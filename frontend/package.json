@@ -1,0 +1,42 @@
+{
+  "name": "snm_client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.8.0",
+    "@mui/material": "^5.8.0",
+    "@mui/styles": "^5.8.0",
+    "@mui/x-date-pickers": "^5.0.0-alpha.3",
+    "date-fns": "^2.23.0",
+    "lodash": "^4.17.20",
+    "material-ui-phone-number": "^3.0.0",
+    "notistack": "^2.0.5",
+    "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.0",
+    "react-bootstrap": "^1.6.1",
+    "react-dom": "^18.2.0",
+    "react-redux": "^7.2.1",
+    "react-router-dom": "^6.3.0",
+    "react-star-rating-component": "^1.4.1",
+    "redux": "^4.0.5"
+  },
+  "devDependencies": {
+    "react-scripts": "5.0.1",
+    "source-map-explorer": "^2.5.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

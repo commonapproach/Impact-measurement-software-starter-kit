@@ -1,0 +1,7 @@
+
+*.xml
+.idea
+frontend/src/context/index.js
+backend/.env
+backend/.DS_Store
+.DS_Store

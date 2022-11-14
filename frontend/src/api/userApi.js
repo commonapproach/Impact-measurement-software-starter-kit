@@ -15,7 +15,7 @@ export function createUser(params) {
  * @returns {Promise<Response|any>}
  */
 export function verifyFirstEntryUser(token) {
-  return postJson('/api/register/firstEntry/verify', token)
+  return postJson('/api/verify/firstEntry', token)
 }
 
 /**

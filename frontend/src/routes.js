@@ -62,12 +62,13 @@ const routes = (
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
+    <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>
     <Route path="/forgot-password" element={<ForgotPassword/>}/>
     <Route path="/update-primary-email/:token" element={<changePrimaryEmail/>}/>
-    <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
+
     <Route path="/resetPassword/:token" element={<PrivateRoute element={ForgotPasswordResetPassword}/>}/>
 
 

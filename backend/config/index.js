@@ -21,7 +21,7 @@ const config = {
     ],
 
   frontend: {
-    addr: isProduction ? 'https://www.mixedusebydesign.com' : 'http://localhost:3001'
+    addr: isProduction ? 'https://www.mixedusebydesign.com' : 'http://localhost:3000'
   },
 
   // pbkdf2 configuration, ~70ms with this config

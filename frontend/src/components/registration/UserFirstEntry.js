@@ -12,6 +12,7 @@ import {REQUIRED_HELPER_TEXT} from "../../constants";
 import {AlertDialog} from "../shared/Dialogs";
 import LoadingButton from "../shared/LoadingButton";
 import PasswordHint from "../shared/PasswordHint";
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,6 +28,7 @@ export default function UserFirstEntry() {
   const classes = useStyles();
   const navigate = useNavigate();
   const {token} = useParams();
+  const {enqueueSnackbar} = useSnackbar();
 
 
   const [state, setState] = useState({
@@ -37,7 +39,6 @@ export default function UserFirstEntry() {
     submitDialog: false,
     successDialog: false,
     failDialog: false,
-    verified: false,
     loading: true,
     email: '',
     id:'',
@@ -51,9 +52,11 @@ export default function UserFirstEntry() {
 
   useEffect(()=> {
     verifyFirstEntryUser({token}).then(res => {
-      setState(state => ({...state, verified: true, email: res.email, id: res.userId, loading: false}))
+      setState(state => ({...state, email: res.email, id: res.userId, loading: false}))
     }).catch(e => {
-      setState(state => ({...state, verified: false, loading: false, errors: e.json}))
+      setState(state => ({...state, loading: false, errors: e.json}))
+      navigate('/login')
+      enqueueSnackbar(e.json?.message || 'Error occurred', {variant: 'error'})
       }
     )
   }, [])
@@ -142,7 +145,7 @@ export default function UserFirstEntry() {
     return <Loading message={`Loading`}/>;
 
 
-  if (state.verified) {
+
     return (
 
       <Container className={classes.root}>
@@ -196,15 +199,15 @@ export default function UserFirstEntry() {
       </Container>
 
     )
-  } else {
-    return (<AlertDialog dialogContentText={state.errors.message || "The token is invalid"}
-                         dialogTitle={'Invalid token'}
-                         buttons={[<Button onClick={() => {navigate('/login')}} key={'invalidToken'}>{'ok'}</Button>]}
-                         open={!state.verified}
-    />)
-
-
-  }
+  // } else {
+  //   // return (<AlertDialog dialogContentText={state.errors.message || "The token is invalid"}
+  //   //                      dialogTitle={'Invalid token'}
+  //   //                      buttons={[<Button onClick={() => {navigate('/login')}} key={'invalidToken'}>{'ok'}</Button>]}
+  //   //                      open={!state.verified}
+  //   // />)
+  //
+  //
+  // }
 
 
 }

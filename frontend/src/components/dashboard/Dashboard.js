@@ -11,7 +11,7 @@ function Dashboard() {
   const userContext = useContext(UserContext);
   console.log(userContext);
 
-  if (userContext.userType === 'superuser')
+  if (userContext.userTypes.includes('superuser'))
     return <DashboardForSuperUser/>;
 
   return (

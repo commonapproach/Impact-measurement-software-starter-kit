@@ -80,7 +80,7 @@ export default function DoubleAuth() {
             email: userAccount.email,
             givenName: userAccount.person?.givenName,
             familyName: userAccount.person?.familyName,
-            userType: userAccount.userType
+            userTypes: userAccount.userTypes
           });
 
           setState(state => ({...state, loadingButton: false}));

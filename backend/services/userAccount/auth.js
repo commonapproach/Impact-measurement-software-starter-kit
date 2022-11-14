@@ -73,13 +73,17 @@ const checkUserSecurityQuestion = async (req, res, next) => {
         const match = await Hashing.validatePassword(answer, securityQuestion.hash, securityQuestion.salt);
         if (match) {
           req.session.email = userAccount.email;
-          req.session.userType = userTypeURI2UserType[userAccount.userType];
+          req.session.userTypes =  userAccount.userTypes.map(usertypeURI => {
+            return userTypeURI2UserType[usertypeURI]
+          })
           return res.status(200).json({success: true, matched: true, message: 'matched',
             userAccount: {
               person: userAccount.person,
               email: userAccount.email,
               _id: userAccount._id,
-              userType: userTypeURI2UserType[userAccount.userType]
+              userTypes: userAccount.userTypes.map(usertypeURI => {
+                return userTypeURI2UserType[usertypeURI]
+              })
             }});
         } else {
           return res.status(200).json({success: false, matched: false, message: 'incorrect'});

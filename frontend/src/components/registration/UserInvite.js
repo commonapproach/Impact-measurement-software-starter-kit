@@ -38,7 +38,7 @@ export default function UserInvite() {
     },
     errors: {},
     dialog: false,
-    // loading: false,
+    loading: true,
     loadingButton: false
   });
 
@@ -49,6 +49,7 @@ export default function UserInvite() {
   useEffect(()=>{
     fetchUserTypes().then(({userTypes})=>{
       setUserTypes(userTypes);
+      setState(state => ({...state, loading: false}))
     }).catch(e => {
       setState(state => ({...state, errors: e.json}))
       navigate('/dashboard');
@@ -119,7 +120,8 @@ export default function UserInvite() {
 
   };
 
-
+  if(state.loading)
+    return <Loading message={'Fetching UserTypes'}/>
 
   return (
     <Container className={classes.root}>

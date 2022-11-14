@@ -11,11 +11,11 @@ export const superuserInvitationFields = {
     type: 'email',
     validator: Validator.email,
   },
-  expirationDate: {
-    ...defaultField,
-    required: true,
-    label: 'Expiration date',
-    type: 'date',
-    validator: Validator.expirationDate
-  }
+  // expirationDate: {
+  //   ...defaultField,
+  //   required: true,
+  //   label: 'Expiration date',
+  //   type: 'date',
+  //   validator: Validator.expirationDate
+  // }
 };

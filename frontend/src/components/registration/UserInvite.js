@@ -56,6 +56,8 @@ export default function UserInvite() {
    */
   const validate = () => {
     const errors = {};
+    if(state.form.userType === '')
+      errors.userType = 'This field is required';
     for (const [field, option] of Object.entries(superuserInvitationFields)) {
       const isEmpty = isFieldEmpty(state.form[field]);
       if (option.required && isEmpty) {
@@ -126,6 +128,16 @@ export default function UserInvite() {
           setState(state => ({...state, form: {...state.form, userType: e.target.value}}))
         }}
         options={userTypes}
+        onBlur = {() => {
+          if(state.form.userType === '') {
+            setState(state => ({...state, errors: {...state.errors, 'userType': 'This field is required'}}))
+          } else {
+            setState(state => ({...state, errors: {...state.errors, 'userType': null}}))
+          }
+        }
+        }
+        error={!!state.errors.userType}
+        helperText={state.errors.userType}
         // sx={{mb: 2}}
         noEmpty
         required = {true}

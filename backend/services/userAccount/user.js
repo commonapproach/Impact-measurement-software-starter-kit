@@ -4,7 +4,9 @@ const {GDBUserAccountModel} = require('../../models/userAccount');
 
 
 async function updateUserPassword(email, newPassword) {
-  const userAccount = await GDBUserAccountModel.findOne({primaryEmail: email});
+  const userAccount = await GDBUserAccountModel.findOne({email: email});
+  if(!userAccount)
+    throw new Server400Error('Wrong email provided');
   const {hash, salt} = await Hashing.hashPassword(newPassword);
   userAccount.hash = hash;
   userAccount.salt = salt;
@@ -15,12 +17,12 @@ async function updateUserPassword(email, newPassword) {
 
 
 async function updateUserAccount(email, updatedData) {
-  const userAccount = await GDBUserAccountModel.findOne({primaryEmail: email});
-  await userAccount.populate('primaryContact.telephone');
+  const userAccount = await GDBUserAccountModel.findOne({email: email});
+  if(!userAccount)
+    throw new Server400Error('Wrong email given');
 
   const {
-    securityQuestions, status, givenName, familyName, countryCode,
-    areaCode, phoneNumber, altEmail
+    securityQuestions,
   } = updatedData
   if (securityQuestions) {
     const answer1 = await Hashing.hashPassword(securityQuestions[3]);
@@ -44,42 +46,41 @@ async function updateUserAccount(email, updatedData) {
     userAccount.securityQuestions = [securityQuestion1, securityQuestion2, securityQuestion3]
 
   }
-  if (status) {
-    userAccount.status = status
-  }
-  // add more if needed TODO
-  if (givenName) {
-    if (!userAccount.primaryContact) {
-      userAccount.primaryContact = {};
-    }
-    userAccount.primaryContact.givenName = givenName;
-  }
-
-  if (familyName) {
-    userAccount.primaryContact.familyName = familyName;
-  }
-
-  if (countryCode) {
-    if (!userAccount.primaryContact.telephone) {
-      userAccount.primaryContact.telephone = {};
-    }
-    userAccount.primaryContact.telephone.countryCode = countryCode;
-  }
-
-  if (areaCode) {
-    userAccount.primaryContact.telephone.areaCode = areaCode;
-  }
-
-  if (phoneNumber) {
-    userAccount.primaryContact.telephone.phoneNumber = phoneNumber;
-  }
-
-  if (altEmail) {
-    userAccount.secondaryEmail = altEmail;
-  }
+  // if (status) {
+  //   userAccount.status = status
+  // }
+  // // add more if needed TODO
+  // if (givenName) {
+  //   if (!userAccount.primaryContact) {
+  //     userAccount.primaryContact = {};
+  //   }
+  //   userAccount.primaryContact.givenName = givenName;
+  // }
+  //
+  // if (familyName) {
+  //   userAccount.primaryContact.familyName = familyName;
+  // }
+  //
+  // if (countryCode) {
+  //   if (!userAccount.primaryContact.telephone) {
+  //     userAccount.primaryContact.telephone = {};
+  //   }
+  //   userAccount.primaryContact.telephone.countryCode = countryCode;
+  // }
+  //
+  // if (areaCode) {
+  //   userAccount.primaryContact.telephone.areaCode = areaCode;
+  // }
+  //
+  // if (phoneNumber) {
+  //   userAccount.primaryContact.telephone.phoneNumber = phoneNumber;
+  // }
+  //
+  // if (altEmail) {
+  //   userAccount.secondaryEmail = altEmail;
+  // }
 
   await userAccount.save();
-  console.log(userAccount)
   return userAccount;
 }
 
@@ -94,7 +95,9 @@ async function findUserAccountById(id) {
 
 
 async function validateCredentials(email, password) {
-  const userAccount = await GDBUserAccountModel.findOne({primaryEmail: email});
+  const userAccount = await GDBUserAccountModel.findOne({email: email});
+  if(!userAccount)
+    throw new Server400Error('No such user under this email');
   const validated = await Hashing.validatePassword(password, userAccount.hash, userAccount.salt);
   return {validated, userAccount};
 }

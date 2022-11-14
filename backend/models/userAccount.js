@@ -16,11 +16,11 @@ const GDBUserAccountModel = createGraphDBModel({
   email: {type: String, internalKey: ':hasEmail'},
   hash: {type: String, internalKey: ':hasHash'},
   salt: {type: String, internalKey: ':hasSalt'},
-  person:{type: GDBPersonModel, internalKey: 'cids:Person'},
+  person:{type: GDBPersonModel, internalKey: 'cids:Person', onDelete: DeleteType.CASCADE},
   userType:{type: [Types.NamedIndividual], internalKey: ':UserType'},
   organization:{type: [GDBOrganizationModel], internalKey: 'org:forOrganization'},
   // Exact 3 questions, the answer should be case-insensitive.
-  securityQuestion: {type: [GDBSecurityQuestion], internalKey: ':hasSecurityQuestion'}
+  securityQuestion: {type: [GDBSecurityQuestion], internalKey: ':hasSecurityQuestion', onDelete: DeleteType.CASCADE}
 
 }, {
   rdfTypes: [':User'], name: 'userAccount'

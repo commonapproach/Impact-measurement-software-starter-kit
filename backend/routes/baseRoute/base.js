@@ -1,6 +1,6 @@
 const express = require('express');
 const {login, logout, getUserSecurityQuestions, checkUserSecurityQuestion} = require('../../services/userAccount/auth');
-const {verifyUser} = require("../../services/userAccount/firstEntry");
+const {verifyUser, firstEntryRegister} = require("../../services/userAccount/firstEntry");
 
 
 const router = express.Router();
@@ -11,6 +11,7 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/verify/firstEntry', verifyUser);
+router.put('/register/firstEntry', firstEntryRegister);
 router.post('/login', login);
 router.get('/login/securityQuestions/fetch', getUserSecurityQuestions)
 router.post('/login/securityQuestions/check', checkUserSecurityQuestion)

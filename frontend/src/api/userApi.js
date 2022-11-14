@@ -25,7 +25,7 @@ export function verifyFirstEntryUser(token) {
  * @returns {Promise<Response|any>}
  */
 export function firstEntryUpdate(params) {
-  return putJson('/api/register/firstEntry/update', params);
+  return putJson('/api/register/firstEntry', params);
 }
 
 /**

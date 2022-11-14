@@ -37,8 +37,6 @@ export default function UserFirstEntry() {
     },
     errors: {},
     submitDialog: false,
-    successDialog: false,
-    failDialog: false,
     loading: true,
     email: '',
     id:'',
@@ -128,13 +126,14 @@ export default function UserFirstEntry() {
       const {success, message} = await firstEntryUpdate({email: state.email, userId: state.id, newPassword: state.form.password,
         securityQuestions: securityQuestions})
       if(success){
-        setState(state => ({...state, loadingButton: false, successDialog: true, submitDialog: false}))
+        setState(state => ({...state, loadingButton: false, submitDialog: false}));
+        navigate('/login');
+        enqueueSnackbar(message || 'Success', {variant: 'success'});
       }
-
-
     } catch (e) {
       if (e.json) {
-        setState(state => ({...state, loadingButton: false, errors: e.json, submitDialog: false, failDialog: true}));
+        setState(state => ({...state, loadingButton: false, errors: e.json, submitDialog: false}));
+        enqueueSnackbar(e.json?.message || 'Failed to register, please try again', {variant: 'error'});
       }
     }
 
@@ -188,14 +187,14 @@ export default function UserFirstEntry() {
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading ={state.loadingButton} key={'confirm'}
                                       onClick={handleConfirm} children='confirm' autoFocus/>]}
                      open={state.submitDialog}/>
-        <AlertDialog dialogContentText={"You are successfully registered"}
-                     dialogTitle={'Success'}
-                     buttons={[<Button onClick={() => {navigate('/login')}} key={'success'}> {'ok'}</Button>]}
-                     open={state.successDialog}/>
-        <AlertDialog dialogContentText={state.errors.message || "Fail to update"}
-                     dialogTitle={'Fail'}
-                     buttons={[<Button onClick={() => {navigate('/login')}} key={'fail'}>{'ok'}</Button>]}
-                     open={state.failDialog}/>
+        {/*<AlertDialog dialogContentText={"You are successfully registered"}*/}
+        {/*             dialogTitle={'Success'}*/}
+        {/*             buttons={[<Button onClick={() => {navigate('/login')}} key={'success'}> {'ok'}</Button>]}*/}
+        {/*             open={state.successDialog}/>*/}
+        {/*<AlertDialog dialogContentText={state.errors.message || "Fail to update"}*/}
+        {/*             dialogTitle={'Fail'}*/}
+        {/*             buttons={[<Button onClick={() => {navigate('/login')}} key={'fail'}>{'ok'}</Button>]}*/}
+        {/*             open={state.failDialog}/>*/}
       </Container>
 
     )

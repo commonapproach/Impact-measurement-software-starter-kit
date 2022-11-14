@@ -49,6 +49,10 @@ export default function UserInvite() {
   useEffect(()=>{
     fetchUserTypes().then(({userTypes})=>{
       setUserTypes(userTypes);
+    }).catch(e => {
+      setState(state => ({...state, errors: e.json}))
+      navigate('/dashboard');
+      enqueueSnackbar('Fail to fetch userTypes', {variant: 'error'})
     })
   },[]);
 

@@ -92,10 +92,6 @@ async function findUserAccountById(id) {
 }
 
 
-async function userExpired(email) {
-  const userAccount = await GDBUserAccountModel.findOne({primaryEmail: email});
-  return userAccount.expirationDate < new Date()
-}
 
 async function validateCredentials(email, password) {
   const userAccount = await GDBUserAccountModel.findOne({primaryEmail: email});
@@ -152,5 +148,5 @@ async function initUserAccounts() {
 
 
 module.exports = {
-  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword, findUserAccountById, userExpired
+  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword, findUserAccountById
 };

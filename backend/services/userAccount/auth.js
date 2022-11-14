@@ -1,19 +1,17 @@
-const {validateCredentials, userExpired, findUserAccountById, findUserAccountByEmail} = require('./user');
+const {validateCredentials, findUserAccountById, findUserAccountByEmail} = require('./user');
 const Hashing = require("../../utils/hashing");
 const {userTypeURI2UserType} = require("../../helpers/dicts")
 const {GDBUserAccountModel} = require("../../models/userAccount");
 
 const login = async (req, res, next) => {
-  const {email, password} = req.body;
+  let {email, password} = req.body;
+  email = email.toLowerCase();
 
   if (!email || !password) {
     return res.status(400).json({success: false, message: 'Email and password are required to login.'});
   }
 
   try {
-    if (await userExpired(email)) {
-      return res.status(400).json({success: false, message: 'User is expired'});
-    }
     const {validated, userAccount} = await validateCredentials(email, password);
     if (!validated) {
       return res.status(400).json({success: false, message: 'Username or password is incorrect.'});

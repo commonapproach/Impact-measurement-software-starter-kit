@@ -98,7 +98,7 @@ export default function UserInvite() {
       setState(state => ({...state, loadingButton: true }))
       const {success, message} = await createUser({form: state.form});
       setState(state => ({...state, loadingButton: false, dialog: false}))
-      navigate('/dashboard');
+      navigate('/users');
       enqueueSnackbar(message, {variant: 'success'});
 
     } catch (e) {

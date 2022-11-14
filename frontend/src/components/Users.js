@@ -5,9 +5,11 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "./shared";
 import { deleteUser, fetchUsers } from "../api/userApi";
 import { useNavigate } from "react-router-dom";
 import { formatPhoneNumber } from "../helpers/phone_number_helpers";
+import { useSnackbar } from 'notistack';
 
 export default function Users() {
   const navigate = useNavigate();
+  const {enqueueSnackbar} = useSnackbar();
   const [state, setState] = useState({
     loading: true,
     data: [],
@@ -20,7 +22,10 @@ export default function Users() {
     fetchUsers().then(data => {
       // console.log(data)
       setState(state => ({...state, loading: false, data: data.data}));
-
+    }).catch(e => {
+      setState(state => ({...state, loading: false}))
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'})
     });
   }, []);
 

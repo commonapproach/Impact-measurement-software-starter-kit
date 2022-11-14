@@ -1,15 +1,9 @@
 import RadioField from "../components/shared/fields/RadioField";
 import { Validator } from "../helpers";
 import { defaultField } from "./index";
+import SelectField from "../components/shared/fields/SelectField";
 
-export const userInvitationFields = {
-  is_superuser: {
-    ...defaultField,
-    label: 'Admin?',
-    component: RadioField,
-    options: {Yes: true, No: false},
-    required: true,
-  },
+export const superuserInvitationFields = {
   email: {
     ...defaultField,
     required: true,

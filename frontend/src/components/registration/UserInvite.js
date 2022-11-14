@@ -1,16 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
 
 import {defaultInvitationFields} from "../../constants/default_fields";
 import {Alert, AlertTitle, Button, Container, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
-import {userInvitationFields} from "../../constants/userInvitationFields";
+import {superuserInvitationFields, } from "../../constants/userInvitationFields";
 import {fetchUser, updateUser, createUser} from "../../api/userApi";
 import {Loading} from "../shared"
 import {AlertDialog} from "../shared/Dialogs"
 import {isFieldEmpty} from "../../helpers";
 import {REQUIRED_HELPER_TEXT} from "../../constants";
 import LoadingButton from "../shared/LoadingButton";
+import {UserContext} from "../../context";
+import SelectField from "../shared/fields/SelectField";
+import {fetchUserTypes} from "../../api/userTypesApi";
 
 
 const useStyles = makeStyles(() => ({
@@ -26,8 +29,7 @@ const useStyles = makeStyles(() => ({
 export default function UserInvite() {
   const classes = useStyles();
   const navigate = useNavigate();
-  // const {id} = useParams();
-  // const mode = id == null ? 'new' : 'edit';
+  const userContext = useContext(UserContext);
   const [state, setState] = useState({
     form: {
       ...defaultInvitationFields
@@ -41,12 +43,20 @@ export default function UserInvite() {
     loadingButton: false
   });
 
+  const [userTypes, setUserTypes] = useState([])
+
+  useEffect(()=>{
+    fetchUserTypes().then(({userTypes})=>{
+      setUserTypes(userTypes);
+    })
+  },[]);
+
   /**
    * @returns {boolean} true if valid.
    */
   const validate = () => {
     const errors = {};
-    for (const [field, option] of Object.entries(userInvitationFields)) {
+    for (const [field, option] of Object.entries(superuserInvitationFields)) {
       const isEmpty = isFieldEmpty(state.form[field]);
       if (option.required && isEmpty) {
         errors[field] = REQUIRED_HELPER_TEXT;
@@ -101,8 +111,6 @@ export default function UserInvite() {
 
   };
 
-  // if (state.loading)
-  //   return <Loading message={`Loading`}/>;
 
 
   return (
@@ -110,7 +118,20 @@ export default function UserInvite() {
       <Typography variant="h5">
         {'Create new user'}
       </Typography>
-      {Object.entries(userInvitationFields).map(([field, option]) => {
+
+      <SelectField
+        label="User Type"
+        value={state.form.userType}
+        onChange={e => {
+          setState(state => ({...state, form: {...state.form, userType: e.target.value}}))
+        }}
+        options={userTypes}
+        // sx={{mb: 2}}
+        noEmpty
+        required = {true}
+      />
+
+      {Object.entries(superuserInvitationFields).map(([field, option]) => {
 
         return (
 

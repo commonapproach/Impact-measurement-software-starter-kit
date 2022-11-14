@@ -6,9 +6,10 @@ const cookieSession = require('cookie-session');
 const cors = require('cors');
 
 const {
-  baseRoute
-} = require('../routes');
-const superuserRoute = require('../routes/superuserRoute');
+  baseRoute,
+} = require('../routes/baseRoute');
+const superuserRoute = require('../routes/superUserRoute/superuserRoute');
+const {userTypes} = require("../routes/general");
 const {authMiddleware, errorHandler} = require('../services/middleware');
 
 
@@ -39,7 +40,11 @@ app.use('/api', baseRoute);
 app.use('/api', authMiddleware('Authentication Required'));
 // TODO: Check authorization
 
+app.use('/api', userTypes);
+
 // Private routes
+
+// routes only for superuser
 app.use('/api/superuser', superuserRoute);
 // app.use('/api', userRoute);
 // app.use('/api', usersRoute);

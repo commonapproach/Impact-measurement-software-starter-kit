@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {fetchQuestions, updateQuestion, deleteQuestion, createQuestion} from '../../api/mockedApi/question';
 import {
   Chip, Container, IconButton, Dialog, DialogActions, DialogTitle, DialogContent,
   Button, Box

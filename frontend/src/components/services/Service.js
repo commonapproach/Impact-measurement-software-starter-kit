@@ -5,7 +5,6 @@ import TR from '../shared/TR'
 
 // redux
 import { connect } from 'react-redux'
-import { fetchService } from '../../api/mockedApi/services'
 
 import { formatLocation } from '../../helpers/location_helpers'
 import { formatEligibilityConditions } from '../../helpers/eligibility_condition_helpers'

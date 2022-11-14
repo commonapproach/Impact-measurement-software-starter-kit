@@ -1,6 +1,6 @@
 const express = require('express');
-const {authSuperuserMiddleware} = require("../services/middleware");
-const {usersRoute} = require("./index");
+const {authSuperuserMiddleware} = require("../../services/middleware");
+const {usersRoute} = require('./index')
 
 
 const router = express.Router({mergeParams: true});

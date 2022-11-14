@@ -6,16 +6,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { providerFields, allForms, providerFormTypes } from '../../constants/provider_fields.js'
 import { clientFields } from "../../constants/client_fields";
-import { fetchQuestions } from '../../api/mockedApi/question';
 import RadioField from '../shared/fields/RadioField';
 import { Button, Container, Grid, TextField, Typography, Divider, IconButton } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import SelectField from "../shared/fields/SelectField";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Close as Delete } from "@mui/icons-material";
-import { fetchProviderFields, updateProviderFields } from "../../api/mockedApi/providerFields";
-
-import { fetchClientFields, updateClientFields } from '../../api/mockedApi/clientFields';
 
 const useStyles = makeStyles(theme => ({
   root: {

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { fetchEligibilities, deleteEligibility, createEligibility, updateEligibility } from '../../api/mockedApi/eligibility';
 import {
   Chip, Container, IconButton, Dialog, DialogActions, DialogTitle, DialogContent,
   Button, Box

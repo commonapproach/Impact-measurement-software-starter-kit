@@ -2,18 +2,19 @@ import React, {useEffect, useState, useContext} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
 
 import {defaultInvitationFields} from "../../constants/default_fields";
-import {Alert, AlertTitle, Button, Container, Typography} from "@mui/material";
+import {Button, Container, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import {superuserInvitationFields, } from "../../constants/userInvitationFields";
-import {fetchUser, updateUser, createUser} from "../../api/userApi";
+import {createUser} from "../../api/userApi";
 import {Loading} from "../shared"
 import {AlertDialog} from "../shared/Dialogs"
 import {isFieldEmpty} from "../../helpers";
 import {REQUIRED_HELPER_TEXT} from "../../constants";
 import LoadingButton from "../shared/LoadingButton";
 import {UserContext} from "../../context";
-import SelectField from "../shared/fields/SelectField";
 import {fetchUserTypes} from "../../api/userTypesApi";
+import Dropdown from "../shared/fields/MultiSelectField";
+import { useSnackbar } from 'notistack';
 
 
 const useStyles = makeStyles(() => ({
@@ -30,20 +31,20 @@ export default function UserInvite() {
   const classes = useStyles();
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
+  const {enqueueSnackbar} = useSnackbar();
   const [state, setState] = useState({
     form: {
       ...defaultInvitationFields
     },
     errors: {},
     dialog: false,
-    success: false,
-    fail: false,
-    failMessage: '',
     // loading: false,
     loadingButton: false
   });
 
-  const [userTypes, setUserTypes] = useState([])
+  const [userTypes, setUserTypes] = useState({
+
+})
 
   useEffect(()=>{
     fetchUserTypes().then(({userTypes})=>{
@@ -56,8 +57,8 @@ export default function UserInvite() {
    */
   const validate = () => {
     const errors = {};
-    if(state.form.userType === '')
-      errors.userType = 'This field is required';
+    if(state.form.userTypes.length === 0)
+      errors.userTypes = 'This field is required';
     for (const [field, option] of Object.entries(superuserInvitationFields)) {
       const isEmpty = isFieldEmpty(state.form[field]);
       if (option.required && isEmpty) {
@@ -90,13 +91,14 @@ export default function UserInvite() {
     console.log('valid')
     try {
       setState(state => ({...state, loadingButton: true }))
-      const {success, message} = await createUser(state.form);
-      setState(state => ({...state, loadingButton: false, success: true, dialog: false}))
+      const {success, message} = await createUser({form: state.form});
+      setState(state => ({...state, loadingButton: false, dialog: false}))
+      navigate('/dashboard');
+      enqueueSnackbar(message, {variant: 'success'});
 
     } catch (e) {
-      if (e.json) {
-        setState(state => ({...state, errors: e.json, fail: true, loadingButton: false}))
-      }
+      setState(state => ({...state, errors: e.json, loadingButton: false, dialog: false}))
+      enqueueSnackbar(state.errors.message || "Error occur", {variant: 'error'})
     }
 
   };
@@ -121,23 +123,24 @@ export default function UserInvite() {
         {'Create new user'}
       </Typography>
 
-      <SelectField
+      <Dropdown
         label="User Type"
-        value={state.form.userType}
+        key={'userTypes'}
+        value={state.form.userTypes}
         onChange={e => {
-          setState(state => ({...state, form: {...state.form, userType: e.target.value}}))
+          state.form.userTypes = e.target.value
         }}
         options={userTypes}
         onBlur = {() => {
-          if(state.form.userType === '') {
-            setState(state => ({...state, errors: {...state.errors, 'userType': 'This field is required'}}))
+          if(state.form.userTypes.length === 0) {
+            setState(state => ({...state, errors: {...state.errors, 'userTypes': 'This field is required'}}))
           } else {
-            setState(state => ({...state, errors: {...state.errors, 'userType': null}}))
+            setState(state => ({...state, errors: {...state.errors, 'userTypes': null}}))
           }
         }
         }
-        error={!!state.errors.userType}
-        helperText={state.errors.userType}
+        error={!!state.errors.userTypes}
+        helperText={state.errors.userTypes}
         // sx={{mb: 2}}
         noEmpty
         required = {true}
@@ -171,14 +174,14 @@ export default function UserInvite() {
                      <LoadingButton noDefaultStyle variant="text" color="primary" loading ={state.loadingButton} key={'confirm'}
                                     onClick={handleConfirm} children='confirm' autoFocus/>]}
                    open={state.dialog}/>
-      <AlertDialog dialogContentText={"A registration link has been sent to the user."}
-                   dialogTitle={'Success'}
-                   buttons={[<Button onClick={() => navigate('/dashboard')} key={'ok'}>{'ok'}</Button>]}
-                   open={state.success}/>
-      <AlertDialog dialogContentText={state.errors.message||"Error occur"}
-                   dialogTitle={'Fail'}
-                   buttons={[<Button onClick={() => navigate('/dashboard')} key={'ok'}>{'ok'}</Button>]}
-                   open={state.fail}/>
+      {/*<AlertDialog dialogContentText={"A registration link has been sent to the user."}*/}
+      {/*             dialogTitle={'Success'}*/}
+      {/*             buttons={[<Button onClick={() => navigate('/dashboard')} key={'ok'}>{'ok'}</Button>]}*/}
+      {/*             open={state.success}/>*/}
+      {/*<AlertDialog dialogContentText={state.errors.message||"Error occur"}*/}
+      {/*             dialogTitle={'Fail'}*/}
+      {/*             buttons={[<Button onClick={() => navigate('/dashboard')} key={'ok'}>{'ok'}</Button>]}*/}
+      {/*             open={state.fail}/>*/}
 
 
 

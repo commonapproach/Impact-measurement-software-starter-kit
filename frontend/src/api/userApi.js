@@ -6,7 +6,7 @@ import { deleteJson, getJson, postJson, putJson } from "./index";
  * @returns {Promise<Response|any>}
  */
 export function createUser(params) {
-  return postJson('/api/register/invite', params);
+  return postJson('/api/superuser/users/invite', params);
 }
 
 /**

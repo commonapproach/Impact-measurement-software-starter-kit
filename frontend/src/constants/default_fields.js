@@ -47,7 +47,7 @@ export const defaultAddEditNeedFields = {
   code: []
 }
 export const defaultInvitationFields = {
-  userType: '',
+  userTypes: [],
   email: '',
   expirationDate: ''
 }

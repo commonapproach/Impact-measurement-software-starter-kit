@@ -2,22 +2,6 @@ const Hashing = require("../../utils/hashing");
 const {GDBUserAccountModel} = require('../../models/userAccount');
 
 
-async function createTemporaryUserAccount(data) {
-  const {
-    email, is_superuser, expirationDate
-  } = data;
-
-
-  const userAccount = GDBUserAccountModel({
-    primaryEmail: email,
-    role: is_superuser ? 'admin' : 'regular',
-    expirationDate: expirationDate,
-    status: "pending"
-  });
-
-  await userAccount.save();
-  return userAccount;
-}
 
 async function updateUserPassword(email, newPassword) {
   const userAccount = await GDBUserAccountModel.findOne({primaryEmail: email});
@@ -99,12 +83,6 @@ async function updateUserAccount(email, updatedData) {
   return userAccount;
 }
 
-async function findUserAccountByEmail(email) {
-  return await GDBUserAccountModel.findOne(
-    {primaryEmail: email},
-    {populates: ['primaryContact.telephone', 'organization']}
-  );
-}
 
 async function findUserAccountById(id) {
   return await GDBUserAccountModel.findOne(
@@ -113,26 +91,6 @@ async function findUserAccountById(id) {
   );
 }
 
-/**
- * Check if this email belongs to a user
- * @param email
- * @returns {Promise<number>}
- * return 0 if the email not belongs to anyone
- * return 1 if the email belongs to a permanent user
- * return 2 if the email belongs to a temporary user
- */
-async function isEmailExists(email) {
-  const userAccount = await findUserAccountByEmail(email);
-  if (!!userAccount) {
-    if (userAccount.status === 'pending') {
-      return 2
-    } else {
-      return 1
-    }
-  } else {
-    return 0
-  }
-}
 
 async function userExpired(email) {
   const userAccount = await GDBUserAccountModel.findOne({primaryEmail: email});
@@ -194,6 +152,5 @@ async function initUserAccounts() {
 
 
 module.exports = {
-  updateUserAccount, findUserAccountByEmail, validateCredentials, initUserAccounts, isEmailExists,
-  createTemporaryUserAccount, updateUserPassword, findUserAccountById, userExpired
+  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword, findUserAccountById, userExpired
 };

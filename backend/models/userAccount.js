@@ -17,7 +17,7 @@ const GDBUserAccountModel = createGraphDBModel({
   hash: {type: String, internalKey: ':hasHash'},
   salt: {type: String, internalKey: ':hasSalt'},
   person:{type: GDBPersonModel, internalKey: 'cids:Person'},
-  userType:{type: Types.NamedIndividual, internalKey: ':UserTypes'},
+  userType:{type: [Types.NamedIndividual], internalKey: ':UserType'},
   organization:{type: [GDBOrganizationModel], internalKey: 'org:forOrganization'},
   // Exact 3 questions, the answer should be case-insensitive.
   securityQuestion: {type: [GDBSecurityQuestion], internalKey: ':hasSecurityQuestion'}

@@ -27,6 +27,13 @@ async function sendJson(url, body, method, rawResponse = false) {
       'Content-Type': 'application/json',
     },
   });
+  if (response.status == 403) {
+    // session expired
+    const e = new Error("Session expired, please login again");
+    e.json = await response.json();
+    e.json.message = "Session expired, please login again";
+    throw e;
+  }
   if (response.status >= 400 && response.status < 600) {
     const e = new Error("Bad response from server: " + response.status);
     e.json = await response.json();

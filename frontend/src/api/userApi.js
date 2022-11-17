@@ -189,11 +189,7 @@ export function getUserProfileById(id, params) {
 /**
  * This function deletes one user by id.
  * @param id
- * @param params
- * @param callback
  */
-export function deleteUser(id, params, callback) {
-  const response = deleteJson('/user/' + id + '/');
-  if (response.status !== 204)
-    throw Error('Server does not return correct code.');
+export async function deleteUser(id) {
+  return deleteJson('/api/superuser/users/' + id + '/');
 }

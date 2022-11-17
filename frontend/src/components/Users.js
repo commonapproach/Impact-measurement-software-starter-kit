@@ -17,6 +17,7 @@ export default function Users() {
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
+  const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
     fetchUsers().then(data => {
@@ -27,33 +28,41 @@ export default function Users() {
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'})
     });
-  }, []);
+  }, [trigger]);
 
-  const showDeleteDialog = (id, title) => () => {
+  const showDeleteDialog = (id) => {
     setState(state => ({
       ...state, selectedId: id, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete ' + title + ' ?'
+      deleteDialogTitle: 'Delete user ' + id + ' ?'
     }));
   };
 
   const handleDelete = async (id, form) => {
-    try {
-      await deleteUser(id, form);
-      setState(state => ({
-        ...state, showDeleteDialog: false,
-        data: state.data.filter(item => item.id !== state.selectedId)
-      }));
-    } catch (e) {
-      // TODO: show error
-      console.error(e);
-    }
+
+
+      deleteUser(id).then(({success, message})=>{
+        if (success) {
+          setState(state => ({
+            ...state, showDeleteDialog: false,
+          }));
+          setTrigger(!trigger);
+          enqueueSnackbar(message || "Success", {variant: 'success'})
+        }
+      }).catch((e)=>{
+        setState(state => ({
+          ...state, showDeleteDialog: false,
+        }));
+        setTrigger(!trigger);
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      });
+
   };
 
   const columns = [
     {
       label: 'Username/Email',
-      body: ({id, email}) => {
-        return <Link color to={`/users/${id}`}>
+      body: ({_id, email}) => {
+        return <Link color to={`/users/${_id}`}>
           {email}
         </Link>
       },
@@ -75,10 +84,6 @@ export default function Users() {
         return 'Not Provided'
       }
     },
-    // {
-    //   label: 'status',
-    //   body: ({status}) => status
-    // },
     {
       label: 'Phone Number',
       body: ({primaryContact}) => {
@@ -90,21 +95,13 @@ export default function Users() {
 
     {
       label: 'Role',
-      body: ({userType}) => userType
+      body: ({userTypes}) => userTypes
     },
-    // {
-    //   label: 'Expiration Date',
-    //   body: ({expirationDate}) => {
-    //     if(expirationDate)
-    //       return (new Date(expirationDate)).toString()
-    //   }
-    //
-    // },
     {
       label: ' ',
-      body: ({username, id}) =>
-        <DropdownMenu urlPrefix={'users'} objectId={id}
-                      handleDelete={() => showDeleteDialog(id, username)}/>
+      body: ({_id}) =>
+        <DropdownMenu urlPrefix={'users'} objectId={_id}
+                      handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 

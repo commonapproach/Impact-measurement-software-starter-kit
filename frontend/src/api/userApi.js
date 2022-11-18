@@ -6,7 +6,7 @@ import { deleteJson, getJson, postJson, putJson } from "./index";
  * @returns {Promise<Response|any>}
  */
 export function createUser(params) {
-  return postJson('/api/superuser/users/invite', params);
+  return postJson('/api/superuser/user/invite', params);
 }
 
 /**
@@ -165,7 +165,7 @@ export async function saveNewPassword(id, password) {
  * @returns {Promise<any>}
  */
 export function fetchUser(id) {
-  return getJson('/user/' + id + '/');
+  return getJson('/api/superuser/user/' + id + '/');
 }
 
 /**
@@ -176,20 +176,11 @@ export function fetchUsers() {
   return getJson('/api/superuser/users/');
 }
 
-/**
- * This function fetches one user profile by user id.
- * @param id
- * @param params
- * @returns {Promise<any>}
- */
-export function getUserProfileById(id, params) {
-  return getJson('/api/users/getUserProfileById/' + id + '/', {params})
-}
 
 /**
  * This function deletes one user by id.
  * @param id
  */
 export async function deleteUser(id) {
-  return deleteJson('/api/superuser/users/' + id + '/');
+  return deleteJson('/api/superuser/user/' + id + '/');
 }

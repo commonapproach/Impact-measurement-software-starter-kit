@@ -130,7 +130,7 @@ export default function UserInvite() {
       </Typography>
 
       <Dropdown
-        label="User Type"
+        label="User Types"
         key={'userTypes'}
         value={state.form.userTypes}
         onChange={e => {

@@ -6,7 +6,5 @@ const router = express.Router({mergeParams: true});
 
 
 router.get('/', superUserFetchUsers);
-router.post('/invite', inviteNewUser);
-router.delete('/:id', superuserDeleteUser);
 
 module.exports = router;

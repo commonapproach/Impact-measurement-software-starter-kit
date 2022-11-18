@@ -5,11 +5,9 @@ import { makeStyles } from "@mui/styles";
 import {
   fetchUser,
   updateUser,
-  createUser,
   getProfile,
-  getUserProfileById,
   updatePrimaryEmail,
-  updateProfile, updateUserForm
+  updateProfile, updateUserForm,
 } from "../../api/userApi";
 import { Loading } from "../shared"
 import { isFieldEmpty } from "../../helpers";
@@ -18,6 +16,10 @@ import {userProfileFields} from "../../constants/userProfileFields";
 import {formatPhoneNumber} from "../../helpers/phone_number_helpers";
 import {AlertDialog} from "../shared/Dialogs";
 import LoadingButton from "../shared/LoadingButton";
+import GeneralField from "../shared/fields/GeneralField";
+import Dropdown from "../shared/fields/MultiSelectField";
+import {fetchUserTypes} from "../../api/userTypesApi";
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -41,21 +43,36 @@ export default function EditUserForm() {
   const [dialogSubmit, setDialogSubmit] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
+  const [userTypeOptions, setUserTypeOptions] = useState({});
+  const {enqueueSnackbar} = useSnackbar();
 
   useEffect(() => {
-    getUserProfileById(id).then(user => {
-      setUser(user);
-      setForm({
-        givenName: (user.primaryContact && user.primaryContact.givenName) ?
-          user.primaryContact.givenName : 'Not Provided',
-        familyName: (user.primaryContact && user.primaryContact.familyName) ?
-          user.primaryContact.familyName : 'Not Provided',
-        email: user.primaryEmail,
-        altEmail: !user.secondaryEmail ? 'Not Provided' : user.secondaryEmail,
-        telephone: (user.primaryContact && user.primaryContact.telephone) ?
-          formatPhoneNumber(user.primaryContact.telephone) : 'Not Provided'
+    fetchUser(id).then(res => {
+      if(res.success) {
+        const user = res.user
+        setUser(user);
+        setForm({
+          // givenName: (user.primaryContact && user.primaryContact.givenName) ?
+          //   user.primaryContact.givenName : 'Not Provided',
+          // familyName: (user.primaryContact && user.primaryContact.familyName) ?
+          //   user.primaryContact.familyName : 'Not Provided',
+          email: user.email,
+          userTypes: user.userTypes,
+          // telephone: (user.primaryContact && user.primaryContact.telephone) ?
+          //   formatPhoneNumber(user.primaryContact.telephone) : 'Not Provided'
+        })
+      }
+    }).then(() => {
+      fetchUserTypes().then(({userTypes})=>{
+        setUserTypeOptions(userTypes);
       })
+    }).then(() => {
       setLoading(false);
+    }).catch(e => {
+      setErrors(e.json);
+      setLoading(false);
+      navigate('/dashboard');
+      enqueueSnackbar(errors.message || 'Error occurs', {variant: 'error'})
     });
   }, [id]);
 
@@ -176,38 +193,73 @@ export default function EditUserForm() {
       <Typography variant="h5">
         {'Edit user: ' + user.primaryEmail}
       </Typography>
-      {Object.entries(userProfileFields).map(([field, option]) => {
-        if (option.label === 'Primary Email') {
-          return (
-            <option.component
-              key={field}
-              label={option.label}
-              type={option.type}
-              options={option.options}
-              value={form[field]}
-              disabled={true}
-              required={option.required}
-              onChange={value => form[field] = value.target.value}
-              onBlur={e => handleOnBlur(e, field, option)}
-              error={!!errors[field]}
-              helperText={errors[field]}
-            />)
-        } else {
-          return (
-            <option.component
-              key={field}
-              label={option.label}
-              type={option.type}
-              options={option.options}
-              value={form[field]}
-              required={option.required}
-              onChange={value => form[field] = value.target.value}
-              onBlur={e => handleOnBlur(e, field, option)}
-              error={!!errors[field]}
-              helperText={errors[field]}
-            />)
-        }
-        })}
+
+      <GeneralField
+        key={'email'}
+        label = {'Email'}
+        type = {'text'}
+        value = {form.email}
+        disabled
+        onChange={e => form.email = e.target.value}
+        error={!!errors.email}
+        helperText={errors.email}
+        />
+
+      <Dropdown
+        label="User Types"
+        key={'userTypes'}
+        value={form.userTypes}
+        onChange={e => {
+          form.userTypes = e.target.value
+        }}
+        options={userTypeOptions}
+        // onBlur = {() => {
+        //   if(form.userTypes.length === 0) {
+        //     setState(state => ({...state, errors: {...state.errors, 'userTypes': 'This field is required'}}))
+        //   } else {
+        //     setState(state => ({...state, errors: {...state.errors, 'userTypes': null}}))
+        //   }
+        // }
+        // }
+        error={!!errors.userTypes}
+        helperText={errors.userTypes}
+        // sx={{mb: 2}}
+        noEmpty
+        required = {true}
+      />
+
+      {/*{Object.entries(userProfileFields).map(([field, option]) => {*/}
+      {/*  if (option.label === 'Primary Email') {*/}
+      {/*    return (*/}
+      {/*      <option.component*/}
+      {/*        key={field}*/}
+      {/*        label={option.label}*/}
+      {/*        type={option.type}*/}
+      {/*        options={option.options}*/}
+      {/*        value={form[field]}*/}
+      {/*        disabled={true}*/}
+      {/*        required={option.required}*/}
+      {/*        onChange={value => form[field] = value.target.value}*/}
+      {/*        onBlur={e => handleOnBlur(e, field, option)}*/}
+      {/*        error={!!errors[field]}*/}
+      {/*        helperText={errors[field]}*/}
+      {/*      />)*/}
+      {/*  } else {*/}
+      {/*    return (*/}
+      {/*      <option.component*/}
+      {/*        key={field}*/}
+      {/*        label={option.label}*/}
+      {/*        type={option.type}*/}
+      {/*        options={option.options}*/}
+      {/*        value={form[field]}*/}
+      {/*        required={option.required}*/}
+      {/*        onChange={value => form[field] = value.target.value}*/}
+      {/*        onBlur={e => handleOnBlur(e, field, option)}*/}
+      {/*        error={!!errors[field]}*/}
+      {/*        helperText={errors[field]}*/}
+      {/*      />)*/}
+      {/*  }*/}
+      {/*  })}*/}
 
       {/* Button for cancelling account info changes */}
       <Button variant="contained" color="primary" className={classes.button}

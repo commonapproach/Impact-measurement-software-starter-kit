@@ -60,9 +60,10 @@ const routes = (
     <Route path="/login/doubleAuth" element={<DoubleAuth/>}/>
     <Route path="/login" element={<LoginPane/>}/>
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
+    <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
-    <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
+    <Route path="/users/:id/edit" element={<PrivateRoute element={EditUserForm}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>
@@ -77,7 +78,7 @@ const routes = (
     <Route path="/users/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
     <Route path="/users/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
 
-    <Route path="/users/:id/edit" element={<SuperUserRoute element={EditUserForm}/>}/>
+
     <Route path="/users/new" element={<SuperUserRoute element={UserForm}/>}/>
 
     <Route path="/users/:id" element={<SuperUserRoute element={User}/>}/>

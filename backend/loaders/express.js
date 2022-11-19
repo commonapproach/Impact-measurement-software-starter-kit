@@ -46,8 +46,6 @@ app.use('/api', userTypes);
 
 // routes only for superuser
 app.use('/api/superuser', superuserRoute);
-// app.use('/api', userRoute);
-// app.use('/api', usersRoute);
 // app.use('/api', characteristicRoute);
 // app.use('/api', questionRoute);
 // app.use('/api', dynamicFormRoute);

@@ -81,24 +81,27 @@ export default function EditUserForm() {
    */
   const validate = () => {
     const newErrors = {};
-    for (const [field, option] of Object.entries(userProfileFields)) {
-      const isEmpty = isFieldEmpty(form[field]);
-
-      if (option.required && isEmpty) {
-        newErrors[field] = REQUIRED_HELPER_TEXT;
-      }
-      let msg;
-      if (!isEmpty && option.validator && (msg = option.validator(form[field]))) {
-        newErrors[field] = msg;
-      }
-
-      if (option.label === 'Secondary Email') {
-        if (form.email === form.altEmail) {
-          newErrors[field] = DUPLICATE_HELPER_TEXT;
-        }
-      }
-
+    if(form.userTypes.length === 0){
+      newErrors.userTypes = 'This field cannot be empty';
     }
+    // for (const [field, option] of Object.entries(userProfileFields)) {
+    //   const isEmpty = isFieldEmpty(form[field]);
+    //
+    //   if (option.required && isEmpty) {
+    //     newErrors[field] = REQUIRED_HELPER_TEXT;
+    //   }
+    //   let msg;
+    //   if (!isEmpty && option.validator && (msg = option.validator(form[field]))) {
+    //     newErrors[field] = msg;
+    //   }
+    //
+    //   if (option.label === 'Secondary Email') {
+    //     if (form.email === form.altEmail) {
+    //       newErrors[field] = DUPLICATE_HELPER_TEXT;
+    //     }
+    //   }
+    //
+    // }
     if (Object.keys(newErrors).length !== 0) {
       setErrors(newErrors);
       return false
@@ -120,10 +123,6 @@ export default function EditUserForm() {
     }
   };
 
-  const handleDialogCancel = () => {
-    setDialogQuitEdit(false);
-    navigate('/users/' + id);
-  }
 
   // submit button handler
   const handleSubmitChanges = () => {
@@ -138,50 +137,42 @@ export default function EditUserForm() {
       setLoadingButton(true);
 
       // Phone number parse.
-      let phoneUnchanged;
-      if (!form.telephone) {
-        phoneUnchanged = null;
-      } else {
-        phoneUnchanged = user.primaryContact.telephone.countryCode.toString() +
-          user.primaryContact.telephone.areaCode.toString() + user.primaryContact.telephone.phoneNumber.toString()
-      }
-      console.log('This is form.telephone:', form.telephone)
-      console.log("phone not changed:", phoneUnchanged)
+      // let phoneUnchanged;
+      // if (!form.telephone) {
+      //   phoneUnchanged = null;
+      // } else {
+      //   phoneUnchanged = user.primaryContact.telephone.countryCode.toString() +
+      //     user.primaryContact.telephone.areaCode.toString() + user.primaryContact.telephone.phoneNumber.toString()
+      // }
+      // console.log('This is form.telephone:', form.telephone)
+      // console.log("phone not changed:", phoneUnchanged)
       const updateForm = {
-        id: id,
-        givenName: form.givenName,
-        familyName: form.familyName,
-        countryCode: null,
-        areaCode: null,
-        phoneNumber: null,
-        altEmail: form.altEmail,
+        email: form.email,
+        userTypes: form.userTypes
       }
 
       console.log(updateForm)
-      if (form.telephone === phoneUnchanged) {
-        updateForm.countryCode = parseInt(form.telephone.slice(0,1));
-        updateForm.areaCode = parseInt(form.telephone.slice(1,4));
-        updateForm.phoneNumber = parseInt(form.telephone.slice(4,11));
-      } else {
-        const phone = form.telephone.split(' ');
-        updateForm.countryCode = parseInt(phone[0]);
-        updateForm.areaCode = parseInt(phone[1].slice(1,4));
-        updateForm.phoneNumber = parseInt(phone[2].slice(0,3) + phone[2].slice(4,8));
-      }
+      // if (form.telephone === phoneUnchanged) {
+      //   updateForm.countryCode = parseInt(form.telephone.slice(0,1));
+      //   updateForm.areaCode = parseInt(form.telephone.slice(1,4));
+      //   updateForm.phoneNumber = parseInt(form.telephone.slice(4,11));
+      // } else {
+      //   const phone = form.telephone.split(' ');
+      //   updateForm.countryCode = parseInt(phone[0]);
+      //   updateForm.areaCode = parseInt(phone[1].slice(1,4));
+      //   updateForm.phoneNumber = parseInt(phone[2].slice(0,3) + phone[2].slice(4,8));
+      // }
       const {success} = await updateUserForm(id, updateForm);
       if (success) {
         setLoadingButton(false);
         setDialogSubmit(false);
-        navigate('/users/' + id);
-      } else {
-        setLoadingButton(false);
-        setDialogSubmit(false);
-        console.log('backend update not success.')
+        navigate('/users/');
+        enqueueSnackbar('Success', {variant: 'success'});
       }
     } catch (e){
       setLoadingButton(false);
-      console.log('catch e');
-      console.log(e.json);
+      setDialogSubmit(false);
+      enqueueSnackbar(e.json.message || 'Error occurs', {variant: 'error'})
     }
   };
 
@@ -191,7 +182,7 @@ export default function EditUserForm() {
   return (
     <Container className={classes.root}>
       <Typography variant="h5">
-        {'Edit user: ' + user.primaryEmail}
+        {'Edit user'}
       </Typography>
 
       <GeneralField
@@ -213,14 +204,14 @@ export default function EditUserForm() {
           form.userTypes = e.target.value
         }}
         options={userTypeOptions}
-        // onBlur = {() => {
-        //   if(form.userTypes.length === 0) {
-        //     setState(state => ({...state, errors: {...state.errors, 'userTypes': 'This field is required'}}))
-        //   } else {
-        //     setState(state => ({...state, errors: {...state.errors, 'userTypes': null}}))
-        //   }
-        // }
-        // }
+        onBlur = {() => {
+          if(form.userTypes.length === 0) {
+            setErrors(errors => ({...errors, 'userTypes': 'This field is required'}));
+          } else {
+            setErrors(errors => ({...errors, 'userTypes': null}));
+          }
+        }
+        }
         error={!!errors.userTypes}
         helperText={errors.userTypes}
         // sx={{mb: 2}}
@@ -228,42 +219,9 @@ export default function EditUserForm() {
         required = {true}
       />
 
-      {/*{Object.entries(userProfileFields).map(([field, option]) => {*/}
-      {/*  if (option.label === 'Primary Email') {*/}
-      {/*    return (*/}
-      {/*      <option.component*/}
-      {/*        key={field}*/}
-      {/*        label={option.label}*/}
-      {/*        type={option.type}*/}
-      {/*        options={option.options}*/}
-      {/*        value={form[field]}*/}
-      {/*        disabled={true}*/}
-      {/*        required={option.required}*/}
-      {/*        onChange={value => form[field] = value.target.value}*/}
-      {/*        onBlur={e => handleOnBlur(e, field, option)}*/}
-      {/*        error={!!errors[field]}*/}
-      {/*        helperText={errors[field]}*/}
-      {/*      />)*/}
-      {/*  } else {*/}
-      {/*    return (*/}
-      {/*      <option.component*/}
-      {/*        key={field}*/}
-      {/*        label={option.label}*/}
-      {/*        type={option.type}*/}
-      {/*        options={option.options}*/}
-      {/*        value={form[field]}*/}
-      {/*        required={option.required}*/}
-      {/*        onChange={value => form[field] = value.target.value}*/}
-      {/*        onBlur={e => handleOnBlur(e, field, option)}*/}
-      {/*        error={!!errors[field]}*/}
-      {/*        helperText={errors[field]}*/}
-      {/*      />)*/}
-      {/*  }*/}
-      {/*  })}*/}
-
       {/* Button for cancelling account info changes */}
       <Button variant="contained" color="primary" className={classes.button}
-              onClick={() => setDialogQuitEdit(true)} key={'Cancel Changes'}>
+              onClick={() => navigate('/users/')}>
         Cancel Changes
       </Button>
 
@@ -285,11 +243,6 @@ export default function EditUserForm() {
                          onClick={handleDialogConfirm} children='confirm' autoFocus/>]}
         open={dialogSubmit}/>
 
-      <AlertDialog
-        dialogContentText={"All the changes you made will not be saved."}
-        dialogTitle={'Notice!'}
-        buttons={<Button onClick={handleDialogCancel} key={'confirm'} autoFocus> {'confirm'}</Button>}
-        open={dialogQuitEdit}/>
 
     </Container>
   )

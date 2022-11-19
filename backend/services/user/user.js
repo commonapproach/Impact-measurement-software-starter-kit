@@ -1,5 +1,5 @@
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {userTypeURI2UserType} = require("../../helpers/dicts");
+
 const superuserFetchUserById = async (req, res, next) => {
   try{
     const {id} = req.params;
@@ -21,7 +21,25 @@ const superuserFetchUserById = async (req, res, next) => {
     next(e);
   }
 
-
 }
 
-module.exports = {superuserFetchUserById}
+const superuserUpdateUserById = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    const {email, userTypes} = req.body;
+    if(!id)
+      return res.status(400).json({success: false, message: 'Wrong URI'});
+    if(!email || userTypes.length === 0)
+      return res.status(400).json({success: false, message: 'Wrong information given'});
+    const user = await GDBUserAccountModel.findOne({_id: id, email: email});
+    if (!user)
+      return res.status(400).json({success: false, message: 'No such user'});
+    user.userTypes = userTypes;
+    await user.save();
+    return res.status(200).json({success: true});
+  } catch (e) {
+    next(e);
+  }
+}
+
+module.exports = {superuserFetchUserById, superuserUpdateUserById}

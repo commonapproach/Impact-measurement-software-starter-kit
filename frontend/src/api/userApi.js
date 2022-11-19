@@ -136,7 +136,7 @@ export function updateProfile(id, params) {
  * @returns {Promise<*>}
  */
 export function updateUserForm(id, params) {
-  return postJson('/api/user/updateUserForm/' + id + '/', params);
+  return postJson('/api/superuser/user/updateUser/' + id + '/', params);
 }
 
 /**

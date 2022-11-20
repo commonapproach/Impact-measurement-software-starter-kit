@@ -6,7 +6,6 @@ import Landing from './components/Landing';
 import LoginPane from './components/login/LoginPane';
 import Dashboard from './components/dashboard/Dashboard';
 import changePrimaryEmail from './components/userProfile/changePrimaryEmail';
-import Clients from './components/Clients';
 import Users from './components/Users';
 import User from './components/users/User';
 import UserForm from './components/users/UserForm';
@@ -31,7 +30,6 @@ import Service from './components/services/Service';
 // import ServiceForm from './components/services/ServiceForm'
 import ServiceForm from './components/services/ServiceForm2';
 import Appointments from "./components/Appointments";
-import AppointmentForm from "./components/appointments/AppointmentForm";
 import ManageFields from './components/settings/ManageFields';
 import ManageForms from './components/settings/ManageForms';
 import ManageFormFields from './components/settings/ManageFormFields';
@@ -46,25 +44,28 @@ import AddEditQuestion from "./components/questions/AddEditQuestion";
 import Questions from './components/questions/Questions';
 import VisualizeServiceProvider from './components/serviceProviders/visualizaServiceProvider';
 import VisualizeService from "./components/services/visualizeService";
-import VisualizeAppointment from "./components/appointment/visualizeAppointment";
 import Needs from "./components/need/needs";
 import AddEditNeedSatisfier from "./components/needSatisfier/addEditNeedSatisfier";
 import NeedSatisfiers from "./components/needSatisfier/needSatisfiers";
 import ServiceOccurrences from "./components/ServiceOccurrences";
 import ServiceOccurrenceForm from "./components/serviceOccurrence/ServiceOccurrence";
 import Referrals from "./components/referrals/referrals";
+import Organizations from "./components/organizations/Organizations";
 
 const routes = (
   <Routes>
+      {/*basic*/}
     <Route exact path="/" element={<Landing/>}/>
     <Route path="/login/doubleAuth" element={<DoubleAuth/>}/>
     <Route path="/login" element={<LoginPane/>}/>
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
     <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
+     {/*users*/}
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
     <Route path="/users/:id/edit" element={<PrivateRoute element={EditUserForm}/>}/>
 
+    <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>
     <Route path="/forgot-password" element={<ForgotPassword/>}/>

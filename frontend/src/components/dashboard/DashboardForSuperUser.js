@@ -18,11 +18,11 @@ export default function DashboardForSuperUser() {
       {/*  <NavButton to={`/provider/${organization.id}/edit/organization`} icon={<Edit/>}*/}
       {/*             text="Edit Organization Profile for Home Agency"/>}*/}
 
-      <NavButton to={`/Groups`} icon={<People/>}
+      <NavButton to={`/groups`} icon={<People/>}
                  text="Manage Groups" disabled/>
 
-      <NavButton to={`/Organizations`} icon={<People/>}
-                 text="Manage Organizations" disabled/>
+      <NavButton to={`/organizations`} icon={<People/>}
+                 text="Manage Organizations"/>
 
       <NavButton to={`/users`} icon={<People/>}
                  text="Manage Users"/>

@@ -25,7 +25,7 @@ export default function Organizations() {
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'})
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
   }, [trigger]);
 
@@ -61,7 +61,7 @@ export default function Organizations() {
     {
       label: 'Legal Name',
       body: ({_id, legalName}) => {
-        return <Link color to={`/users/${_id}`}>
+        return <Link color to={`/organizations/edit/${_id}`}>
           {legalName}
         </Link>
       },
@@ -93,13 +93,13 @@ export default function Organizations() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'users'} objectId={_id}
+        <DropdownMenu urlPrefix={'organizations'} objectId={_id}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading users...`}/>;
+    return <Loading message={`Loading organizations...`}/>;
 
   return (
     <Container>
@@ -110,10 +110,10 @@ export default function Organizations() {
         idField="id"
         customToolbar={
           <Chip
-            onClick={() => navigate('/organizations/invite')}
+            onClick={() => navigate('/organizations/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Invite Organization"
+            label="Add new Organization"
             variant="outlined"/>
         }
 

@@ -4,10 +4,7 @@ import { Button, Container, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import {
   fetchUser,
-  updateUser,
-  getProfile,
-  updatePrimaryEmail,
-  updateProfile, updateUserForm,
+  updateUserForm,
 } from "../../api/userApi";
 import { Loading } from "../shared"
 import { isFieldEmpty } from "../../helpers";

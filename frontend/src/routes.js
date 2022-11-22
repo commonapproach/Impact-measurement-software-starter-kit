@@ -15,7 +15,6 @@ import UserResetSecurityQuestions from "./components/userProfile/UserResetSecuri
 import EmailConfirm from './components/emailConfirm';
 import UserProfile from './components/userProfile/Profile';
 import UpdateUserProfile from './components/userProfile/EditProfile';
-import AddEditNeed from "./components/need/addEditNeed";
 // import NeedForm from './components/client_needs/NeedForm'
 // import Need from './components/client_needs/Need'
 import PrivateRoute from './components/routes/PrivateRoute';
@@ -37,35 +36,27 @@ import UserFirstEntry from "./components/registration/UserFirstEntry";
 import ForgotPassword from "./components/forgotPassword/ForgotPassword";
 import ForgotPasswordResetPassword from "./components/forgotPassword/ResetPassword";
 import DoubleAuth from "./components/login/DoubleAuth";
-import EditUserForm from "./components/users/EditUserForm";
-import AddEditCharacteristic from "./components/characteristics/AddEditCharacteristic";
-import Characteristics from "./components/characteristics/Characteristics";
-import AddEditQuestion from "./components/questions/AddEditQuestion";
-import Questions from './components/questions/Questions';
-import VisualizeServiceProvider from './components/serviceProviders/visualizaServiceProvider';
-import VisualizeService from "./components/services/visualizeService";
-import Needs from "./components/need/needs";
-import AddEditNeedSatisfier from "./components/needSatisfier/addEditNeedSatisfier";
-import NeedSatisfiers from "./components/needSatisfier/needSatisfiers";
-import ServiceOccurrences from "./components/ServiceOccurrences";
-import ServiceOccurrenceForm from "./components/serviceOccurrence/ServiceOccurrence";
-import Referrals from "./components/referrals/referrals";
 import Organizations from "./components/organizations/Organizations";
+import AddEditOrganization from "./components/organizations/AddEditOrganization";
+import EditUserForm from "./components/users/EditUserForm";
 
 const routes = (
   <Routes>
-      {/*basic*/}
+    {/*basic*/}
     <Route exact path="/" element={<Landing/>}/>
     <Route path="/login/doubleAuth" element={<DoubleAuth/>}/>
     <Route path="/login" element={<LoginPane/>}/>
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
     <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
-     {/*users*/}
+    {/*users*/}
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
     <Route path="/users/:id/edit" element={<PrivateRoute element={EditUserForm}/>}/>
-
+    {/*organization*/}
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
+    <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
+    <Route path="/organizations/:id" element={<PrivateRoute element={AddEditOrganization}/>}/>
+
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>
     <Route path="/forgot-password" element={<ForgotPassword/>}/>

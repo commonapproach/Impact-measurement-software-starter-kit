@@ -4,8 +4,10 @@ const {GDBUserAccountModel} = require("./userAccount");
 const GDBOrganizationModel = createGraphDBModel({
   comment: {type: String, internalKey: 'rdfs:comment'},
   administrator: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},
-  users:{type: [GDBUserAccountModel], internalKey:':hasUser'},
-  legalName:{type: String, internalKey:'org:hasLegalName'}
+  reporter: {type: [GDBUserAccountModel], internalKey: ':hasReporter'},
+  editor: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},
+  researcher: {type: [GDBUserAccountModel], internalKey: ':hasResearcher'},
+  legalName:{type: String, internalKey:'tove_org:hasLegalName'}
 }, {
   rdfTypes: ['cids:Organization'], name: 'organization'
 });

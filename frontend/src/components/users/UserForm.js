@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { defaultUserFields } from "../../constants/default_fields";
 import { Button, Container, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { userInvitationFields } from "../../constants/userInvitationFields";
 import { fetchUser, updateUser, createUser } from "../../api/userApi";
 import { Loading } from "../shared"
 import { isFieldEmpty } from "../../helpers";

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
-import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "./shared";
-import { deleteUser, fetchUsers } from "../api/userApi";
+import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
+import { deleteUser, fetchUsers } from "../../api/userApi";
 import { useNavigate } from "react-router-dom";
-import { formatPhoneNumber } from "../helpers/phone_number_helpers";
+import { formatPhoneNumber } from "../../helpers/phone_number_helpers";
 import { useSnackbar } from 'notistack';
 
 export default function Users() {

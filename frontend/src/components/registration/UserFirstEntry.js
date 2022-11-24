@@ -7,7 +7,6 @@ import {Loading} from "../shared";
 import {Button, Container, TextField} from "@mui/material";
 import {userFirstEntryFields} from "../../constants/userFirstEntryFields";
 import {isFieldEmpty} from "../../helpers";
-import {userInvitationFields} from "../../constants/userInvitationFields";
 import {REQUIRED_HELPER_TEXT} from "../../constants";
 import {AlertDialog} from "../shared/Dialogs";
 import LoadingButton from "../shared/LoadingButton";

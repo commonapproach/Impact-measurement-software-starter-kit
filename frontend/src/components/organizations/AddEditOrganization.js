@@ -30,7 +30,7 @@ export default function AddEditOrganization() {
   const classes = useStyles();
   const navigate = useNavigate();
   const {id} = useParams();
-  const mode = id? 'edit' : 'new'
+  const mode = id ? 'edit' : 'new';
   const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({
@@ -44,7 +44,9 @@ export default function AddEditOrganization() {
   const [form, setForm] = useState({
     legalName: '',
     administrator: '',
-    users: [],
+    reporters: [],
+    editors: [],
+    researchers: [],
     comment: '',
   });
   const [loading, setLoading] = useState(true);
@@ -52,26 +54,26 @@ export default function AddEditOrganization() {
 
   useEffect(() => {
     fetchUsers().then((res) => {
-      if(res.success){
+      if (res.success) {
         const data = res.data;
         const users = {};
         data.map((user) => {
-          users[`userAccount_${user._id}`] = `userAccount_${user._id}`;
-        })
+          users[`:userAccount_${user._id}`] = `userAccount_${user._id}`;
+        });
         setAllUsers(users);
       }
     }).then(() => {
       if (mode === 'edit' && id) {
-      fetchOrganization(id).then(res => {
-        if (res.success) {
-          setForm(res.organization);
-          setLoading(false);
-        }
-      })
-    } else if (mode === 'edit' && !id) {
-      navigate('/organizations');
-      enqueueSnackbar("No ID provided", {variant: 'error'});
-    } else if (mode === 'new') {
+        fetchOrganization(id).then(res => {
+          if (res.success) {
+            setForm(res.organization);
+            setLoading(false);
+          }
+        });
+      } else if (mode === 'edit' && !id) {
+        navigate('/organizations');
+        enqueueSnackbar("No ID provided", {variant: 'error'});
+      } else if (mode === 'new') {
         setLoading(false);
       }
     }).catch(e => {
@@ -92,14 +94,21 @@ export default function AddEditOrganization() {
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
-    if (mode === 'add') {
-      createOrganization(form).then(() => {
-        setState(state => ({...state, loadingButton: false, submitDialog: false, successDialog: true}));
+    console.log(mode)
+    if (mode === 'new') {
+      createOrganization(form).then((ret) => {
+        if(ret.success){
+          setState({loadingButton: false, submitDialog: false,});
+          navigate('/organizations');
+          enqueueSnackbar(ret.message || 'Success', {variant: "success"})
+        }
+
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
         }
-        setState(state => ({...state, loadingButton: false, submitDialog: false, failDialog: true}));
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"})
+        setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
       updateQuestion(id, form).then(() => {
@@ -116,11 +125,8 @@ export default function AddEditOrganization() {
 
   const validate = () => {
     const error = {};
-    if (form.content === '') {
-      error.content = 'The field cannot be empty';
-    }
-    if (form.description === '') {
-      error.description = 'The field cannot be empty';
+    if (form.legalName === '') {
+      error.legalName = 'The field cannot be empty';
     }
     setErrors(error);
     return Object.keys(error).length === 0;
@@ -142,39 +148,87 @@ export default function AddEditOrganization() {
           onChange={e => form.legalName = e.target.value}
           error={!!errors.legalName}
           helperText={errors.legalName}
+          onBlur={() => {
+            if(form.legalName === ''){
+              setErrors(errors => ({...errors, legalName: 'This field cannot be empty'}))
+            }
+            else{
+              setErrors(errors => ({...errors, legalName: ''}))
+            }
+
+          }}
+        />
+        {/*<Dropdown*/}
+        {/*  label="Users"*/}
+        {/*  key={'users'}*/}
+        {/*  value={form.users}*/}
+        {/*  onChange={e => {*/}
+        {/*    form.users = e.target.value*/}
+        {/*  }}*/}
+        {/*  options={allUsers}*/}
+        {/*  onBlur = {() => {*/}
+        {/*    if(form.users.length === 0) {*/}
+        {/*      setErrors(errors => ({...errors, 'userTypes': 'This field is required'}));*/}
+        {/*    } else {*/}
+        {/*      setErrors(errors => ({...errors, 'userTypes': null}));*/}
+        {/*    }*/}
+        {/*  }*/}
+        {/*  }*/}
+        {/*  error={!!errors.users}*/}
+        {/*  helperText={errors.users}*/}
+        {/*  // sx={{mb: 2}}*/}
+        {/*  noEmpty*/}
+        {/*  required = {true}*/}
+        {/*/>*/}
+        <SelectField
+          key={'administrator'}
+          label={'Organization Administrator'}
+          value={form.administrator}
+          options={allUsers}
+          error={!!errors.administrator}
+          helperText={errors.administrator}
+          onChange={e => {
+            setForm(form => ({
+                ...form, administrator: e.target.value
+              })
+            );
+          }}
         />
         <Dropdown
-          label="Users"
-          key={'users'}
-          value={form.users}
+          label="Editors"
+          key={'editors'}
+          value={form.editors}
           onChange={e => {
-            form.users = e.target.value
+            form.editors = e.target.value;
           }}
           options={allUsers}
-          onBlur = {() => {
-            if(form.users.length === 0) {
-              setErrors(errors => ({...errors, 'userTypes': 'This field is required'}));
-            } else {
-              setErrors(errors => ({...errors, 'userTypes': null}));
-            }
-          }
-          }
-          error={!!errors.users}
-          helperText={errors.users}
+          error={!!errors.editors}
+          helperText={errors.editors}
           // sx={{mb: 2}}
-          noEmpty
-          required = {true}
         />
-        <SelectField
-        key={'administrator'}
-        label={'Organization Administrator'}
-        value={form.administrator}
-        options={allUsers}
-        error={!!errors.administrator}
-        helperText={errors.administrator}
-        onChange={e => {
-          form.administrator = e.target.administrator
-        }}
+        <Dropdown
+          label="Reporters"
+          key={'reporters'}
+          value={form.reporters}
+          onChange={e => {
+            form.reporters = e.target.value;
+          }}
+          options={allUsers}
+          error={!!errors.reporters}
+          helperText={errors.reporters}
+          // sx={{mb: 2}}
+        />
+        <Dropdown
+          label="Researcher"
+          key={'researcher'}
+          value={form.researchers}
+          onChange={e => {
+            form.researchers = e.target.value;
+          }}
+          options={allUsers}
+          error={!!errors.researchers}
+          helperText={errors.researchers}
+          // sx={{mb: 2}}
         />
         <GeneralField
           key={'comment'}
@@ -191,7 +245,7 @@ export default function AddEditOrganization() {
         </Button>
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'add' ? 'Are you sure you want to create this new Organization?' :
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
                        'Are you sure you want to update this Organization?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,

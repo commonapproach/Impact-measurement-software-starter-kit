@@ -122,7 +122,9 @@ export function verifyEmail(field, fieldName, errsContainer){
   const email_regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   if (!email_regex.test(field)) {
     errsContainer[fieldName] = "Invalid email! ".concat("They are in the format of jsmith@example.com");
+    return "Invalid email! ".concat("They are in the format of jsmith@example.com");
   }
+  return false
 }
 
 export function verifyPhoneNumber(field, fieldName, errsContainer){

@@ -6,7 +6,7 @@ import Landing from './components/Landing';
 import LoginPane from './components/login/LoginPane';
 import Dashboard from './components/dashboard/Dashboard';
 import changePrimaryEmail from './components/userProfile/changePrimaryEmail';
-import Users from './components/Users';
+import Users from './components/users/Users';
 import User from './components/users/User';
 import UserForm from './components/users/UserForm';
 import UserInvite from './components/registration/UserInvite';
@@ -15,8 +15,6 @@ import UserResetSecurityQuestions from "./components/userProfile/UserResetSecuri
 import EmailConfirm from './components/emailConfirm';
 import UserProfile from './components/userProfile/Profile';
 import UpdateUserProfile from './components/userProfile/EditProfile';
-// import NeedForm from './components/client_needs/NeedForm'
-// import Need from './components/client_needs/Need'
 import PrivateRoute from './components/routes/PrivateRoute';
 import {SuperUserRoute} from './components/routes/RoutesForUserTypes';
 import Providers from './components/Providers';
@@ -27,11 +25,6 @@ import ProviderRatingForm from './components/providers/ProviderRatingForm.js';
 import Services from './components/Services';
 import Service from './components/services/Service';
 // import ServiceForm from './components/services/ServiceForm'
-import ServiceForm from './components/services/ServiceForm2';
-import Appointments from "./components/Appointments";
-import ManageFields from './components/settings/ManageFields';
-import ManageForms from './components/settings/ManageForms';
-import ManageFormFields from './components/settings/ManageFormFields';
 import UserFirstEntry from "./components/registration/UserFirstEntry";
 import ForgotPassword from "./components/forgotPassword/ForgotPassword";
 import ForgotPasswordResetPassword from "./components/forgotPassword/ResetPassword";

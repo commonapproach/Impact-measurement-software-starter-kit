@@ -1,7 +1,7 @@
 const {GraphDB, Types, createGraphDBModel, DeleteType} = require('../utils/graphdb');
 
 const {GDBPersonModel} = require('./person');
-const {GDBOrganizationModel} = require("./organization");
+// const {GDBOrganizationModel} = require("./organization");
 
 const GDBSecurityQuestion = createGraphDBModel({
   question: {type: String, internalKey: ':hasQuestion'},
@@ -18,7 +18,11 @@ const GDBUserAccountModel = createGraphDBModel({
   salt: {type: String, internalKey: ':hasSalt'},
   person:{type: GDBPersonModel, internalKey: 'cids:Person', onDelete: DeleteType.CASCADE},
   userType:{type: [Types.NamedIndividual], internalKey: ':UserType'},
-  organization:{type: [GDBOrganizationModel], internalKey: 'org:forOrganization'},
+  editorOf: {type: [Types.NamedIndividual], internalKey: ':editorOf'},
+  reporterOf: {type: [Types.NamedIndividual], internalKey: ':reporterOf'},
+  administratorOf: {type: [Types.NamedIndividual], internalKey: ':administratorOf'},
+  groupAdminOf: {type: [Types.NamedIndividual], internalKey: ':administratorOf'},
+  researcherOf: {type: [Types.NamedIndividual], internalKey: ':researcherOf'},
   // Exact 3 questions, the answer should be case-insensitive.
   securityQuestion: {type: [GDBSecurityQuestion], internalKey: ':hasSecurityQuestion', onDelete: DeleteType.CASCADE}
 

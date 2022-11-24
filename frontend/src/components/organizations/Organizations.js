@@ -4,7 +4,7 @@ import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
-import {fetchOrganizations} from "../../api/organizationApi";
+import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 
 export default function Organizations() {
   const navigate = useNavigate();
@@ -38,8 +38,7 @@ export default function Organizations() {
 
   const handleDelete = async (id, form) => {
 
-
-    deleteUser(id).then(({success, message})=>{
+    deleteOrganization(id).then(({success, message})=>{
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -93,7 +92,7 @@ export default function Organizations() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectId={_id}
+        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];

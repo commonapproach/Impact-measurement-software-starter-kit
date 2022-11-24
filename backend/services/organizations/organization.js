@@ -57,4 +57,18 @@ async function superuserUpdateOrganization(req, res, next){
   }
 }
 
-module.exports = {superuserCreateOrganization, superuserFetchOrganization, superuserUpdateOrganization};
+async function superuserDeleteOrganization(req, res, next){
+  try {
+    const {id} = req.params;
+    if(!id)
+      return res.status(400).json({success: false, message: 'Id is needed'});
+    const organization = await GDBOrganizationModel.findByIdAndDelete(id);
+    if(!organization)
+      return res.status(400).json({success: false, message: 'No such organization'})
+    return res.status(200).json({success: true, message: 'Successfully deleted ' + organization.legalName});
+  }catch (e) {
+    next(e);
+  }
+}
+
+module.exports = {superuserCreateOrganization, superuserFetchOrganization, superuserUpdateOrganization, superuserDeleteOrganization};

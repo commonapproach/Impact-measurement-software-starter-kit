@@ -15,3 +15,7 @@ export async function createOrganization(params) {
 export async function updateOrganization(id, params) {
   return putJson('/api/superuser/organization/' + id, params)
 }
+
+export async function deleteOrganization(id) {
+  return deleteJson('/api/superuser/organization/' + id)
+}

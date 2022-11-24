@@ -1,4 +1,4 @@
-import {deleteJson, getJson, postJson} from "./index";
+import {deleteJson, getJson, postJson, putJson} from "./index";
 
 export async function fetchOrganizations() {
   return getJson('/api/superuser/organizations');
@@ -10,4 +10,8 @@ export async function fetchOrganization(id) {
 
 export async function createOrganization(params) {
   return postJson('/api/superuser/organization/', params);
+}
+
+export async function updateOrganization(id, params) {
+  return putJson('/api/superuser/organization/' + id, params)
 }

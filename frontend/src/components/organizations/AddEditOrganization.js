@@ -7,7 +7,7 @@ import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {createQuestion, fetchQuestion, updateQuestion} from "../../api/questionApi";
-import {createOrganization, fetchOrganization} from "../../api/organizationApi";
+import {createOrganization, fetchOrganization, updateOrganization} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
@@ -66,7 +66,7 @@ export default function AddEditOrganization() {
       if (mode === 'edit' && id) {
         fetchOrganization(id).then(res => {
           if (res.success) {
-            const organization = res.organization
+            const organization = res.organization;
             setForm({
               legalName: organization.legalName || '',
               administrator: organization.administrator || '',
@@ -102,30 +102,35 @@ export default function AddEditOrganization() {
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
-    console.log(mode)
+    console.log(mode);
     if (mode === 'new') {
       createOrganization(form).then((ret) => {
-        if(ret.success){
+        if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
-          enqueueSnackbar(ret.message || 'Success', {variant: "success"})
+          enqueueSnackbar(ret.message || 'Success', {variant: "success"});
         }
 
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
         }
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"})
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateQuestion(id, form).then(() => {
-        setState(state => ({...state, loadingButton: false, submitDialog: false, successDialog: true}));
+      updateOrganization(id, form).then((res) => {
+        if (res.success) {
+          setState({loadingButton: false, submitDialog: false,});
+          navigate('/organizations');
+          enqueueSnackbar(res.message || 'Success', {variant: "success"});
+        }
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
         }
-        setState(state => ({...state, loadingButton: false, submitDialog: false, failDialog: true}));
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating organization', {variant: "error"});
+        setState({loadingButton: false, submitDialog: false,});
       });
     }
 
@@ -157,11 +162,10 @@ export default function AddEditOrganization() {
           error={!!errors.legalName}
           helperText={errors.legalName}
           onBlur={() => {
-            if(form.legalName === ''){
-              setErrors(errors => ({...errors, legalName: 'This field cannot be empty'}))
-            }
-            else{
-              setErrors(errors => ({...errors, legalName: ''}))
+            if (form.legalName === '') {
+              setErrors(errors => ({...errors, legalName: 'This field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, legalName: ''}));
             }
 
           }}

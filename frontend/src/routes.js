@@ -48,7 +48,7 @@ const routes = (
     {/*organization*/}
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
     <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
-    <Route path="/organizations/:id" element={<PrivateRoute element={AddEditOrganization}/>}/>
+    <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

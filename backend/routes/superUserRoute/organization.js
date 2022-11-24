@@ -1,8 +1,9 @@
 const express = require('express');
-const {createOrganization} = require("../../services/organizations/organization");
+const {superuserCreateOrganization, superuserFetchOrganization} = require("../../services/organizations/organization");
 
 const router = express.Router({mergeParams: true});
 
-router.post('/', createOrganization)
+router.post('/', superuserCreateOrganization)
+router.get('/:id', superuserFetchOrganization)
 
 module.exports = router;

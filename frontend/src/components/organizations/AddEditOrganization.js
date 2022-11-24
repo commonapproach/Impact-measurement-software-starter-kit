@@ -66,7 +66,15 @@ export default function AddEditOrganization() {
       if (mode === 'edit' && id) {
         fetchOrganization(id).then(res => {
           if (res.success) {
-            setForm(res.organization);
+            const organization = res.organization
+            setForm({
+              legalName: organization.legalName || '',
+              administrator: organization.administrator || '',
+              reporters: organization.reporters || [],
+              editors: organization.editors || [],
+              researchers: organization.researchers || [],
+              comment: organization.comment || ''
+            });
             setLoading(false);
           }
         });

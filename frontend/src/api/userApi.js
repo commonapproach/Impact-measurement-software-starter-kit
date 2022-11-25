@@ -172,8 +172,11 @@ export function fetchUser(id) {
  * This function fetches all users.
  * @returns {Promise<any>}
  */
-export function fetchUsers() {
-  return getJson('/api/superuser/users/');
+export function fetchUsers(usertype) {
+  if(!usertype)
+    return getJson('/api/superuser/users/');
+  return getJson(`/api/superuser/users/${usertype}/`)
+
 }
 
 

@@ -50,19 +50,28 @@ export default function AddEditOrganization() {
     comment: '',
   });
   const [loading, setLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState([]);
+  const [options, setOptions] = useState({
+    reporters: [],
+    editors: [],
+    researchers: [],
+    administrators: [],
+  });
 
   useEffect(() => {
-    fetchUsers().then((res) => {
-      if (res.success) {
-        const data = res.data;
-        const users = {};
-        data.map((user) => {
-          users[`:userAccount_${user._id}`] = `userAccount_${user._id}`;
-        });
-        setAllUsers(users);
-      }
-    }).then(() => {
+    Promise.all([
+      fetchUsers('editor').then(({data}) => {
+        options.editors = data
+      }),
+      fetchUsers('reporter').then(({data}) => {
+        options.reporters = data
+      }),
+      fetchUsers('admin').then(({data}) => {
+        options.administrators = data
+      }),
+      fetchUsers('researcher').then(({data}) => {
+        options.researchers = data
+      }),
+    ]).then(() => {
       if (mode === 'edit' && id) {
         fetchOrganization(id).then(res => {
           if (res.success) {
@@ -196,7 +205,7 @@ export default function AddEditOrganization() {
           key={'administrator'}
           label={'Organization Administrator'}
           value={form.administrator}
-          options={allUsers}
+          options={options.administrators}
           error={!!errors.administrator}
           helperText={errors.administrator}
           onChange={e => {
@@ -213,7 +222,7 @@ export default function AddEditOrganization() {
           onChange={e => {
             form.editors = e.target.value;
           }}
-          options={allUsers}
+          options={options.editors}
           error={!!errors.editors}
           helperText={errors.editors}
           // sx={{mb: 2}}
@@ -225,7 +234,7 @@ export default function AddEditOrganization() {
           onChange={e => {
             form.reporters = e.target.value;
           }}
-          options={allUsers}
+          options={options.reporters}
           error={!!errors.reporters}
           helperText={errors.reporters}
           // sx={{mb: 2}}
@@ -237,7 +246,7 @@ export default function AddEditOrganization() {
           onChange={e => {
             form.researchers = e.target.value;
           }}
-          options={allUsers}
+          options={options.researchers}
           error={!!errors.researchers}
           helperText={errors.researchers}
           // sx={{mb: 2}}

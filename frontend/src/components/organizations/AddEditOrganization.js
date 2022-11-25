@@ -69,9 +69,7 @@ export default function AddEditOrganization() {
         })
       }),
       fetchUsers('admin').then(({data}) => {
-        data.map(admin => {
-          options.administrators[admin] = admin
-        })
+        options.administrators = data
       }),
       fetchUsers('researcher').then(({data}) => {
         data.map(researcher => {
@@ -83,7 +81,7 @@ export default function AddEditOrganization() {
           options.reporters[superuser] = superuser;
           options.editors[superuser] = superuser;
           options.researchers[superuser] = superuser;
-          options.administrators[superuser] = superuser;
+          options.administrators.push(superuser);
         })
       }),
     ]).then(() => {

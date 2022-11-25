@@ -51,7 +51,7 @@ export default function AddEditOrganization() {
   });
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
-    reporters: [],
+    reporters: {},
     editors: [],
     researchers: [],
     administrators: [],
@@ -60,16 +60,32 @@ export default function AddEditOrganization() {
   useEffect(() => {
     Promise.all([
       fetchUsers('editor').then(({data}) => {
-        options.editors = data
+        data.map(editor => {
+          options.editors[editor] = editor
+        })
       }),
       fetchUsers('reporter').then(({data}) => {
-        options.reporters = data
+        data.map(reporter => {
+          options.reporters[reporter] = reporter
+        })
       }),
       fetchUsers('admin').then(({data}) => {
-        options.administrators = data
+        data.map(admin => {
+          options.administrators[admin] = admin
+        })
       }),
       fetchUsers('researcher').then(({data}) => {
-        options.researchers = data
+        data.map(researcher => {
+          options.researchers[researcher] = researcher
+        })
+      }),
+      fetchUsers('superuser').then(({data}) => {
+        data.map((superuser) => {
+          options.reporters[superuser] = superuser;
+          options.editors[superuser] = superuser;
+          options.researchers[superuser] = superuser;
+          options.administrators[superuser] = superuser;
+        })
       }),
     ]).then(() => {
       if (mode === 'edit' && id) {

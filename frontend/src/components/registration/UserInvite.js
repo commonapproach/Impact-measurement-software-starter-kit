@@ -34,7 +34,10 @@ export default function UserInvite() {
   const {enqueueSnackbar} = useSnackbar();
   const [state, setState] = useState({
     form: {
-      ...defaultInvitationFields
+      userTypes: [],
+      email: '',
+      firstName: '',
+      lastName: ''
     },
     errors: {},
     dialog: false,
@@ -63,17 +66,10 @@ export default function UserInvite() {
     if (state.form.userTypes.length === 0)
       errors.userTypes = 'This field is required';
     verifyEmail(state.form.email, 'email', errors);
-
-    // for (const [field, option] of Object.entries(superuserInvitationFields)) {
-    //   const isEmpty = isFieldEmpty(state.form[field]);
-    //   if (option.required && isEmpty) {
-    //     errors[field] = REQUIRED_HELPER_TEXT;
-    //   }
-    //   let msg;
-    //   if (!isEmpty && option.validator && (msg = option.validator(state.form[field]))) {
-    //     errors[field] = msg;
-    //   }
-    // }
+    if(!state.form.firstName)
+      errors.firstName = 'This field is required';
+    if(!state.form.lastName)
+      errors.lastName = 'This field is required';
 
     if (Object.keys(errors).length !== 0) {
       setState(state => ({...state, errors}));
@@ -159,7 +155,7 @@ export default function UserInvite() {
         type={'email'}
         value={state.form.email}
         required
-        onChange={e => state.form.email = e.target.value} // todo: handle on blur
+        onChange={e => state.form.email = e.target.value}
         onBlur={() => {
           const correct = verifyEmail(state.form.email, 'email', state.errors)
           if(correct){
@@ -170,6 +166,38 @@ export default function UserInvite() {
         }}
         error={!!state.errors.email}
         helperText={state.errors.email}
+      />
+      <GeneralField
+        key={'firstName'}
+        label={'First Name'}
+        value={state.form.firstName}
+        required
+        onChange={e => state.form.firstName = e.target.value}
+        onBlur={() => {
+          if(!state.form.firstName){
+            setState(state => ({...state, errors: {...state.errors, firstName: 'First name is required'}}))
+          } else {
+            setState(state => ({...state, errors: {...state.errors, firstName: undefined}}))
+          }
+        }}
+        error={!!state.errors.firstName}
+        helperText={state.errors.firstName}
+      />
+      <GeneralField
+        key={'lastName'}
+        label={'Last Name'}
+        value={state.form.lastName}
+        required
+        onChange={e => state.form.lastName = e.target.value}
+        onBlur={() => {
+          if(!state.form.lastName){
+            setState(state => ({...state, errors: {...state.errors, lastName: 'First name is required'}}))
+          } else {
+            setState(state => ({...state, errors: {...state.errors, lastName: undefined}}))
+          }
+        }}
+        error={!!state.errors.lastName}
+        helperText={state.errors.lastName}
       />
       <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
         Submit
@@ -182,14 +210,6 @@ export default function UserInvite() {
                                     key={'confirm'}
                                     onClick={handleConfirm} children="confirm" autoFocus/>]}
                    open={state.dialog}/>
-      {/*<AlertDialog dialogContentText={"A registration link has been sent to the user."}*/}
-      {/*             dialogTitle={'Success'}*/}
-      {/*             buttons={[<Button onClick={() => navigate('/dashboard')} key={'ok'}>{'ok'}</Button>]}*/}
-      {/*             open={state.success}/>*/}
-      {/*<AlertDialog dialogContentText={state.errors.message||"Error occur"}*/}
-      {/*             dialogTitle={'Fail'}*/}
-      {/*             buttons={[<Button onClick={() => navigate('/dashboard')} key={'ok'}>{'ok'}</Button>]}*/}
-      {/*             open={state.fail}/>*/}
 
 
     </Container>

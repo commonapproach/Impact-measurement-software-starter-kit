@@ -15,6 +15,7 @@ const namespaces = {
 
   'cp': 'http://helpseeker.co/compass#',
   'cids': 'http://ontology.eil.utoronto.ca/cids/cids#',
+  'cidsrep': 'http://ontology.eil.utoronto.ca/cids/cidsrep#',
   'tove_org': 'http://ontology.eil.utoronto.ca/tove/organization#',
   'ic': 'http://ontology.eil.utoronto.ca/tove/icontact#',
   'cwrc': 'http://sparql.cwrc.ca/ontologies/cwrc#',

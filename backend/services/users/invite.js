@@ -18,13 +18,15 @@ const inviteNewUser = async (req, res, next) => {
 
 
   try {
-    let {email, userTypes} = req.body.form;
+    let {email, userTypes, firstName, lastName} = req.body.form;
     if (!email)
       return res.status(400).json({success: false, message: 'Email is required to invite new user.'});
     if (!userTypes)
       return res.status(400).json({success: false, message: 'userTypes is required to invite new user.'});
     if (!Array.isArray(userTypes) || userTypes.length === 0)
       return res.status(400).json({success: false, message: 'userTypes is not valid.'});
+    if(!firstName || !lastName)
+      return res.status(400).json({success: false, message: 'Name is required to invite new user.'});
 
     email = email.toLowerCase();
     userTypes.map(userType => {
@@ -40,6 +42,7 @@ const inviteNewUser = async (req, res, next) => {
       const userAccount = GDBUserAccountModel({
         email, userTypes
       });
+      userAccount.person = {givenName: firstName, familyName: lastName}
       // send email
       const token = sign({
         email
@@ -61,33 +64,6 @@ const inviteNewUser = async (req, res, next) => {
       return res.status(201).json({success: true, message: 'Successfully invited user.'});
     }
 
-    // if (userAccount.securityQuestions) {
-    //   // the user already exists, and has been activated.
-    //   return res.status(400).json({success: false, message: 'The email is occupied by an account.'});
-    //
-    // } else if (!userAccount) {
-    //   // the user is a new user, store its data inside the database
-    //   const userAccount = GDBUserAccountModel({
-    //     email, userTypes
-    //   });
-    //   // send email
-    //   const token = sign({
-    //     email
-    //   }, jwtConfig.secret, jwtConfig.options);
-    //   await sendVerificationMail(email, token);
-    //   await userAccount.save();
-    //   return res.status(201).json({success: true, message: 'Successfully invited user.'});
-    // } else {
-    //   // the user is already a temporary user
-    //   userAccount.userTypes = userTypes;
-    //   const token = sign({
-    //     email
-    //   }, jwtConfig.secret, jwtConfig.options);
-    //   await sendVerificationMail(email, token);
-    //   await userAccount.save();
-    //   return res.status(201).json({success: true, message: 'Successfully invited user.'});
-    //
-    // }
   } catch (e) {
     return next(e);
   }

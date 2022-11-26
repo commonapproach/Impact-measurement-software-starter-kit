@@ -46,11 +46,6 @@ export const defaultAddEditNeedFields = {
   characteristic: '',
   code: []
 }
-export const defaultInvitationFields = {
-  userTypes: [],
-  email: '',
-  expirationDate: ''
-}
 
 export const defaultCurrentPasswordFields = {
   currentPassword: '',

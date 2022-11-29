@@ -32,6 +32,7 @@ import DoubleAuth from "./components/login/DoubleAuth";
 import Organizations from "./components/organizations/Organizations";
 import AddEditOrganization from "./components/organizations/AddEditOrganization";
 import EditUserForm from "./components/users/EditUserForm";
+import Groups from "./components/groups/Groups";
 
 const routes = (
   <Routes>
@@ -49,6 +50,10 @@ const routes = (
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
     <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
     <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
+      {/*Groups*/}
+      <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
+      <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
+      <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

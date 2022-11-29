@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
-import { deleteUser, fetchUsers } from "../../api/userApi";
 import { useNavigate } from "react-router-dom";
 import { formatPhoneNumber } from "../../helpers/phone_number_helpers";
 import { useSnackbar } from 'notistack';
@@ -61,53 +60,53 @@ export default function Groups() {
 
   const columns = [
     {
-      label: 'Username/Email',
-      body: ({_id, email}) => {
-        return <Link color to={`/users/${_id}`}>
-          {email}
+      label: 'Label',
+      body: ({_id, label}) => {
+        return <Link color to={`/groups/${_id}`}>
+          {label}
         </Link>
       },
       sortBy: ({email}) => email
     },
     {
-      label: 'First name',
-      body: ({person}) => {
-        if(person && person.givenName)
-          return person.givenName
+      label: 'Administrator',
+      body: ({administrator}) => {
+        if(administrator)
+          return administrator
         return 'Not Provided'
       }
     },
-    {
-      label: 'Last name',
-      body: ({person}) => {
-        if(person && person.familyName)
-          return person.familyName
-        return 'Not Provided'
-      }
-    },
-    {
-      label: 'Phone Number',
-      body: ({primaryContact}) => {
-        if (primaryContact && primaryContact.telephone)
-          return formatPhoneNumber(primaryContact.telephone);
-        return 'Not Provided';
-      },
-    },
-
-    {
-      label: 'Role',
-      body: ({userTypes}) => userTypes
-    },
+    // {
+    //   label: 'Last name',
+    //   body: ({person}) => {
+    //     if(person && person.familyName)
+    //       return person.familyName
+    //     return 'Not Provided'
+    //   }
+    // },
+    // {
+    //   label: 'Phone Number',
+    //   body: ({primaryContact}) => {
+    //     if (primaryContact && primaryContact.telephone)
+    //       return formatPhoneNumber(primaryContact.telephone);
+    //     return 'Not Provided';
+    //   },
+    // },
+    //
+    // {
+    //   label: 'Role',
+    //   body: ({userTypes}) => userTypes
+    // },
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'users'} objectId={_id}
+        <DropdownMenu urlPrefix={'groups'} objectId={_id}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading users...`}/>;
+    return <Loading message={`Loading groups...`}/>;
 
   return (
     <Container>
@@ -118,10 +117,10 @@ export default function Groups() {
         idField="id"
         customToolbar={
           <Chip
-            onClick={() => navigate('/users/invite')}
+            onClick={() => navigate('/groups/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Invite User"
+            label="Add group"
             variant="outlined"/>
         }
 

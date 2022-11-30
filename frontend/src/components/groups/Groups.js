@@ -20,9 +20,9 @@ export default function Groups() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchGroups().then(data => {
+    fetchGroups().then(({groups}) => {
       // console.log(data)
-      setState(state => ({...state, loading: false, data: data.data}));
+      setState(state => ({...state, loading: false, data: groups}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');

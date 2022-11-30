@@ -17,12 +17,10 @@ import UserProfile from './components/userProfile/Profile';
 import UpdateUserProfile from './components/userProfile/EditProfile';
 import PrivateRoute from './components/routes/PrivateRoute';
 import {SuperUserRoute} from './components/routes/RoutesForUserTypes';
-import Providers from './components/Providers';
 import AddServicePrompt from './components/providers/AddServicePrompt';
 import ProviderForm from './components/providers/ProviderForm2';
 import ProviderProfile from './components/providers/ProviderProfile';
 import ProviderRatingForm from './components/providers/ProviderRatingForm.js';
-import Services from './components/Services';
 import Service from './components/services/Service';
 // import ServiceForm from './components/services/ServiceForm'
 import UserFirstEntry from "./components/registration/UserFirstEntry";
@@ -33,6 +31,7 @@ import Organizations from "./components/organizations/Organizations";
 import AddEditOrganization from "./components/organizations/AddEditOrganization";
 import EditUserForm from "./components/users/EditUserForm";
 import Groups from "./components/groups/Groups";
+import AddEditGroup from "./components/groups/AddEditGroup";
 
 const routes = (
   <Routes>
@@ -50,10 +49,10 @@ const routes = (
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
     <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
     <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
-      {/*Groups*/}
-      <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
-      <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
-      <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
+    {/*Groups*/}
+    <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
+    <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>
+    <Route path="/groups/:id/edit" element={<PrivateRoute element={AddEditGroup}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

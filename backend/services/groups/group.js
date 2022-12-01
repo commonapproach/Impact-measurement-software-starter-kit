@@ -25,5 +25,17 @@ const superuserFetchGroup = async (req, res, next) => {
     next(e);
   }
 }
+const superuserUpdateGroup = async (req, res, next) => {
+  try {
+    const {id} = req.params
+    const form = req.body
+    if(!id || !form)
+      return res.status(400).json({success: false, message: 'Invalid information given'});
+    await GDBGroupModel.findByIdAndUpdate(id, form);
+    return res.status(200).json({success: true, message: 'Successfully update group '+ id})
+  }catch (e) {
+    next(e);
+  }
+}
 
-module.exports = {createGroup, superuserFetchGroup};
+module.exports = {createGroup, superuserFetchGroup, superuserUpdateGroup};

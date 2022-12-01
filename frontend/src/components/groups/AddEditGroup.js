@@ -11,7 +11,7 @@ import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
-import {createGroup, fetchGroup} from "../../api/groupApi";
+import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -124,10 +124,10 @@ export default function AddEditGroup() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateOrganization(id, form).then((res) => {
+      updateGroup(id, form).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/organizations');
+          navigate('/groups');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {

@@ -11,7 +11,7 @@ import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
-import {createGroup} from "../../api/groupApi";
+import {createGroup, fetchGroup} from "../../api/groupApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -70,22 +70,20 @@ export default function AddEditGroup() {
       }),
     ]).then(() => {
       if (mode === 'edit' && id) {
-        fetchOrganization(id).then(res => {
+        fetchGroup(id).then(res => {
           if (res.success) {
-            const organization = res.organization;
+            const group = res.group;
             setForm({
-              legalName: organization.legalName || '',
-              administrator: organization.administrator || '',
-              reporters: organization.reporters || [],
-              editors: organization.editors || [],
-              researchers: organization.researchers || [],
-              comment: organization.comment || ''
+              label: group.label || '',
+              administrator: group.administrator || '',
+              comment: group.comment || '',
+              organizations: group.organizations
             });
             setLoading(false);
           }
         });
       } else if (mode === 'edit' && !id) {
-        navigate('/organizations');
+        navigate('/groups');
         enqueueSnackbar("No ID provided", {variant: 'error'});
       } else if (mode === 'new') {
         setLoading(false);

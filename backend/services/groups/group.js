@@ -12,4 +12,18 @@ const createGroup = async (req, res, next) => {
   }
 };
 
-module.exports = {createGroup};
+const superuserFetchGroup = async (req, res, next) => {
+  try {
+    const {id} =req.params
+    if(!id)
+      return res.status(400).json({success: false, message: 'No id is given'});
+    const group = await GDBGroupModel.findById(id);
+    if(!group)
+      return res.status(400).json({success: false, message: 'No such group'});
+    return res.status(200).json({success: true, group: group})
+  }catch (e) {
+    next(e);
+  }
+}
+
+module.exports = {createGroup, superuserFetchGroup};

@@ -11,7 +11,7 @@ const GDBPersonModel = createGraphDBModel({
   gender: {type: Types.NamedIndividual, internalKey: 'cwrc:Gender'},
   email: {type: String, internalKey: 'ic:hasEmail'},
   altEmail: {type: String, internalKey: 'ic:hasAltEmail'},
-  telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone'},
+  phoneNumber: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone'},
 }, {
   rdfTypes: ['cids:Person'], name: 'person'
 });

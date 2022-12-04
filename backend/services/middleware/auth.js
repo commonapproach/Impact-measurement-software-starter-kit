@@ -21,4 +21,15 @@ const authSuperuserMiddleware = (message) => (req, res, next) => {
   }
 };
 
-module.exports = {authMiddleware, authSuperuserMiddleware};
+ // A user can only handle its own affairs
+const authGeneralMiddleware = (message) => (req, res, next) => {
+  const {id} = req.params;
+
+  if (id && req.session._id !== id) {
+    res.status(403).json({error: true, message: message || 'Wrong Authentication.'})
+  } else {
+    next();
+  }
+};
+
+module.exports = {authMiddleware, authSuperuserMiddleware, authGeneralMiddleware};

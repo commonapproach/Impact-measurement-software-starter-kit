@@ -5,7 +5,7 @@ const {usersRoute, userRoute, organizationsRoute, organizationRoute, groupsRoute
 
 const router = express.Router({mergeParams: true});
 
-router.use('/', authSuperuserMiddleware('superuser only'));
+router.use('/', authSuperuserMiddleware('Superuser only'));
 router.use('/users', usersRoute);
 router.use('/user', userRoute);
 router.use('/organizations', organizationsRoute);

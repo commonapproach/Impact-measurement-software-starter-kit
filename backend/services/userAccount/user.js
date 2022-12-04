@@ -140,7 +140,11 @@ async function initUserAccounts() {
       securityQuestions: [
         securityQuestion1, securityQuestion2, securityQuestion3
       ],
-      hash, salt
+      hash, salt,
+      person: {
+        familyName: 'MIE',
+        givenName: 'CSSE',
+      }
     });
 
 

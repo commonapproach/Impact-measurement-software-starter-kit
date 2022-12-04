@@ -17,12 +17,6 @@ import UserProfile from './components/userProfile/Profile';
 import UpdateUserProfile from './components/userProfile/EditProfile';
 import PrivateRoute from './components/routes/PrivateRoute';
 import {SuperUserRoute} from './components/routes/RoutesForUserTypes';
-import AddServicePrompt from './components/providers/AddServicePrompt';
-import ProviderForm from './components/providers/ProviderForm2';
-import ProviderProfile from './components/providers/ProviderProfile';
-import ProviderRatingForm from './components/providers/ProviderRatingForm.js';
-import Service from './components/services/Service';
-// import ServiceForm from './components/services/ServiceForm'
 import UserFirstEntry from "./components/registration/UserFirstEntry";
 import ForgotPassword from "./components/forgotPassword/ForgotPassword";
 import ForgotPasswordResetPassword from "./components/forgotPassword/ResetPassword";
@@ -32,6 +26,7 @@ import AddEditOrganization from "./components/organizations/AddEditOrganization"
 import EditUserForm from "./components/users/EditUserForm";
 import Groups from "./components/groups/Groups";
 import AddEditGroup from "./components/groups/AddEditGroup";
+import Profile from "./components/userProfile/Profile";
 
 const routes = (
   <Routes>
@@ -41,6 +36,7 @@ const routes = (
     <Route path="/login" element={<LoginPane/>}/>
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
     <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
+    <Route path="/profile/:id" element={<PrivateRoute element={Profile}/>}/>
     {/*users*/}
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>

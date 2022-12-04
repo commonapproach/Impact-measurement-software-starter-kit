@@ -6,7 +6,7 @@ import {userProfileFields} from "../../constants/userProfileFields";
 import {getProfile} from "../../api/userApi";
 import {Link, Loading} from "../shared";
 import {UserContext} from "../../context";
-import {AlertDialog} from "../shared/Dialogs";
+import {useSnackbar} from "notistack";
 
 
 function NavButton({to, text}) {
@@ -29,7 +29,8 @@ const useStyles = makeStyles(() => ({
   button: {
     marginTop: 12,
     marginBottom: 12,
-  }
+  },
+
 }));
 
 /**
@@ -43,28 +44,41 @@ export default function Profile() {
   const navigate = useNavigate();
   const {id} = useParams();
   const userContext = useContext(UserContext);
+  const {enqueueSnackbar} = useSnackbar();
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({...userProfileFields});
-  const profileForm = {
-    givenName: userContext.givenName,
-    familyName: userContext.familyName,
-    telephone: userContext.countryCode && ('+' + userContext.countryCode.toString() + ' (' +
-      userContext.areaCode.toString() + ') ' + userContext.phoneNumber.toString()),
-    email: userContext.email,
-    altEmail: userContext.altEmail,
-  }
+  const [form, setForm] = useState({
+    familyName: '',
+    middleName: '',
+    givenName: '',
+    formalName: '',
+    address: '',
+    gender: '',
+    altEmail: '',
+    telephone: '',
+  });
 
   useEffect(() => {
-    getProfile(id).then(user => {
-      setForm(profileForm);
-      setLoading(false);
+    if (id !== userContext.id) {
+      navigate('/dashboard');
+      enqueueSnackbar('A user can only see its own profile.', {variant: 'error'});
+    }
+    getProfile(id).then(({success, person}) => {
+      if (success) {
+        setForm({
+          ...form, ...person
+        });
+        setLoading(false);
+      }
+    }).catch(e => {
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
   }, [id]);
 
   // goes to edit page
   const handleEdit = () => {
     navigate('/profile/' + id + '/edit');
-  }
+  };
 
   if (loading)
     return <Loading message={`Loading...`}/>;
@@ -84,16 +98,56 @@ export default function Profile() {
           borderRadius: 2
         }}>
           {/* account information display */}
-          {Object.entries(userProfileFields).map(([field, option]) => {
-            return (
-              <div>
-                <Typography
-                  style={{padding: 10, fontSize: 'large'}} key={'Profile Field'}>
-                  {option.label} : {form[field]}
-                </Typography>
-              </div>
-            )
-          })}
+
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'givenName'}>
+              {'Given Name'} : {form.givenName}
+            </Typography>
+          </div>
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'middleName'}>
+              {'Middle Name'} : {form.middleName}
+            </Typography>
+          </div>
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'familyName'}>
+              {'Family Name'} : {form.familyName}
+            </Typography>
+          </div>
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'formalName'}>
+              {'Formal Name'} : {form.formalName}
+            </Typography>
+          </div>
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'gender'}>
+              {'Gender'} : {form.gender}
+            </Typography>
+          </div>
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'altEmail'}>
+              {'Alternate Email'} : {form.altEmail}
+            </Typography>
+          </div>
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'address'}>
+              {'Address'} : {form.address}
+            </Typography>
+          </div>
+          <div>
+            <Typography
+              style={{padding: 10, fontSize: 'large'}} key={'telephone'}>
+              {'Telephone'} : {form.telephone}
+            </Typography>
+          </div>
+
         </Box>
 
         {/* Button for Edit Profile */}
@@ -141,5 +195,5 @@ export default function Profile() {
         </Box>
       </div>
     </Container>
-  )
+  );
 }

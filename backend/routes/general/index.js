@@ -1,3 +1,4 @@
 module.exports = {
-  userTypes: require('./userTypes'),
+  userTypesRoute: require('./userTypes'),
+  profileRoute: require('./profiles'),
 }

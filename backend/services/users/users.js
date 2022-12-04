@@ -5,7 +5,7 @@ const {SPARQL} = require('../../utils/graphdb/helpers')
 const superUserFetchUsers = async (req, res, next) => {
   const {userType} = req.params;
   if (!userType) {
-    const users = await GDBUserAccountModel.find({}, {populates: 'person'});
+    const users = await GDBUserAccountModel.find({}, {populates: ['person']});
     return res.status(200).json({data: users, success: true});
   } else {
     if (!userType2UserTypeURI[userType]) {

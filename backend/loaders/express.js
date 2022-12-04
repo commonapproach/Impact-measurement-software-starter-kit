@@ -9,7 +9,7 @@ const {
   baseRoute,
 } = require('../routes/baseRoute');
 const superuserRoute = require('../routes/superUserRoute/superuserRoute');
-const {userTypes} = require("../routes/general");
+const generalUserRoute = require('../routes/general/generalUserRoute')
 const {authMiddleware, errorHandler} = require('../services/middleware');
 
 
@@ -37,10 +37,10 @@ app.use(cookieSession(config.cookieSession));
 app.use('/api', baseRoute);
 
 // Authentication required for the below routes
-app.use('/api', authMiddleware('Authentication Required'));
-// TODO: Check authorization
+app.use('/api', authMiddleware('Session expired, please login again'));
+// Check authorization
 
-app.use('/api', userTypes);
+app.use('/api/general', generalUserRoute);
 
 // Private routes
 

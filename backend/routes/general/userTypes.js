@@ -4,7 +4,6 @@ const {fetchUserTypes} = require("../../services/userTypes");
 
 const router = express.Router();
 
-
 router.get('/fetchUserTypes', fetchUserTypes);
 
 

@@ -18,7 +18,7 @@ const inviteNewUser = async (req, res, next) => {
 
 
   try {
-    let {email, userTypes, firstName, lastName} = req.body.form;
+    let {email, userTypes, firstName, lastName, middleName} = req.body.form;
     if (!email)
       return res.status(400).json({success: false, message: 'Email is required to invite new user.'});
     if (!userTypes)
@@ -35,14 +35,14 @@ const inviteNewUser = async (req, res, next) => {
     })
 
     const userAccount = await GDBUserAccountModel.findOne(
-      {email: email},
+      {email: email}, {populates: ['person']}
     );
     if(!userAccount){
       // the user is a new user, store its data inside the database
       const userAccount = GDBUserAccountModel({
         email, userTypes
       });
-      userAccount.person = {givenName: firstName, familyName: lastName}
+      userAccount.person = {givenName: firstName, familyName: lastName, middleName}
       // send email
       const token = sign({
         email
@@ -56,6 +56,9 @@ const inviteNewUser = async (req, res, next) => {
     } else {
       // the user is already a temporary user
       userAccount.userTypes = userTypes;
+      userAccount.person.middleName = middleName;
+      userAccount.person.givenName = firstName;
+      userAccount.person.familyName = lastName;
       const token = sign({
         email
       }, jwtConfig.secret, jwtConfig.options);

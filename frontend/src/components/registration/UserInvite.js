@@ -37,7 +37,8 @@ export default function UserInvite() {
       userTypes: [],
       email: '',
       firstName: '',
-      lastName: ''
+      lastName: '',
+      middleName: ''
     },
     errors: {},
     dialog: false,
@@ -105,17 +106,6 @@ export default function UserInvite() {
 
   };
 
-  const handleOnBlur = (field, option) => {
-
-    if (!isFieldEmpty(state.form[field]) && option.validator && !!option.validator(state.form[field]))
-      // state.errors.field = option.validator(e.target.value)
-      setState(state => ({...state, errors: {...state.errors, [field]: option.validator(state.form[field])}}));
-    //console.log(state.errors)
-    else {
-      setState(state => ({...state, errors: {...state.errors, [field]: undefined}}));
-    }
-
-  };
 
   if (state.loading)
     return <Loading message={'Fetching UserTypes'}/>;
@@ -198,6 +188,15 @@ export default function UserInvite() {
         }}
         error={!!state.errors.lastName}
         helperText={state.errors.lastName}
+      />
+      <GeneralField
+        key={'middleName'}
+        label={'Middle Name'}
+        value={state.form.middleName}
+        required
+        onChange={e => state.form.middleName = e.target.value}
+        error={!!state.errors.middleName}
+        helperText={state.errors.middleName}
       />
       <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
         Submit

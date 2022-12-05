@@ -4,7 +4,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {Button, Container, Typography} from "@mui/material";
 import {userProfileFields} from "../../constants/userProfileFields";
 import {getProfile, updatePrimaryEmail, updateProfile} from "../../api/userApi";
-import {isFieldEmpty} from "../../helpers";
+import {isFieldEmpty, Validator} from "../../helpers";
 import {
   DUPLICATE_HELPER_TEXT,
   REQUIRED_HELPER_TEXT
@@ -13,6 +13,11 @@ import {AlertDialog} from "../shared/Dialogs";
 import {Loading} from "../shared";
 import LoadingButton from "../shared/LoadingButton";
 import {UserContext} from "../../context";
+import GeneralField from "../shared/fields/GeneralField";
+import {useSnackbar} from "notistack";
+import SelectField from "../shared/fields/SelectField";
+import {genderOptions} from "../../store/defaults";
+import AddressField from "../shared/AddressFieldField";
 
 
 const useStyles = makeStyles(() => ({
@@ -36,7 +41,17 @@ export default function EditProfile() {
   const navigate = useNavigate();
   const {id} = useParams();
   const userContext = useContext(UserContext);
-  const [form, setForm] = useState({...userProfileFields});
+  const {enqueueSnackbar} = useSnackbar();
+  const [form, setForm] = useState({
+    familyName: '',
+    middleName: '',
+    givenName: '',
+    formalName: '',
+    address: {},
+    gender: '',
+    altEmail: '',
+    phoneNumber: '',
+  });
   const [errors, setErrors] = useState({});
   const [dialogSubmit, setDialogSubmit] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -45,19 +60,18 @@ export default function EditProfile() {
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
   const [dialogExistEmail, setDialogExistEmail] = useState(false);
 
-  const profileForm = {
-    givenName: userContext.givenName,
-    familyName: userContext.familyName,
-    telephone: userContext.countryCode && (userContext.countryCode.toString() +
-      userContext.areaCode.toString() + userContext.phoneNumber.toString()),
-    email: userContext.email,
-    altEmail: userContext.altEmail,
-  }
 
   useEffect(() => {
-    getProfile(id).then(user => {
-      setForm(profileForm);
-      setLoading(false);
+    getProfile(id).then(({success, person}) => {
+      if (success) {
+        setForm({
+          ...form, ...person
+        });
+        setLoading(false);
+      }
+    }).catch(e => {
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
   }, [id]);
 
@@ -207,21 +221,81 @@ export default function EditProfile() {
 
       <div>
         {/* Fields for account information */}
-        {Object.entries(userProfileFields).map(([field, option]) => {
-          return (
-            <option.component
-              key={field}
-              label={option.label}
-              type={option.type}
-              options={option.options}
-              value={form[field]}
-              required={option.required}
-              onChange={value => form[field] = value.target.value}
-              onBlur={e => handleOnBlur(e, field, option)}
-              error={!!errors[field]}
-              helperText={errors[field]}
-            />)
-        })}
+        {/*{Object.entries(userProfileFields).map(([field, option]) => {*/}
+        {/*  return (*/}
+        {/*    <option.component*/}
+        {/*      key={field}*/}
+        {/*      label={option.label}*/}
+        {/*      type={option.type}*/}
+        {/*      options={option.options}*/}
+        {/*      value={form[field]}*/}
+        {/*      required={option.required}*/}
+        {/*      onChange={value => form[field] = value.target.value}*/}
+        {/*      onBlur={e => handleOnBlur(e, field, option)}*/}
+        {/*      error={!!errors[field]}*/}
+        {/*      helperText={errors[field]}*/}
+        {/*    />)*/}
+        {/*})}*/}
+        <GeneralField
+          key={'givenName'}
+          label={'Given Name'}
+          value={form.givenName}
+          disabled
+        />
+        <GeneralField
+          key={'familyName'}
+          label={'Family Name'}
+          value={form.familyName}
+          disabled
+        />
+        {form.middleName?
+          <GeneralField
+          key={'middleName'}
+          label={'Middle Name'}
+          value={form.middleName}
+          disabled
+        />: <div/>}
+
+        <GeneralField
+          key={'phoneNumber'}
+          label={'Phone Number'}
+          type={'phoneNumber'}
+          value={form.phoneNumber}
+          onChange={value => form.phoneNumber = value.target.value}
+          // onBlur={e => handleOnBlur(e, field, option)}
+          error={!!errors.phoneNumber}
+          helperText={errors.phoneNumber}
+        />
+
+        <GeneralField
+          key={'altEmail'}
+          label={'Alternate Email'}
+          value={form.altEmail}
+          onChange={value => form.altEmail = value.target.value}
+          error={!!errors.altEmail}
+          helperText={errors.altEmail}
+        />
+
+        <SelectField
+          key={'gender'}
+          label={'Gender'}
+          value={form.gender}
+          onChange={value => form.gender = value.target.value}
+          error={!!errors.gender}
+          helperText={errors.gender}
+          options={genderOptions}
+        />
+
+        <AddressField
+          label={'Address'}
+          onChange={state => form.address = state}
+          value={form.address}
+        />
+
+
+
+
+
 
         {/* Button for cancelling account info changes */}
         <Button variant="contained" color="primary" className={classes.button}

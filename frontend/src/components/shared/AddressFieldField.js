@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Autocomplete, CircularProgress, Grid, Paper, TextField, Typography } from "@mui/material";
-import { getInstancesInClass } from "../../api/dynamicFormApi";
+import { getInstancesInClass } from "../../api/dynamicClassInstance";
 import { createFilterOptions } from '@mui/material/Autocomplete';
 
 

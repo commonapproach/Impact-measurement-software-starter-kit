@@ -21,7 +21,6 @@ export default function Groups() {
 
   useEffect(() => {
     fetchGroups().then(({groups}) => {
-      // console.log(data)
       setState(state => ({...state, loading: false, data: groups}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))

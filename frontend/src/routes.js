@@ -49,6 +49,10 @@ const routes = (
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
     <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>
     <Route path="/groups/:id/edit" element={<PrivateRoute element={AddEditGroup}/>}/>
+    {/*profile*/}
+    <Route path="/profile/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
+    <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
+
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>
@@ -58,8 +62,6 @@ const routes = (
     <Route path="/resetPassword/:token" element={<PrivateRoute element={ForgotPasswordResetPassword}/>}/>
 
 
-    <Route path="/profile/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
-    <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
     <Route path="/users/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
     <Route path="/users/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
 

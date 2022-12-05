@@ -54,13 +54,13 @@ export default function Profile() {
     address: '',
     gender: '',
     altEmail: '',
-    telephone: '',
+    phoneNumber: '',
   });
 
   useEffect(() => {
     if (id !== userContext.id) {
       navigate('/dashboard');
-      enqueueSnackbar('A user can only see its own profile.', {variant: 'error'});
+      enqueueSnackbar('A user can only visualize its own profile.', {variant: 'error'});
     }
     getProfile(id).then(({success, person}) => {
       if (success) {
@@ -143,8 +143,8 @@ export default function Profile() {
           </div>
           <div>
             <Typography
-              style={{padding: 10, fontSize: 'large'}} key={'telephone'}>
-              {'Telephone'} : {form.telephone}
+              style={{padding: 10, fontSize: 'large'}} key={'phoneNumber'}>
+              {'PhoneNumber'} : {form.phoneNumber}
             </Typography>
           </div>
 

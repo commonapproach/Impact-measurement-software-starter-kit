@@ -11,6 +11,10 @@ export const userProfileFields = {
     ...defaultField,
     label: 'Family name',
   },
+  formalName: {
+    ...defaultField,
+    label: 'Formal name'
+  },
   telephone: {
     ...defaultField,
     required: true,

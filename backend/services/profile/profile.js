@@ -1,4 +1,6 @@
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {genderOptions} = require("../../helpers/dicts");
+const {Validator} = require("../../helpers/validator");
 const regularUserGetProfile = async (req, res, next) => {
   try {
     const {id} = req.params;
@@ -17,4 +19,23 @@ const regularUserGetProfile = async (req, res, next) => {
   }
 };
 
-module.exports = {regularUserGetProfile};
+const regularUserUpdateProfile = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    const {gender, altEmail, address, countryCode, areaCode, phoneNumber} = req.body;
+    const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person']});
+    const person = userAccount.person;
+    if(gender && !Validator.gender(gender))
+      return res.status(400).json({success: false, message: 'Wrong value on gender'})
+    if(altEmail && !Validator.email(altEmail))
+      return res.status(400).json({success: false, message: 'Wrong value on altEmail'})
+    person.gender = gender;
+    person.altEmail = altEmail.toLowerCase();
+
+
+  } catch (e) {
+
+  }
+}
+
+module.exports = {regularUserGetProfile, regularUserUpdateProfile};

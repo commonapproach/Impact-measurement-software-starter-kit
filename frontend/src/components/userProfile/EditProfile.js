@@ -81,28 +81,15 @@ export default function EditProfile() {
    */
   const validate = () => {
     const newErrors = {};
-    for (const [field, option] of Object.entries(userProfileFields)) {
-      const isEmpty = isFieldEmpty(form[field]);
-
-      if (option.required && isEmpty) {
-        newErrors[field] = REQUIRED_HELPER_TEXT;
-      }
-      let msg;
-      if (!isEmpty && option.validator && (msg = option.validator(form[field]))) {
-        newErrors[field] = msg;
-      }
-
-      if (option.label === 'Secondary Email') {
-        if (form.email === form.altEmail) {
-          newErrors[field] = DUPLICATE_HELPER_TEXT;
-        }
-      }
-
-    }
-
+    if(Validator.phone(form.phoneNumber))
+      newErrors.phoneNumber = Validator.phone(form.phoneNumber);
+    if(Validator.email(form.altEmail))
+      newErrors.altEmail = Validator.email(form.altEmail);
+    if (form.gender && !genderOptions.includes(form.gender))
+      newErrors.gender = 'Wrong value';
     if (Object.keys(newErrors).length !== 0) {
       setErrors(newErrors);
-      return false
+      return false;
     }
     return true;
   };
@@ -111,103 +98,54 @@ export default function EditProfile() {
   const handleDialogCancel = () => {
     setDialogQuitEdit(false);
     navigate('/profile/' + id);
-  }
+  };
 
   // email-sent dialog confirm button handler
   const handleDialogEmail = () => {
     setDialogEmail(false);
     setDialogSubmit(true);
-  }
+  };
+
 
   // submit button handler
   const handleSubmitChanges = async () => {
     if (validate()) {
-      if (form.email !== userContext.email) {
-        console.log('reach before send verification')
-        const {sentEmailConfirm} = await updatePrimaryEmail(id, form.email);
-        console.log(sentEmailConfirm)
-        if (sentEmailConfirm) {
-          setDialogEmail(true);
-          console.log('email verification link sent');
-        } else {
-          setDialogExistEmail(true);
-          console.log('email verification is not sent.');
-        }
-      } else {
-        setDialogSubmit(true);
-      }
+      setDialogSubmit(true);
     }
-  }
+  };
 
   // confirmation dialog confirm button handler
   const handleDialogConfirm = async () => {
     try {
-      let phoneUnchanged;
-      if (!userContext.phoneNumber) {
-        phoneUnchanged = null;
-      } else {
-        phoneUnchanged = userContext.countryCode.toString() +
-          userContext.areaCode.toString() + userContext.phoneNumber.toString()
-      }
       const updateForm = {
-        givenName: form.givenName,
-        familyName: form.familyName,
-        countryCode: null,
-        areaCode: null,
-        phoneNumber: null,
+        gender: form.gender,
         altEmail: form.altEmail,
-      }
-      if (form.telephone === phoneUnchanged) {
-        updateForm.countryCode = parseInt(form.telephone.slice(0, 1));
-        console.log(updateForm.countryCode)
-        updateForm.areaCode = parseInt(form.telephone.slice(1, 4));
-        updateForm.phoneNumber = parseInt(form.telephone.slice(4, 11));
-      } else {
-        const phone = form.telephone.split(' ');
-        updateForm.countryCode = parseInt(phone[0]);
-        updateForm.areaCode = parseInt(phone[1].slice(1, 4));
-        updateForm.phoneNumber = parseInt(phone[2].slice(0, 3) + phone[2].slice(4, 8));
+        address: form.address,
+      };
+
+      if(form.phoneNumber){
+        updateForm.countryCode = 1;
+        updateForm.areaCode = Number(form.phoneNumber.match(/\(\d{3}\)/)[0].match(/\d{3}/)[0])
+        updateForm.phoneNumber = Number(form.phoneNumber.split('(')[1].split(') ')[0] +
+          form.phoneNumber.split('(')[1].split(') ')[1].split('-')[0] +
+          form.phoneNumber.split('(')[1].split(') ')[1].split('-')[1])
       }
 
       setLoadingButton(true);
+
       const {success} = await updateProfile(id, updateForm);
       if (success) {
-        for (const [key, value] of Object.entries(updateForm)) {
-          userContext[key] = value;
-        }
-        userContext.updateUser({
-          altEmail: userContext.altEmail,
-          givenName: userContext.givenName,
-          familyName: userContext.familyName,
-          countryCode: userContext.countryCode,
-          areaCode: userContext.areaCode,
-          phoneNumber: userContext.phoneNumber,
-        });
+        setLoadingButton(false);
+        setDialogSubmit(false);
+        navigate('/profile/' + id + '/');
       }
+    } catch (e) {
+      console.log(e)
       setLoadingButton(false);
       setDialogSubmit(false);
-      navigate('/profile/' + id + '/');
-    } catch (e) {
-      setLoadingButton(false);
-      console.log('catch e');
-      console.log(e);
     }
   };
 
-
-  /**
-   * handler of onBlur.
-   * @param e
-   * @param field
-   * @param option
-   */
-  const handleOnBlur = (e, field, option) => {
-    if (!isFieldEmpty(form[field]) && option.validator && !!option.validator(form[field])) {
-      setErrors({...errors, [field]: option.validator(form[field])});
-    } else {
-      setErrors({...errors, [field]: undefined});
-    }
-  };
 
   if (loading)
     return <Loading message={`Loading...`}/>;
@@ -248,13 +186,13 @@ export default function EditProfile() {
           value={form.familyName}
           disabled
         />
-        {form.middleName?
+        {form.middleName ?
           <GeneralField
-          key={'middleName'}
-          label={'Middle Name'}
-          value={form.middleName}
-          disabled
-        />: <div/>}
+            key={'middleName'}
+            label={'Middle Name'}
+            value={form.middleName}
+            disabled
+          /> : <div/>}
 
         <GeneralField
           key={'phoneNumber'}
@@ -262,7 +200,13 @@ export default function EditProfile() {
           type={'phoneNumber'}
           value={form.phoneNumber}
           onChange={value => form.phoneNumber = value.target.value}
-          // onBlur={e => handleOnBlur(e, field, option)}
+          onBlur={e => {
+            console.log(Number(e.target.value.split('(')[1].split(') ')[0] +
+              e.target.value.split('(')[1].split(') ')[1].split('-')[0] +
+              e.target.value.split('(')[1].split(') ')[1].split('-')[1])
+            )
+            setErrors(errors => ({...errors, phoneNumber: Validator.phone(e.target.value)}));
+          }}
           error={!!errors.phoneNumber}
           helperText={errors.phoneNumber}
         />
@@ -272,6 +216,9 @@ export default function EditProfile() {
           label={'Alternate Email'}
           value={form.altEmail}
           onChange={value => form.altEmail = value.target.value}
+          onBlur={e => {
+            setErrors(errors => ({...errors, altEmail: Validator.email(e.target.value)}));
+          }}
           error={!!errors.altEmail}
           helperText={errors.altEmail}
         />
@@ -281,6 +228,11 @@ export default function EditProfile() {
           label={'Gender'}
           value={form.gender}
           onChange={value => form.gender = value.target.value}
+          onBlur={e => {
+            if (!genderOptions.includes(e.target.value) && e.target.value)
+              setErrors(errors => ({...errors, gender: 'Wrong value'}));
+          }}
+          noEmpty
           error={!!errors.gender}
           helperText={errors.gender}
           options={genderOptions}
@@ -291,10 +243,6 @@ export default function EditProfile() {
           onChange={state => form.address = state}
           value={form.address}
         />
-
-
-
-
 
 
         {/* Button for cancelling account info changes */}
@@ -312,40 +260,24 @@ export default function EditProfile() {
 
         {/* Alert prompt for submitting changes */}
         <AlertDialog
-          dialogContentText={"Note that if you want to change your primary email, you will receive a " +
-            "confirmation link in your input email. Changes of primary email will only be made" +
-            " after you click the confirm link in the email."}
+          dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
           dialogTitle={'Are you sure you want to submit?'}
           buttons={[
             <Button onClick={() => setDialogSubmit(false)} key={'cancel'}>{'cancel'}</Button>,
-            //<Button onClick={handleDialogConfirm} key={'confirm'} autoFocus> {'confirm'}</Button>,
             <LoadingButton noDefaultStyle variant="text" color="primary" loading={loadingButton} key={'confirm'}
-                           onClick={handleDialogConfirm} children='confirm' autoFocus/>]}
+                           onClick={handleDialogConfirm} children="confirm" autoFocus/>]}
           open={dialogSubmit}/>
-
-        {/* Alert prompt after email was sent */}
-        <AlertDialog
-          dialogContentText={"A confirmation link has been sent to the new primary email address."}
-          dialogTitle={'Congratulations!'}
-          buttons={<Button onClick={handleDialogEmail} key={'confirm'} autoFocus> {'confirm'}</Button>}
-          open={dialogEmail}/>
 
         <AlertDialog
           dialogContentText={"All the changes you made will not be saved."}
           dialogTitle={'Notice!'}
-          buttons={<Button onClick={handleDialogCancel} key={'confirm'} autoFocus> {'confirm'}</Button>}
+          buttons={<Button onClick={handleDialogCancel} key={'cancelConfirm'} autoFocus> {'confirm'}</Button>}
           open={dialogQuitEdit}/>
 
-        <AlertDialog
-          dialogContentText={"Your input new primary email already registered as the primary email for another account."}
-          dialogTitle={'Notice!'}
-          buttons={<Button onClick={() => setDialogExistEmail(false)}
-                           key={'Got it'} autoFocus> {'Got it'}</Button>}
-          open={dialogExistEmail}/>
 
       </div>
 
 
     </Container>
-  )
+  );
 }

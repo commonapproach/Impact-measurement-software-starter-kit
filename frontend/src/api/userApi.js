@@ -126,7 +126,7 @@ export async function updatePrimaryEmail(id, email) {
  * @returns {Promise<*>}
  */
 export function updateProfile(id, params) {
-  return postJson('/api/user/editProfile/' + id + '/', params);
+  return postJson('/api/general/profile/' + id + '/', params);
 }
 
 /**

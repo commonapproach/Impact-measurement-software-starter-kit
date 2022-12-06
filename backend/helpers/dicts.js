@@ -17,4 +17,11 @@ const userType2UserTypeURI = {
   'researcher': ':researcher'
 }
 
-module.exports = {userTypeURI2UserType, userType2UserTypeURI};
+const genderOptions = [
+  'Female',
+  'Male',
+  'Other'
+]
+
+
+module.exports = {genderOptions,userTypeURI2UserType, userType2UserTypeURI};

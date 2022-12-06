@@ -23,7 +23,7 @@ const regularUserUpdateProfile = async (req, res, next) => {
   try {
     const {id} = req.params;
     const {gender, altEmail, address, countryCode, areaCode, phoneNumber} = req.body;
-    const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person']});
+    const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person.address']});
     const person = userAccount.person;
     if(gender && !Validator.gender(gender))
       return res.status(400).json({success: false, message: 'Wrong value on gender'})
@@ -33,6 +33,14 @@ const regularUserUpdateProfile = async (req, res, next) => {
     person.altEmail = altEmail.toLowerCase();
     const {unitNumber, streetNumber, streetName, city,
     postalCode, state, streetDirection, StreetType} = address
+    if(postalCode && Validator.postalCode(postalCode))
+      return res.status(400).json({success: false, message: Validator.postalCode(postalCode)});
+    person.address = {
+      unitNumber, streetNumber, streetName, city,
+      postalCode, state, streetDirection, StreetType
+    }
+    await person.save();
+    return res.status(200).json({success: true})
 
 
 

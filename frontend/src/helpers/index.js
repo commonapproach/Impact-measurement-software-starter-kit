@@ -199,7 +199,7 @@ export const Validator = {
    * @returns {string|void} Return string iff fails. Otherwise return undefined.
    */
   email: email => {
-    if (!emailRegex.test(email)) {
+    if (email && !emailRegex.test(email)) {
       return EMAIL_ERR_MSG;
     }
   },

@@ -83,10 +83,16 @@ export default function EditProfile() {
     const newErrors = {};
     if(Validator.phone(form.phoneNumber))
       newErrors.phoneNumber = Validator.phone(form.phoneNumber);
-    if(Validator.email(form.altEmail))
+    if(form.altEmail && Validator.email(form.altEmail))
       newErrors.altEmail = Validator.email(form.altEmail);
     if (form.gender && !genderOptions.includes(form.gender))
       newErrors.gender = 'Wrong value';
+    if(form.address.postalCode && Validator.postalCode(form.address.postalCode)){
+      if(!newErrors.address)
+        newErrors.address = {}
+      newErrors.address.postalCode = 'Wrong'
+    }
+
     if (Object.keys(newErrors).length !== 0) {
       setErrors(newErrors);
       return false;
@@ -138,11 +144,13 @@ export default function EditProfile() {
         setLoadingButton(false);
         setDialogSubmit(false);
         navigate('/profile/' + id + '/');
+        enqueueSnackbar('Success', {variant: 'success'});
       }
     } catch (e) {
       console.log(e)
       setLoadingButton(false);
       setDialogSubmit(false);
+      enqueueSnackbar(e.json?.message || 'Error occur', {variant: "error"})
     }
   };
 
@@ -158,22 +166,6 @@ export default function EditProfile() {
       </Typography>
 
       <div>
-        {/* Fields for account information */}
-        {/*{Object.entries(userProfileFields).map(([field, option]) => {*/}
-        {/*  return (*/}
-        {/*    <option.component*/}
-        {/*      key={field}*/}
-        {/*      label={option.label}*/}
-        {/*      type={option.type}*/}
-        {/*      options={option.options}*/}
-        {/*      value={form[field]}*/}
-        {/*      required={option.required}*/}
-        {/*      onChange={value => form[field] = value.target.value}*/}
-        {/*      onBlur={e => handleOnBlur(e, field, option)}*/}
-        {/*      error={!!errors[field]}*/}
-        {/*      helperText={errors[field]}*/}
-        {/*    />)*/}
-        {/*})}*/}
         <GeneralField
           key={'givenName'}
           label={'Given Name'}

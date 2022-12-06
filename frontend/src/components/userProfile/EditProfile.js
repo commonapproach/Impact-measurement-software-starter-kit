@@ -90,7 +90,12 @@ export default function EditProfile() {
     if(form.address.postalCode && Validator.postalCode(form.address.postalCode)){
       if(!newErrors.address)
         newErrors.address = {}
-      newErrors.address.postalCode = 'Wrong'
+      newErrors.address.postalCode = Validator.postalCode(form.address.postalCode)
+    }
+    if(form.address.streetNumber && isNaN(form.address.streetNumber)){
+      if(!newErrors.address)
+        newErrors.address = {}
+      newErrors.address.streetNumber = "This must be a number"
     }
 
     if (Object.keys(newErrors).length !== 0) {

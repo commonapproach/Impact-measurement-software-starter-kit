@@ -21,7 +21,7 @@ const Validator = {
 
 
   postalCode: postalCode => {
-    return postalCodeRegex.test(postalCode)
+    return !postalCodeRegex.test(postalCode)
   },
 
 

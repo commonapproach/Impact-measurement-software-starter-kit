@@ -201,10 +201,6 @@ export default function EditProfile() {
           value={form.phoneNumber}
           onChange={value => form.phoneNumber = value.target.value}
           onBlur={e => {
-            console.log(Number(e.target.value.split('(')[1].split(') ')[0] +
-              e.target.value.split('(')[1].split(') ')[1].split('-')[0] +
-              e.target.value.split('(')[1].split(') ')[1].split('-')[1])
-            )
             setErrors(errors => ({...errors, phoneNumber: Validator.phone(e.target.value)}));
           }}
           error={!!errors.phoneNumber}
@@ -242,6 +238,7 @@ export default function EditProfile() {
           label={'Address'}
           onChange={state => form.address = state}
           value={form.address}
+          importErrors={errors.address}
         />
 
 

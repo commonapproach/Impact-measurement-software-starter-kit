@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Autocomplete, CircularProgress, Grid, Paper, TextField, Typography } from "@mui/material";
-import { getInstancesInClass } from "../../api/dynamicClassInstance";
-import { createFilterOptions } from '@mui/material/Autocomplete';
+import React, {useEffect, useState} from 'react';
+import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
+import {getInstancesInClass} from "../../api/dynamicClassInstance";
+import {createFilterOptions} from '@mui/material/Autocomplete';
+import {Validator} from "../../helpers";
 
 
 const filterOptions = createFilterOptions({
@@ -9,7 +10,13 @@ const filterOptions = createFilterOptions({
   matchFrom: 'start'
 });
 
-function LoadingAutoComplete({label, options, property, state, onChange, disabled}) {
+const numberChecker = (value) => {
+    if(isNaN(value))
+      return 'This field should be a number.'
+    return null
+}
+
+function LoadingAutoComplete({label, options, property, state, onChange, disabled, error, helperText}) {
   return (
     <Autocomplete
       sx={{mt: 2}}
@@ -24,19 +31,23 @@ function LoadingAutoComplete({label, options, property, state, onChange, disable
           {...params}
           label={label}
           disabled={disabled}
+          error={error}
+          helperText={helperText}
         />
       }
     />
   );
 }
 
-export default function AddressField({value: defaultValue, required, onChange, label, disabled}) {
+export default function AddressField({value: defaultValue, required, onChange, label, disabled, importErrors}) {
 
   const [state, setState] = useState(defaultValue || {});
 
   const [options, setOptions] = useState({streetType: {}, streetDirection: {}, state: {}});
 
   const [loading, setLoading] = useState(true);
+
+  const [errors, setErrors] = useState({...importErrors});
 
   useEffect(() => {
     Promise.all([
@@ -78,6 +89,8 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 defaultValue={state.unitNumber}
                 onChange={handleChange('unitNumber')}
                 disabled={disabled}
+                error={!!errors.unitNumber}
+                helperText={errors.unitNumber}
               />
             </Grid>
             <Grid item xs={3}>
@@ -89,6 +102,11 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 defaultValue={state.streetNumber}
                 onChange={handleChange('streetNumber')}
                 disabled={disabled}
+                error={!!errors.streetNumber}
+                helperText={errors.streetNumber}
+                onBlur={e => {
+                setErrors(errors => ({...errors, streetNumber: numberChecker(e.target.value)}))}
+                }
               />
             </Grid>
             <Grid item xs={6}>
@@ -101,6 +119,8 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 onChange={handleChange('streetName')}
                 required={required}
                 disabled={disabled}
+                error={!!errors.streetName}
+                helperText={errors.streetName}
               />
             </Grid>
             <Grid item xs={6}>
@@ -110,6 +130,8 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 property={'streetType'}
                 state={state}
                 onChange={handleChange}
+                error={!!errors.streetType}
+                helperText={errors.streetType}
                 disabled={disabled}
               />
             </Grid>
@@ -120,6 +142,8 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 property={'streetDirection'}
                 state={state}
                 onChange={handleChange}
+                error={!!errors.streetDirection}
+                helperText={errors.streetDirection}
                 disabled={disabled}
               />
             </Grid>
@@ -133,6 +157,8 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 onChange={handleChange('city')}
                 required={required}
                 disabled={disabled}
+                error={!!errors.city}
+                helperText={errors.city}
               />
             </Grid>
             <Grid item xs={6}>
@@ -143,6 +169,8 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 state={state}
                 onChange={handleChange}
                 disabled={disabled}
+                error={!!errors.state}
+                helperText={errors.state}
               />
             </Grid>
             <Grid item xs={3}>
@@ -155,6 +183,12 @@ export default function AddressField({value: defaultValue, required, onChange, l
                 onChange={handleChange('postalCode')}
                 required={required}
                 disabled={disabled}
+                error={!!errors.postalCode}
+                helperText={errors.postalCode}
+                onBlur={e => {
+                setErrors(errors => ({...errors, postalCode: Validator.postalCode(e.target.value)})
+                )}
+                }
               />
             </Grid>
           </Grid>

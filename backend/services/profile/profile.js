@@ -31,6 +31,9 @@ const regularUserUpdateProfile = async (req, res, next) => {
       return res.status(400).json({success: false, message: 'Wrong value on altEmail'})
     person.gender = gender;
     person.altEmail = altEmail.toLowerCase();
+    const {unitNumber, streetNumber, streetName, city,
+    postalCode, state, streetDirection, StreetType} = address
+
 
 
   } catch (e) {

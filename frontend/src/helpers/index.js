@@ -242,7 +242,7 @@ export const Validator = {
   },
 
   postalCode: postalCode => {
-    if (!postalCodeRegex.test(postalCode))
+    if (postalCode && !postalCodeRegex.test(postalCode))
       return POSTAL_CODE_ERR_MSG;
   },
 

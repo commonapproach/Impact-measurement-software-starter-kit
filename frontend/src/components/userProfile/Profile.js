@@ -98,11 +98,7 @@ export default function Profile() {
       }
       getProfile(id).then(({success, person}) => {
         if (success) {
-          person.address =
-            `${person.address.unitNumber}-${person.address.streetNumber} 
-          ${person.address.streetName} ${options.streetType[person.address.streetType]} ${options.streetDirection[person.address.streetDirection]}, 
-          ${person.address.city}, ${options.state[person.address.state]}, ${person.address.postalCode}`
-          person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`;
+          person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`
           setForm({
             ...form, ...person,
           });
@@ -178,7 +174,9 @@ export default function Profile() {
           <div>
             <Typography
               style={{padding: 10, fontSize: 'large'}} key={'address'}>
-              {'Address'} : {form.address}
+              {'Address'} : {`${form.address.unitNumber}-${form.address.streetNumber} 
+          ${form.address.streetName} ${options.streetType[form.address.streetType]} ${options.streetDirection[form.address.streetDirection]}, 
+          ${form.address.city}, ${options.state[form.address.state]}, ${form.address.postalCode}`}
             </Typography>
           </div>
           <div>

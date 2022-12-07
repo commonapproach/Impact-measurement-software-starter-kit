@@ -63,7 +63,6 @@ export default function EditProfile() {
   useEffect(() => {
     getProfile(id).then(({success, person}) => {
       if (success) {
-        console.log(String(person.phoneNumber.phoneNumber).slice(3,10))
         person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3,10)}`
         setForm({
           ...form, ...person

@@ -7,6 +7,7 @@ import {getProfile} from "../../api/userApi";
 import {Link, Loading} from "../shared";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
+import {getInstancesInClass} from "../../api/dynamicClassInstance";
 
 
 function NavButton({to, text}) {
@@ -46,6 +47,7 @@ export default function Profile() {
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
   const [loading, setLoading] = useState(true);
+  const [options, setOptions] = useState({streetType: {}, streetDirection: {}, state: {}});
   const [form, setForm] = useState({
     familyName: '',
     middleName: '',
@@ -58,21 +60,59 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    if (id !== userContext.id) {
-      navigate('/dashboard');
-      enqueueSnackbar('A user can only visualize its own profile.', {variant: 'error'});
-    }
-    getProfile(id).then(({success, person}) => {
-      if (success) {
-        setForm({
-          ...form, ...person
-        });
-        setLoading(false);
+    Promise.all([
+      getInstancesInClass('ic:StreetType')
+        .then(streetType => {
+          setOptions(options => ({...options, streetType}));
+        }),
+      getInstancesInClass('ic:StreetDirection')
+        .then(streetDirection => {
+          setOptions(options => ({...options, streetDirection}));
+        }),
+      getInstancesInClass('schema:State')
+        .then(state => {
+          setOptions(options => ({...options, state}));
+        }),
+    ]).then(() => setLoading(false));
+
+  }, []);
+
+  useEffect( () => {
+    Promise.all([
+      getInstancesInClass('ic:StreetType')
+        .then(streetType => {
+          setOptions(options => ({...options, streetType}));
+        }),
+      getInstancesInClass('ic:StreetDirection')
+        .then(streetDirection => {
+          setOptions(options => ({...options, streetDirection}));
+        }),
+      getInstancesInClass('schema:State')
+        .then(state => {
+          setOptions(options => ({...options, state}));
+        }),
+    ]).then(() => {
+      if (id !== userContext.id) {
+        navigate('/dashboard');
+        enqueueSnackbar('A user can only visualize its own profile.', {variant: 'error'});
       }
-    }).catch(e => {
-      navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
-    });
+      getProfile(id).then(({success, person}) => {
+        if (success) {
+          person.address =
+            `${person.address.unitNumber}-${person.address.streetNumber} 
+          ${person.address.streetName} ${options.streetType[person.address.streetType]} ${options.streetDirection[person.address.streetDirection]}, 
+          ${person.address.city}, ${options.state[person.address.state]}, ${person.address.postalCode}`
+          person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`;
+          setForm({
+            ...form, ...person,
+          });
+          setLoading(false);
+        }
+      }).catch(e => {
+        navigate('/dashboard');
+        enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
+      });
+  })
   }, [id]);
 
   // goes to edit page

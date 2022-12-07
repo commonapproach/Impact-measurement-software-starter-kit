@@ -58,7 +58,6 @@ export default function EditProfile() {
   const [loadingButton, setLoadingButton] = useState(false);
   const [dialogEmail, setDialogEmail] = useState(false);
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
-  const [dialogExistEmail, setDialogExistEmail] = useState(false);
 
 
   useEffect(() => {

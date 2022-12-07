@@ -1,17 +1,23 @@
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {genderOptions} = require("../../helpers/dicts");
 const {Validator} = require("../../helpers/validator");
+const {SPARQL} = require('../../utils/graphdb/helpers');
+
 const regularUserGetProfile = async (req, res, next) => {
   try {
     const {id} = req.params;
     if (!id)
       return res.status(400).json({success: false, message: 'Id is needed'});
-    const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person']});
+    const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person.phoneNumber', 'person.address']});
     if (!userAccount)
       return res.status(400).json({success: false, message: 'No such user'});
     if (!userAccount.person)
       return res.status(400).json({success: false});
     delete userAccount.person.email
+    userAccount.person.address.streetDirection = SPARQL.getFullURI(userAccount.person.address.streetDirection)
+    userAccount.person.address.streetType = SPARQL.getFullURI(userAccount.person.address.streetType)
+    userAccount.person.address.state = SPARQL.getFullURI(userAccount.person.address.state)
+
     return res.status(200).json({success: true, person: userAccount.person});
 
   } catch (e) {

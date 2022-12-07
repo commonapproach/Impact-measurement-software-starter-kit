@@ -57,14 +57,14 @@ export default function EditProfile() {
   useEffect(() => {
     getProfile(id).then(({success, person}) => {
       if (success) {
-        person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3,6)}-${String(person.phoneNumber.phoneNumber).slice(6,10)}`
+        person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
         setForm({
           ...form, ...person
         });
         setLoading(false);
       }
     }).catch(e => {
-      console.log(e)
+      console.log(e);
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
@@ -76,21 +76,21 @@ export default function EditProfile() {
    */
   const validate = () => {
     const newErrors = {};
-    if(Validator.phone(form.phoneNumber))
+    if (Validator.phone(form.phoneNumber))
       newErrors.phoneNumber = Validator.phone(form.phoneNumber);
-    if(form.altEmail && Validator.email(form.altEmail))
+    if (form.altEmail && Validator.email(form.altEmail))
       newErrors.altEmail = Validator.email(form.altEmail);
     if (form.gender && !genderOptions.includes(form.gender))
       newErrors.gender = 'Wrong value';
-    if(form.address.postalCode && Validator.postalCode(form.address.postalCode)){
-      if(!newErrors.address)
-        newErrors.address = {}
-      newErrors.address.postalCode = Validator.postalCode(form.address.postalCode)
+    if (form.address.postalCode && Validator.postalCode(form.address.postalCode)) {
+      if (!newErrors.address)
+        newErrors.address = {};
+      newErrors.address.postalCode = Validator.postalCode(form.address.postalCode);
     }
-    if(form.address.streetNumber && isNaN(form.address.streetNumber)){
-      if(!newErrors.address)
-        newErrors.address = {}
-      newErrors.address.streetNumber = "This must be a number"
+    if (form.address.streetNumber && isNaN(form.address.streetNumber)) {
+      if (!newErrors.address)
+        newErrors.address = {};
+      newErrors.address.streetNumber = "This must be a number";
     }
 
     if (Object.keys(newErrors).length !== 0) {
@@ -105,7 +105,6 @@ export default function EditProfile() {
     setDialogQuitEdit(false);
     navigate('/profile/' + id);
   };
-
 
 
   // submit button handler
@@ -124,12 +123,12 @@ export default function EditProfile() {
         address: form.address,
       };
 
-      if(form.phoneNumber){
+      if (form.phoneNumber) {
         updateForm.countryCode = 1;
-        updateForm.areaCode = Number(form.phoneNumber.match(/\(\d{3}\)/)[0].match(/\d{3}/)[0])
+        updateForm.areaCode = Number(form.phoneNumber.match(/\(\d{3}\)/)[0].match(/\d{3}/)[0]);
         updateForm.phoneNumber = Number(form.phoneNumber.split('(')[1].split(') ')[0] +
           form.phoneNumber.split('(')[1].split(') ')[1].split('-')[0] +
-          form.phoneNumber.split('(')[1].split(') ')[1].split('-')[1])
+          form.phoneNumber.split('(')[1].split(') ')[1].split('-')[1]);
       }
 
       setLoadingButton(true);
@@ -142,10 +141,10 @@ export default function EditProfile() {
         enqueueSnackbar('Success', {variant: 'success'});
       }
     } catch (e) {
-      console.log(e)
+      console.log(e);
       setLoadingButton(false);
       setDialogSubmit(false);
-      enqueueSnackbar(e.json?.message || 'Error occur', {variant: "error"})
+      enqueueSnackbar(e.json?.message || 'Error occur', {variant: "error"});
     }
   };
 

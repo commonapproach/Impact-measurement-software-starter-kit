@@ -59,25 +59,7 @@ export default function Profile() {
     phoneNumber: '',
   });
 
-  // useEffect(() => {
-  //   Promise.all([
-  //     getInstancesInClass('ic:StreetType')
-  //       .then(streetType => {
-  //         setOptions(options => ({...options, streetType}));
-  //       }),
-  //     getInstancesInClass('ic:StreetDirection')
-  //       .then(streetDirection => {
-  //         setOptions(options => ({...options, streetDirection}));
-  //       }),
-  //     getInstancesInClass('schema:State')
-  //       .then(state => {
-  //         setOptions(options => ({...options, state}));
-  //       }),
-  //   ]).then(() => setLoading(false));
-
-  // }, []);
-
-  useEffect( () => {
+  useEffect(() => {
     Promise.all([
       getInstancesInClass('ic:StreetType')
         .then(streetType => {
@@ -98,17 +80,17 @@ export default function Profile() {
       }
       getProfile(id).then(({success, person}) => {
         if (success) {
-          person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`
+          person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`;
           setForm({
             ...form, ...person,
           });
           setLoading(false);
         }
-      })
-  }).catch(e => {
+      });
+    }).catch(e => {
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
-    })
+    });
   }, [id]);
 
   // goes to edit page
@@ -208,7 +190,7 @@ export default function Profile() {
           </Typography>
 
           {/* Button for password reset */}
-          <NavButton to={'/users/reset-password/' + id}
+          <NavButton to={'/profile/reset-password/' + id}
                      text={'Reset Password'}
                      key={'Reset Password'}/>
         </Box>

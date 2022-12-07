@@ -140,23 +140,13 @@ export function updateUserForm(id, params) {
 }
 
 /**
- * This will send current user password to backend to verify correctness.
- * @param id
- * @param password
- * @returns {Promise<*>}
- */
-export async function checkCurrentPassword(id, password) {
-  return postJson('/api/user/resetPassword/checkCurrentPassword/' + id + '/', {password});
-}
-
-/**
  * This will send new password to backend and database.
  * @param id
  * @param password
  * @returns {Promise<*>}
  */
-export async function saveNewPassword(id, password) {
-  return postJson('/api/user/resetPassword/saveNewPassword/' + id + '/', {password});
+export async function updatePassword(id, params) {
+  return postJson('/api/general/profile/' + id + '/resetPassword/', params);
 }
 
 /**

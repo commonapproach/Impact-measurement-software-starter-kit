@@ -52,7 +52,7 @@ const routes = (
     {/*profile*/}
     <Route path="/profile/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
     <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
-
+    <Route path="/profile/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>
@@ -62,7 +62,6 @@ const routes = (
     <Route path="/resetPassword/:token" element={<PrivateRoute element={ForgotPasswordResetPassword}/>}/>
 
 
-    <Route path="/users/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
     <Route path="/users/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
 
 

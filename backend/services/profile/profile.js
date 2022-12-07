@@ -25,6 +25,16 @@ const regularUserGetProfile = async (req, res, next) => {
   }
 };
 
+const regularUserUpdatePassword = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    const {newPassword, currentPassword} = req.body;
+    return res.status(300).json({success: true})
+  }catch (e) {
+    next(e);
+  }
+}
+
 const regularUserUpdateProfile = async (req, res, next) => {
   try {
     const {id} = req.params;
@@ -63,4 +73,4 @@ const regularUserUpdateProfile = async (req, res, next) => {
   }
 }
 
-module.exports = {regularUserGetProfile, regularUserUpdateProfile};
+module.exports = {regularUserGetProfile, regularUserUpdateProfile, regularUserUpdatePassword};

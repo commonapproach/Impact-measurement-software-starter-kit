@@ -1,32 +1,27 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {makeStyles} from "@mui/styles";
-import {
-    defaultCurrentPasswordFields,
-    defaultNewPasswordFields,
-} from "../../constants/default_fields";
 import {Button, Container, Typography} from "@mui/material";
-import {
-    newPasswordFields,
-    updatePasswordFields
-} from "../../constants/updatePasswordFields";
-import {isFieldEmpty} from "../../helpers";
+import {isFieldEmpty, Validator} from "../../helpers";
 import {PASSWORD_NOT_MATCH_TEXT, REQUIRED_HELPER_TEXT} from "../../constants";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {AlertDialog} from "../shared/Dialogs";
 import {useParams} from "react-router-dom";
-import {checkCurrentPassword, saveNewPassword} from "../../api/userApi";
+import {checkCurrentPassword, saveNewPassword, updatePassword} from "../../api/userApi";
 import LoadingButton from "../shared/LoadingButton";
 import PasswordHint from "../shared/PasswordHint";
+import GeneralField from "../shared/fields/GeneralField";
+import {UserContext} from "../../context";
+import {useSnackbar} from "notistack";
 
 
 const useStyles = makeStyles(() => ({
-    root: {
-        width: '80%'
-    },
-    button: {
-        marginTop: 12,
-        marginBottom: 12,
-    }
+  root: {
+    width: '80%'
+  },
+  button: {
+    marginTop: 12,
+    marginBottom: 12,
+  }
 }));
 
 /**
@@ -35,266 +30,189 @@ const useStyles = makeStyles(() => ({
  * @constructor
  */
 export default function UserResetPassword() {
-    const classes = useStyles();
-    const {id} = useParams();
-    const [errors, setErrors] = useState({});
-    const [dialogSubmit, setDialogSubmit] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [form, setForm] = useState({...defaultCurrentPasswordFields});
-    const [editNew, setEditNew] = useState(false);
-    const [dialogConfirmed, setDialogConfirmed] = useState(false);
-    const [loadingButton, setLoadingButton] = useState(false);
-    let history = useNavigate();
-
-    /**
-     * This validates the correctness of current password.
-     * @returns {boolean}
-     */
-    const validateOld = () => {
-        const newErrors = {};
-        for (const [field, option] of Object.entries(updatePasswordFields)) {
-            const isEmpty = isFieldEmpty(form[field]);
-            if (option.required && isEmpty) {
-                newErrors[field] = REQUIRED_HELPER_TEXT;}}
-        if (Object.keys(newErrors).length !== 0) {
-            setErrors(newErrors);
-            return false;}
-
-        return true;
-    };
+  const classes = useStyles();
+  const {id} = useParams();
+  const [errors, setErrors] = useState({});
+  const [dialogSubmit, setDialogSubmit] = useState(false);
+  const [form, setForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    repeatNewPassword: ''
+  });
+  const [dialogConfirmed, setDialogConfirmed] = useState(false);
+  const [loadingButton, setLoadingButton] = useState(false);
+  const navigate = useNavigate();
+  const userContext = useContext(UserContext);
+  const {enqueueSnackbar} = useSnackbar();
 
 
-    /**
-     * This validates the correctness of new password.
-     * @returns {boolean}
-     */
-    const validateNew = () => {
-        const newErrors = {};
-        for (const [field, option] of Object.entries(newPasswordFields)) {
-            const isEmpty = isFieldEmpty(form[field]);
-            if (option.required && isEmpty) {
-                newErrors[field] = REQUIRED_HELPER_TEXT;
-            }
 
-            let msg;
-            if (!isEmpty && option.validator && (msg = option.validator(form[field], form.newPassword))) {
-                newErrors[field] = msg;
-            }
-
-            if (field === "repeatNewPassword" && form.newPassword !== form.repeatNewPassword) {
-                newErrors[field] = PASSWORD_NOT_MATCH_TEXT;
-            }
-        }
-
-        console.log(newErrors)
-        if (Object.keys(newErrors).length !== 0) {
-            setErrors(newErrors);
-            return false
-        }
-        return true;
-    };
-
-    /**
-     * handler for submit current password.
-     * @returns {Promise<void>}
-     */
-    const handleSubmitOld = async () => {
-        if (validateOld()) {
-            setLoadingButton(true);
-            const {success} = await checkCurrentPassword(id, form.currentPassword);
-            console.log(success)
-            if (success) {
-                setLoadingButton(false);
-                setForm({...defaultNewPasswordFields});
-                setEditNew(true);
-            } else {
-                setLoadingButton(false);
-                //TODO: change this alert to dialog.
-                alert('Your input password does not match your current password.');
-                console.log('wrong current password.');
-            }
-        } else {
-            console.log('validateOld() not passed.');
-        }
+  useEffect(() => {
+    if(id !== userContext.id){
+      navigate('/dashboard')
+      enqueueSnackbar('A user can only update its own password.', {variant: 'error'});
+    }
+  }, [id])
+  /**
+   * This validates the correctness of new password.
+   * @returns {boolean}
+   */
+  const validate = () => {
+    const newErrors = {};
+    if(!form.currentPassword){
+      newErrors.currentPassword = "This field is required."
+    }
+    if(!form.newPassword){
+      newErrors.newPassword = 'This field is required.'
+    } else if(Validator.password(form.newPassword)){
+      newErrors.newPassword = Validator.password(form.newPassword)
+    }
+    if(!form.repeatNewPassword){
+      newErrors.repeatNewPassword = 'This field is required.'
+    }else if(form.newPassword !== form.repeatNewPassword){
+      newErrors.repeatNewPassword = 'This field must be same with the New Password you entered'
     }
 
-    /**
-     * handler for submit new password.
-     */
-    const handleSubmitNew = () => {
-        // console.log(form)
-        if (validateNew()) {
-            setDialogSubmit(true);
-        }
+    if (Object.keys(newErrors).length !== 0) {
+      setErrors(newErrors);
+      return false;
     }
+    return true;
+  };
 
-    /**
-     * handler for the button in dialog notify user changed password successfully.
-     */
-    const handleDialogConfirmed = () => {
-        setDialogConfirmed(false);
-        navigate('/dashboard');
+
+  /**
+   * handler for submit new password.
+   */
+  const handleSubmit = () => {
+    if (validate()) {
+      setDialogSubmit(true);
     }
+  };
 
-    /**
-     * handler for the confirm button in the dialog pops after click submit new password.
-     * @returns {Promise<void>}
-     */
-    const handleConfirm = async () => {
-        setLoadingButton(true);
-        const {success} = await saveNewPassword(id, form.newPassword);
-        if (success) {
-            setLoadingButton(false);
-            setDialogSubmit(false);
-            setDialogConfirmed(true);
-            try {
-            } catch (e) {
-                if (e.json) {
-                    console.log(e.json);
-                }
-            }
-        } else {
-            setLoadingButton(false);
-            alert('save new password failed, please try again.')
+  /**
+   * handler for the button in dialog notify user changed password successfully.
+   */
+  const handleDialogConfirmed = () => {
+    setDialogConfirmed(false);
+    navigate('/dashboard');
+  };
+
+  /**
+   * handler for the confirm button in the dialog pops after click submit new password.
+   * @returns {Promise<void>}
+   */
+  const handleConfirm = async () => {
+    setLoadingButton(true);
+    const {success} = await updatePassword(id, {
+      currentPassword: form.currentPassword, newPassword: form.newPassword});
+    if (success) {
+      setLoadingButton(false);
+      setDialogSubmit(false);
+      setDialogConfirmed(true);
+      try {
+      } catch (e) {
+        if (e.json) {
+          console.log(e.json);
         }
-    };
+      }
+    } else {
+      setLoadingButton(false);
+      alert('save new password failed, please try again.');
+    }
+  };
 
-    // OnBlur handler
-    const handleOnBlur = (e, field, option) => {
-        console.log('reach check handleonblur')
-        // console.log(form.repeatNewPassword, form.newPassword)
-        if (!isFieldEmpty(form["repeatNewPassword"]) && field === "repeatNewPassword"
-          && !!option.validator(form.repeatNewPassword, form.newPassword)) {
-            // console.log('reach first if')
-            setErrors({...errors, [field]: option.validator(form[field], form.newPassword)});
-        } else if (!isFieldEmpty(form[field]) && field !== "repeatNewPassword" && option.validator
-          && !!option.validator(form[field])) {
-            // console.log('reach second if')
-            setErrors({...errors, [field]: option.validator(form[field])});
-        } else {
-            // console.log('reach else')
-            setErrors({...errors, [field]: undefined});
+
+
+  return (
+    <Container className={classes.root}>
+      <Typography variant="h5"
+                  style={{marginTop: '20px'}}>
+        {'Please enter your current password:'}
+      </Typography>
+      <GeneralField
+        id={'currentPassword'}
+        label={'current Password'}
+        required
+        onChange={ e => form.currentPassword = e.target.value}
+        value={form.currentPassword}
+        error={!!errors.currentPassword}
+        helperText={errors.currentPassword}
+        // onBlur={e => {
+        //   if(e.target.value && Validator.password(e.target.value)){
+        //     setErrors(errors => ({...errors, currentPassword: Validator.password(e.target.value)}))
+        //   } else {
+        //     setErrors(errors => ({...errors, currentPassword: null}))
+        //   }
+        // }}
+        type={'password'}
+      />
+      <PasswordHint/>
+      <Typography variant="h5"
+                  style={{marginTop: '20px'}}>
+        {'Please enter your new password:'}
+      </Typography>
+      <GeneralField
+        id={'newPassword'}
+        label={'new Password'}
+        required
+        onChange={ e => form.newPassword = e.target.value}
+        value={form.newPassword}
+        error={!!errors.newPassword}
+        helperText={errors.newPassword}
+        onBlur={e => {
+          if(e.target.value && Validator.password(e.target.value)){
+            setErrors(errors => ({...errors, newPassword: Validator.password(e.target.value)}))
+          } else {
+            setErrors(errors => ({...errors, newPassword: null}))
+          }
+        }}
+        type={'password'}
+      />
+
+
+      <Typography variant="h5"
+                  style={{marginTop: '20px'}}>
+        {'Please repeat your new password:'}
+      </Typography>
+
+      <GeneralField
+        id={'repeatNewPassword'}
+        label={'Repeat New Password'}
+        required
+        onChange={ e => form.repeatNewPassword = e.target.value}
+        value={form.repeatNewPassword}
+        error={!!errors.repeatNewPassword}
+        helperText={errors.repeatNewPassword}
+        onBlur={e => {
+          if(e.target.value && e.target.value !== form.newPassword){
+            setErrors(errors => ({...errors, repeatNewPassword: 'Please confirm that this match the new password you entered.'}))
+          }else{
+            setErrors(errors => ({...errors, repeatNewPassword: null}))
+          }
         }
-    };
+        }
+        type={'password'}
+      />
+      {/* new password submit button */}
+      <Button
+        variant="contained"
+        color="primary"
+        style={{marginTop: '20px'}}
+        className={classes.button}
+        onClick={handleSubmit}>
+        Submit
+      </Button>
 
+      {/* dialog for confirming new password */}
+      <AlertDialog dialogContentText={"Note that you won't be able to edit the information after clicking CONFIRM."}
+                   dialogTitle={'Are you sure to submit?'}
+                   buttons={[<Button onClick={() => setDialogSubmit(false)} key={'cancel'}>{'cancel'}</Button>,
+                     <LoadingButton noDefaultStyle variant="text" color="primary"
+                                    loading={loadingButton} key={'Confirm New'}
+                                    onClick={handleConfirm}>{'confirm'}</LoadingButton>]}
+                   open={dialogSubmit}/>
 
-    return (
-        <Container className={classes.root}>
-            {editNew ? (
-                <Container className={classes.root}>
-                    <PasswordHint/>
-                    <Typography variant="h5"
-                                style={{marginTop: '20px'}}>
-                        {'Please enter your new password:'}
-                    </Typography>
+    </Container>);
 
-                {/* text field for new password */}
-                {Object.entries(newPasswordFields).map(([field, option]) => {
-                    if (option.label === 'New Password'){
-                        return (
-                            <option.component
-                                key={field}
-                                label={option.label}
-                                type={option.type}
-                                options={option.options}
-                                value={form[field]}
-                                required={option.required}
-                                onChange={value => form[field] = value.target.value}
-                                onBlur={e => handleOnBlur(e, field, option)}
-                                error={!!errors[field]}
-                                helperText={errors[field]}
-                                style={{marginTop: '10px'}}
-                            />
-                        )
-                    }})}
-
-
-                <Typography variant="h5"
-                            style={{marginTop: '20px'}}>
-                    {'Please repeat your new password:'}
-                </Typography>
-
-                    {/* text field for repeat new password */}
-                    {Object.entries(newPasswordFields).map(([field, option]) => {
-                        if (option.label === 'Repeat New Password'){
-                            return (
-                                <option.component
-                                  key={field}
-                                  label={option.label}
-                                  type={option.type}
-                                  options={option.options}
-                                  value={form[field]}
-                                  required={option.required}
-                                  onChange={value => form[field] = value.target.value}
-                                  onBlur={e => handleOnBlur(e, field, option)}
-                                  error={!!errors[field]}
-                                  helperText={errors[field]}
-                                  style={{marginTop: '10px'}}
-                                />
-                            )
-                        }})}
-
-                {/* new password submit button */}
-                <Button
-                    variant="contained"
-                    color="primary"
-                    style={{marginTop: '20px'}}
-                    className={classes.button}
-                    onClick={handleSubmitNew}>
-                    Submit
-                </Button>
-
-                {/* dialog for confirming new password */}
-                <AlertDialog dialogContentText={"Note that you won't be able to edit the information after clicking CONFIRM."}
-                             dialogTitle={'Are you sure to submit?'}
-                             buttons={[<Button onClick={() => setDialogSubmit(false)} key={'cancel'}>{'cancel'}</Button>,
-                                 //<Button onClick={handleConfirm} key={'confirm'} autoFocus> {'confirm'}</Button>
-                                 <LoadingButton noDefaultStyle variant="text" color="primary"
-                                                loading={loadingButton} key={'Confirm New'}
-                                                onClick={handleConfirm}>{'confirm'}</LoadingButton>]}
-                             open={dialogSubmit}/>
-
-                {/* dialog for informing changes has been made */}
-                <AlertDialog
-                  dialogContentText={"You have successfully changed your password. Click the " +
-                    "button below to be redirected to the Dashboard."}
-                  dialogTitle={'Congratulation!'}
-                  buttons={<Button onClick={handleDialogConfirmed} key={'redirect'} autoFocus> {'redirect'}</Button>}
-                  open={dialogConfirmed}/>
-
-            </Container>) : (
-                <Container className={classes.root}>
-                    <Typography variant="h5">
-                        {'Please enter your old password below:'}
-                    </Typography>
-
-                    {/* text field for old password */}
-                    {Object.entries(updatePasswordFields).map(([field, option]) => {
-                        return (
-                                <option.component
-                                  key={field}
-                                  label={option.label}
-                                  type={option.type}
-                                  options={option.options}
-                                  value={form[field]}
-                                  required={option.required}
-                                  onChange={value => form[field] = value.target.value}
-                                  onBlur={e => handleOnBlur(e, field, option)}
-                                  error={!!errors[field]}
-                                  helperText={errors[field]}
-                                  style={{marginTop: '10px'}}
-                                />
-                            )
-                        })}
-
-                    {/* button for submitting old password */}
-                    <LoadingButton noDefaultStyle variant="contained" color="primary"
-                                   loading ={loadingButton} key={'check old'} style={{marginTop: '10px'}}
-                                   onClick={handleSubmitOld}/>
-
-                </Container>
-            )}
-
-        </Container>
-    )
 }

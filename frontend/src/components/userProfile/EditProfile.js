@@ -51,7 +51,6 @@ export default function EditProfile() {
   const [dialogSubmit, setDialogSubmit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingButton, setLoadingButton] = useState(false);
-  const [dialogEmail, setDialogEmail] = useState(false);
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
 
 

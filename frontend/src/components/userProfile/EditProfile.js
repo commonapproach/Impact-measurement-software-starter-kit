@@ -63,7 +63,7 @@ export default function EditProfile() {
   useEffect(() => {
     getProfile(id).then(({success, person}) => {
       if (success) {
-        person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3,10)}`
+        person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3,6)}-${String(person.phoneNumber.phoneNumber).slice(6,10)}`
         setForm({
           ...form, ...person
         });
@@ -112,11 +112,6 @@ export default function EditProfile() {
     navigate('/profile/' + id);
   };
 
-  // email-sent dialog confirm button handler
-  const handleDialogEmail = () => {
-    setDialogEmail(false);
-    setDialogSubmit(true);
-  };
 
 
   // submit button handler

@@ -59,23 +59,23 @@ export default function Profile() {
     phoneNumber: '',
   });
 
-  useEffect(() => {
-    Promise.all([
-      getInstancesInClass('ic:StreetType')
-        .then(streetType => {
-          setOptions(options => ({...options, streetType}));
-        }),
-      getInstancesInClass('ic:StreetDirection')
-        .then(streetDirection => {
-          setOptions(options => ({...options, streetDirection}));
-        }),
-      getInstancesInClass('schema:State')
-        .then(state => {
-          setOptions(options => ({...options, state}));
-        }),
-    ]).then(() => setLoading(false));
+  // useEffect(() => {
+  //   Promise.all([
+  //     getInstancesInClass('ic:StreetType')
+  //       .then(streetType => {
+  //         setOptions(options => ({...options, streetType}));
+  //       }),
+  //     getInstancesInClass('ic:StreetDirection')
+  //       .then(streetDirection => {
+  //         setOptions(options => ({...options, streetDirection}));
+  //       }),
+  //     getInstancesInClass('schema:State')
+  //       .then(state => {
+  //         setOptions(options => ({...options, state}));
+  //       }),
+  //   ]).then(() => setLoading(false));
 
-  }, []);
+  // }, []);
 
   useEffect( () => {
     Promise.all([
@@ -104,11 +104,11 @@ export default function Profile() {
           });
           setLoading(false);
         }
-      }).catch(e => {
-        navigate('/dashboard');
-        enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
-      });
-  })
+      })
+  }).catch(e => {
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
+    })
   }, [id]);
 
   // goes to edit page

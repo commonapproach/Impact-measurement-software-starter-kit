@@ -2,13 +2,8 @@ import React, {useEffect, useState, useContext} from 'react';
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Container, Typography} from "@mui/material";
-import {userProfileFields} from "../../constants/userProfileFields";
-import {getProfile, updatePrimaryEmail, updateProfile} from "../../api/userApi";
-import {isFieldEmpty, Validator} from "../../helpers";
-import {
-  DUPLICATE_HELPER_TEXT,
-  REQUIRED_HELPER_TEXT
-} from "../../constants";
+import {getProfile, updateProfile} from "../../api/userApi";
+import {Validator} from "../../helpers";
 import {AlertDialog} from "../shared/Dialogs";
 import {Loading} from "../shared";
 import LoadingButton from "../shared/LoadingButton";

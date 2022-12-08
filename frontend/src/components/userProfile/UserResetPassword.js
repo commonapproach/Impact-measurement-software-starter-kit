@@ -90,13 +90,6 @@ export default function UserResetPassword() {
     }
   };
 
-  /**
-   * handler for the button in dialog notify user changed password successfully.
-   */
-  const handleDialogConfirmed = () => {
-    setDialogConfirmed(false);
-    navigate('/dashboard');
-  };
 
   /**
    * handler for the confirm button in the dialog pops after click submit new password.
@@ -104,21 +97,14 @@ export default function UserResetPassword() {
    */
   const handleConfirm = async () => {
     setLoadingButton(true);
-    const {success} = await updatePassword(id, {
+    const res = await updatePassword(id, {
       currentPassword: form.currentPassword, newPassword: form.newPassword});
-    if (success) {
-      setLoadingButton(false);
-      setDialogSubmit(false);
-      setDialogConfirmed(true);
-      try {
-      } catch (e) {
-        if (e.json) {
-          console.log(e.json);
-        }
-      }
-    } else {
-      setLoadingButton(false);
-      alert('save new password failed, please try again.');
+    setLoadingButton(false);
+    setDialogSubmit(false);
+    if (res.success) {
+
+    } else if (res.wrongCurrentPassword){
+      setErrors(errors => ({...errors, currentPassword: res.message || "Wrong current password."}))
     }
   };
 

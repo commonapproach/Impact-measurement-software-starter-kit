@@ -97,7 +97,9 @@ async function findUserAccountById(id) {
 async function validateCredentials(email, password) {
   const userAccount = await GDBUserAccountModel.findOne({email: email});
   if(!userAccount)
-    throw new Server400Error('No such user under this email');
+    throw new Server400Error('No such user under this email.');
+  if(!userAccount.hash || !userAccount.salt)
+    throw new Server400Error('The user is not registered.')
   const validated = await Hashing.validatePassword(password, userAccount.hash, userAccount.salt);
   return {validated, userAccount};
 }

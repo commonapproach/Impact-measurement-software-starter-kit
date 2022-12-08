@@ -2,6 +2,7 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {genderOptions} = require("../../helpers/dicts");
 const {Validator} = require("../../helpers/validator");
 const {SPARQL} = require('../../utils/graphdb/helpers');
+const {validateCredentials} = require("../userAccount/user");
 
 const regularUserGetProfile = async (req, res, next) => {
   try {
@@ -29,8 +30,17 @@ const regularUserUpdatePassword = async (req, res, next) => {
   try {
     const {id} = req.params;
     const {newPassword, currentPassword} = req.body;
-    return res.status(300).json({success: true})
-  }catch (e) {
+    if(!id)
+      return res.status(400).json({success: false, message: 'Id is needed'})
+    if(!newPassword || !currentPassword)
+      return res.status(400).json({success: false, message: 'Information invalid'})
+    const userAccount = await GDBUserAccountModel.findById(id);
+    if(!userAccount)
+      return res.status(400).json({success: false, message: 'No such user'})
+    const  {validated}= await validateCredentials(userAccount.email, currentPassword);
+    if(!validated)
+      return res.status(203).json({success: false, message: 'The current password is wrong.', wrongCurrentPassword: true})
+  } catch (e) {
     next(e);
   }
 }

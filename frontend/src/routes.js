@@ -53,6 +53,7 @@ const routes = (
     <Route path="/profile/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
     <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
     <Route path="/profile/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
+    <Route path="/profile/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

@@ -80,7 +80,8 @@ export default function Profile() {
       }
       getProfile(id).then(({success, person}) => {
         if (success) {
-          person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`;
+          if(person.phoneNumber)
+            person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`;
           setForm({
             ...form, ...person,
           });
@@ -156,9 +157,9 @@ export default function Profile() {
           <div>
             <Typography
               style={{padding: 10, fontSize: 'large'}} key={'address'}>
-              {'Address'} : {`${form.address.unitNumber}-${form.address.streetNumber} 
+              {'Address'} : {form.address? `${form.address.unitNumber}-${form.address.streetNumber} 
           ${form.address.streetName} ${options.streetType[form.address.streetType]} ${options.streetDirection[form.address.streetDirection]}, 
-          ${form.address.city}, ${options.state[form.address.state]}, ${form.address.postalCode}`}
+          ${form.address.city}, ${options.state[form.address.state]}, ${form.address.postalCode}`: ''}
             </Typography>
           </div>
           <div>
@@ -209,7 +210,7 @@ export default function Profile() {
           </Typography>
 
           {/* Button for password reset */}
-          <NavButton to={'/users/reset-securityQuestions/' + id}
+          <NavButton to={'/profile/reset-securityQuestions/' + id}
                      text={'Reset Security Questions'}
                      key={'Reset Security Questions'}/>
         </Box>

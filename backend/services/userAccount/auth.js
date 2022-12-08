@@ -86,7 +86,7 @@ const checkUserSecurityQuestion = async (req, res, next) => {
               })
             }});
         } else {
-          return res.status(200).json({success: false, matched: false, message: 'incorrect'});
+          return res.status(203).json({success: false, matched: false, message: 'incorrect'});
         }
       }
     }

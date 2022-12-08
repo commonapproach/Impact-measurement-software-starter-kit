@@ -1,12 +1,11 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {makeStyles} from "@mui/styles";
 import {Button, Container, Typography} from "@mui/material";
-import {isFieldEmpty, Validator} from "../../helpers";
-import {PASSWORD_NOT_MATCH_TEXT, REQUIRED_HELPER_TEXT} from "../../constants";
+import {Validator} from "../../helpers";
 import {useNavigate} from "react-router-dom";
 import {AlertDialog} from "../shared/Dialogs";
 import {useParams} from "react-router-dom";
-import {checkCurrentPassword, saveNewPassword, updatePassword} from "../../api/userApi";
+import {updatePassword} from "../../api/userApi";
 import LoadingButton from "../shared/LoadingButton";
 import PasswordHint from "../shared/PasswordHint";
 import GeneralField from "../shared/fields/GeneralField";
@@ -46,31 +45,30 @@ export default function UserResetPassword() {
   const {enqueueSnackbar} = useSnackbar();
 
 
-
   useEffect(() => {
-    if(id !== userContext.id){
-      navigate('/dashboard')
+    if (id !== userContext.id) {
+      navigate('/dashboard');
       enqueueSnackbar('A user can only update its own password.', {variant: 'error'});
     }
-  }, [id])
+  }, [id]);
   /**
    * This validates the correctness of new password.
    * @returns {boolean}
    */
   const validate = () => {
     const newErrors = {};
-    if(!form.currentPassword){
-      newErrors.currentPassword = "This field is required."
+    if (!form.currentPassword) {
+      newErrors.currentPassword = "This field is required.";
     }
-    if(!form.newPassword){
-      newErrors.newPassword = 'This field is required.'
-    } else if(Validator.password(form.newPassword)){
-      newErrors.newPassword = Validator.password(form.newPassword)
+    if (!form.newPassword) {
+      newErrors.newPassword = 'This field is required.';
+    } else if (Validator.password(form.newPassword)) {
+      newErrors.newPassword = Validator.password(form.newPassword);
     }
-    if(!form.repeatNewPassword){
-      newErrors.repeatNewPassword = 'This field is required.'
-    }else if(form.newPassword !== form.repeatNewPassword){
-      newErrors.repeatNewPassword = 'This field must be same with the New Password you entered'
+    if (!form.repeatNewPassword) {
+      newErrors.repeatNewPassword = 'This field is required.';
+    } else if (form.newPassword !== form.repeatNewPassword) {
+      newErrors.repeatNewPassword = 'This field must be same with the New Password you entered';
     }
 
     if (Object.keys(newErrors).length !== 0) {
@@ -96,18 +94,25 @@ export default function UserResetPassword() {
    * @returns {Promise<void>}
    */
   const handleConfirm = async () => {
-    setLoadingButton(true);
-    const res = await updatePassword(id, {
-      currentPassword: form.currentPassword, newPassword: form.newPassword});
-    setLoadingButton(false);
-    setDialogSubmit(false);
-    if (res.success) {
-
-    } else if (res.wrongCurrentPassword){
-      setErrors(errors => ({...errors, currentPassword: res.message || "Wrong current password."}))
+    try {
+      setLoadingButton(true);
+      const res = await updatePassword(id, {
+        currentPassword: form.currentPassword, newPassword: form.newPassword
+      });
+      setLoadingButton(false);
+      setDialogSubmit(false);
+      if (res.success) {
+        navigate("/profile/" + id);
+        enqueueSnackbar(res.message || 'Success!', {variant: 'success'});
+      } else if (res.wrongCurrentPassword) {
+        setErrors(errors => ({...errors, currentPassword: res.message || "Wrong current password."}));
+      }
+    } catch (e) {
+      setLoadingButton(false);
+      setDialogSubmit(false);
+      enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     }
   };
-
 
 
   return (
@@ -120,7 +125,7 @@ export default function UserResetPassword() {
         id={'currentPassword'}
         label={'current Password'}
         required
-        onChange={ e => form.currentPassword = e.target.value}
+        onChange={e => form.currentPassword = e.target.value}
         value={form.currentPassword}
         error={!!errors.currentPassword}
         helperText={errors.currentPassword}
@@ -142,15 +147,15 @@ export default function UserResetPassword() {
         id={'newPassword'}
         label={'new Password'}
         required
-        onChange={ e => form.newPassword = e.target.value}
+        onChange={e => form.newPassword = e.target.value}
         value={form.newPassword}
         error={!!errors.newPassword}
         helperText={errors.newPassword}
         onBlur={e => {
-          if(e.target.value && Validator.password(e.target.value)){
-            setErrors(errors => ({...errors, newPassword: Validator.password(e.target.value)}))
+          if (e.target.value && Validator.password(e.target.value)) {
+            setErrors(errors => ({...errors, newPassword: Validator.password(e.target.value)}));
           } else {
-            setErrors(errors => ({...errors, newPassword: null}))
+            setErrors(errors => ({...errors, newPassword: null}));
           }
         }}
         type={'password'}
@@ -166,15 +171,18 @@ export default function UserResetPassword() {
         id={'repeatNewPassword'}
         label={'Repeat New Password'}
         required
-        onChange={ e => form.repeatNewPassword = e.target.value}
+        onChange={e => form.repeatNewPassword = e.target.value}
         value={form.repeatNewPassword}
         error={!!errors.repeatNewPassword}
         helperText={errors.repeatNewPassword}
         onBlur={e => {
-          if(e.target.value && e.target.value !== form.newPassword){
-            setErrors(errors => ({...errors, repeatNewPassword: 'Please confirm that this match the new password you entered.'}))
-          }else{
-            setErrors(errors => ({...errors, repeatNewPassword: null}))
+          if (e.target.value && e.target.value !== form.newPassword) {
+            setErrors(errors => ({
+              ...errors,
+              repeatNewPassword: 'Please confirm that this match the new password you entered.'
+            }));
+          } else {
+            setErrors(errors => ({...errors, repeatNewPassword: null}));
           }
         }
         }

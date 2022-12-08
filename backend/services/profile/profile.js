@@ -2,7 +2,7 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {genderOptions} = require("../../helpers/dicts");
 const {Validator} = require("../../helpers/validator");
 const {SPARQL} = require('../../utils/graphdb/helpers');
-const {validateCredentials} = require("../userAccount/user");
+const {validateCredentials, updateUserPassword} = require("../userAccount/user");
 
 const regularUserGetProfile = async (req, res, next) => {
   try {
@@ -40,6 +40,10 @@ const regularUserUpdatePassword = async (req, res, next) => {
     const  {validated}= await validateCredentials(userAccount.email, currentPassword);
     if(!validated)
       return res.status(203).json({success: false, message: 'The current password is wrong.', wrongCurrentPassword: true})
+    const {saved} = await updateUserPassword(userAccount.email, newPassword)
+    if(!saved)
+      return res.status(400).json({success: false, message: 'Cannot update password.'})
+    return res.status(200).json({success: true, message: 'Successfully update password'})
   } catch (e) {
     next(e);
   }

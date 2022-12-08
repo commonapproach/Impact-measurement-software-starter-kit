@@ -3,6 +3,7 @@ const {genderOptions} = require("../../helpers/dicts");
 const {Validator} = require("../../helpers/validator");
 const {SPARQL} = require('../../utils/graphdb/helpers');
 const {validateCredentials, updateUserPassword} = require("../userAccount/user");
+const Hashing = require("../../utils/hashing");
 
 const regularUserGetProfile = async (req, res, next) => {
   try {
@@ -14,11 +15,11 @@ const regularUserGetProfile = async (req, res, next) => {
       return res.status(400).json({success: false, message: 'No such user'});
     if (!userAccount.person)
       return res.status(400).json({success: false});
-    delete userAccount.person.email
-    if(userAccount.person.address){
-      userAccount.person.address.streetDirection = SPARQL.getFullURI(userAccount.person.address.streetDirection)
-      userAccount.person.address.streetType = SPARQL.getFullURI(userAccount.person.address.streetType)
-      userAccount.person.address.state = SPARQL.getFullURI(userAccount.person.address.state)
+    delete userAccount.person.email;
+    if (userAccount.person.address) {
+      userAccount.person.address.streetDirection = SPARQL.getFullURI(userAccount.person.address.streetDirection);
+      userAccount.person.address.streetType = SPARQL.getFullURI(userAccount.person.address.streetType);
+      userAccount.person.address.state = SPARQL.getFullURI(userAccount.person.address.state);
     }
 
     return res.status(200).json({success: true, person: userAccount.person});
@@ -28,28 +29,66 @@ const regularUserGetProfile = async (req, res, next) => {
   }
 };
 
+const regularUserUpdateSecurityQuestions = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    const {form, checkedAnswer, checkedQuestion} = req.body;
+    if (!id)
+      return res.status(400).json({success: false, message: 'Id is needed'});
+    if (!form || !checkedAnswer || !checkedQuestion)
+      return res.status(400).json({success: true, message: 'Wrong information given'});
+    const userAccount = await GDBUserAccountModel.findOne({_id: id},{populates: ['securityQuestions']});
+    if(!userAccount)
+      return res.status(400).json({success: false, message: 'No such user'})
+    if(!userAccount.securityQuestions)
+      return res.status(400).json({success: false, message: 'The user is not registered'})
+
+    for (let i in userAccount.securityQuestions) {
+      let securityQuestion = userAccount.securityQuestions[i]
+      if(securityQuestion.question === checkedQuestion){
+        const match = await Hashing.validatePassword(checkedAnswer, securityQuestion.hash, securityQuestion.salt)
+        if (match) {
+          // update security Questions
+          return res.status(200).json({success: true, message: 'matched'})
+        }else{
+          return res.status(400).json({success: false, message: 'Please firstly correctly answer the current security question'})
+        }
+      }
+    }
+    return res.status(400).json({success: false, message: 'Please firstly correctly answer the current security question'})
+
+  } catch (e) {
+    next(e);
+  }
+
+};
+
 const regularUserUpdatePassword = async (req, res, next) => {
   try {
     const {id} = req.params;
     const {newPassword, currentPassword} = req.body;
-    if(!id)
-      return res.status(400).json({success: false, message: 'Id is needed'})
-    if(!newPassword || !currentPassword)
-      return res.status(400).json({success: false, message: 'Information invalid'})
+    if (!id)
+      return res.status(400).json({success: false, message: 'Id is needed'});
+    if (!newPassword || !currentPassword)
+      return res.status(400).json({success: false, message: 'Information invalid'});
     const userAccount = await GDBUserAccountModel.findById(id);
-    if(!userAccount)
-      return res.status(400).json({success: false, message: 'No such user'})
-    const  {validated}= await validateCredentials(userAccount.email, currentPassword);
-    if(!validated)
-      return res.status(203).json({success: false, message: 'The current password is wrong.', wrongCurrentPassword: true})
-    const {saved} = await updateUserPassword(userAccount.email, newPassword)
-    if(!saved)
-      return res.status(400).json({success: false, message: 'Cannot update password.'})
-    return res.status(200).json({success: true, message: 'Successfully update password'})
+    if (!userAccount)
+      return res.status(400).json({success: false, message: 'No such user'});
+    const {validated} = await validateCredentials(userAccount.email, currentPassword);
+    if (!validated)
+      return res.status(203).json({
+        success: false,
+        message: 'The current password is wrong.',
+        wrongCurrentPassword: true
+      });
+    const {saved} = await updateUserPassword(userAccount.email, newPassword);
+    if (!saved)
+      return res.status(400).json({success: false, message: 'Cannot update password.'});
+    return res.status(200).json({success: true, message: 'Successfully update password'});
   } catch (e) {
     next(e);
   }
-}
+};
 
 const regularUserUpdateProfile = async (req, res, next) => {
   try {
@@ -57,36 +96,42 @@ const regularUserUpdateProfile = async (req, res, next) => {
     const {gender, altEmail, address, countryCode, areaCode, phoneNumber} = req.body;
     const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person.address', 'person.phoneNumber']});
     const person = userAccount.person;
-    if(gender && Validator.gender(gender))
-      return res.status(400).json({success: false, message: 'Wrong value on gender'})
-    if(altEmail && Validator.email(altEmail))
-      return res.status(400).json({success: false, message: 'Wrong value on altEmail'})
+    if (gender && Validator.gender(gender))
+      return res.status(400).json({success: false, message: 'Wrong value on gender'});
+    if (altEmail && Validator.email(altEmail))
+      return res.status(400).json({success: false, message: 'Wrong value on altEmail'});
     person.gender = gender;
     person.altEmail = altEmail.toLowerCase();
-    const {unitNumber, streetNumber, streetName, city,
-    postalCode, state, streetDirection, streetType} = address
-    if(postalCode && Validator.postalCode(postalCode))
+    const {
+      unitNumber, streetNumber, streetName, city,
+      postalCode, state, streetDirection, streetType
+    } = address;
+    if (postalCode && Validator.postalCode(postalCode))
       return res.status(400).json({success: false, message: Validator.postalCode(postalCode)});
-    if(streetNumber && isNaN(streetNumber))
+    if (streetNumber && isNaN(streetNumber))
       return res.status(400).json({success: false, message: 'The street number must be a number'});
     person.address = {
       unitNumber, streetNumber, streetName, city,
       postalCode, state, streetDirection, streetType
-    }
-    if(countryCode && areaCode && phoneNumber){
-      if(isNaN(countryCode) || isNaN(areaCode) || isNaN(phoneNumber))
-        return res.status(400).json({success: false, message: 'Wrong Phone number format'})
-      person.phoneNumber = {countryCode, areaCode, phoneNumber}
+    };
+    if (countryCode && areaCode && phoneNumber) {
+      if (isNaN(countryCode) || isNaN(areaCode) || isNaN(phoneNumber))
+        return res.status(400).json({success: false, message: 'Wrong Phone number format'});
+      person.phoneNumber = {countryCode, areaCode, phoneNumber};
     }
 
     await userAccount.save();
-    return res.status(200).json({success: true})
-
+    return res.status(200).json({success: true});
 
 
   } catch (e) {
     next(e);
   }
-}
+};
 
-module.exports = {regularUserGetProfile, regularUserUpdateProfile, regularUserUpdatePassword};
+module.exports = {
+  regularUserUpdateSecurityQuestions,
+  regularUserGetProfile,
+  regularUserUpdateProfile,
+  regularUserUpdatePassword
+};

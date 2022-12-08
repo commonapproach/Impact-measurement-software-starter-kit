@@ -1,8 +1,8 @@
 import {makeStyles} from "@mui/styles";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import React, { useEffect, useState, useContext } from 'react';
 import {
-  LoginCheckSecurityQuestion,
+  LoginCheckSecurityQuestion, updateSecurityQuestion,
 } from "../../api/userApi";
 import {getUserSecurityQuestionsLogin} from "../../api/auth";
 import {Loading} from "../shared";
@@ -10,6 +10,7 @@ import {Button, Container, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
 import {loginDoubleAuthFields} from "../../constants/login_double_auth_fields";
 import { UserContext } from "../../context";
+import GeneralField from "../shared/fields/GeneralField";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -26,11 +27,14 @@ const useStyles = makeStyles(() => ({
 export default function DoubleAuth() {
   const classes = useStyles();
   const navigate = useNavigate();
+  const {id} = useParams();
   const userContext = useContext(UserContext);
 
   const [state, setState] = useState({
     group: 1,
-    password: '',
+    checked: false,
+    checkedQuestion: '',
+    checkedAnswer: '',
     errors: {
       group1: {},
       group2: {},
@@ -73,18 +77,21 @@ export default function DoubleAuth() {
   const handleSubmit = async () => {
     setState(state => ({...state, loadingButton: true}))
     try{
-      if(state.group < 4){
+      if(state.checked){
+        await updateSecurityQuestion(id, {form, checkedAnswer: state.checkedAnswer, checkedQuestion: state.checkedQuestion, email: state.email})
+      }else if(state.group < 4){
         const group = 'group' + state.group
         const securityQuestionAnswer = 'securityQuestionAnswer' + state.group
         const answer = form[group][securityQuestionAnswer]
         const securityQuestion = 'securityQuestion' + state.group
+        const question = form[group][securityQuestion]
 
         const {success, message, matched} = await LoginCheckSecurityQuestion({email: state.email,
-          question: form[group][securityQuestion], answer})
+          question, answer})
 
         if(matched){
-
-          setState(state => ({...state, loadingButton: false}))
+          setForm(form => ({...form, [group]: {...form[group], [securityQuestionAnswer]: ''}}))
+          setState(state => ({...state, loadingButton: false, checked: true, checkedAnswer: answer, checkedQuestion: question}))
 
         }else{
           setForm(form => ({...form, [group]: {...form[group], [securityQuestionAnswer]: ''}}))
@@ -101,24 +108,58 @@ export default function DoubleAuth() {
   if(loading)
     return <Loading message={`Loading`}/>
 
+  if(state.checked)
+    return (<Container className={classes.root}>
+      <Typography variant="h5">
+        {'Please reset your security Question'}
+      </Typography>
+      {Object.entries(form).map((group, index) => {
+        console.log(group[1])
+        console.log(`securityQuestion${index + 1}`)
+        console.log(form[`group${index + 1}`][`securityQuestion${index + 1}`])
+        return (
+          <div>
+            <GeneralField
+              label={`Question ${index + 1}`}
+              key={`Question${index + 1}`}
+              value={group[1][`securityQuestion${index + 1}`]}
+              required
+              onChange={e => {
+                form[`group${index + 1}`][`securityQuestion${index + 1}`] = e.target.value
+              }}
+            />
+
+            <GeneralField
+              key={`Answer${index + 1}`}
+              label={`Answer ${index + 1}`}
+              value={group[1][`securityQuestionAnswer${index + 1}`]}
+              required
+              onChange={e => {
+                form[`group${index + 1}`][`securityQuestionAnswer${index + 1}`] = e.target.value
+              }}
+            />
+          </div>
+          )
+      })}
+      <LoadingButton noDefaultStyle variant="contained" color="primary" loading ={state.loadingButton} className={classes.button}
+                     onClick={handleSubmit}/>
+    </Container>)
+
+
   const group = 'group' + state.group
 
   if(state.group === 1)
     return (<Container className={classes.root}>
       <Typography variant="h5">
-        {'Please input your password'}
+        {'Please answer the security question.'}
       </Typography>
 
       {Object.entries(loginDoubleAuthFields[group]).map(([field, option]) => {
-        console.log(option, field)
         return (
-
-
           <option.component
             key={field}
             label={option.label}
             type={option.type}
-            options={option.options}
             value={form[group][field]}
             required={option.required}
             onChange={e => form[group][field] = e.target.value}
@@ -129,15 +170,8 @@ export default function DoubleAuth() {
 
       }
       )}
-      {/*<Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>*/}
-      {/*  Submit*/}
-      {/*</Button>*/}
       <LoadingButton noDefaultStyle variant="contained" color="primary" loading ={state.loadingButton} className={classes.button}
                      onClick={handleSubmit}/>
-      {/*<AlertDialog dialogContentText={'A link has been sent to your email address. Please follow it to reset your password'}*/}
-      {/*             dialogTitle={'Success'}*/}
-      {/*             buttons={[<Button onClick={() => navigate('/')} key={'ok'}>{'ok'}</Button>]}*/}
-      {/*             open={state.successDialog}/>*/}
     </Container>)
 
 
@@ -166,19 +200,8 @@ export default function DoubleAuth() {
             />
           )
         })}
-        {/*<Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>*/}
-        {/*  Submit*/}
-        {/*</Button>*/}
         <LoadingButton noDefaultStyle variant="contained" color="primary" loading ={state.loadingButton} className={classes.button}
                        onClick={handleSubmit}/>
-        {/*<AlertDialog dialogContentText={state.errors.message||"Error occur"}*/}
-        {/*             dialogTitle={'Error'}*/}
-        {/*             buttons={[<Button onClick={() => navigate('/')} key={'ok'}>{'ok'}</Button>]}*/}
-        {/*             open={state.errorDialog}/>*/}
-        {/*<AlertDialog dialogContentText={'A link has been sent to your email address. Please follow it to reset your password'}*/}
-        {/*             dialogTitle={'Success'}*/}
-        {/*             buttons={[<Button onClick={() => navigate('/')} key={'ok'}>{'ok'}</Button>]}*/}
-        {/*             open={state.successDialog}/>*/}
       </Container>)
   }
 }

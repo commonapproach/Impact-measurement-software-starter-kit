@@ -51,6 +51,7 @@ export function LoginCheckSecurityQuestion(params) {
   return postJson('/api/login/securityQuestions/check', params)
 }
 
+
 /**
  * this will send the verification email during forgot password process
  * @param params: {email}
@@ -127,6 +128,10 @@ export async function updatePrimaryEmail(id, email) {
  */
 export function updateProfile(id, params) {
   return postJson('/api/general/profile/' + id + '/', params);
+}
+
+export function updateSecurityQuestion(id, params) {
+  return postJson('/api/general/profile/' + id + '/securityQuestions/', params)
 }
 
 /**

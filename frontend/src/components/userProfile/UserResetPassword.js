@@ -38,7 +38,6 @@ export default function UserResetPassword() {
     newPassword: '',
     repeatNewPassword: ''
   });
-  const [dialogConfirmed, setDialogConfirmed] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const navigate = useNavigate();
   const userContext = useContext(UserContext);

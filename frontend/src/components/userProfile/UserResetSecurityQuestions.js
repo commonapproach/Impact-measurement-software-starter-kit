@@ -11,6 +11,7 @@ import LoadingButton from "../shared/LoadingButton";
 import {loginDoubleAuthFields} from "../../constants/login_double_auth_fields";
 import { UserContext } from "../../context";
 import GeneralField from "../shared/fields/GeneralField";
+import {useSnackbar} from "notistack";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -29,6 +30,7 @@ export default function DoubleAuth() {
   const navigate = useNavigate();
   const {id} = useParams();
   const userContext = useContext(UserContext);
+  const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({
     group: 1,
@@ -78,7 +80,13 @@ export default function DoubleAuth() {
     setState(state => ({...state, loadingButton: true}))
     try{
       if(state.checked){
-        await updateSecurityQuestion(id, {form, checkedAnswer: state.checkedAnswer, checkedQuestion: state.checkedQuestion, email: state.email})
+        const {success, message} = await updateSecurityQuestion(id, {form, checkedAnswer: state.checkedAnswer, checkedQuestion: state.checkedQuestion, email: state.email})
+
+        if(success){
+          setState(state => ({...state, loadingButton: false}))
+          navigate('/profile/' + id)
+          enqueueSnackbar(message || 'Success!', {variant: 'success'})
+        }
       }else if(state.group < 4){
         const group = 'group' + state.group
         const securityQuestionAnswer = 'securityQuestionAnswer' + state.group
@@ -100,7 +108,8 @@ export default function DoubleAuth() {
       }
     }catch (e){
       if (e.json) {
-        setState(state => ({...state, errors: e.json, errorDialog: true, loadingButton: false}))
+        setState(state => ({...state, loadingButton: false}))
+        enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'})
       }
     }
   }

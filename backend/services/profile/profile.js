@@ -29,6 +29,15 @@ const regularUserGetProfile = async (req, res, next) => {
   }
 };
 
+const replaceSecurityQuestions = async (securityQuestions, newSecurityQuestions) => {
+  for (let i = 0; i < securityQuestions.length; i++){
+    securityQuestions[i].question = newSecurityQuestions[`group${i + 1}`][`securityQuestion${i + 1}`];
+    const {hash, salt} = await Hashing.hashPassword(newSecurityQuestions[`group${i + 1}`][`securityQuestionAnswer${i + 1}`])
+    securityQuestions[i].hash = hash;
+    securityQuestions[i].salt = salt;
+  }
+}
+
 const regularUserUpdateSecurityQuestions = async (req, res, next) => {
   try {
     const {id} = req.params;
@@ -49,7 +58,9 @@ const regularUserUpdateSecurityQuestions = async (req, res, next) => {
         const match = await Hashing.validatePassword(checkedAnswer, securityQuestion.hash, securityQuestion.salt)
         if (match) {
           // update security Questions
-          return res.status(200).json({success: true, message: 'matched'})
+          await replaceSecurityQuestions(userAccount.securityQuestions, form);
+          await userAccount.save();
+          return res.status(200).json({success: true, message: 'Successfully Updated Security Questions'})
         }else{
           return res.status(400).json({success: false, message: 'Please firstly correctly answer the current security question'})
         }

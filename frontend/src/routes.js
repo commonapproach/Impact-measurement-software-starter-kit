@@ -36,7 +36,6 @@ const routes = (
     <Route path="/login" element={<LoginPane/>}/>
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
     <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
-    <Route path="/profile/:id" element={<PrivateRoute element={Profile}/>}/>
     {/*users*/}
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>

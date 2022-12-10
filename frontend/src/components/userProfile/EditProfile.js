@@ -36,6 +36,7 @@ export default function EditProfile() {
   const navigate = useNavigate();
   const {id} = useParams();
   const userContext = useContext(UserContext);
+  console.log(userContext)
   const {enqueueSnackbar} = useSnackbar();
   const [form, setForm] = useState({
     familyName: '',
@@ -55,9 +56,10 @@ export default function EditProfile() {
 
 
   useEffect(() => {
-    getProfile(id).then(({success, person}) => {
+    getProfile(id, userContext.userTypes).then(({success, person}) => {
       if (success) {
-        person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
+        if(person.phoneNumber)
+          person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
         setForm({
           ...form, ...person
         });
@@ -133,11 +135,16 @@ export default function EditProfile() {
 
       setLoadingButton(true);
 
-      const {success} = await updateProfile(id, updateForm);
+      const {success} = await updateProfile(id, updateForm, userContext.userTypes);
       if (success) {
         setLoadingButton(false);
         setDialogSubmit(false);
-        navigate('/profile/' + id + '/');
+        if(userContext.userTypes.includes('superuser')){
+          navigate('/users/' + id + '/edit')
+        }else{
+          navigate('/profile/' + id + '/');
+        }
+
         enqueueSnackbar('Success', {variant: 'success'});
       }
     } catch (e) {

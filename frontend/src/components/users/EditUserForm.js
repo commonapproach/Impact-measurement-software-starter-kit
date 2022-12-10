@@ -106,19 +106,6 @@ export default function EditUserForm() {
     return true;
   };
 
-  /**
-   * handler of onBlur.
-   * @param e
-   * @param field
-   * @param option
-   */
-  const handleOnBlur = (e, field, option) => {
-    if (!isFieldEmpty(form[field]) && option.validator && !!option.validator(form[field])){
-      setErrors({...errors, [field]: option.validator(form[field])});
-    } else {
-      setErrors({...errors, [field]: undefined});
-    }
-  };
 
 
   // submit button handler
@@ -133,32 +120,12 @@ export default function EditUserForm() {
     try{
       setLoadingButton(true);
 
-      // Phone number parse.
-      // let phoneUnchanged;
-      // if (!form.telephone) {
-      //   phoneUnchanged = null;
-      // } else {
-      //   phoneUnchanged = user.primaryContact.telephone.countryCode.toString() +
-      //     user.primaryContact.telephone.areaCode.toString() + user.primaryContact.telephone.phoneNumber.toString()
-      // }
-      // console.log('This is form.telephone:', form.telephone)
-      // console.log("phone not changed:", phoneUnchanged)
       const updateForm = {
         email: form.email,
         userTypes: form.userTypes
       }
 
       console.log(updateForm)
-      // if (form.telephone === phoneUnchanged) {
-      //   updateForm.countryCode = parseInt(form.telephone.slice(0,1));
-      //   updateForm.areaCode = parseInt(form.telephone.slice(1,4));
-      //   updateForm.phoneNumber = parseInt(form.telephone.slice(4,11));
-      // } else {
-      //   const phone = form.telephone.split(' ');
-      //   updateForm.countryCode = parseInt(phone[0]);
-      //   updateForm.areaCode = parseInt(phone[1].slice(1,4));
-      //   updateForm.phoneNumber = parseInt(phone[2].slice(0,3) + phone[2].slice(4,8));
-      // }
       const {success} = await updateUserForm(id, updateForm);
       if (success) {
         setLoadingButton(false);
@@ -220,6 +187,11 @@ export default function EditUserForm() {
       <Button variant="contained" color="primary" className={classes.button}
               onClick={() => navigate('/users/')}>
         Cancel Changes
+      </Button>
+
+      <Button variant="contained" color="primary" className={classes.button}
+              onClick={() => navigate('/profile/' + id + '/edit')} key={'editProfile'}>
+        User Profile
       </Button>
 
       {/* Button for submitting account info changes */}

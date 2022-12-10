@@ -5,7 +5,7 @@ const {SPARQL} = require('../../utils/graphdb/helpers');
 const {validateCredentials, updateUserPassword} = require("../userAccount/user");
 const Hashing = require("../../utils/hashing");
 
-const regularUserGetProfile = async (req, res, next) => {
+const regularUserSuperuserGetProfile = async (req, res, next) => {
   try {
     const {id} = req.params;
     if (!id)
@@ -101,7 +101,7 @@ const regularUserUpdatePassword = async (req, res, next) => {
   }
 };
 
-const regularUserUpdateProfile = async (req, res, next) => {
+const regularUserSuperuserUpdateProfile = async (req, res, next) => {
   try {
     const {id} = req.params;
     const {gender, altEmail, address, countryCode, areaCode, phoneNumber} = req.body;
@@ -117,14 +117,16 @@ const regularUserUpdateProfile = async (req, res, next) => {
       unitNumber, streetNumber, streetName, city,
       postalCode, state, streetDirection, streetType
     } = address;
-    if (postalCode && Validator.postalCode(postalCode))
-      return res.status(400).json({success: false, message: Validator.postalCode(postalCode)});
-    if (streetNumber && isNaN(streetNumber))
-      return res.status(400).json({success: false, message: 'The street number must be a number'});
-    person.address = {
-      unitNumber, streetNumber, streetName, city,
-      postalCode, state, streetDirection, streetType
-    };
+    if (Object.keys(address).length > 0) {
+      if (postalCode && Validator.postalCode(postalCode))
+        return res.status(400).json({success: false, message: Validator.postalCode(postalCode)});
+      if (streetNumber && isNaN(streetNumber))
+        return res.status(400).json({success: false, message: 'The street number must be a number'});
+      person.address = {
+        unitNumber, streetNumber, streetName, city,
+        postalCode, state, streetDirection, streetType
+      };
+    }
     if (countryCode && areaCode && phoneNumber) {
       if (isNaN(countryCode) || isNaN(areaCode) || isNaN(phoneNumber))
         return res.status(400).json({success: false, message: 'Wrong Phone number format'});
@@ -142,7 +144,7 @@ const regularUserUpdateProfile = async (req, res, next) => {
 
 module.exports = {
   regularUserUpdateSecurityQuestions,
-  regularUserGetProfile,
-  regularUserUpdateProfile,
+  regularUserSuperuserGetProfile,
+  regularUserSuperuserUpdateProfile,
   regularUserUpdatePassword
 };

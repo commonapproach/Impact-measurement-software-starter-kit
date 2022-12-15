@@ -8,5 +8,9 @@ const superuserFetchGroups = async (req, res, next) => {
   }
 }
 
+const groupAdminFetchGroups = async (req, res, next) => {
 
-module.exports = {superuserFetchGroups}
+}
+
+
+module.exports = {superuserFetchGroups, groupAdminFetchGroups}

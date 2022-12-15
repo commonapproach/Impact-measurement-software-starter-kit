@@ -1,7 +1,10 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
-export async function fetchGroups(){
-  return getJson('/api/superuser/groups/');
+export async function fetchGroups(userTypes){
+  if(userTypes.includes('superuser'))
+    return getJson('/api/superuser/groups/');
+  if(userTypes.includes('groupAdmin'))
+    return getJson('/api/groupAdmin/groups/')
 }
 
 export async function deleteGroup(id) {

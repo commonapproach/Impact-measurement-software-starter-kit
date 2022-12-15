@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext} from 'react';
 import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
@@ -6,10 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { formatPhoneNumber } from "../../helpers/phone_number_helpers";
 import { useSnackbar } from 'notistack';
 import {deleteGroup, fetchGroups} from "../../api/groupApi";
+import {UserContext} from "../../context";
 
 export default function Groups() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
+  const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
@@ -20,7 +22,7 @@ export default function Groups() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchGroups().then(({groups}) => {
+    fetchGroups(userContext.userTypes).then(({groups}) => {
       setState(state => ({...state, loading: false, data: groups}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))

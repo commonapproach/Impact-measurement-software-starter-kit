@@ -5,14 +5,60 @@ import {Container, Button, Typography} from "@mui/material";
 import {Edit, Create, People, ViewHeadline as Log, CheckCircleOutline as Criteria} from "@mui/icons-material";
 import {UserContext} from "../../context";
 import DashboardForSuperUser from "./DashboardForSuperUser";
+import {NavButton} from "./NavButton";
 
 
 function Dashboard() {
   const userContext = useContext(UserContext);
   console.log(userContext);
 
-  if (userContext.userTypes.includes('superuser'))
-    return <DashboardForSuperUser/>;
+  // if (userContext.userTypes.includes('superuser'))
+  //   return <DashboardForSuperUser/>;
+
+  return (
+    <Container maxWidth="md" sx={{
+      paddingTop: 8,
+      textAlign: 'center',
+    }}>
+
+      {/*{!organization.id &&*/}
+      {/*  <NavButton to={{pathname: '/providers/organization/new', state: {status: 'Home Agency'}}}*/}
+      {/*             text="Create Organization Profile for Home Agency" icon={<Create/>}/>}*/}
+
+      {/*{organization.id &&*/}
+      {/*  <NavButton to={`/provider/${organization.id}/edit/organization`} icon={<Edit/>}*/}
+      {/*             text="Edit Organization Profile for Home Agency"/>}*/}
+
+      {userContext.userTypes.includes('superuser') || userContext.userTypes.includes('groupAdmin')?
+        <NavButton to={`/groups`} icon={<People/>}
+                  text="Manage Groups"/>:<div/>}
+
+      {userContext.userTypes.includes('superuser')?
+        <NavButton to={`/organizations`} icon={<People/>}
+                  text="Manage Organizations"/>:
+      <div/>}
+
+      {userContext.userTypes.includes('superuser')?<NavButton to={`/users`} icon={<People/>}
+                  text="Manage Users"/>:<div/>}
+
+
+      {/*<NavButton to={'/characteristics'} icon={<Edit/>}*/}
+      {/*           text="Manage Characteristics"/>*/}
+
+      {/*<NavButton to={'/questions'} icon={<Edit/>}*/}
+      {/*           text="Manage Questions"/>*/}
+
+      {/*<NavButton to={'/needs'} icon={<Edit/>}*/}
+      {/*           text="Manage Needs"/>*/}
+
+      {/*<NavButton to={'/needSatisfiers'} icon={<Edit/>}*/}
+      {/*           text="Manage Need Satisfiers"/>*/}
+
+      {/*<NavButton to={'/settings/manage-forms/client'} icon={<Edit/>}*/}
+      {/*           text="Manage Forms"/>*/}
+
+
+    </Container>);
 
   return (
     <Container>

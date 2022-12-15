@@ -3,7 +3,7 @@ import {Edit, Group, People, PeopleTwoTone, ViewHeadline as Log} from "@mui/icon
 import React from 'react';
 import {NavButton} from "./NavButton";
 
-export default function DashboardForSuperUser() {
+export default function DashboardForSuperUser({}) {
   return (
     <Container maxWidth="md" sx={{
       paddingTop: 8,
@@ -18,8 +18,8 @@ export default function DashboardForSuperUser() {
       {/*  <NavButton to={`/provider/${organization.id}/edit/organization`} icon={<Edit/>}*/}
       {/*             text="Edit Organization Profile for Home Agency"/>}*/}
 
-      <NavButton to={`/groups`} icon={<People/>}
-                 text="Manage Groups"/>
+      { <NavButton to={`/groups`} icon={<People/>}
+                  text="Manage Groups"/>}
 
       <NavButton to={`/organizations`} icon={<People/>}
                  text="Manage Organizations"/>

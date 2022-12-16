@@ -63,7 +63,7 @@ export default function AddEditGroup() {
     Promise.all([
       fetchOrganizations(userContext.userTypes).then(({organizations}) => {
         organizations.map(organization => {
-          options[organization] = organization;
+          options.organizations[':organization_' + organization._id] = organization.legalName;
         })
       }),
       userContext.userTypes.includes('superuser')?
@@ -85,7 +85,7 @@ export default function AddEditGroup() {
               label: group.label || '',
               administrator: group.administrator || '',
               comment: group.comment || '',
-              organizations: group.organizations
+              organizations: group.organizations || []
             });
             setLoading(false);
           }
@@ -132,7 +132,7 @@ export default function AddEditGroup() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateGroup(id, form).then((res) => {
+      updateGroup(id, form, userContext.userTypes).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/groups');
@@ -142,7 +142,7 @@ export default function AddEditGroup() {
         if (e.json) {
           setErrors(e.json);
         }
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating group', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -151,7 +151,6 @@ export default function AddEditGroup() {
 
   const validate = () => {
     const error = {};
-    console.log(form.label)
     if (form.label === '') {
       error.label = 'The field cannot be empty';
     }

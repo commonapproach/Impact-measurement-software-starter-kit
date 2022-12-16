@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
+import {UserContext} from "../../context";
 
 export default function Organizations() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
+
+  const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
@@ -19,7 +22,7 @@ export default function Organizations() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOrganizations().then(res => {
+    fetchOrganizations(userContext.userTypes).then(res => {
       if(res.success)
       setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {

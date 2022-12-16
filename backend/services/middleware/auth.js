@@ -34,7 +34,7 @@ const authGeneralMiddleware = (message) => (req, res, next) => {
   }
 };
 
-const authGroupAdminMiddlewere = (message) => (req, res, next) => {
+const authGroupAdminMiddleware = (message) => (req, res, next) => {
   if (req.session.userTypes.includes('groupAdmin')) {
     next();
   } else {
@@ -42,4 +42,4 @@ const authGroupAdminMiddlewere = (message) => (req, res, next) => {
   }
 }
 
-module.exports = {authMiddleware, authSuperuserMiddleware, authGeneralMiddleware, authGroupAdminMiddlewere};
+module.exports = {authMiddleware, authSuperuserMiddleware, authGeneralMiddleware, authGroupAdminMiddleware};

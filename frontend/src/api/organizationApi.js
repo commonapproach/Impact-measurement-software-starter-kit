@@ -1,7 +1,10 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
-export async function fetchOrganizations() {
-  return getJson('/api/superuser/organizations');
+export async function fetchOrganizations(userTypes) {
+  if(userTypes.includes('superuser'))
+    return getJson('/api/superuser/organizations');
+  if(userTypes.includes('groupAdmin'))
+    return getJson('/api/groupAdmin/organizations');
 }
 
 export async function fetchOrganization(id) {

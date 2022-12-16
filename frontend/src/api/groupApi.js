@@ -11,8 +11,11 @@ export async function deleteGroup(id) {
   return deleteJson('/api/superuser/group/' + id + '/');
 }
 
-export async function fetchGroup(id) {
-  return getJson('/api/superuser/group/' + id + '/');
+export async function fetchGroup(id, userTypes) {
+  if(userTypes.includes('superuser'))
+    return getJson('/api/superuser/group/' + id + '/');
+  if(userTypes.includes('groupAdmin'))
+    return getJson('/api/groupAdmin/group/' + id + '/');
 }
 
 export async function updateGroup(id, params) {

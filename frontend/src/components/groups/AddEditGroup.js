@@ -1,6 +1,6 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useContext} from "react";
 import {Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
@@ -12,6 +12,7 @@ import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
+import {UserContext} from "../../context";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -32,6 +33,7 @@ export default function AddEditGroup() {
   const {id} = useParams();
   const mode = id ? 'edit' : 'new';
   const {enqueueSnackbar} = useSnackbar();
+  const userContext = useContext(UserContext);
 
   const [state, setState] = useState({
     submitDialog: false,
@@ -54,23 +56,29 @@ export default function AddEditGroup() {
   });
 
   useEffect(() => {
+    if(!userContext.userTypes.includes('superuser') && !userContext.userTypes.includes('groupAdmin')){
+      navigate('/groups');
+      enqueueSnackbar('Wrong auth', {variant: 'error'})
+    }
     Promise.all([
-      fetchOrganizations().then(({organizations}) => {
+      fetchOrganizations(userContext.userTypes).then(({organizations}) => {
         organizations.map(organization => {
           options[organization] = organization;
         })
       }),
+      userContext.userTypes.includes('superuser')?
       fetchUsers('groupAdmin').then(({data}) => {
         options.administrators = data
-      }),
+      }):null,
+      userContext.userTypes.includes('superuser')?
       fetchUsers('superuser').then(({data}) => {
         data.map((superuser) => {
           options.administrators.push(superuser);
         })
-      }),
+      }):null,
     ]).then(() => {
       if (mode === 'edit' && id) {
-        fetchGroup(id).then(res => {
+        fetchGroup(id, userContext.userTypes).then(res => {
           if (res.success) {
             const group = res.group;
             setForm({
@@ -164,6 +172,7 @@ export default function AddEditGroup() {
           label={'Label'}
           value={form.label}
           required
+          disabled={!userContext.userTypes.includes('superuser')}
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.label = e.target.value}
           error={!!errors.label}
@@ -177,7 +186,8 @@ export default function AddEditGroup() {
 
           }}
         />
-        <SelectField
+        {userContext.userTypes.includes('superuser')?
+          <SelectField
           key={'administrator'}
           label={'Group Administrator'}
           value={form.administrator}
@@ -190,7 +200,8 @@ export default function AddEditGroup() {
               })
             );
           }}
-        />
+        />:
+        <div/>}
 
         <Dropdown
           label="Organizations"

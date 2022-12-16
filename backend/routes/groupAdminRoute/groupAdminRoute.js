@@ -1,11 +1,13 @@
 const express = require('express');
-const {authGroupAdminMiddlewere} = require("../../services/middleware");
-const {groupsRoute} = require("./index");
+const {authGroupAdminMiddleware} = require("../../services/middleware");
+const {groupsRoute, organizationsRoute, groupRoute} = require("./index");
 
 
 const router = express.Router({mergeParams: true});
 
-router.use('/', authGroupAdminMiddlewere('Group Admin only'));
+router.use('/', authGroupAdminMiddleware('Group Admin only'));
 router.use('/groups', groupsRoute);
+router.use('/group', groupRoute);
+router.use('/organizations', organizationsRoute);
 
 module.exports = router;

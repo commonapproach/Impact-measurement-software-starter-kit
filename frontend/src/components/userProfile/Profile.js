@@ -78,7 +78,7 @@ export default function Profile() {
         navigate('/dashboard');
         enqueueSnackbar('A user can only visualize its own profile.', {variant: 'error'});
       }
-      getProfile(id).then(({success, person}) => {
+      getProfile(id, userContext.userTypes).then(({success, person}) => {
         if (success) {
           if(person.phoneNumber)
             person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`;
@@ -89,6 +89,7 @@ export default function Profile() {
         }
       });
     }).catch(e => {
+      console.log(e)
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });

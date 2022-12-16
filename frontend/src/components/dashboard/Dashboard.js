@@ -33,7 +33,7 @@ function Dashboard() {
         <NavButton to={`/groups`} icon={<People/>} key={'groups'}
                   text="Manage Groups"/>:<div/>}
 
-      {userContext.userTypes.includes('superuser')?
+      {userContext.userTypes.includes('superuser') || userContext.userTypes.includes('admin')?
         <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
       <div/>}

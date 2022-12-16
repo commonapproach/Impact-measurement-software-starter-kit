@@ -11,6 +11,7 @@ const {
 const superuserRoute = require('../routes/superUserRoute/superuserRoute');
 const generalUserRoute = require('../routes/general/generalUserRoute');
 const groupAdminRoute = require('../routes/groupAdminRoute/groupAdminRoute');
+const adminRoute = require('../routes/admin/adminRoute')
 const {authMiddleware, errorHandler} = require('../services/middleware');
 
 
@@ -48,6 +49,7 @@ app.use('/api/general', generalUserRoute);
 // routes only for superuser
 app.use('/api/superuser', superuserRoute);
 app.use('/api/groupAdmin', groupAdminRoute);
+app.use('/api/admin', adminRoute);
 // app.use('/api', characteristicRoute);
 // app.use('/api', questionRoute);
 // app.use('/api', dynamicFormRoute);

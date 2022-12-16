@@ -40,6 +40,20 @@ const authGroupAdminMiddleware = (message) => (req, res, next) => {
   } else {
     res.status(403).json({error: true, message: message || 'Wrong Authentication.'});
   }
-}
+};
 
-module.exports = {authMiddleware, authSuperuserMiddleware, authGeneralMiddleware, authGroupAdminMiddleware};
+const authAdminMiddleware = (message) => (req, res, next) => {
+  if (req.session.userTypes.includes('admin')) {
+    next();
+  } else {
+    res.status(403).json({error: true, message: message || 'Wrong Authentication.'});
+  }
+};
+
+module.exports = {
+  authMiddleware,
+  authSuperuserMiddleware,
+  authGeneralMiddleware,
+  authGroupAdminMiddleware,
+  authAdminMiddleware
+};

@@ -15,13 +15,13 @@ const createGroup = async (req, res, next) => {
 const groupAdminFetchGroup = async (req, res, next) => {
   try {
     const {id} = req.params;
-    const SessionId = req.session._id;
+    const sessionId = req.session._id;
     if (!id)
       return res.status(400).json({success: false, message: 'No id is given'});
     const group = await GDBGroupModel.findOne({_id: id}, {populates: ['administrator']});
     if (!group)
       return res.status(400).json({success: false, message: 'No such group'});
-    if (group.administrator._id !== SessionId)
+    if (group.administrator._id !== sessionId)
       return res.status(400).json({success: false, message: 'You are not the admin of this group'});
     return res.status(200).json({success: true, group: group});
 
@@ -72,14 +72,14 @@ const superuserDeleteGroup = async (req, res, next) => {
 const groupAdminUpdateGroup = async (req, res, next) => {
   try {
     const {id} = req.params;
-    const SessionId = req.session._id;
+    const sessionId = req.session._id;
     const {comment, organizations} = req.body;
     if (!id)
       return res.status(400).json({success: false, message: 'No id is given'});
     const group = await GDBGroupModel.findOne({_id: id}, {populates: ['administrator']});
     if (!group)
       return res.status(400).json({success: false, message: 'No such group'});
-    if (group.administrator._id !== SessionId)
+    if (group.administrator._id !== sessionId)
       return res.status(400).json({success: false, message: 'You are not the admin of this group'});
     group.comment = comment;
     group.organizations = organizations

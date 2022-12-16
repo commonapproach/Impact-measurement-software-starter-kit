@@ -16,7 +16,7 @@ const GDBUserAccountModel = createGraphDBModel({
   email: {type: String, internalKey: ':hasEmail'},
   hash: {type: String, internalKey: ':hasHash'},
   salt: {type: String, internalKey: ':hasSalt'},
-  person:{type: GDBPersonModel, internalKey: 'cids:Person', onDelete: DeleteType.CASCADE},
+  person: {type: GDBPersonModel, internalKey: 'cids:Person', onDelete: DeleteType.CASCADE},
   userType:{type: [Types.NamedIndividual], internalKey: ':UserType'},
   editorOf: {type: [Types.NamedIndividual], internalKey: ':editorOf'},
   reporterOf: {type: [Types.NamedIndividual], internalKey: ':reporterOf'},

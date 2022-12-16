@@ -46,7 +46,7 @@ async function superuserUpdateOrganization(req, res, next) {
       return res.status(400).json({success: false, message: 'Legal name is requested'});
     organization.legalName = form.legalName;
     organization.comment = form.comment;
-    organization.administrators = form.administrators;
+    organization.administrator = form.administrator;
     organization.reporters = form.reporters;
     organization.editors = form.editors;
     organization.researchers = form.researchers;

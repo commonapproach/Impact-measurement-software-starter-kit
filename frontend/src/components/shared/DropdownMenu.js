@@ -5,7 +5,7 @@ import { MoreVert as MoreVertIcon, Edit, Delete, OpenInBrowser } from '@mui/icon
 
 const ITEM_HEIGHT = 48;
 
-export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideViewOption}) {
+export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideViewOption, hideDeleteOption}) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -60,7 +60,8 @@ export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideVie
           Edit
         </MenuItem>
 
-        <MenuItem onClick={() => {
+        {!hideDeleteOption?
+          <MenuItem onClick={() => {
           handleClose();
           handleDelete(objectId);
         }}>
@@ -68,7 +69,8 @@ export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideVie
             <Delete fontSize="small" color="secondary"/>
           </ListItemIcon>
           Delete
-        </MenuItem>
+        </MenuItem>:
+          <div/>}
 
       </Menu>
     </div>

@@ -30,15 +30,15 @@ function Dashboard() {
       {/*             text="Edit Organization Profile for Home Agency"/>}*/}
 
       {userContext.userTypes.includes('superuser') || userContext.userTypes.includes('groupAdmin')?
-        <NavButton to={`/groups`} icon={<People/>}
+        <NavButton to={`/groups`} icon={<People/>} key={'groups'}
                   text="Manage Groups"/>:<div/>}
 
       {userContext.userTypes.includes('superuser')?
-        <NavButton to={`/organizations`} icon={<People/>}
+        <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
       <div/>}
 
-      {userContext.userTypes.includes('superuser')?<NavButton to={`/users`} icon={<People/>}
+      {userContext.userTypes.includes('superuser')?<NavButton to={`/users`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:<div/>}
 
 

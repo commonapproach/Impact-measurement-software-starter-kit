@@ -1,6 +1,6 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useContext} from "react";
 import {Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
@@ -11,6 +11,7 @@ import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
+import {UserContext} from "../../context";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -28,6 +29,7 @@ export default function AddEditOrganization() {
 
   const classes = useStyles();
   const navigate = useNavigate();
+  const userContext = useContext(UserContext);
   const {id} = useParams();
   const mode = id ? 'edit' : 'new';
   const {enqueueSnackbar} = useSnackbar();
@@ -58,25 +60,25 @@ export default function AddEditOrganization() {
 
   useEffect(() => {
     Promise.all([
-      fetchUsers('editor').then(({data}) => {
+      fetchUsers('editor', userContext.userTypes).then(({data}) => {
         data.map(editor => {
           options.editors[editor] = editor
         })
       }),
-      fetchUsers('reporter').then(({data}) => {
+      fetchUsers('reporter', userContext.userTypes).then(({data}) => {
         data.map(reporter => {
           options.reporters[reporter] = reporter
         })
       }),
-      fetchUsers('admin').then(({data}) => {
+      fetchUsers('admin', userContext.userTypes).then(({data}) => {
         options.administrators = data
       }),
-      fetchUsers('researcher').then(({data}) => {
+      fetchUsers('researcher', userContext.userTypes).then(({data}) => {
         data.map(researcher => {
           options.researchers[researcher] = researcher
         })
       }),
-      fetchUsers('superuser').then(({data}) => {
+      fetchUsers('superuser', userContext.userTypes).then(({data}) => {
         data.map((superuser) => {
           options.reporters[superuser] = superuser;
           options.editors[superuser] = superuser;
@@ -86,7 +88,7 @@ export default function AddEditOrganization() {
       }),
     ]).then(() => {
       if (mode === 'edit' && id) {
-        fetchOrganization(id).then(res => {
+        fetchOrganization(id, userContext.userTypes).then(res => {
           if (res.success) {
             const organization = res.organization;
             setForm({

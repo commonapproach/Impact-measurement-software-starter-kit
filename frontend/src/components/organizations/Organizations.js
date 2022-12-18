@@ -95,7 +95,7 @@ export default function Organizations() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption
+        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption hideDeleteOption={!userContext.userTypes.includes('superuser')}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -110,13 +110,14 @@ export default function Organizations() {
         data={state.data}
         columns={columns}
         idField="id"
-        customToolbar={
+        customToolbar={userContext.userTypes.includes('superuser')?
           <Chip
             onClick={() => navigate('/organizations/new')}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Organization"
-            variant="outlined"/>
+            variant="outlined"/>:
+          <div/>
         }
 
       />

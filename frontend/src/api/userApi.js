@@ -1,4 +1,4 @@
-import { deleteJson, getJson, postJson, putJson } from "./index";
+import {deleteJson, getJson, postJson, putJson} from "./index";
 
 /**
  * this will create a temporary account during user invite process
@@ -15,7 +15,7 @@ export function createUser(params) {
  * @returns {Promise<Response|any>}
  */
 export function verifyFirstEntryUser(token) {
-  return postJson('/api/verify/firstEntry', token)
+  return postJson('/api/verify/firstEntry', token);
 }
 
 /**
@@ -34,7 +34,7 @@ export function firstEntryUpdate(params) {
  * @returns {Promise<Response|any>}
  */
 export function fetchSecurityQuestionsByEmail(email) {
-  return putJson('/api/forgotPassword/securityQuestions/fetch', {email})
+  return putJson('/api/forgotPassword/securityQuestions/fetch', {email});
 }
 
 /**
@@ -44,11 +44,11 @@ export function fetchSecurityQuestionsByEmail(email) {
  */
 
 export function checkSecurityQuestion(params) {
-  return postJson('/api/forgotPassword/securityQuestions/check', params)
+  return postJson('/api/forgotPassword/securityQuestions/check', params);
 }
 
 export function LoginCheckSecurityQuestion(params) {
-  return postJson('/api/login/securityQuestions/check', params)
+  return postJson('/api/login/securityQuestions/check', params);
 }
 
 
@@ -58,7 +58,7 @@ export function LoginCheckSecurityQuestion(params) {
  * @returns {Promise<Response|any>}
  */
 export function sendVerificationEmail(params) {
-  return postJson('/api/forgotPassword/sendVerificationEmail', params)
+  return postJson('/api/forgotPassword/sendVerificationEmail', params);
 }
 
 /**
@@ -67,7 +67,7 @@ export function sendVerificationEmail(params) {
  * @returns {Promise<Response|any>}
  */
 export function verifyForgotPasswordUser(token) {
-  return postJson('/api/forgotPassword/resetPassword/verify', {token})
+  return postJson('/api/forgotPassword/resetPassword/verify', {token});
 }
 
 /**
@@ -76,7 +76,7 @@ export function verifyForgotPasswordUser(token) {
  * @returns {Promise<Response|any>}
  */
 export async function forgotPasswordSaveNewPassword(params) {
-  return postJson('/api/forgotPassword/resetPassword/saveNewPassword/', params)
+  return postJson('/api/forgotPassword/resetPassword/saveNewPassword/', params);
 }
 
 /**
@@ -86,7 +86,7 @@ export async function forgotPasswordSaveNewPassword(params) {
  * @returns {Promise<Response|any>}
  */
 export async function verifyChangePrimaryEmail(token) {
-  return postJson('/api/user/updatePrimaryEmail', {token})
+  return postJson('/api/user/updatePrimaryEmail', {token});
 }
 
 //have not been used so far.
@@ -102,9 +102,9 @@ export function createUsers(params) {
  * @returns {Promise<Response|any>}
  */
 export function getProfile(id, userTypes) {
-  if(userTypes.includes('superuser'))
-    return getJson('/api/superuser/user/profile/edit/' + id + '/')
-  return getJson('/api/general/profile/' + id + '/')
+  if (userTypes.includes('superuser'))
+    return getJson('/api/superuser/user/profile/edit/' + id + '/');
+  return getJson('/api/general/profile/' + id + '/');
 }
 
 //have not been used so far.
@@ -119,7 +119,7 @@ export function updateUser(id, params) {
  * @returns {Promise<Response|any>}
  */
 export async function updatePrimaryEmail(id, email) {
-  return postJson('/api/user/editProfile/updatePrimaryEmail/' + id + '/', {email})
+  return postJson('/api/user/editProfile/updatePrimaryEmail/' + id + '/', {email});
 }
 
 /**
@@ -129,13 +129,13 @@ export async function updatePrimaryEmail(id, email) {
  * @returns {Promise<*>}
  */
 export function updateProfile(id, params, userTypes) {
-  if(userTypes.includes('superuser'))
-    return postJson('/api/superuser/user/profile/' + id + '/', params)
+  if (userTypes.includes('superuser'))
+    return postJson('/api/superuser/user/profile/' + id + '/', params);
   return postJson('/api/general/profile/' + id + '/', params);
 }
 
 export function updateSecurityQuestion(id, params) {
-  return postJson('/api/general/profile/' + id + '/securityQuestions/', params)
+  return postJson('/api/general/profile/' + id + '/securityQuestions/', params);
 }
 
 /**
@@ -171,10 +171,17 @@ export function fetchUser(id) {
  * This function fetches all users.
  * @returns {Promise<any>}
  */
-export function fetchUsers(usertype) {
-  if(!usertype)
-    return getJson('/api/superuser/users/');
-  return getJson(`/api/superuser/users/${usertype}/`)
+export function fetchUsers(usertype, userTypes) {
+  if (userTypes.includes('superuser')) {
+    if (!usertype)
+      return getJson('/api/superuser/users/');
+    return getJson(`/api/superuser/users/${usertype}/`);
+  } else if(userTypes.includes('admin')){
+    if (!usertype)
+      return getJson('/api/admin/users/');
+    return getJson(`/api/admin/users/${usertype}/`);
+  }
+
 
 }
 

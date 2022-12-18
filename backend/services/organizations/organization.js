@@ -19,12 +19,30 @@ async function superuserFetchOrganization(req, res, next) {
   try {
     const {id} = req.params;
     if (!id)
-      return res.status(400).json({success: false, message: 'Id is needed'});
+      return res.status(400).json({success: false, message: 'Organization ID is needed'});
     const organization = await GDBOrganizationModel.findById(id);
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
     return res.status(200).json({success: true, organization: organization});
   } catch (e) {
+    next(e);
+  }
+}
+
+async function adminFetchOrganization(req, res, next) {
+  try {
+    const {id} = req.params;
+    const sessionId = req.session._id;
+    if (!id)
+      return res.status(400).json({success: false, message: 'Organization ID is needed'});
+    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['administrator']});
+    if (!organization)
+      return res.status(400).json({success: false, message: 'No such organization'});
+    if(organization.administrator._id !== sessionId)
+      return res.status(400).json({success: false, message: 'The user is not the admin of the organization'});
+    organization.administrator = `:userAccount_${organization.administrator._id}`;
+    return res.status(200).json({success: true, organization: organization});
+  }catch (e) {
     next(e);
   }
 }
@@ -78,5 +96,6 @@ module.exports = {
   superuserCreateOrganization,
   superuserFetchOrganization,
   superuserUpdateOrganization,
-  superuserDeleteOrganization
+  superuserDeleteOrganization,
+  adminFetchOrganization
 };

@@ -106,7 +106,7 @@ export default function Groups() {
       label: ' ',
       body: ({_id}) =>
         <DropdownMenu urlPrefix={'groups'} objectId={_id} hideDeleteOption={!userContext.userTypes.includes('superuser')}
-                      handleDelete={() => showDeleteDialog(_id)}/>
+                      hideViewOption handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 

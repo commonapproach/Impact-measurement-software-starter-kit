@@ -1,7 +1,7 @@
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {userType2UserTypeURI} = require("../../helpers/dicts");
-const {GraphDB} = require('../../utils/graphdb')
-const {SPARQL} = require('../../utils/graphdb/helpers')
+const {GraphDB} = require('../../utils/graphdb');
+const {SPARQL} = require('../../utils/graphdb/helpers');
 const superUserFetchUsers = async (req, res, next) => {
   const {userType} = req.params;
   if (!userType) {
@@ -12,20 +12,22 @@ const superUserFetchUsers = async (req, res, next) => {
       return res.status(400).json({success: false, message: 'Wrong userType'});
     }
 
-    const usersWithUsertype = []
+    const usersWithUsertype = [];
     let query = `
         PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
         select * where { 
 	          ?user :UserType :${userType}.
         }`;
     await GraphDB.sendSelectQuery(query, false, ({user}) => {
-      usersWithUsertype.push(SPARQL.getPrefixedURI(user.id) )
+      usersWithUsertype.push(SPARQL.getPrefixedURI(user.id));
     });
 
     return res.status(200).json({data: usersWithUsertype, success: true});
   }
 
 };
+
+const adminFetchUsers = superUserFetchUsers;
 
 const superuserDeleteUser = async (req, res, next) => {
   try {
@@ -40,4 +42,4 @@ const superuserDeleteUser = async (req, res, next) => {
 };
 
 
-module.exports = {superUserFetchUsers, superuserDeleteUser};
+module.exports = {superUserFetchUsers, superuserDeleteUser, adminFetchUsers};

@@ -9,8 +9,11 @@ export async function fetchOrganizations(userTypes) {
     return getJson('/api/admin/organizations');
 }
 
-export async function fetchOrganization(id) {
-  return getJson('/api/superuser/organization/' + id);
+export async function fetchOrganization(id, userTypes) {
+  if (userTypes.includes('superuser'))
+    return getJson('/api/superuser/organization/' + id);
+  if (userTypes.includes('admin'))
+    return getJson('/api/admin/organization/' + id);
 }
 
 export async function createOrganization(params) {

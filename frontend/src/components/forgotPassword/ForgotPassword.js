@@ -48,7 +48,7 @@ export default function ForgotPassword() {
         setState(state => ({...state, loadingButton: true}))
         if (state.group === 1) {
           // get the user security questions
-          const {success, message, securityQuestions} = await fetchSecurityQuestionsByEmail(state.form.group1.email)
+          const {success, securityQuestions} = await fetchSecurityQuestionsByEmail(state.form.group1.email)
           state.form.group2.securityQuestion1 = securityQuestions.splice(Math.floor(Math.random() * securityQuestions.length), 1)[0]
           state.form.group3.securityQuestion2 = securityQuestions.splice(Math.floor(Math.random() * securityQuestions.length), 1)[0]
           state.form.group4.securityQuestion3 = securityQuestions.splice(Math.floor(Math.random() * securityQuestions.length), 1)[0]

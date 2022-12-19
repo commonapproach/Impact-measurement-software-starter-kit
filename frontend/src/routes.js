@@ -36,6 +36,7 @@ const routes = (
     <Route path="/login" element={<LoginPane/>}/>
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
     <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
+    <Route path="/forgot-password" element={<ForgotPassword/>}/>
     {/*users*/}
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
@@ -56,7 +57,7 @@ const routes = (
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>
-    <Route path="/forgot-password" element={<ForgotPassword/>}/>
+
     <Route path="/update-primary-email/:token" element={<changePrimaryEmail/>}/>
 
     <Route path="/resetPassword/:token" element={<PrivateRoute element={ForgotPasswordResetPassword}/>}/>

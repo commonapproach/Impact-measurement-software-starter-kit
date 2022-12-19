@@ -27,6 +27,29 @@ const login = async (req, res, next) => {
   }
 };
 
+const getSecurityQuestionsByEmail = async (req, res, next) => {
+  try {
+    const {email} = req.params;
+    if (!email)
+      return res.status(400).json({
+        success: false, message: 'Email is required'
+      });
+    const userAccount = await GDBUserAccountModel.findOne({email: email.toLowerCase()}, {populates: ['securityQuestions']});
+    if (!userAccount) {
+      return res.status(400).json({success: false, message: 'No such user'});
+    }
+    const securityQuestions = [userAccount.securityQuestions[0].question, userAccount.securityQuestions[1].question, userAccount.securityQuestions[2].question];
+    return res.status(200).json({
+      success: true,
+      message: 'Success',
+      securityQuestions
+    });
+
+  } catch (e) {
+    next(e);
+  }
+}
+
 const getUserSecurityQuestions = async (req, res, next) => {
   const id = req.session._id;
   if (!id) {
@@ -101,4 +124,4 @@ const logout = async (req, res) => {
   return res.json({success: true});
 };
 
-module.exports = {login, logout, getUserSecurityQuestions, checkUserSecurityQuestion};
+module.exports = {login, logout, getUserSecurityQuestions, checkUserSecurityQuestion, getSecurityQuestionsByEmail};

@@ -34,7 +34,7 @@ export function firstEntryUpdate(params) {
  * @returns {Promise<Response|any>}
  */
 export function fetchSecurityQuestionsByEmail(email) {
-  return putJson('/api/forgotPassword/securityQuestions/fetch', {email});
+  return getJson('/api/forgotPassword/securityQuestions/fetch/' + email);
 }
 
 /**

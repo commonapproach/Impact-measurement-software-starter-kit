@@ -143,7 +143,7 @@ export default function AddEditOrganization() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateOrganization(id, form).then((res) => {
+      updateOrganization(id, form, userContext.userTypes).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
@@ -177,6 +177,7 @@ export default function AddEditOrganization() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Organization </Typography>
         <GeneralField
+          disabled={!userContext.userTypes.includes('superuser')}
           key={'legalName'}
           label={'Legal Name'}
           value={form.legalName}
@@ -217,6 +218,7 @@ export default function AddEditOrganization() {
         {/*  required = {true}*/}
         {/*/>*/}
         <SelectField
+          disabled={!userContext.userTypes.includes('superuser')}
           key={'administrator'}
           label={'Organization Administrator'}
           value={form.administrator}

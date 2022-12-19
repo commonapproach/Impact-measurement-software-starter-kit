@@ -20,8 +20,11 @@ export async function createOrganization(params) {
   return postJson('/api/superuser/organization/', params);
 }
 
-export async function updateOrganization(id, params) {
-  return putJson('/api/superuser/organization/' + id, params)
+export async function updateOrganization(id, params, userTypes) {
+  if(userTypes.includes('superuser'))
+    return putJson('/api/superuser/organization/' + id, params);
+  if(userTypes.includes('admin'))
+    return putJson('/api/admin/organization/' + id, params);
 }
 
 export async function deleteOrganization(id) {

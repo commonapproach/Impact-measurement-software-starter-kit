@@ -76,6 +76,37 @@ async function superuserUpdateOrganization(req, res, next) {
   } catch (e) {
     next(e);
   }
+};
+
+async function adminUpdateOrganization(req, res, next) {
+  try {
+    const {id} = req.params;
+    const form = req.body;
+
+    const sessionId = req.session._id;
+    if (!id)
+      return res.status(400).json({success: false, message: 'Id is needed'});
+    if (!form)
+      return res.status(400).json({success: false, message: 'Information is needed'});
+
+    const organization = await GDBOrganizationModel.findOne({_id: id, administrator: {_id: sessionId}});
+    if (!organization)
+      return res.status(400).json({success: false, message: 'No such organization'});
+
+    // admin shouldn't be able to edit legal name and administrator
+    organization.comment = form.comment;
+    organization.reporters = form.reporters;
+    organization.editors = form.editors;
+    organization.researchers = form.researchers;
+
+    await organization.save();
+    return res.status(200).json({
+      success: true,
+      message: 'Successfully updated organization ' + organization.legalName
+    });
+  } catch (e) {
+    next(e);
+  }
 }
 
 async function superuserDeleteOrganization(req, res, next) {
@@ -93,6 +124,7 @@ async function superuserDeleteOrganization(req, res, next) {
 }
 
 module.exports = {
+  adminUpdateOrganization,
   superuserCreateOrganization,
   superuserFetchOrganization,
   superuserUpdateOrganization,

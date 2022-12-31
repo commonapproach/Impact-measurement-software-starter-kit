@@ -12,7 +12,6 @@ const namespaces = {
   'schema': 'http://schema.org/',
   'foaf': 'http://xmlns.com/foaf/0.1/',
   'geo': 'http://www.w3.org/2003/01/geo/wgs84_pos#',
-
   'snmi': 'http://snmi#',
   'cp': 'http://helpseeker.co/compass#',
   'cids': 'http://ontology.eil.utoronto.ca/cids/cids#',

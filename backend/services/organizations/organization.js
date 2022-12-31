@@ -7,6 +7,9 @@ async function superuserCreateOrganization(req, res, next) {
       return res.status(400).json({success: false, message: 'Wrong information input'});
     if (!form.legalName)
       return res.status(400).json({success: false, message: 'Legal name is requested'});
+    if(!form.ID)
+      return res.status(400).json({success: false, message: 'Organization ID is requested'});
+    form.hasId = form.ID;
     const organization = GDBOrganizationModel(form);
     await organization.save();
     return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});
@@ -62,12 +65,15 @@ async function superuserUpdateOrganization(req, res, next) {
 
     if (!form.legalName)
       return res.status(400).json({success: false, message: 'Legal name is requested'});
+    if (!form.ID)
+      return res.status(400).json({success: false, message: 'ID is requested'});
     organization.legalName = form.legalName;
     organization.comment = form.comment;
     organization.administrator = form.administrator;
     organization.reporters = form.reporters;
     organization.editors = form.editors;
     organization.researchers = form.researchers;
+    organization.hasId = form.ID;
     await organization.save();
     return res.status(200).json({
       success: true,

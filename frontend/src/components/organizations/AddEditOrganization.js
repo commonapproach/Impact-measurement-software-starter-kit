@@ -44,6 +44,7 @@ export default function AddEditOrganization() {
 
   const [form, setForm] = useState({
     legalName: '',
+    ID: '',
     administrator: '',
     reporters: [],
     editors: [],
@@ -162,8 +163,11 @@ export default function AddEditOrganization() {
 
   const validate = () => {
     const error = {};
-    if (form.legalName === '') {
+    if (!form.legalName) {
       error.legalName = 'The field cannot be empty';
+    }
+    if (!form.ID) {
+      error.ID = 'The field cannot be empty';
     }
     setErrors(error);
     return Object.keys(error).length === 0;
@@ -195,6 +199,27 @@ export default function AddEditOrganization() {
 
           }}
         />
+
+        <GeneralField
+          disabled={!userContext.userTypes.includes('superuser')}
+          key={'ID'}
+          label={'ID'}
+          value={form.ID}
+          required
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.ID = e.target.value}
+          error={!!errors.ID}
+          helperText={errors.ID}
+          onBlur={() => {
+            if (form.ID === '') {
+              setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, ID: ''}));
+            }
+
+          }}
+        />
+
         {/*<Dropdown*/}
         {/*  label="Users"*/}
         {/*  key={'users'}*/}

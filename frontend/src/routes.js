@@ -27,6 +27,8 @@ import EditUserForm from "./components/users/EditUserForm";
 import Groups from "./components/groups/Groups";
 import AddEditGroup from "./components/groups/AddEditGroup";
 import Profile from "./components/userProfile/Profile";
+import Domains from "./components/domain/domains";
+import AddEditDomain from "./components/domain/addEditDomain";
 
 const routes = (
   <Routes>
@@ -54,6 +56,10 @@ const routes = (
     <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
     <Route path="/profile/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
     <Route path="/profile/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
+    {/*domain*/}
+    <Route path="/domains" element={<PrivateRoute element={Domains}/>}/>
+    <Route path="/domains/new" element={<PrivateRoute element={AddEditDomain}/>}/>
+    <Route path="/domains/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

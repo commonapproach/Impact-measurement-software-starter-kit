@@ -1,5 +1,6 @@
 module.exports = {
   userTypesRoute: require('./userTypes'),
   profileRoute: require('./profiles'),
-  dynamicClassInstancesRoute: require('./dynamicClassInstances')
+  dynamicClassInstancesRoute: require('./dynamicClassInstances'),
+  domainsRoute: require('./domains')
 }

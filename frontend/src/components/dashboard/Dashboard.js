@@ -42,8 +42,8 @@ function Dashboard() {
                   text="Manage Users"/>:<div/>}
 
 
-      {/*<NavButton to={'/characteristics'} icon={<Edit/>}*/}
-      {/*           text="Manage Characteristics"/>*/}
+      <NavButton to={'/domains'} icon={<Edit/>}
+                 text="Manage Domains"/>
 
       {/*<NavButton to={'/questions'} icon={<Edit/>}*/}
       {/*           text="Manage Questions"/>*/}

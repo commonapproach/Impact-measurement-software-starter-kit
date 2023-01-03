@@ -4,5 +4,6 @@ module.exports = {
   organizationsRoute: require('./organizations'),
   organizationRoute: require('./organization'),
   groupsRoute: require('./groups'),
-  groupRoute: require('./group')
+  groupRoute: require('./group'),
+  domainRoute: require('./domain')
 }

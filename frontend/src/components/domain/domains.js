@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
-import {fetchDomains} from "../../api/domainApi";
+import {deleteDomain, fetchDomains} from "../../api/domainApi";
 
 export default function Domains() {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ export default function Domains() {
 
   const handleDelete = async (id, form) => {
 
-    deleteOrganization(id).then(({success, message})=>{
+    deleteDomain(id).then(({success, message})=>{
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,

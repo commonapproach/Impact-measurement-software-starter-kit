@@ -27,5 +27,17 @@ const fetchDomain = async (req, res, next) => {
   }
 }
 
+const deleteDomain = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    if(!id)
+      return res.status(400).json({success: false, message: 'Id is needed'});
+    await GDBDomainModel.findAndDelete({_id: id});
+    return res.status(200).json({success: true});
+  }catch (e) {
+    next(e);
+  }
+}
 
-module.exports = {createDomain, fetchDomain};
+
+module.exports = {createDomain, fetchDomain, deleteDomain};

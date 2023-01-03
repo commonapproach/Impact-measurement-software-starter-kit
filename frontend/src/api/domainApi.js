@@ -1,4 +1,4 @@
-import {deleteJson, getJson, postJson} from "./index";
+import {deleteJson, getJson, postJson, putJson} from "./index";
 
 export async function createDomain(params) {
   return postJson('/api/superuser/domain/', params);
@@ -13,5 +13,9 @@ export async function fetchDomain(id) {
 }
 
 export async function deleteDomain(id) {
-  return deleteJson('/api/superuser/domain/' + id + '/')
+  return deleteJson('/api/superuser/domain/' + id + '/');
+}
+
+export async function updateDomain(id, params) {
+  return putJson('/api/superuser/domain/' + id + '/', params);
 }

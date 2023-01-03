@@ -7,7 +7,7 @@ import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {createOrganization, fetchOrganization, updateOrganization} from "../../api/organizationApi";
-import {createDomain, fetchDomain} from "../../api/domainApi";
+import {createDomain, fetchDomain, updateDomain} from "../../api/domainApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 
@@ -96,17 +96,17 @@ export default function AddEditDomain() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateOrganization(id, form, userContext.userTypes).then((res) => {
+      updateDomain(id, form).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/organizations');
+          navigate('/domains');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
         }
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating the domain', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }

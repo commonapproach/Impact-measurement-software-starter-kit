@@ -7,3 +7,7 @@ export async function createDomain(params) {
 export async function fetchDomains(params) {
   return getJson('/api/general/domains/', params);
 }
+
+export async function fetchDomain(id) {
+  return getJson('/api/general/domain/' + id + '/')
+}

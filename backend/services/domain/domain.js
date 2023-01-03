@@ -13,5 +13,19 @@ const createDomain = async (req, res, next) => {
   }
 };
 
+const fetchDomain = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    if(!id)
+      return res.status(400).json({success: false, message: 'Id is needed'});
+    const domain = await GDBDomainModel.findOne({_id: id});
+    if(!domain)
+      return res.status(400).json({success: false, message: 'No such domain'});
+    return res.status(200).json({success: true, domain});
+  }catch (e) {
+    next(e);
+  }
+}
 
-module.exports = {createDomain};
+
+module.exports = {createDomain, fetchDomain};

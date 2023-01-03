@@ -7,7 +7,7 @@ import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {createOrganization, fetchOrganization, updateOrganization} from "../../api/organizationApi";
-import {createDomain} from "../../api/domainApi";
+import {createDomain, fetchDomain} from "../../api/domainApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 
@@ -55,16 +55,11 @@ export default function AddEditDomain() {
   useEffect(() => {
 
       if (mode === 'edit' && id) {
-        fetchOrganization(id, userContext.userTypes).then(res => {
+        fetchDomain(id).then(res => {
           if (res.success) {
-            const organization = res.organization;
             setForm({
-              legalName: organization.legalName || '',
-              administrator: organization.administrator || '',
-              reporters: organization.reporters || [],
-              editors: organization.editors || [],
-              researchers: organization.researchers || [],
-              comment: organization.comment || ''
+              name: res.domain.name,
+              description: res.domain.description
             });
             setLoading(false);
           }

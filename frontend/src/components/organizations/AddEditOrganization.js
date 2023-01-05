@@ -99,15 +99,17 @@ export default function AddEditOrganization() {
       if (mode === 'edit' && id) {
         fetchOrganization(id, userContext.userTypes).then(res => {
           if (res.success) {
-            const organization = res.organization;
+            const {organization, outcomes} = res;
             setForm({
               legalName: organization.legalName || '',
+              ID: organization.ID || '',
               administrator: organization.administrator || '',
               reporters: organization.reporters || [],
               editors: organization.editors || [],
               researchers: organization.researchers || [],
               comment: organization.comment || ''
             });
+            setOutcomeForm(outcomes)
             setLoading(false);
           }
         });

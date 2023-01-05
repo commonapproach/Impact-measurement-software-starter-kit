@@ -42,10 +42,17 @@ async function superuserFetchOrganization(req, res, next) {
     const {id} = req.params;
     if (!id)
       return res.status(400).json({success: false, message: 'Organization ID is needed'});
-    const organization = await GDBOrganizationModel.findById(id);
+    const organization = await GDBOrganizationModel.findOne({_id:id}, {populates: ['hasId', 'hasOutcomes']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
-    return res.status(200).json({success: true, organization: organization});
+    const outcomes = organization.hasOutcomes;
+    outcomes.map(outcome => {
+      outcome.domain = outcome.domain.split('_')[1]
+    })
+    organization.ID = organization.hasId?.hasIdentifier;
+    delete organization.hasOutcomes;
+    delete organization.hasId;
+    return res.status(200).json({success: true, organization, outcomes});
   } catch (e) {
     next(e);
   }

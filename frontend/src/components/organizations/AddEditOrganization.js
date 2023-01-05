@@ -12,12 +12,14 @@ import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
+import OutcomeField from "../shared/OutcomeField";
 
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
   },
   button: {
+    marginLeft: 10,
     marginTop: 12,
     marginBottom: 0,
     length: 100
@@ -42,6 +44,10 @@ export default function AddEditOrganization() {
     {}
   );
 
+  const [outcomeFormErrors, setOutcomeFormErrors] = useState([{
+
+  }])
+
   const [form, setForm] = useState({
     legalName: '',
     ID: '',
@@ -51,6 +57,8 @@ export default function AddEditOrganization() {
     researchers: [],
     comment: '',
   });
+  const [outcomeForm, setOutcomeForm] = useState([
+  ]);
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     reporters: {},
@@ -63,21 +71,21 @@ export default function AddEditOrganization() {
     Promise.all([
       fetchUsers('editor', userContext.userTypes).then(({data}) => {
         data.map(editor => {
-          options.editors[editor] = editor
-        })
+          options.editors[editor] = editor;
+        });
       }),
       fetchUsers('reporter', userContext.userTypes).then(({data}) => {
         data.map(reporter => {
-          options.reporters[reporter] = reporter
-        })
+          options.reporters[reporter] = reporter;
+        });
       }),
       fetchUsers('admin', userContext.userTypes).then(({data}) => {
-        options.administrators = data
+        options.administrators = data;
       }),
       fetchUsers('researcher', userContext.userTypes).then(({data}) => {
         data.map(researcher => {
-          options.researchers[researcher] = researcher
-        })
+          options.researchers[researcher] = researcher;
+        });
       }),
       fetchUsers('superuser', userContext.userTypes).then(({data}) => {
         data.map((superuser) => {
@@ -85,7 +93,7 @@ export default function AddEditOrganization() {
           options.editors[superuser] = superuser;
           options.researchers[superuser] = superuser;
           options.administrators.push(superuser);
-        })
+        });
       }),
     ]).then(() => {
       if (mode === 'edit' && id) {
@@ -121,15 +129,15 @@ export default function AddEditOrganization() {
 
   const handleSubmit = () => {
     if (validate()) {
+      console.log('valid')
       setState(state => ({...state, submitDialog: true}));
     }
   };
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
-    console.log(mode);
     if (mode === 'new') {
-      createOrganization(form).then((ret) => {
+      createOrganization({form, outcomeForm}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
@@ -170,7 +178,28 @@ export default function AddEditOrganization() {
       error.ID = 'The field cannot be empty';
     }
     setErrors(error);
-    return Object.keys(error).length === 0;
+
+    const outcomeFormErrors = [];
+    outcomeForm.map((outcome, index) => {
+      console.log(outcome)
+      if(!outcome.name) {
+        if (!outcomeFormErrors[index])
+          outcomeFormErrors[index] = {};
+        outcomeFormErrors[index].name = 'This field cannot be empty';
+      }
+      if(!outcome.domain) {
+        if (!outcomeFormErrors[index])
+          outcomeFormErrors[index] = {};
+        outcomeFormErrors[index].domain = 'This field cannot be empty';
+      }
+      if(!outcome.description) {
+        if (!outcomeFormErrors[index])
+          outcomeFormErrors[index] = {};
+        outcomeFormErrors[index].description = 'This field cannot be empty';
+      }
+    })
+    setOutcomeFormErrors(outcomeFormErrors);
+    return Object.keys(error).length === 0 && outcomeFormErrors.length === 0;
   };
 
   if (loading)
@@ -179,7 +208,7 @@ export default function AddEditOrganization() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Organization </Typography>
+        <Typography variant={'h4'}> Organization Basic</Typography>
         <GeneralField
           disabled={!userContext.userTypes.includes('superuser')}
           key={'legalName'}
@@ -301,11 +330,11 @@ export default function AddEditOrganization() {
           onChange={e => form.comment = e.target.value}
           error={!!errors.comment}
           helperText={errors.comment}
+          minRows={4}
+          multiline
         />
 
-        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-          Submit
-        </Button>
+
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
@@ -317,6 +346,70 @@ export default function AddEditOrganization() {
                                       onClick={handleConfirm} children="confirm" autoFocus/>]}
                      open={state.submitDialog}/>
       </Paper>
-    </Container>);
+      <Paper sx={{p: 2}} variant={'outlined'}>
+        <Typography variant={'h4'}> Outcomes </Typography>
+        {outcomeForm.map((outcome, index) => {
+          console.log(outcome, index);
+          return <OutcomeField
+            importErrors={outcomeFormErrors[index]}
+            key={'outcome' + index}
+            label={'outcome ' + (index + 1)}
+            value={outcome}
+            required
+            onChange={(state) => {
+              setOutcomeForm(outcomeForm => {
+                outcomeForm[index] = state;
+                return outcomeForm
+              })
+            }}
+          />;
+        })}
+        {/*<OutcomeField*/}
+        {/*value={outcomeForm[0]}*/}
+        {/*onChange={(state) => {*/}
+        {/*  setOutcomeForm(outcomeForm => ({...outcomeForm, 0: state}))*/}
+        {/*}}*/}
+        {/*label={1}*/}
+        {/*/>*/}
 
-}
+
+        <Button variant="contained" color="primary" className={classes.button}
+                onClick={
+                  () => {
+                    setOutcomeForm(outcomes => (outcomes.concat({name: '', description: '', domain: undefined})));
+                    // outcomeForm.push({name: '', description: '', domain: ''})
+                  }
+                }
+        >
+          Add new
+        </Button>
+        <Button variant="contained" color="primary" className={classes.button}
+                onClick={
+                  () => {
+                    setOutcomeForm(outcomes => {
+                      return outcomes.splice(0, outcomes.length - 1);
+                    });
+                  }
+                  }
+                  >
+                  Remove
+                  </Button>
+
+                  <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                  dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
+                  'Are you sure you want to update this Organization?'}
+                  buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                  key={'cancel'}>{'cancel'}</Button>,
+                  <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                  key={'confirm'}
+                  onClick={handleConfirm} children="confirm" autoFocus/>]}
+                  open={state.submitDialog}/>
+                  </Paper>
+      <Paper sx={{p: 2}} variant={'outlined'}>
+        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+          Submit
+        </Button></Paper>
+
+                  </Container>);
+
+                }

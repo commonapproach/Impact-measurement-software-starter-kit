@@ -1,16 +1,35 @@
-const {GDBOrganizationModel} = require("../../models/organization");
+const {GDBOrganizationModel, GDBOrganizationIdModel} = require("../../models/organization");
+const {Server400Error} = require("../../utils");
+const {GDBOutcomeModel} = require("../../models/outcome");
+const {GDBDomainModel} = require("../../models/domain");
 
 async function superuserCreateOrganization(req, res, next) {
   try {
-    const form = req.body;
-    if (!form)
+    const {form, outcomeForm} = req.body;
+    if (!form || !outcomeForm)
       return res.status(400).json({success: false, message: 'Wrong information input'});
     if (!form.legalName)
       return res.status(400).json({success: false, message: 'Legal name is requested'});
     if(!form.ID)
       return res.status(400).json({success: false, message: 'Organization ID is requested'});
-    form.hasId = form.ID;
+    form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID})
     const organization = GDBOrganizationModel(form);
+    for(let i = 0; i < outcomeForm.length; i++){
+      const outcome = outcomeForm[i];
+      if(!outcome.name || !outcome.description || !outcome.domain)
+        return res.status(400).json({success: false, message: 'Wrong information input'});
+      const domainObject= await GDBDomainModel.findOne({_id:outcome.domain});
+      if(!domainObject)
+        return res.status(400).json({success: false, message: 'Wrong domain id'});
+      const outcomeObject = GDBOutcomeModel({name: outcome.name, description: outcome.description, domain: domainObject
+      });
+      if(!organization.hasOutcomes) {
+        organization.hasOutcomes = []
+      }
+      await outcomeObject.save()
+      organization.hasOutcomes.push(outcomeObject);
+    }
+
     await organization.save();
     return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});
   } catch (e) {

@@ -24,5 +24,5 @@ const GDBOrganizationModel = createGraphDBModel({
 });
 
 module.exports = {
-  GDBOrganizationModel
+  GDBOrganizationModel, GDBOrganizationIdModel
 }

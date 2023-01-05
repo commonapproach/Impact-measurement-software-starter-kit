@@ -1,4 +1,4 @@
-const {createGraphDBModel, Types} = require("../utils/graphdb");
+const {createGraphDBModel, Types, DeleteType} = require("../utils/graphdb");
 const {GDBUserAccountModel} = require("./userAccount");
 const {GDBIndicatorModel} = require("./indicator");
 const {GDBOutcomeModel} = require("./outcome");
@@ -16,9 +16,9 @@ const GDBOrganizationModel = createGraphDBModel({
   editor: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},
   researcher: {type: [GDBUserAccountModel], internalKey: ':hasResearcher'},
   legalName:{type: String, internalKey:'tove_org:hasLegalName'},
-  hasId: {type: GDBOrganizationIdModel, internalKey: 'tove_org:hasID'},
+  hasId: {type: GDBOrganizationIdModel, internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE},
   hasIndicator: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
-  hasOutcome: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome'}
+  hasOutcome: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE}
 }, {
   rdfTypes: ['cids:Organization'], name: 'organization'
 });

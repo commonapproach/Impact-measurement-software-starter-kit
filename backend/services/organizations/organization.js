@@ -115,35 +115,11 @@ async function superuserUpdateOrganization(req, res, next) {
       // drop previous one
       await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
       // and add a new one
-      GDBOrganizationIdModel({hasIdentifier: form.ID});
+      organization.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
     }
-
 
     // handle outcomes
-    if(!organization.hasOutcomes)
-      organization.hasOutcomes = [];
-    // loop through previous outcomes, delete those not in the form
-    for (let i = 0; i < organization.hasOutcomes.length; i++) {
-      if (!includeThisPreviousOutcome(outcomeForm, organization.hasOutcomes[i])) {
-        await GDBOutcomeModel.findOneAndDelete({_id: organization.hasOutcomes[i]._id});
-        organization.hasOutcomes[i] = undefined;
-      }
-    }
-    organization.hasOutcomes = organization.hasOutcomes.filter((outcome) => {
-      return !!outcome
-    })
-    // loop through new form, add those not in previous outcomes to the form
-    const buf = [];
-    for (let i = 0; i < outcomeForm.length; i++) {
-      if (!includeThisNewOutcome(organization.hasOutcomes, outcomeForm[i])) {
-        const domain = await GDBDomainModel.findOne({_id: outcomeForm[i].domain});
-        if(!domain)
-          return res.status(400).json({success: false, message: 'No such domain'});
-        outcomeForm[i].domain = domain;
-        buf.push(GDBOutcomeModel(outcomeForm[i]));
-      }
-    }
-    organization.hasOutcomes = organization.hasOutcomes.concat(buf);
+    await updateOutcomes(organization, outcomeForm)
 
     await organization.save();
     return res.status(200).json({
@@ -157,9 +133,10 @@ async function superuserUpdateOrganization(req, res, next) {
 
 /*
 Check is theNewOutcome inside previous outcomes
-return true if yes
+if yes, update the previous outcome and return true
+if no, return false
  */
-function includeThisNewOutcome(outcomes, theOutcome) {
+async function includeThisNewOutcome(outcomes, theOutcome) {
   if (!theOutcome._id) // must be a new outcome
     return false;
   for (let outcome of outcomes) {
@@ -167,8 +144,20 @@ function includeThisNewOutcome(outcomes, theOutcome) {
       throw new Server400Error('No _id in previous outcomes');
     }
 
-    if (outcome._id === theOutcome._id)
+    if (outcome._id === theOutcome._id){
+      outcome.name = theOutcome.name;
+      outcome.description = theOutcome.description;
+      if(outcome.domain.split('_')[1] !== theOutcome.domain){
+        console.log(outcome, theOutcome)
+        const domainObject = await GDBDomainModel.findOne({_id:theOutcome.domain});
+        if(!domainObject)
+          throw new Server400Error('No such domain');
+        console.log(domainObject)
+        outcome.domain = domainObject;
+      }
       return true;
+    }
+
   }
   return false;
 }
@@ -188,12 +177,42 @@ function includeThisPreviousOutcome(outcomes, theOutcome) {
     }
   }
   return false;
+};
+
+const updateOutcomes = async (organization, outcomeForm) => {
+  if(!organization.hasOutcomes)
+    organization.hasOutcomes = [];
+  // loop through previous outcomes, delete those not in the form
+  for (let i = 0; i < organization.hasOutcomes.length; i++) {
+    if (!includeThisPreviousOutcome(outcomeForm, organization.hasOutcomes[i])) {
+      await GDBOutcomeModel.findOneAndDelete({_id: organization.hasOutcomes[i]._id});
+      organization.hasOutcomes[i] = undefined;
+    }
+  }
+  organization.hasOutcomes = organization.hasOutcomes.filter((outcome) => {
+    return !!outcome
+  })
+  // loop through new form,
+  // add those not in previous outcomes to the form,
+  // update those who were in previous outcomes
+  const buf = [];
+  for (let i = 0; i < outcomeForm.length; i++) {
+    if (!await includeThisNewOutcome(organization.hasOutcomes, outcomeForm[i])) {
+      // the new outcome is not in previous outcomes
+      const domain = await GDBDomainModel.findOne({_id: outcomeForm[i].domain});
+      if(!domain)
+        return res.status(400).json({success: false, message: 'No such domain'});
+      outcomeForm[i].domain = domain;
+      buf.push(GDBOutcomeModel(outcomeForm[i]));
+    }
+  }
+  organization.hasOutcomes = organization.hasOutcomes.concat(buf);
 }
 
 async function adminUpdateOrganization(req, res, next) {
   try {
     const {id} = req.params;
-    const form = req.body;
+    const {form, outcomeForm} = req.body;
 
     const sessionId = req.session._id;
     if (!id)
@@ -201,7 +220,7 @@ async function adminUpdateOrganization(req, res, next) {
     if (!form)
       return res.status(400).json({success: false, message: 'Information is needed'});
 
-    const organization = await GDBOrganizationModel.findOne({_id: id, administrator: {_id: sessionId}});
+    const organization = await GDBOrganizationModel.findOne({_id: id, administrator: {_id: sessionId}}, {populates: ['hasId', 'hasOutcomes']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
 
@@ -211,11 +230,15 @@ async function adminUpdateOrganization(req, res, next) {
     organization.editors = form.editors;
     organization.researchers = form.researchers;
 
+    // handle outcomes
+    await updateOutcomes(organization, outcomeForm);
+
     await organization.save();
     return res.status(200).json({
       success: true,
       message: 'Successfully updated organization ' + organization.legalName
     });
+
   } catch (e) {
     next(e);
   }

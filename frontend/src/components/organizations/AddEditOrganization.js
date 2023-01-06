@@ -170,6 +170,7 @@ export default function AddEditOrganization() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
+      console.log(outcomeForm)
       updateOrganization(id, {form, outcomeForm}, userContext.userTypes).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
@@ -199,7 +200,6 @@ export default function AddEditOrganization() {
 
     const outcomeFormErrors = [];
     outcomeForm.map((outcome, index) => {
-      console.log(outcome)
       if(!outcome.name) {
         if (!outcomeFormErrors[index])
           outcomeFormErrors[index] = {};
@@ -367,7 +367,6 @@ export default function AddEditOrganization() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Outcomes </Typography>
         {outcomeForm.map((outcome, index) => {
-          console.log(outcome, index);
           return <OutcomeField
             importErrors={outcomeFormErrors[index]}
             key={'outcome' + index}

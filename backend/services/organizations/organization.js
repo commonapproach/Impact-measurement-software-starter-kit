@@ -10,23 +10,24 @@ async function superuserCreateOrganization(req, res, next) {
       return res.status(400).json({success: false, message: 'Wrong information input'});
     if (!form.legalName)
       return res.status(400).json({success: false, message: 'Legal name is requested'});
-    if(!form.ID)
+    if (!form.ID)
       return res.status(400).json({success: false, message: 'Organization ID is requested'});
-    form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID})
+    form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
     const organization = GDBOrganizationModel(form);
-    for(let i = 0; i < outcomeForm.length; i++){
+    for (let i = 0; i < outcomeForm.length; i++) {
       const outcome = outcomeForm[i];
-      if(!outcome.name || !outcome.description || !outcome.domain)
+      if (!outcome.name || !outcome.description || !outcome.domain)
         return res.status(400).json({success: false, message: 'Wrong information input'});
-      const domainObject= await GDBDomainModel.findOne({_id:outcome.domain});
-      if(!domainObject)
+      const domainObject = await GDBDomainModel.findOne({_id: outcome.domain});
+      if (!domainObject)
         return res.status(400).json({success: false, message: 'Wrong domain id'});
-      const outcomeObject = GDBOutcomeModel({name: outcome.name, description: outcome.description, domain: domainObject
+      const outcomeObject = GDBOutcomeModel({
+        name: outcome.name, description: outcome.description, domain: domainObject
       });
-      if(!organization.hasOutcomes) {
-        organization.hasOutcomes = []
+      if (!organization.hasOutcomes) {
+        organization.hasOutcomes = [];
       }
-      await outcomeObject.save()
+      await outcomeObject.save();
       organization.hasOutcomes.push(outcomeObject);
     }
 
@@ -42,11 +43,11 @@ async function superuserFetchOrganization(req, res, next) {
     const {id} = req.params;
     if (!id)
       return res.status(400).json({success: false, message: 'Organization ID is needed'});
-    const organization = await GDBOrganizationModel.findOne({_id:id}, {populates: ['hasId', 'hasOutcomes']});
+    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
     const outcomes = organization.hasOutcomes || [];
-    if(outcomes.length > 0){
+    if (outcomes.length > 0) {
       outcomes.map(outcome => {
         outcome.domain = outcome.domain.split('_')[1];
       });
@@ -69,11 +70,11 @@ async function adminFetchOrganization(req, res, next) {
     const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['administrator']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
-    if(organization.administrator._id !== sessionId)
+    if (organization.administrator._id !== sessionId)
       return res.status(400).json({success: false, message: 'The user is not the admin of the organization'});
     organization.administrator = `:userAccount_${organization.administrator._id}`;
     return res.status(200).json({success: true, organization: organization});
-  }catch (e) {
+  } catch (e) {
     next(e);
   }
 }
@@ -81,13 +82,13 @@ async function adminFetchOrganization(req, res, next) {
 async function superuserUpdateOrganization(req, res, next) {
   try {
     const {id} = req.params;
-    const form = req.body;
+    const {form, outcomeForm} = req.body;
     if (!id)
       return res.status(400).json({success: false, message: 'Id is needed'});
-    if (!form)
-      return res.status(400).json({success: false, message: 'Information is needed'});
+    if (!form || !outcomeForm)
+      return res.status(400).json({success: false, message: 'Form and outcomeForm are needed'});
 
-    const organization = await GDBOrganizationModel.findById(id);
+    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
 
@@ -101,7 +102,40 @@ async function superuserUpdateOrganization(req, res, next) {
     organization.reporters = form.reporters;
     organization.editors = form.editors;
     organization.researchers = form.researchers;
-    organization.hasId = form.ID;
+    if (organization.hasId.hasIdentifier !== form.ID) {
+      // drop previous one
+      await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
+      // and add a new one
+      GDBOrganizationIdModel({hasIdentifier: form.ID});
+    }
+
+
+    // handle outcomes
+    if(!organization.hasOutcomes)
+      organization.hasOutcomes = [];
+    // loop through previous outcomes, delete those not in the form
+    for (let i = 0; i < organization.hasOutcomes.length; i++) {
+      if (!includeThisPreviousOutcome(outcomeForm, organization.hasOutcomes[i])) {
+        await GDBOutcomeModel.findOneAndDelete({_id: organization.hasOutcomes[i]._id});
+        organization.hasOutcomes[i] = undefined;
+      }
+    }
+    organization.hasOutcomes = organization.hasOutcomes.filter((outcome) => {
+      return !!outcome
+    })
+    // loop through new form, add those not in previous outcomes to the form
+    const buf = [];
+    for (let i = 0; i < outcomeForm.length; i++) {
+      if (!includeThisNewOutcome(organization.hasOutcomes, outcomeForm[i])) {
+        const domain = await GDBDomainModel.findOne({_id: outcomeForm[i].domain});
+        if(!domain)
+          return res.status(400).json({success: false, message: 'No such domain'});
+        outcomeForm[i].domain = domain;
+        buf.push(GDBOutcomeModel(outcomeForm[i]));
+      }
+    }
+    organization.hasOutcomes = organization.hasOutcomes.concat(buf);
+
     await organization.save();
     return res.status(200).json({
       success: true,
@@ -111,6 +145,41 @@ async function superuserUpdateOrganization(req, res, next) {
     next(e);
   }
 };
+
+/*
+Check is theNewOutcome inside previous outcomes
+return true if yes
+ */
+function includeThisNewOutcome(outcomes, theOutcome) {
+  if (!theOutcome._id) // must be a new outcome
+    return false;
+  for (let outcome of outcomes) {
+    if (!outcome._id){
+      throw new Server400Error('No _id in previous outcomes');
+    }
+
+    if (outcome._id === theOutcome._id)
+      return true;
+  }
+  return false;
+}
+
+/*
+Check is theOutcome inside new outcomes
+return true if yes
+ */
+function includeThisPreviousOutcome(outcomes, theOutcome) {
+  if (!theOutcome._id) {
+    console.log(theOutcome)
+    throw new Server400Error('The previous outcome does not have _id');
+  }
+  for (let newOutcome of outcomes) {
+    if (newOutcome._id && newOutcome._id === theOutcome._id) {
+      return true;
+    }
+  }
+  return false;
+}
 
 async function adminUpdateOrganization(req, res, next) {
   try {

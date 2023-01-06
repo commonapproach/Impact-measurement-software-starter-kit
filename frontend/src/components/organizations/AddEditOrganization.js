@@ -62,12 +62,20 @@ export default function AddEditOrganization() {
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     reporters: {},
-    editors: [],
-    researchers: [],
+    editors: {},
+    researchers: {},
     administrators: [],
   });
 
+  const [trigger, setTrigger] = useState(false)
+
   useEffect(() => {
+    const options = {
+      reporters: {},
+      editors: {},
+      researchers: {},
+      administrators: [],
+    }
     Promise.all([
       fetchUsers('editor', userContext.userTypes).then(({data}) => {
         data.map(editor => {
@@ -93,9 +101,12 @@ export default function AddEditOrganization() {
           options.editors[superuser] = superuser;
           options.researchers[superuser] = superuser;
           options.administrators.push(superuser);
+
         });
       }),
     ]).then(() => {
+      setOptions(options)
+    }).then(() => {
       if (mode === 'edit' && id) {
         fetchOrganization(id, userContext.userTypes).then(res => {
           if (res.success) {
@@ -131,7 +142,7 @@ export default function AddEditOrganization() {
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log('valid')
+      console.log(outcomeForm)
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -154,7 +165,7 @@ export default function AddEditOrganization() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateOrganization(id, form, userContext.userTypes).then((res) => {
+      updateOrganization(id, {form, outcomeForm}, userContext.userTypes).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');

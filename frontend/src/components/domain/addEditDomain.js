@@ -6,7 +6,6 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createOrganization, fetchOrganization, updateOrganization} from "../../api/organizationApi";
 import {createDomain, fetchDomain, updateDomain} from "../../api/domainApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
@@ -53,7 +52,10 @@ export default function AddEditDomain() {
   });
 
   useEffect(() => {
-
+      if(!userContext.userTypes.includes('superuser')){
+        navigate('/organizations');
+        enqueueSnackbar("Superuser only", {variant: 'error'});
+      }
       if (mode === 'edit' && id) {
         fetchDomain(id).then(res => {
           if (res.success) {

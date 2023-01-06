@@ -75,28 +75,12 @@ export default function Domains() {
         return description;
       }
     },
-    // {
-    //   label: 'Last name',
-    //   body: ({person}) => {
-    //     if(person && person.familyName)
-    //       return person.familyName
-    //     return 'Not Provided'
-    //   }
-    // },
-    // {
-    //   label: 'Phone Number',
-    //   body: ({primaryContact}) => {
-    //     if (primaryContact && primaryContact.telephone)
-    //       return formatPhoneNumber(primaryContact.telephone);
-    //     return 'Not Provided';
-    //   },
-    // },
 
     {
       label: ' ',
       body: ({_id}) =>
         <DropdownMenu urlPrefix={'domains'} objectId={_id} hideViewOption hideDeleteOption={!userContext.userTypes.includes('superuser')}
-                      handleDelete={() => showDeleteDialog(_id)}/>
+                      hideEditOption={!userContext.userTypes.includes('superuser')} handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 

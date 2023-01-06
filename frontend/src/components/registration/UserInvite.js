@@ -1,14 +1,12 @@
 import React, {useEffect, useState, useContext} from 'react';
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate,} from "react-router-dom";
 
-import {defaultInvitationFields} from "../../constants/default_fields";
 import {Button, Container, Typography} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import {createUser} from "../../api/userApi";
 import {Loading} from "../shared";
 import {AlertDialog} from "../shared/Dialogs";
-import {isFieldEmpty, verifyEmail} from "../../helpers";
-import {REQUIRED_HELPER_TEXT} from "../../constants";
+import {verifyEmail} from "../../helpers";
 import LoadingButton from "../shared/LoadingButton";
 import {UserContext} from "../../context";
 import {fetchUserTypes} from "../../api/userTypesApi";
@@ -193,7 +191,6 @@ export default function UserInvite() {
         key={'middleName'}
         label={'Middle Name'}
         value={state.form.middleName}
-        required
         onChange={e => state.form.middleName = e.target.value}
         error={!!state.errors.middleName}
         helperText={state.errors.middleName}

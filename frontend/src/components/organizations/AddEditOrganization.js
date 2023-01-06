@@ -123,6 +123,11 @@ export default function AddEditOrganization() {
             setOutcomeForm(outcomes)
             setLoading(false);
           }
+        }).catch(e => {
+          if (e.json)
+            setErrors(e.json);
+          setLoading(false);
+          enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
         });
       } else if (mode === 'edit' && !id) {
         navigate('/organizations');

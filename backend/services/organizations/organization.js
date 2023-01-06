@@ -67,13 +67,22 @@ async function adminFetchOrganization(req, res, next) {
     const sessionId = req.session._id;
     if (!id)
       return res.status(400).json({success: false, message: 'Organization ID is needed'});
-    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['administrator']});
+    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['administrator', 'hasId', 'hasOutcomes']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
     if (organization.administrator._id !== sessionId)
       return res.status(400).json({success: false, message: 'The user is not the admin of the organization'});
     organization.administrator = `:userAccount_${organization.administrator._id}`;
-    return res.status(200).json({success: true, organization: organization});
+    const outcomes = organization.hasOutcomes || [];
+    if (outcomes.length > 0) {
+      outcomes.map(outcome => {
+        outcome.domain = outcome.domain.split('_')[1];
+      });
+    }
+    organization.ID = organization.hasId?.hasIdentifier;
+    delete organization.hasOutcomes;
+    delete organization.hasId;
+    return res.status(200).json({success: true, organization, outcomes});
   } catch (e) {
     next(e);
   }

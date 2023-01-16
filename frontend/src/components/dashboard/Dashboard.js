@@ -10,7 +10,6 @@ import {NavButton} from "./NavButton";
 
 function Dashboard() {
   const userContext = useContext(UserContext);
-  console.log(userContext);
 
   // if (userContext.userTypes.includes('superuser'))
   //   return <DashboardForSuperUser/>;
@@ -42,11 +41,8 @@ function Dashboard() {
                   text="Manage Users"/>:<div/>}
 
 
-      <NavButton to={'/domains'} icon={<Edit/>}
+      <NavButton to={'/domains'} icon={<Edit/>} key={'domains'}
                  text="Manage Domains"/>
-
-      {/*<NavButton to={'/questions'} icon={<Edit/>}*/}
-      {/*           text="Manage Questions"/>*/}
 
       {/*<NavButton to={'/needs'} icon={<Edit/>}*/}
       {/*           text="Manage Needs"/>*/}

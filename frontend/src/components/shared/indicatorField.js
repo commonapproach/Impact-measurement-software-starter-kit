@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
+import {Autocomplete, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchDomains} from "../../api/domainApi";
 
 
 const filterOptions = createFilterOptions({
@@ -35,30 +34,14 @@ function LoadingAutoComplete({label, options, property, state, onChange, disable
   );
 }
 
-export default function OutcomeField({value: defaultValue, required, onChange, label, disabled, importErrors}) {
+export default function IndicatorField({value: defaultValue, required, onChange, label, disabled, importErrors}) {
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({domain: {}});
 
-  const [loading, setLoading] = useState(true);
 
   const [errors, setErrors] = useState({...importErrors});
 
-  useEffect(() => {
-    Promise.all([
-      fetchDomains()
-        .then(res => {
-          if (res.success)
-            res.domains.map(
-              domain => {
-                options.domain[domain._id] = domain.name;
-              }
-            );
-        }),
-    ]).then(() => setLoading(false));
-
-  }, []);
 
   useEffect(() => {
     setErrors({...importErrors});
@@ -76,12 +59,12 @@ export default function OutcomeField({value: defaultValue, required, onChange, l
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
       <Typography variant="h5">
-        {loading && <CircularProgress color="inherit" size={20}/>} {label} {required ? '*' : ''}
+         {label} {required ? '*' : ''}
       </Typography>
-      {!loading &&
+      {
         <>
           <Grid container columnSpacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={8}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -103,27 +86,7 @@ export default function OutcomeField({value: defaultValue, required, onChange, l
                 }
               />
             </Grid>
-            <Grid item xs={6}>
-              <LoadingAutoComplete
-                label="Domain"
-                options={options}
-                property={'domain'}
-                state={state}
-                onChange={handleChange}
-                error={!!errors.domain}
-                helperText={errors.domain}
-                required={required}
-                disabled={disabled}
-                onBlur={() => {
-                  if (!state.domain) {
-                    setErrors(errors => ({...errors, domain: 'This field cannot be empty'}));
-                  }else {
-                    setErrors(errors => ({...errors, domain: null}));
-                  }
-                }
-                }
-              />
-            </Grid>
+
             <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}

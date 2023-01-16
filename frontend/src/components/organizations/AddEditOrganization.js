@@ -1,7 +1,7 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
-import {Loading} from "../shared";
+import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
@@ -24,6 +24,11 @@ const useStyles = makeStyles(() => ({
     marginBottom: 0,
     length: 100
   },
+  link: {
+    marginTop: 20,
+    marginLeft: 15,
+    color: '#007dff',
+  }
 }));
 
 
@@ -354,6 +359,7 @@ export default function AddEditOrganization() {
 
 
 
+
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
                        'Are you sure you want to update this Organization?'}
@@ -421,11 +427,20 @@ export default function AddEditOrganization() {
                   key={'confirm'}
                   onClick={handleConfirm} children="confirm" autoFocus/>]}
                   open={state.submitDialog}/>
+        <Link to={'/indicators/' + id}>
+        <Typography variant="body2" className={classes.link}>
+          Add/Manage Indicators?
+        </Typography>
+        </Link>
                   </Paper>
-      <Paper sx={{p: 2}} variant={'outlined'}>
+
+
+
+        <Paper sx={{p: 2}} variant={'outlined'}>
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit
-        </Button></Paper>
+        </Button>
+        </Paper>
 
                   </Container>);
 

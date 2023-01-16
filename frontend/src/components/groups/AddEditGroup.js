@@ -61,17 +61,18 @@ export default function AddEditGroup() {
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
     Promise.all([
-      fetchOrganizations(userContext.userTypes).then(({organizations}) => {
+      fetchOrganizations(userContext.userTypes)
+        .then(({organizations}) => {
         organizations.map(organization => {
           options.organizations[':organization_' + organization._id] = organization.legalName;
         })
       }),
       userContext.userTypes.includes('superuser')?
-      fetchUsers('groupAdmin').then(({data}) => {
+      fetchUsers('groupAdmin', userContext.userTypes).then(({data}) => {
         options.administrators = data
       }):null,
       userContext.userTypes.includes('superuser')?
-      fetchUsers('superuser').then(({data}) => {
+      fetchUsers('superuser', userContext.userTypes,).then(({data}) => {
         data.map((superuser) => {
           options.administrators.push(superuser);
         })

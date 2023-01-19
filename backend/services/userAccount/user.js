@@ -138,7 +138,13 @@ async function initUserAccounts() {
 
     const userAccount = GDBUserAccountModel({
       email: 'superuser@pathfinder.ca',
-      userTypes: [':superuser'],
+      // userTypes: [':superuser'],
+      isSuperuser: true,
+      editorOf: [],
+      reporterOf: [],
+      administratorOf: [],
+      groupAdminOf: [],
+      researcherOf: [],
       securityQuestions: [
         securityQuestion1, securityQuestion2, securityQuestion3
       ],

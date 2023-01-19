@@ -17,13 +17,13 @@ const GDBUserAccountModel = createGraphDBModel({
   hash: {type: String, internalKey: ':hasHash'},
   salt: {type: String, internalKey: ':hasSalt'},
   person: {type: GDBPersonModel, internalKey: 'cids:forPerson', onDelete: DeleteType.CASCADE},
-  userType:{type: [Types.NamedIndividual], internalKey: ':userType'},
-  // isSuperuser: {type: Boolean, internalKey: ':isSuperuser'},
-  // editorOf: {type: [Types.NamedIndividual], internalKey: ':editorOf'},
-  // reporterOf: {type: [Types.NamedIndividual], internalKey: ':reporterOf'},
-  // administratorOf: {type: [Types.NamedIndividual], internalKey: ':administratorOf'},
-  // groupAdminOf: {type: [Types.NamedIndividual], internalKey: ':administratorOf'},
-  // researcherOf: {type: [Types.NamedIndividual], internalKey: ':researcherOf'},
+  // userType:{type: [Types.NamedIndividual], internalKey: ':userType'},
+  isSuperuser: {type: Boolean, internalKey: ':isSuperuser'},
+  editorOf: {type: [Number], internalKey: ':editorOf'},
+  reporterOf: {type: [Number], internalKey: ':reporterOf'},
+  administratorOf: {type: [Number], internalKey: ':administratorOf'},
+  groupAdminOf: {type: [Number], internalKey: ':administratorOf'},
+  researcherOf: {type: [Number], internalKey: ':researcherOf'},
   // Exact 3 questions, the answer should be case-insensitive.
   securityQuestion: {type: [GDBSecurityQuestion], internalKey: ':hasSecurityQuestion', onDelete: DeleteType.CASCADE}
 

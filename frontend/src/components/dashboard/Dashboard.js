@@ -28,16 +28,16 @@ function Dashboard() {
       {/*  <NavButton to={`/provider/${organization.id}/edit/organization`} icon={<Edit/>}*/}
       {/*             text="Edit Organization Profile for Home Agency"/>}*/}
 
-      {userContext.userTypes.includes('superuser') || userContext.userTypes.includes('groupAdmin')?
+      {userContext.isSuperuser || userContext.groupAdminOf.length > 0?
         <NavButton to={`/groups`} icon={<People/>} key={'groups'}
                   text="Manage Groups"/>:<div/>}
 
-      {userContext.userTypes.includes('superuser') || userContext.userTypes.includes('admin')?
+      {userContext.isSuperuser || userContext.administratorOf.length > 0?
         <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
       <div/>}
 
-      {userContext.userTypes.includes('superuser')?<NavButton to={`/users`} icon={<People/>} key={'users'}
+      {userContext.isSuperuser?<NavButton to={`/users`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:<div/>}
 
 

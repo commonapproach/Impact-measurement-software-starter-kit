@@ -5,7 +5,6 @@ export const defaultUserContext = {
   givenName:'',
   familyName:'',
   email: '',
-  userTypes: [],
   errorMessage:[],
 }
 

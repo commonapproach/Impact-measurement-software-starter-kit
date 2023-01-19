@@ -96,17 +96,29 @@ const checkUserSecurityQuestion = async (req, res, next) => {
         const match = await Hashing.validatePassword(answer, securityQuestion.hash, securityQuestion.salt);
         if (match) {
           req.session.email = userAccount.email;
-          req.session.userTypes =  userAccount.userTypes.map(usertypeURI => {
-            return userTypeURI2UserType[usertypeURI]
-          })
+          // req.session.userTypes =  userAccount.userTypes.map(usertypeURI => {
+          //   return userTypeURI2UserType[usertypeURI]
+          // })
+          req.session.isSuperuser = userAccount.isSuperuser;
+          req.session.editorOf = userAccount.editorOf;
+          req.session.reporterOf = userAccount.reporterOf;
+          req.session.administratorOf = userAccount.administratorOf;
+          req.session.groupAdminOf = userAccount.groupAdminOf;
+          req.session.researcherOf = userAccount.researcherOf;
           return res.status(200).json({success: true, matched: true, message: 'matched',
             userAccount: {
               person: userAccount.person,
               email: userAccount.email,
               _id: userAccount._id,
-              userTypes: userAccount.userTypes.map(usertypeURI => {
-                return userTypeURI2UserType[usertypeURI]
-              })
+              // userTypes: userAccount.userTypes.map(usertypeURI => {
+              //   return userTypeURI2UserType[usertypeURI]
+              // })
+              isSuperuser: userAccount.isSuperuser,
+              editorOf: userAccount.editorOf,
+              reporterOf: userAccount.reporterOf,
+              administratorOf: userAccount.administratorOf,
+              groupAdminOf: userAccount.groupAdminOf,
+              researcherOf: userAccount.researcherOf,
             }});
         } else {
           return res.status(203).json({success: false, matched: false, message: 'incorrect'});

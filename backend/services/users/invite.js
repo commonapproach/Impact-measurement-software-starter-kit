@@ -18,21 +18,17 @@ const inviteNewUser = async (req, res, next) => {
 
 
   try {
-    let {email, userTypes, firstName, lastName, middleName} = req.body.form;
+    let {email, firstName, lastName, middleName} = req.body.form;
     if (!email)
       return res.status(400).json({success: false, message: 'Email is required to invite new user.'});
-    if (!userTypes)
-      return res.status(400).json({success: false, message: 'userTypes is required to invite new user.'});
-    if (!Array.isArray(userTypes) || userTypes.length === 0)
-      return res.status(400).json({success: false, message: 'userTypes is not valid.'});
     if(!firstName || !lastName)
       return res.status(400).json({success: false, message: 'Name is required to invite new user.'});
 
     email = email.toLowerCase();
-    userTypes.map(userType => {
-      if (!userTypeURI2UserType[userType])
-        throw new Server400Error('userTypes is not valid.');
-    })
+    // userTypes.map(userType => {
+    //   if (!userTypeURI2UserType[userType])
+    //     throw new Server400Error('userTypes is not valid.');
+    // })
 
     const userAccount = await GDBUserAccountModel.findOne(
       {email: email}, {populates: ['person']}
@@ -40,7 +36,12 @@ const inviteNewUser = async (req, res, next) => {
     if(!userAccount){
       // the user is a new user, store its data inside the database
       const userAccount = GDBUserAccountModel({
-        email, userTypes
+        email, isSuperuser: [],
+        editorOf: [],
+        reporterOf: [],
+        administratorOf: [],
+        groupAdminOf: [],
+        researcherOf: [],
       });
       userAccount.person = {givenName: firstName, familyName: lastName, middleName}
       // send email
@@ -55,7 +56,6 @@ const inviteNewUser = async (req, res, next) => {
       return res.status(400).json({success: false, message: 'The email is occupied by an account.'});
     } else {
       // the user is already a temporary user
-      userAccount.userTypes = userTypes;
       userAccount.person.middleName = middleName;
       userAccount.person.givenName = firstName;
       userAccount.person.familyName = lastName;

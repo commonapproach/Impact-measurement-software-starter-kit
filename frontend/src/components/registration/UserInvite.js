@@ -32,7 +32,6 @@ export default function UserInvite() {
   const {enqueueSnackbar} = useSnackbar();
   const [state, setState] = useState({
     form: {
-      userTypes: [],
       email: '',
       firstName: '',
       lastName: '',
@@ -40,30 +39,17 @@ export default function UserInvite() {
     },
     errors: {},
     dialog: false,
-    loading: true,
     loadingButton: false
   });
 
-  const [userTypes, setUserTypes] = useState({});
-
-  useEffect(() => {
-    fetchUserTypes().then(({userTypes}) => {
-      setUserTypes(userTypes);
-      setState(state => ({...state, loading: false}));
-    }).catch(e => {
-      setState(state => ({...state, errors: e.json}));
-      navigate('/dashboard');
-      enqueueSnackbar('Fail to fetch userTypes', {variant: 'error'});
-    });
-  }, []);
 
   /**
    * @returns {boolean} true if valid.
    */
   const validate = () => {
     const errors = {};
-    if (state.form.userTypes.length === 0)
-      errors.userTypes = 'This field is required';
+    // if (state.form.userTypes.length === 0)
+    //   errors.userTypes = 'This field is required';
     verifyEmail(state.form.email, 'email', errors);
     if(!state.form.firstName)
       errors.firstName = 'This field is required';
@@ -105,8 +91,8 @@ export default function UserInvite() {
   };
 
 
-  if (state.loading)
-    return <Loading message={'Fetching UserTypes'}/>;
+  // if (state.loading)
+  //   return <Loading message={'Fetching UserTypes'}/>;
 
   return (
     <Container className={classes.root}>
@@ -114,28 +100,28 @@ export default function UserInvite() {
         {'Create new user'}
       </Typography>
 
-      <Dropdown
-        label="User Types"
-        key={'userTypes'}
-        value={state.form.userTypes}
-        onChange={e => {
-          state.form.userTypes = e.target.value;
-        }}
-        options={userTypes}
-        onBlur={() => {
-          if (state.form.userTypes.length === 0) {
-            setState(state => ({...state, errors: {...state.errors, 'userTypes': 'This field is required'}}));
-          } else {
-            setState(state => ({...state, errors: {...state.errors, 'userTypes': null}}));
-          }
-        }
-        }
-        error={!!state.errors.userTypes}
-        helperText={state.errors.userTypes}
-        // sx={{mb: 2}}
-        noEmpty
-        required={true}
-      />
+      {/*<Dropdown*/}
+      {/*  label="User Types"*/}
+      {/*  key={'userTypes'}*/}
+      {/*  value={state.form.userTypes}*/}
+      {/*  onChange={e => {*/}
+      {/*    state.form.userTypes = e.target.value;*/}
+      {/*  }}*/}
+      {/*  options={userTypes}*/}
+      {/*  onBlur={() => {*/}
+      {/*    if (state.form.userTypes.length === 0) {*/}
+      {/*      setState(state => ({...state, errors: {...state.errors, 'userTypes': 'This field is required'}}));*/}
+      {/*    } else {*/}
+      {/*      setState(state => ({...state, errors: {...state.errors, 'userTypes': null}}));*/}
+      {/*    }*/}
+      {/*  }*/}
+      {/*  }*/}
+      {/*  error={!!state.errors.userTypes}*/}
+      {/*  helperText={state.errors.userTypes}*/}
+      {/*  // sx={{mb: 2}}*/}
+      {/*  noEmpty*/}
+      {/*  required={true}*/}
+      {/*/>*/}
 
       <GeneralField
         key={'email'}
@@ -196,7 +182,7 @@ export default function UserInvite() {
         helperText={state.errors.middleName}
       />
       <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-        Submit
+        Invite
       </Button>
       <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                    dialogTitle={'Are you sure you want to submit?'}

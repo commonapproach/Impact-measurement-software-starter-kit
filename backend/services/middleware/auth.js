@@ -14,7 +14,7 @@ const authMiddleware = (message) => (req, res, next) => {
 
 const authSuperuserMiddleware = (message) => (req, res, next) => {
   // Only logged-in user has this property
-  if (req.session.userTypes.includes('superuser')) {
+  if (req.session.isSuperuser) {
     next();
   } else {
     res.status(403).json({error: true, message: message || 'Wrong Authentication.'});

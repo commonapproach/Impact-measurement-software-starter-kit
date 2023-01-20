@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useContext} from 'react';
-import { Chip, Container } from "@mui/material";
-import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
-import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
-import { deleteUser, fetchUsers } from "../../api/userApi";
-import { useNavigate } from "react-router-dom";
-import { formatPhoneNumber } from "../../helpers/phone_number_helpers";
-import { useSnackbar } from 'notistack';
+import React, {useEffect, useState, useContext} from 'react';
+import {Chip, Container} from "@mui/material";
+import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
+import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
+import {deleteUser, fetchUsers} from "../../api/userApi";
+import {useNavigate} from "react-router-dom";
+import {formatPhoneNumber} from "../../helpers/phone_number_helpers";
+import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 
 export default function Users() {
@@ -22,13 +22,13 @@ export default function Users() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchUsers(null, userContext.userTypes).then(data => {
+    fetchUsers(null, userContext).then(data => {
       // console.log(data)
       setState(state => ({...state, loading: false, data: data.data}));
     }).catch(e => {
-      setState(state => ({...state, loading: false}))
+      setState(state => ({...state, loading: false}));
       navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'})
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
   }, [trigger]);
 
@@ -42,21 +42,21 @@ export default function Users() {
   const handleDelete = async (id, form) => {
 
 
-      deleteUser(id).then(({success, message})=>{
-        if (success) {
-          setState(state => ({
-            ...state, showDeleteDialog: false,
-          }));
-          setTrigger(!trigger);
-          enqueueSnackbar(message || "Success", {variant: 'success'})
-        }
-      }).catch((e)=>{
+    deleteUser(id).then(({success, message}) => {
+      if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
         }));
         setTrigger(!trigger);
-        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-      });
+        enqueueSnackbar(message || "Success", {variant: 'success'});
+      }
+    }).catch((e) => {
+      setState(state => ({
+        ...state, showDeleteDialog: false,
+      }));
+      setTrigger(!trigger);
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    });
 
   };
 
@@ -66,24 +66,24 @@ export default function Users() {
       body: ({_id, email}) => {
         return <Link color to={`/users/${_id}`}>
           {email}
-        </Link>
+        </Link>;
       },
       sortBy: ({email}) => email
     },
     {
       label: 'First name',
       body: ({person}) => {
-        if(person && person.givenName)
-          return person.givenName
-        return 'Not Provided'
+        if (person && person.givenName)
+          return person.givenName;
+        return 'Not Provided';
       }
     },
     {
       label: 'Last name',
       body: ({person}) => {
-        if(person && person.familyName)
-          return person.familyName
-        return 'Not Provided'
+        if (person && person.familyName)
+          return person.familyName;
+        return 'Not Provided';
       }
     },
     {
@@ -97,7 +97,29 @@ export default function Users() {
 
     {
       label: 'Role',
-      body: ({userTypes}) => userTypes
+      body: ({isSuperuser, groupAdminOf, administratorOf, editorOf, reporterOf, researcherOf}) => {
+        let ret = '';
+        if (isSuperuser)
+          ret += 'Superuser, ';
+        if (groupAdminOf?.length)
+          ret += 'Group Admin, '
+        if(administratorOf?.length)
+          ret += 'Admin, ';
+        if (editorOf?.length)
+          ret += 'Editor, ';
+        if (reporterOf?.length)
+          ret += 'Reporter, '
+        if (researcherOf?.length)
+          ret += 'Researcher, '
+
+        if(ret === '') {
+          ret = 'Null';
+        } else {
+          ret = ret.slice(0, -2)
+        }
+        return ret;
+
+      }
     },
     {
       label: ' ',
@@ -124,7 +146,7 @@ export default function Users() {
             icon={<AddIcon/>}
             label="Invite User"
             variant="outlined"/>
-          }
+        }
 
       />
       <DeleteModal

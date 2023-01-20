@@ -43,7 +43,7 @@ const authGroupAdminMiddleware = (message) => (req, res, next) => {
 };
 
 const authAdminMiddleware = (message) => (req, res, next) => {
-  if (req.session.userTypes.includes('admin')) {
+  if (req.session.administratorOf.length) {
     next();
   } else {
     res.status(403).json({error: true, message: message || 'Wrong Authentication.'});

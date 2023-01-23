@@ -22,7 +22,7 @@ export default function Organizations() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOrganizations(userContext.userTypes).then(res => {
+    fetchOrganizations(userContext).then(res => {
       if(res.success)
       setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {
@@ -95,7 +95,7 @@ export default function Organizations() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption hideDeleteOption={!userContext.userTypes.includes('superuser')}
+        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption hideDeleteOption={!userContext.isSuperuser}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -110,7 +110,7 @@ export default function Organizations() {
         data={state.data}
         columns={columns}
         idField="id"
-        customToolbar={userContext.userTypes.includes('superuser')?
+        customToolbar={userContext.isSuperuser?
           <Chip
             onClick={() => navigate('/organizations/new')}
             color="primary"

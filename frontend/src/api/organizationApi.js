@@ -1,11 +1,11 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
-export async function fetchOrganizations(userTypes) {
-  if(userTypes.includes('superuser'))
+export async function fetchOrganizations(userContext) {
+  if(userContext.isSuperuser)
     return getJson('/api/superuser/organizations');
-  if(userTypes.includes('groupAdmin'))
+  if(userContext.groupAdminOf.length > 0)
     return getJson('/api/groupAdmin/organizations');
-  if(userTypes.includes('admin'))
+  if(userContext.administratorOf.length > 0)
     return getJson('/api/admin/organizations');
 }
 

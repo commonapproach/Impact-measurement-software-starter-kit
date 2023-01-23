@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState,useContext } from 'react';
+import { useNavigate, useParams,} from "react-router-dom";
 import { Button, Container, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import {
@@ -17,6 +17,7 @@ import GeneralField from "../shared/fields/GeneralField";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchUserTypes} from "../../api/userTypesApi";
 import { useSnackbar } from 'notistack';
+import {UserContext} from "../../context";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -40,11 +41,11 @@ export default function EditUserForm() {
   const [dialogSubmit, setDialogSubmit] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
-  const [userTypeOptions, setUserTypeOptions] = useState({});
   const {enqueueSnackbar} = useSnackbar();
+  const userContext = useContext(UserContext);
 
   useEffect(() => {
-    fetchUser(id).then(res => {
+    fetchUser(id, userContext).then(res => {
       if(res.success) {
         const user = res.user
         setUser(user);
@@ -54,15 +55,12 @@ export default function EditUserForm() {
           // familyName: (user.primaryContact && user.primaryContact.familyName) ?
           //   user.primaryContact.familyName : 'Not Provided',
           email: user.email,
-          userTypes: user.userTypes,
+          isSuperuser: user.isSuperuser,
+          // userTypes: user.userTypes,
           // telephone: (user.primaryContact && user.primaryContact.telephone) ?
           //   formatPhoneNumber(user.primaryContact.telephone) : 'Not Provided'
         })
       }
-    }).then(() => {
-      fetchUserTypes().then(({userTypes})=>{
-        setUserTypeOptions(userTypes);
-      })
     }).then(() => {
       setLoading(false);
     }).catch(e => {
@@ -78,9 +76,9 @@ export default function EditUserForm() {
    */
   const validate = () => {
     const newErrors = {};
-    if(form.userTypes.length === 0){
-      newErrors.userTypes = 'This field cannot be empty';
-    }
+    // if(form.userTypes.length === 0){
+    //   newErrors.userTypes = 'This field cannot be empty';
+    // }
     // for (const [field, option] of Object.entries(userProfileFields)) {
     //   const isEmpty = isFieldEmpty(form[field]);
     //
@@ -146,7 +144,7 @@ export default function EditUserForm() {
   return (
     <Container className={classes.root}>
       <Typography variant="h5">
-        {'Edit user'}
+        {'View User Account'}
       </Typography>
 
       <GeneralField
@@ -159,46 +157,70 @@ export default function EditUserForm() {
         error={!!errors.email}
         helperText={errors.email}
         />
+      <Typography variant="h6">
+        {'Is superuser: ' + form.isSuperuser}
+      </Typography>
 
-      <Dropdown
-        label="User Types"
-        key={'userTypes'}
-        value={form.userTypes}
-        onChange={e => {
-          form.userTypes = e.target.value
-        }}
-        options={userTypeOptions}
-        onBlur = {() => {
-          if(form.userTypes.length === 0) {
-            setErrors(errors => ({...errors, 'userTypes': 'This field is required'}));
-          } else {
-            setErrors(errors => ({...errors, 'userTypes': null}));
-          }
-        }
-        }
-        error={!!errors.userTypes}
-        helperText={errors.userTypes}
-        // sx={{mb: 2}}
-        noEmpty
-        required = {true}
-      />
+      <Typography variant="h6">
+        {'Administrator of: ' + (form.administratorOf?form.administratorOf:'')}
+      </Typography>
+
+      <Typography variant="h6">
+        {'Group Administrator of: ' + (form.groupAdminOf?form.groupAdminOf:'')}
+      </Typography>
+
+      <Typography variant="h6">
+        {'Editor of: ' + (form.editorOf?form.editorOf:'')}
+      </Typography>
+
+      <Typography variant="h6">
+        {'Reporter of: ' + (form.reporterOf?form.reporterOf:'')}
+      </Typography>
+
+      <Typography variant="h6">
+        {'Researcher Of: ' + (form.researcherOf?form.researcherOf:'')}
+      </Typography>
+
+
+      {/*<Dropdown*/}
+      {/*  label="User Types"*/}
+      {/*  key={'userTypes'}*/}
+      {/*  value={form.userTypes}*/}
+      {/*  onChange={e => {*/}
+      {/*    form.userTypes = e.target.value*/}
+      {/*  }}*/}
+      {/*  options={userTypeOptions}*/}
+      {/*  onBlur = {() => {*/}
+      {/*    if(form.userTypes.length === 0) {*/}
+      {/*      setErrors(errors => ({...errors, 'userTypes': 'This field is required'}));*/}
+      {/*    } else {*/}
+      {/*      setErrors(errors => ({...errors, 'userTypes': null}));*/}
+      {/*    }*/}
+      {/*  }*/}
+      {/*  }*/}
+      {/*  error={!!errors.userTypes}*/}
+      {/*  helperText={errors.userTypes}*/}
+      {/*  // sx={{mb: 2}}*/}
+      {/*  noEmpty*/}
+      {/*  required = {true}*/}
+      {/*/>*/}
 
       {/* Button for cancelling account info changes */}
-      <Button variant="contained" color="primary" className={classes.button}
-              onClick={() => navigate('/users/')}>
-        Cancel Changes
-      </Button>
+      {/*<Button variant="contained" color="primary" className={classes.button}*/}
+      {/*        onClick={() => navigate('/users/')}>*/}
+      {/*  Cancel Changes*/}
+      {/*</Button>*/}
 
-      <Button variant="contained" color="primary" className={classes.button}
-              onClick={() => navigate('/profile/' + id + '/edit')} key={'editProfile'}>
-        User Profile
-      </Button>
+      {/*<Button variant="contained" color="primary" className={classes.button}*/}
+      {/*        onClick={() => navigate('/profile/' + id + '/edit')} key={'editProfile'}>*/}
+      {/*  User Profile*/}
+      {/*</Button>*/}
 
-      {/* Button for submitting account info changes */}
-      <Button variant="contained" color="primary" className={classes.button}
-              onClick={handleSubmitChanges} key={'Submit Changes'}>
-        Submit Changes
-      </Button>
+      {/*/!* Button for submitting account info changes *!/*/}
+      {/*<Button variant="contained" color="primary" className={classes.button}*/}
+      {/*        onClick={handleSubmitChanges} key={'Submit Changes'}>*/}
+      {/*  Submit Changes*/}
+      {/*</Button>*/}
 
 
       {/* Alert prompt for submitting changes */}

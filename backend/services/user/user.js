@@ -26,15 +26,14 @@ const superuserFetchUserById = async (req, res, next) => {
 const superuserUpdateUserById = async (req, res, next) => {
   try {
     const {id} = req.params;
-    const {email, userTypes} = req.body;
+    const {email,} = req.body;
     if(!id)
       return res.status(400).json({success: false, message: 'Wrong URI'});
-    if(!email || userTypes.length === 0)
+    if(!email)
       return res.status(400).json({success: false, message: 'Wrong information given'});
     const user = await GDBUserAccountModel.findOne({_id: id, email: email});
     if (!user)
       return res.status(400).json({success: false, message: 'No such user'});
-    user.userTypes = userTypes;
     await user.save();
     return res.status(200).json({success: true});
   } catch (e) {

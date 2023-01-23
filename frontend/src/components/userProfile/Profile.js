@@ -78,7 +78,7 @@ export default function Profile() {
         navigate('/dashboard');
         enqueueSnackbar('A user can only visualize its own profile.', {variant: 'error'});
       }
-      getProfile(id, userContext.userTypes).then(({success, person}) => {
+      getProfile(id, userContext).then(({success, person}) => {
         if (success) {
           if(person.phoneNumber)
             person.phoneNumber = `+ ${person.phoneNumber.countryCode} ${person.phoneNumber.phoneNumber}`;

@@ -101,8 +101,8 @@ export function createUsers(params) {
  * @param id
  * @returns {Promise<Response|any>}
  */
-export function getProfile(id, userTypes) {
-  if (userTypes.includes('superuser'))
+export function getProfile(id, userContext) {
+  if (userContext.isSuperuser)
     return getJson('/api/superuser/user/profile/edit/' + id + '/');
   return getJson('/api/general/profile/' + id + '/');
 }
@@ -128,8 +128,8 @@ export async function updatePrimaryEmail(id, email) {
  * @param params
  * @returns {Promise<*>}
  */
-export function updateProfile(id, params, userTypes) {
-  if (userTypes.includes('superuser'))
+export function updateProfile(id, params, userContext) {
+  if (userContext.isSuperuser)
     return postJson('/api/superuser/user/profile/' + id + '/', params);
   return postJson('/api/general/profile/' + id + '/', params);
 }
@@ -163,8 +163,9 @@ export async function updatePassword(id, params) {
  * @param id
  * @returns {Promise<any>}
  */
-export function fetchUser(id) {
-  return getJson('/api/superuser/user/' + id + '/');
+export function fetchUser(id, userContext) {
+  if(userContext.isSuperuser)
+    return getJson('/api/superuser/user/' + id + '/');
 }
 
 /**

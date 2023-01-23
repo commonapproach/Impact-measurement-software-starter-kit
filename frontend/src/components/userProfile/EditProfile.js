@@ -36,7 +36,6 @@ export default function EditProfile() {
   const navigate = useNavigate();
   const {id} = useParams();
   const userContext = useContext(UserContext);
-  console.log(userContext)
   const {enqueueSnackbar} = useSnackbar();
   const [form, setForm] = useState({
     familyName: '',
@@ -56,7 +55,7 @@ export default function EditProfile() {
 
 
   useEffect(() => {
-    getProfile(id, userContext.userTypes).then(({success, person}) => {
+    getProfile(id, userContext).then(({success, person}) => {
       if (success) {
         if(person.phoneNumber)
           person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
@@ -105,7 +104,7 @@ export default function EditProfile() {
   // cancel change button handler
   const handleDialogCancel = () => {
     setDialogQuitEdit(false);
-    navigate('/profile/' + id);
+    navigate('/users/' + id + '/edit');
   };
 
 
@@ -135,7 +134,7 @@ export default function EditProfile() {
 
       setLoadingButton(true);
 
-      const {success} = await updateProfile(id, updateForm, userContext.userTypes);
+      const {success} = await updateProfile(id, updateForm, userContext);
       if (success) {
         setLoadingButton(false);
         setDialogSubmit(false);

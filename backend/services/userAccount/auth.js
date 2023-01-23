@@ -100,11 +100,11 @@ const checkUserSecurityQuestion = async (req, res, next) => {
           //   return userTypeURI2UserType[usertypeURI]
           // })
           req.session.isSuperuser = userAccount.isSuperuser;
-          req.session.editorOf = userAccount.editorOf;
-          req.session.reporterOf = userAccount.reporterOf;
-          req.session.administratorOf = userAccount.administratorOf;
-          req.session.groupAdminOf = userAccount.groupAdminOf;
-          req.session.researcherOf = userAccount.researcherOf;
+          req.session.editorOf = userAccount.editorOfs;
+          req.session.reporterOf = userAccount.reporterOfs;
+          req.session.administratorOf = userAccount.administratorOfs;
+          req.session.groupAdminOf = userAccount.groupAdminOfs;
+          req.session.researcherOf = userAccount.researcherOfs;
           return res.status(200).json({success: true, matched: true, message: 'matched',
             userAccount: {
               person: userAccount.person,
@@ -114,11 +114,11 @@ const checkUserSecurityQuestion = async (req, res, next) => {
               //   return userTypeURI2UserType[usertypeURI]
               // })
               isSuperuser: userAccount.isSuperuser,
-              editorOf: userAccount.editorOf,
-              reporterOf: userAccount.reporterOf,
-              administratorOf: userAccount.administratorOf,
-              groupAdminOf: userAccount.groupAdminOf,
-              researcherOf: userAccount.researcherOf,
+              editorOf: userAccount.editorOfs,
+              reporterOf: userAccount.reporterOfs,
+              administratorOf: userAccount.administratorOfs,
+              groupAdminOf: userAccount.groupAdminOfs,
+              researcherOf: userAccount.researcherOfs,
             }});
         } else {
           return res.status(203).json({success: false, matched: false, message: 'incorrect'});

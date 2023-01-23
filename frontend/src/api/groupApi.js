@@ -1,9 +1,9 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
-export async function fetchGroups(userTypes){
-  if(userTypes.includes('superuser'))
+export async function fetchGroups(userContext){
+  if(userContext.isSuperuser)
     return getJson('/api/superuser/groups/');
-  if(userTypes.includes('groupAdmin'))
+  if(userContext.groupAdminOf.length > 0)
     return getJson('/api/groupAdmin/groups/')
 }
 

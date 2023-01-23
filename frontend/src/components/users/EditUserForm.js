@@ -48,18 +48,8 @@ export default function EditUserForm() {
     fetchUser(id, userContext).then(res => {
       if(res.success) {
         const user = res.user
-        setUser(user);
-        setForm({
-          // givenName: (user.primaryContact && user.primaryContact.givenName) ?
-          //   user.primaryContact.givenName : 'Not Provided',
-          // familyName: (user.primaryContact && user.primaryContact.familyName) ?
-          //   user.primaryContact.familyName : 'Not Provided',
-          email: user.email,
-          isSuperuser: user.isSuperuser,
-          // userTypes: user.userTypes,
-          // telephone: (user.primaryContact && user.primaryContact.telephone) ?
-          //   formatPhoneNumber(user.primaryContact.telephone) : 'Not Provided'
-        })
+        // setUser(user);
+        setForm(user);
       }
     }).then(() => {
       setLoading(false);
@@ -74,69 +64,69 @@ export default function EditUserForm() {
   /**
    * @returns {boolean} true if valid.
    */
-  const validate = () => {
-    const newErrors = {};
-    // if(form.userTypes.length === 0){
-    //   newErrors.userTypes = 'This field cannot be empty';
-    // }
-    // for (const [field, option] of Object.entries(userProfileFields)) {
-    //   const isEmpty = isFieldEmpty(form[field]);
-    //
-    //   if (option.required && isEmpty) {
-    //     newErrors[field] = REQUIRED_HELPER_TEXT;
-    //   }
-    //   let msg;
-    //   if (!isEmpty && option.validator && (msg = option.validator(form[field]))) {
-    //     newErrors[field] = msg;
-    //   }
-    //
-    //   if (option.label === 'Secondary Email') {
-    //     if (form.email === form.altEmail) {
-    //       newErrors[field] = DUPLICATE_HELPER_TEXT;
-    //     }
-    //   }
-    //
-    // }
-    if (Object.keys(newErrors).length !== 0) {
-      setErrors(newErrors);
-      return false
-    }
-    return true;
-  };
+  // const validate = () => {
+  //   const newErrors = {};
+  //   // if(form.userTypes.length === 0){
+  //   //   newErrors.userTypes = 'This field cannot be empty';
+  //   // }
+  //   // for (const [field, option] of Object.entries(userProfileFields)) {
+  //   //   const isEmpty = isFieldEmpty(form[field]);
+  //   //
+  //   //   if (option.required && isEmpty) {
+  //   //     newErrors[field] = REQUIRED_HELPER_TEXT;
+  //   //   }
+  //   //   let msg;
+  //   //   if (!isEmpty && option.validator && (msg = option.validator(form[field]))) {
+  //   //     newErrors[field] = msg;
+  //   //   }
+  //   //
+  //   //   if (option.label === 'Secondary Email') {
+  //   //     if (form.email === form.altEmail) {
+  //   //       newErrors[field] = DUPLICATE_HELPER_TEXT;
+  //   //     }
+  //   //   }
+  //   //
+  //   // }
+  //   if (Object.keys(newErrors).length !== 0) {
+  //     setErrors(newErrors);
+  //     return false
+  //   }
+  //   return true;
+  // };
 
 
 
   // submit button handler
-  const handleSubmitChanges = () => {
-    if (validate()) {
-      setDialogSubmit(true);
-    }
-  }
+  // const handleSubmitChanges = () => {
+  //   if (validate()) {
+  //     setDialogSubmit(true);
+  //   }
+  // }
 
   // confirmation dialog confirm button handler
-  const handleDialogConfirm = async () => {
-    try{
-      setLoadingButton(true);
-
-      const updateForm = {
-        email: form.email,
-        userTypes: form.userTypes
-      }
-
-      console.log(updateForm)
-      const {success} = await updateUserForm(id, updateForm);
-      if (success) {
-        setLoadingButton(false);
-        setDialogSubmit(false);
-        navigate('/users/');
-        enqueueSnackbar('Success', {variant: 'success'});
-      }
-    } catch (e){
-      setLoadingButton(false);
-      setDialogSubmit(false);
-      enqueueSnackbar(e.json.message || 'Error occurs', {variant: 'error'})
-    }
-  };
+  // const handleDialogConfirm = async () => {
+  //   try{
+  //     setLoadingButton(true);
+  //
+  //     const updateForm = {
+  //       email: form.email,
+  //       userTypes: form.userTypes
+  //     }
+  //
+  //     console.log(updateForm)
+  //     const {success} = await updateUserForm(id, updateForm);
+  //     if (success) {
+  //       setLoadingButton(false);
+  //       setDialogSubmit(false);
+  //       navigate('/users/');
+  //       enqueueSnackbar('Success', {variant: 'success'});
+  //     }
+  //   } catch (e){
+  //     setLoadingButton(false);
+  //     setDialogSubmit(false);
+  //     enqueueSnackbar(e.json.message || 'Error occurs', {variant: 'error'})
+  //   }
+  // };
 
   if (loading)
     return <Loading message={`Loading...`}/>;
@@ -162,23 +152,23 @@ export default function EditUserForm() {
       </Typography>
 
       <Typography variant="h6">
-        {'Administrator of: ' + (form.administratorOf?form.administratorOf:'')}
+        {'Administrator of: ' + (form.administratorOfs?form.administratorOfs:'')}
       </Typography>
 
       <Typography variant="h6">
-        {'Group Administrator of: ' + (form.groupAdminOf?form.groupAdminOf:'')}
+        {'Group Administrator of: ' + (form.groupAdminOfs?form.groupAdminOfs:'')}
       </Typography>
 
       <Typography variant="h6">
-        {'Editor of: ' + (form.editorOf?form.editorOf:'')}
+        {'Editor of: ' + (form.editorOfs?form.editorOfs:'')}
       </Typography>
 
       <Typography variant="h6">
-        {'Reporter of: ' + (form.reporterOf?form.reporterOf:'')}
+        {'Reporter of: ' + (form.reporterOfs?form.reporterOfs:'')}
       </Typography>
 
       <Typography variant="h6">
-        {'Researcher Of: ' + (form.researcherOf?form.researcherOf:'')}
+        {'Researcher Of: ' + (form.researcherOfs?form.researcherOfs:'')}
       </Typography>
 
 
@@ -224,15 +214,15 @@ export default function EditUserForm() {
 
 
       {/* Alert prompt for submitting changes */}
-      <AlertDialog
-        dialogContentText={"Note that if you are changing the profile information for user:" + user.primaryEmail}
-        dialogTitle={'Are you sure you want to submit?'}
-        buttons={[
-          <Button onClick={() => setDialogSubmit(false)} key={'cancel'}>{'cancel'}</Button>,
-          //<Button onClick={handleDialogConfirm} key={'confirm'} autoFocus> {'confirm'}</Button>,
-          <LoadingButton noDefaultStyle variant="text" color="primary" loading ={loadingButton} key={'confirm'}
-                         onClick={handleDialogConfirm} children='confirm' autoFocus/>]}
-        open={dialogSubmit}/>
+      {/*<AlertDialog*/}
+      {/*  dialogContentText={"Note that if you are changing the profile information for user:" + user.primaryEmail}*/}
+      {/*  dialogTitle={'Are you sure you want to submit?'}*/}
+      {/*  buttons={[*/}
+      {/*    <Button onClick={() => setDialogSubmit(false)} key={'cancel'}>{'cancel'}</Button>,*/}
+      {/*    //<Button onClick={handleDialogConfirm} key={'confirm'} autoFocus> {'confirm'}</Button>,*/}
+      {/*    <LoadingButton noDefaultStyle variant="text" color="primary" loading ={loadingButton} key={'confirm'}*/}
+      {/*                   onClick={handleDialogConfirm} children='confirm' autoFocus/>]}*/}
+      {/*  open={dialogSubmit}/>*/}
 
 
     </Container>

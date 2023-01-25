@@ -52,7 +52,7 @@ export default function AddEditDomain() {
   });
 
   useEffect(() => {
-      if(!userContext.userTypes.includes('superuser')){
+      if(!userContext.isSuperuser){
         navigate('/organizations');
         enqueueSnackbar("Superuser only", {variant: 'error'});
       }
@@ -136,7 +136,7 @@ export default function AddEditDomain() {
         <Typography variant={'h4'}> Domain </Typography>
 
         <GeneralField
-          disabled={!userContext.userTypes.includes('superuser')}
+          disabled={!userContext.isSuperuser}
           key={'name'}
           label={'Name'}
           value={form.name}

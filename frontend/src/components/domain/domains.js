@@ -79,8 +79,8 @@ export default function Domains() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'domains'} objectId={_id} hideViewOption hideDeleteOption={!userContext.userTypes.includes('superuser')}
-                      hideEditOption={!userContext.userTypes.includes('superuser')} handleDelete={() => showDeleteDialog(_id)}/>
+        <DropdownMenu urlPrefix={'domains'} objectId={_id} hideViewOption hideDeleteOption={!userContext.isSuperuser}
+                      hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 
@@ -94,7 +94,7 @@ export default function Domains() {
         data={state.data}
         columns={columns}
         idField="id"
-        customToolbar={userContext.userTypes.includes('superuser')?
+        customToolbar={userContext.isSuperuser?
           <Chip
             onClick={() => navigate('/Domains/new')}
             color="primary"

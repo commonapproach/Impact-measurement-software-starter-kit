@@ -174,7 +174,7 @@ export default function AddEditOrganization() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOrganization({form, outcomeForm}).then((ret) => {
+      createOrganization({form, outcomeForm, indicatorForm}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');

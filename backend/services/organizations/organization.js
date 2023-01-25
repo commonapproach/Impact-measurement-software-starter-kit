@@ -3,6 +3,7 @@ const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBDomainModel} = require("../../models/domain");
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {GDBIndicatorModel} = require("../../models/indicator");
 
 /**
  * Add organization to each account in organization[usertype] 's associated property
@@ -23,8 +24,8 @@ function addOrganizations2UsersRole(organization, usertype, property) {
 
 async function superuserCreateOrganization(req, res, next) {
   try {
-    const {form, outcomeForm} = req.body;
-    if (!form || !outcomeForm)
+    const {form, outcomeForm, indicatorForm} = req.body;
+    if (!form || !outcomeForm || !indicatorForm)
       return res.status(400).json({success: false, message: 'Wrong information input'});
     if (!form.legalName)
       return res.status(400).json({success: false, message: 'Legal name is requested'});
@@ -53,6 +54,7 @@ async function superuserCreateOrganization(req, res, next) {
 
 
     const organization = GDBOrganizationModel(form);
+    // below handles outcome part
     for (let i = 0; i < outcomeForm.length; i++) {
       const outcome = outcomeForm[i];
       if (!outcome.name || !outcome.description || !outcome.domain)
@@ -68,6 +70,18 @@ async function superuserCreateOrganization(req, res, next) {
       }
       await outcomeObject.save();
       organization.hasOutcomes.push(outcomeObject);
+    }
+
+    // below handles indicator part
+    for (let i = 0; i < indicatorForm.length; i++){
+      const indicator = indicatorForm[i];
+      if(!indicator.name || !indicator.description)
+        return res.status(400).json({success: false, message: 'Wrong information input'});
+      const indicatorObject = GDBIndicatorModel(indicator);
+      if(!organization.hasIndicators)
+        organization.hasIndicators = [];
+      await indicatorObject.save();
+      organization.hasIndicators.push(indicatorObject);
     }
 
     await organization.save();

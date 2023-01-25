@@ -52,7 +52,7 @@ export default function AddEditGroup() {
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     organizations: {},
-    administrators: [],
+    administrators: {},
   });
 
   useEffect(() => {
@@ -64,22 +64,17 @@ export default function AddEditGroup() {
       fetchOrganizations(userContext)
         .then(({organizations}) => {
         organizations.map(organization => {
-          options.organizations[':organization_' + organization._id] = organization.legalName;
+          options.organizations[organization._id] = organization.legalName;
         })
       }),
-      userContext.isSuperuser?
-      fetchUsers( userContext).then(({data}) => {
-        options.administrators = data
-      }):null,
-      userContext.isSuperuser?
       fetchUsers(userContext).then(({data}) => {
-        data.map((superuser) => {
-          options.administrators.push(superuser);
+        data.map((user) => {
+          options.administrators[user._id] = `${user.person.familyName} ${user.person.givenName} ID: ${user._id}`;
         })
-      }):null,
+      }),
     ]).then(() => {
       if (mode === 'edit' && id) {
-        fetchGroup(id, userContext.userTypes).then(res => {
+        fetchGroup(id, userContext).then(res => {
           if (res.success) {
             const group = res.group;
             setForm({
@@ -116,7 +111,6 @@ export default function AddEditGroup() {
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
-    console.log(mode);
     if (mode === 'new') {
       createGroup(form).then((ret) => {
         if (ret.success) {
@@ -155,6 +149,9 @@ export default function AddEditGroup() {
     if (form.label === '') {
       error.label = 'The field cannot be empty';
     }
+    if (!form.administrator)
+      error.administrator = 'The field cannot be empty'
+
 
     setErrors(error);
     return Object.keys(error).length === 0;
@@ -172,7 +169,7 @@ export default function AddEditGroup() {
           label={'Label'}
           value={form.label}
           required
-          disabled={!userContext.userTypes.includes('superuser')}
+          disabled={!userContext.isSuperuser}
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.label = e.target.value}
           error={!!errors.label}
@@ -186,7 +183,6 @@ export default function AddEditGroup() {
 
           }}
         />
-        {userContext.isSuperuser?
           <SelectField
           key={'administrator'}
           label={'Group Administrator'}
@@ -200,8 +196,7 @@ export default function AddEditGroup() {
               })
             );
           }}
-        />:
-        <div/>}
+        />
 
         <Dropdown
           label="Organizations"

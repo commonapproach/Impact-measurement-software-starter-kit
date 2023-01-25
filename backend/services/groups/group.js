@@ -1,9 +1,19 @@
 const {GDBGroupModel} = require("../../models/group");
+const {GDBUserAccountModel} = require("../../models/userAccount");
+const {GDBOrganizationModel} = require("../../models/organization");
 const createGroup = async (req, res, next) => {
   try {
     const form = req.body;
-    if (!form || !form.label)
+    if (!form || !form.label || !form.administrator)
       return res.status(400).json({success: false, message: 'Wrong information given'});
+    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+    if (!form.administrator)
+      return res.status(400).json({success: false, message: 'Invalid administrator'});
+    if (form.organizations && form.organizations.length > 0) {
+      form.organizations = await Promise.all(form.organizations.map(organizationId => {
+        return GDBOrganizationModel.findOne({_id:organizationId});
+      }))
+    }
     const group = GDBGroupModel(form);
     await group.save();
     return res.status(200).json({success: true});
@@ -82,7 +92,7 @@ const groupAdminUpdateGroup = async (req, res, next) => {
     if (group.administrator._id !== sessionId)
       return res.status(400).json({success: false, message: 'You are not the admin of this group'});
     group.comment = comment;
-    group.organizations = organizations
+    group.organizations = organizations;
     await group.save();
     return res.status(200).json({success: true, message: 'Successfully updated group ' + id});
   } catch (e) {
@@ -90,4 +100,11 @@ const groupAdminUpdateGroup = async (req, res, next) => {
   }
 };
 
-module.exports = {groupAdminUpdateGroup, createGroup, superuserFetchGroup, superuserUpdateGroup, superuserDeleteGroup, groupAdminFetchGroup};
+module.exports = {
+  groupAdminUpdateGroup,
+  createGroup,
+  superuserFetchGroup,
+  superuserUpdateGroup,
+  superuserDeleteGroup,
+  groupAdminFetchGroup
+};

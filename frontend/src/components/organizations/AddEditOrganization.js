@@ -74,7 +74,6 @@ export default function AddEditOrganization() {
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     objectForm: {},
-    listForm: [],
   });
 
   const [trigger, setTrigger] = useState(false)
@@ -115,21 +114,18 @@ export default function AddEditOrganization() {
       //   });
       // }),
     fetchUsers(userContext).then(({data, success}) => {
-      const listForm = data.map(user => {
-        return user._id
-      })
       const objectForm = {};
       data.map(user => {
         objectForm[user._id] = `${user.person.givenName} ${user.person.familyName} ID: ${user._id}`;
       })
       if(success)
-        setOptions({objectForm, listForm});
+        setOptions({objectForm,});
 
     }).then(() => {
       if (mode === 'edit' && id) {
         fetchOrganization(id, userContext).then(res => {
           if (res.success) {
-            const {organization, outcomes} = res;
+            const {organization, outcomes, indicators} = res;
             setForm({
               legalName: organization.legalName || '',
               ID: organization.ID || '',
@@ -140,6 +136,7 @@ export default function AddEditOrganization() {
               comment: organization.comment || ''
             });
             setOutcomeForm(outcomes)
+            setIndicatorForm(indicators)
             setLoading(false);
           }
         }).catch(e => {
@@ -328,7 +325,7 @@ export default function AddEditOrganization() {
           key={'administrator'}
           label={'Organization Administrator'}
           value={form.administrator}
-          options={options.listForm}
+          options={options.objectForm}
           error={!!errors.administrator}
           helperText={errors.administrator}
           onChange={e => {

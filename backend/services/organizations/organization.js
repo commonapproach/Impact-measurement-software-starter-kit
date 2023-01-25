@@ -103,7 +103,7 @@ async function superuserFetchOrganization(req, res, next) {
     const {id} = req.params;
     if (!id)
       return res.status(400).json({success: false, message: 'Organization ID is needed'});
-    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes']});
+    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
     const outcomes = organization.hasOutcomes || [];
@@ -112,10 +112,23 @@ async function superuserFetchOrganization(req, res, next) {
         outcome.domain = outcome.domain.split('_')[1];
       });
     }
+    const indicators = organization.hasIndicators || [];
     organization.ID = organization.hasId?.hasIdentifier;
+    if(!organization.researchers)
+      organization.researchers = []
+    if(!organization.reporters)
+      organization.reporters = []
+    if(!organization.editors)
+      organization.editors = []
+    if(organization.administrator)
+      organization.administrator = organization.administrator.split('_')[1]
+    organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1])
+    organization.editors = organization.editors.map(editor => editor.split('_')[1]);
+    organization.reporters = organization.reporters.map(reporter => reporter.split('_')[1])
     delete organization.hasOutcomes;
     delete organization.hasId;
-    return res.status(200).json({success: true, organization, outcomes});
+    delete organization.hasIndicators;
+    return res.status(200).json({success: true, organization, outcomes, indicators});
   } catch (e) {
     next(e);
   }

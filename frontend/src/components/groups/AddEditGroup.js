@@ -56,23 +56,23 @@ export default function AddEditGroup() {
   });
 
   useEffect(() => {
-    if(!userContext.userTypes.includes('superuser') && !userContext.userTypes.includes('groupAdmin')){
+    if(!userContext.isSuperuser && !userContext.groupAdmin.length > 0){
       navigate('/groups');
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
     Promise.all([
-      fetchOrganizations(userContext.userTypes)
+      fetchOrganizations(userContext)
         .then(({organizations}) => {
         organizations.map(organization => {
           options.organizations[':organization_' + organization._id] = organization.legalName;
         })
       }),
-      userContext.userTypes.includes('superuser')?
-      fetchUsers('groupAdmin', userContext.userTypes).then(({data}) => {
+      userContext.isSuperuser?
+      fetchUsers( userContext).then(({data}) => {
         options.administrators = data
       }):null,
-      userContext.userTypes.includes('superuser')?
-      fetchUsers('superuser', userContext.userTypes,).then(({data}) => {
+      userContext.isSuperuser?
+      fetchUsers(userContext).then(({data}) => {
         data.map((superuser) => {
           options.administrators.push(superuser);
         })
@@ -186,7 +186,7 @@ export default function AddEditGroup() {
 
           }}
         />
-        {userContext.userTypes.includes('superuser')?
+        {userContext.isSuperuser?
           <SelectField
           key={'administrator'}
           label={'Group Administrator'}

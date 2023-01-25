@@ -172,15 +172,11 @@ export function fetchUser(id, userContext) {
  * This function fetches all users.
  * @returns {Promise<any>}
  */
-export function fetchUsers(usertype, userContext) {
+export function fetchUsers(userContext) {
   if (userContext.isSuperuser) {
-    if (!usertype)
-      return getJson('/api/superuser/users/');
-    return getJson(`/api/superuser/users/${usertype}/`);
+    return getJson('/api/superuser/users/');
   } else if(userContext.administratorOf.length){
-    if (!usertype)
-      return getJson('/api/admin/users/');
-    return getJson(`/api/admin/users/${usertype}/`);
+    return getJson('/api/admin/users/');
   }
 
 

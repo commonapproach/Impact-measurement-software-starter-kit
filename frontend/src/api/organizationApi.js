@@ -9,10 +9,10 @@ export async function fetchOrganizations(userContext) {
     return getJson('/api/admin/organizations');
 }
 
-export async function fetchOrganization(id, userTypes) {
-  if (userTypes.includes('superuser'))
+export async function fetchOrganization(id, userContext) {
+  if (userContext.isSuperuser)
     return getJson('/api/superuser/organization/' + id);
-  if (userTypes.includes('admin'))
+  if (userContext.administratorOf.length > 0)
     return getJson('/api/admin/organization/' + id);
 }
 

@@ -6,6 +6,6 @@ const router = express.Router({mergeParams: true});
 
 
 router.get('/', superUserFetchUsers);
-router.get('/:userType', superUserFetchUsers)
+// router.get('/:userType', superUserFetchUsers)
 
 module.exports = router;

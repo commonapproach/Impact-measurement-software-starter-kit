@@ -53,6 +53,8 @@ export default function AddEditOrganization() {
 
   }])
 
+  const [indicatorForm, setIndicatorForm] = useState([])
+
   const [form, setForm] = useState({
     legalName: '',
     ID: '',
@@ -66,10 +68,8 @@ export default function AddEditOrganization() {
   ]);
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
-    reporters: {},
-    editors: {},
-    researchers: {},
-    administrators: [],
+    objectForm: {},
+    listForm: [],
   });
 
   const [trigger, setTrigger] = useState(false)
@@ -81,39 +81,48 @@ export default function AddEditOrganization() {
       researchers: {},
       administrators: [],
     }
-    Promise.all([
-      fetchUsers('editor', userContext.userTypes).then(({data}) => {
-        data.map(editor => {
-          options.editors[editor] = editor;
-        });
-      }),
-      fetchUsers('reporter', userContext.userTypes).then(({data}) => {
-        data.map(reporter => {
-          options.reporters[reporter] = reporter;
-        });
-      }),
-      fetchUsers('admin', userContext.userTypes).then(({data}) => {
-        options.administrators = data;
-      }),
-      fetchUsers('researcher', userContext.userTypes).then(({data}) => {
-        data.map(researcher => {
-          options.researchers[researcher] = researcher;
-        });
-      }),
-      fetchUsers('superuser', userContext.userTypes).then(({data}) => {
-        data.map((superuser) => {
-          options.reporters[superuser] = superuser;
-          options.editors[superuser] = superuser;
-          options.researchers[superuser] = superuser;
-          options.administrators.push(superuser);
 
-        });
-      }),
-    ]).then(() => {
-      setOptions(options)
+      // fetchUsers('editor', userContext.userTypes).then(({data}) => {
+      //   data.map(editor => {
+      //     options.editors[editor] = editor;
+      //   });
+      // }),
+      // fetchUsers('reporter', userContext.userTypes).then(({data}) => {
+      //   data.map(reporter => {
+      //     options.reporters[reporter] = reporter;
+      //   });
+      // }),
+      // fetchUsers('admin', userContext.userTypes).then(({data}) => {
+      //   options.administrators = data;
+      // }),
+      // fetchUsers('researcher', userContext.userTypes).then(({data}) => {
+      //   data.map(researcher => {
+      //     options.researchers[researcher] = researcher;
+      //   });
+      // }),
+      // fetchUsers('superuser', userContext.userTypes).then(({data}) => {
+      //   data.map((superuser) => {
+      //     options.reporters[superuser] = superuser;
+      //     options.editors[superuser] = superuser;
+      //     options.researchers[superuser] = superuser;
+      //     options.administrators.push(superuser);
+      //
+      //   });
+      // }),
+    fetchUsers(userContext).then(({data, success}) => {
+      const listForm = data.map(user => {
+        return user._id
+      })
+      const objectForm = {};
+      data.map(user => {
+        objectForm[user._id] = `${user.person.givenName} ${user.person.familyName} ID: ${user._id}`;
+      })
+      if(success)
+        setOptions({objectForm, listForm});
+
     }).then(() => {
       if (mode === 'edit' && id) {
-        fetchOrganization(id, userContext.userTypes).then(res => {
+        fetchOrganization(id, userContext).then(res => {
           if (res.success) {
             const {organization, outcomes} = res;
             setForm({
@@ -233,7 +242,7 @@ export default function AddEditOrganization() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Organization Basic</Typography>
         <GeneralField
-          disabled={!userContext.userTypes.includes('superuser')}
+          disabled={!userContext.isSuperuser}
           key={'legalName'}
           label={'Legal Name'}
           value={form.legalName}
@@ -253,7 +262,7 @@ export default function AddEditOrganization() {
         />
 
         <GeneralField
-          disabled={!userContext.userTypes.includes('superuser')}
+          disabled={!userContext.isSuperuser}
           key={'ID'}
           label={'ID'}
           value={form.ID}
@@ -295,11 +304,11 @@ export default function AddEditOrganization() {
         {/*  required = {true}*/}
         {/*/>*/}
         <SelectField
-          disabled={!userContext.userTypes.includes('superuser')}
+          disabled={!userContext.isSuperuser}
           key={'administrator'}
           label={'Organization Administrator'}
           value={form.administrator}
-          options={options.administrators}
+          options={options.listForm}
           error={!!errors.administrator}
           helperText={errors.administrator}
           onChange={e => {
@@ -316,7 +325,7 @@ export default function AddEditOrganization() {
           onChange={e => {
             form.editors = e.target.value;
           }}
-          options={options.editors}
+          options={options.objectForm}
           error={!!errors.editors}
           helperText={errors.editors}
           // sx={{mb: 2}}
@@ -328,7 +337,7 @@ export default function AddEditOrganization() {
           onChange={e => {
             form.reporters = e.target.value;
           }}
-          options={options.reporters}
+          options={options.objectForm}
           error={!!errors.reporters}
           helperText={errors.reporters}
           // sx={{mb: 2}}
@@ -340,7 +349,7 @@ export default function AddEditOrganization() {
           onChange={e => {
             form.researchers = e.target.value;
           }}
-          options={options.researchers}
+          options={options.objectForm}
           error={!!errors.researchers}
           helperText={errors.researchers}
           // sx={{mb: 2}}
@@ -427,12 +436,76 @@ export default function AddEditOrganization() {
                   key={'confirm'}
                   onClick={handleConfirm} children="confirm" autoFocus/>]}
                   open={state.submitDialog}/>
-        <Link to={'/indicators/' + id}>
-        <Typography variant="body2" className={classes.link}>
-          Add/Manage Indicators?
-        </Typography>
-        </Link>
+        {/*<Link to={'/indicators/' + id}>*/}
+        {/*<Typography variant="body2" className={classes.link}>*/}
+        {/*  Add/Manage Indicators?*/}
+        {/*</Typography>*/}
+        {/*</Link>*/}
                   </Paper>
+
+      <Paper sx={{p: 2}} variant={'outlined'}>
+        <Typography variant={'h4'}> Indicators </Typography>
+        {indicatorForm.map((indicator, index) => {
+          return <OutcomeField
+            importErrors={outcomeFormErrors[index]}
+            key={'indicator' + index}
+            label={'indicator ' + (index + 1)}
+            value={indicator}
+            required
+            onChange={(state) => {
+              setOutcomeForm(outcomeForm => {
+                indicatorForm[index] = state;
+                return indicatorForm
+              })
+            }}
+          />;
+        })}
+        {/*<OutcomeField*/}
+        {/*value={outcomeForm[0]}*/}
+        {/*onChange={(state) => {*/}
+        {/*  setOutcomeForm(outcomeForm => ({...outcomeForm, 0: state}))*/}
+        {/*}}*/}
+        {/*label={1}*/}
+        {/*/>*/}
+
+
+        <Button variant="contained" color="primary" className={classes.button}
+                onClick={
+                  () => {
+                    setOutcomeForm(outcomes => (outcomes.concat({name: '', description: '', domain: undefined})));
+                    // outcomeForm.push({name: '', description: '', domain: ''})
+                  }
+                }
+        >
+          Add new
+        </Button>
+        <Button variant="contained" color="primary" className={classes.button}
+                onClick={
+                  () => {
+                    setOutcomeForm(outcomes => {
+                      return outcomes.splice(0, outcomes.length - 1);
+                    });
+                  }
+                }
+        >
+          Remove
+        </Button>
+
+        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
+                       'Are you sure you want to update this Organization?'}
+                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                                       key={'cancel'}>{'cancel'}</Button>,
+                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                                      key={'confirm'}
+                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
+                     open={state.submitDialog}/>
+        {/*<Link to={'/indicators/' + id}>*/}
+        {/*<Typography variant="body2" className={classes.link}>*/}
+        {/*  Add/Manage Indicators?*/}
+        {/*</Typography>*/}
+        {/*</Link>*/}
+      </Paper>
 
 
 

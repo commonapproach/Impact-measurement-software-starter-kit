@@ -2,6 +2,24 @@ const {GDBOrganizationModel, GDBOrganizationIdModel} = require("../../models/org
 const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBDomainModel} = require("../../models/domain");
+const {GDBUserAccountModel} = require("../../models/userAccount");
+
+/**
+ * Add organization to each account in organization[usertype] 's associated property
+ * @param organization
+ * @param usertype
+ * @param property
+ */
+function addOrganizations2UsersRole(organization, usertype, property) {
+  organization[usertype].map(reporter => {
+    if (reporter) {
+      if (!reporter[property])
+        reporter[property] = [];
+      reporter[property].push(organization);
+    }
+  });
+}
+
 
 async function superuserCreateOrganization(req, res, next) {
   try {
@@ -13,6 +31,27 @@ async function superuserCreateOrganization(req, res, next) {
     if (!form.ID)
       return res.status(400).json({success: false, message: 'Organization ID is requested'});
     form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
+    // handle administrators, editors, reporters, researchers
+
+    // firstly replace ids to the actual userAccount object
+    // then add organization id to the userAccount Object
+    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+    if (!form.administrator)
+      return res.status(400).json({success: false, message: 'Administrator: No such user'});
+
+    // firstly replace ids to the actual userAccount objects
+    // form.reporters = await GDBUserAccountModel.find({_id: {$in: form.reporters}});
+    form.reporters = await Promise.all(form.reporters.map(reporterId => {
+      return GDBUserAccountModel.findOne({_id: reporterId});
+    }))
+    form.editors = await Promise.all(form.editors.map(editorId => {
+      return GDBUserAccountModel.findOne({_id: editorId});
+    }))
+    form.researchers = await Promise.all(form.researchers.map(researcherId => {
+      return GDBUserAccountModel.findOne({_id: researcherId});
+    }))
+
+
     const organization = GDBOrganizationModel(form);
     for (let i = 0; i < outcomeForm.length; i++) {
       const outcome = outcomeForm[i];
@@ -32,6 +71,13 @@ async function superuserCreateOrganization(req, res, next) {
     }
 
     await organization.save();
+
+    // then add organization id to the userAccount Object
+    addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
+    addOrganizations2UsersRole(organization, 'editors', 'editorOfs');
+    addOrganizations2UsersRole(organization, 'researchers', 'researcherOfs');
+    await organization.save();
+
     return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});
   } catch (e) {
     next(e);
@@ -119,7 +165,7 @@ async function superuserUpdateOrganization(req, res, next) {
     }
 
     // handle outcomes
-    await updateOutcomes(organization, outcomeForm)
+    await updateOutcomes(organization, outcomeForm);
 
     await organization.save();
     return res.status(200).json({
@@ -140,19 +186,19 @@ async function includeThisNewOutcome(outcomes, theOutcome) {
   if (!theOutcome._id) // must be a new outcome
     return false;
   for (let outcome of outcomes) {
-    if (!outcome._id){
+    if (!outcome._id) {
       throw new Server400Error('No _id in previous outcomes');
     }
 
-    if (outcome._id === theOutcome._id){
+    if (outcome._id === theOutcome._id) {
       outcome.name = theOutcome.name;
       outcome.description = theOutcome.description;
-      if(outcome.domain.split('_')[1] !== theOutcome.domain){
-        console.log(outcome, theOutcome)
-        const domainObject = await GDBDomainModel.findOne({_id:theOutcome.domain});
-        if(!domainObject)
+      if (outcome.domain.split('_')[1] !== theOutcome.domain) {
+        console.log(outcome, theOutcome);
+        const domainObject = await GDBDomainModel.findOne({_id: theOutcome.domain});
+        if (!domainObject)
           throw new Server400Error('No such domain');
-        console.log(domainObject)
+        console.log(domainObject);
         outcome.domain = domainObject;
       }
       return true;
@@ -168,7 +214,7 @@ return true if yes
  */
 function includeThisPreviousOutcome(outcomes, theOutcome) {
   if (!theOutcome._id) {
-    console.log(theOutcome)
+    console.log(theOutcome);
     throw new Server400Error('The previous outcome does not have _id');
   }
   for (let newOutcome of outcomes) {
@@ -180,7 +226,7 @@ function includeThisPreviousOutcome(outcomes, theOutcome) {
 };
 
 const updateOutcomes = async (organization, outcomeForm) => {
-  if(!organization.hasOutcomes)
+  if (!organization.hasOutcomes)
     organization.hasOutcomes = [];
   // loop through previous outcomes, delete those not in the form
   for (let i = 0; i < organization.hasOutcomes.length; i++) {
@@ -190,8 +236,8 @@ const updateOutcomes = async (organization, outcomeForm) => {
     }
   }
   organization.hasOutcomes = organization.hasOutcomes.filter((outcome) => {
-    return !!outcome
-  })
+    return !!outcome;
+  });
   // loop through new form,
   // add those not in previous outcomes to the form,
   // update those who were in previous outcomes
@@ -200,14 +246,14 @@ const updateOutcomes = async (organization, outcomeForm) => {
     if (!await includeThisNewOutcome(organization.hasOutcomes, outcomeForm[i])) {
       // the new outcome is not in previous outcomes
       const domain = await GDBDomainModel.findOne({_id: outcomeForm[i].domain});
-      if(!domain)
+      if (!domain)
         return res.status(400).json({success: false, message: 'No such domain'});
       outcomeForm[i].domain = domain;
       buf.push(GDBOutcomeModel(outcomeForm[i]));
     }
   }
   organization.hasOutcomes = organization.hasOutcomes.concat(buf);
-}
+};
 
 async function adminUpdateOrganization(req, res, next) {
   try {
@@ -220,7 +266,10 @@ async function adminUpdateOrganization(req, res, next) {
     if (!form)
       return res.status(400).json({success: false, message: 'Information is needed'});
 
-    const organization = await GDBOrganizationModel.findOne({_id: id, administrator: {_id: sessionId}}, {populates: ['hasId', 'hasOutcomes']});
+    const organization = await GDBOrganizationModel.findOne({
+      _id: id,
+      administrator: {_id: sessionId}
+    }, {populates: ['hasId', 'hasOutcomes']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
 

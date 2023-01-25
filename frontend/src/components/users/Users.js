@@ -22,7 +22,7 @@ export default function Users() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchUsers(null, userContext).then(data => {
+    fetchUsers(userContext).then(data => {
       // console.log(data)
       setState(state => ({...state, loading: false, data: data.data}));
     }).catch(e => {

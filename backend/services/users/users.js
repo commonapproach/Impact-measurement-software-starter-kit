@@ -4,27 +4,14 @@ const {GraphDB} = require('../../utils/graphdb');
 const {SPARQL} = require('../../utils/graphdb/helpers');
 const superUserFetchUsers = async (req, res, next) => {
   try {
-    const {userType} = req.params;
-    if (!userType) {
       const users = await GDBUserAccountModel.find({}, {populates: ['person']});
+      users.map((user) => {
+        delete user.hash;
+        delete user.salt;
+        delete user.securityQuestions;
+      })
       return res.status(200).json({data: users, success: true});
-    } else {
-      if (!userType2UserTypeURI[userType]) {
-        return res.status(400).json({success: false, message: 'Wrong userType'});
-      }
 
-      const usersWithUsertype = [];
-      let query = `
-        PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
-        select * where { 
-	          ?user :userType :${userType}.
-        }`;
-      await GraphDB.sendSelectQuery(query, false, ({user}) => {
-        usersWithUsertype.push(SPARQL.getPrefixedURI(user.id));
-      });
-
-      return res.status(200).json({data: usersWithUsertype, success: true});
-    }
   } catch (e) {
     next(e);
   }

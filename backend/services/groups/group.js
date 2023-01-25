@@ -48,6 +48,10 @@ const superuserFetchGroup = async (req, res, next) => {
     const group = await GDBGroupModel.findById(id);
     if (!group)
       return res.status(400).json({success: false, message: 'No such group'});
+    if(group.administrator)
+      group.administrator = group.administrator.split('_')[1]
+    if(group.organizations)
+      group.organizations = group.organizations.map(organization => organization.split('_')[1])
     return res.status(200).json({success: true, group: group});
   } catch (e) {
     next(e);

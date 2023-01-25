@@ -13,6 +13,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
+import IndicatorField from "../shared/indicatorField";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -53,7 +54,11 @@ export default function AddEditOrganization() {
 
   }])
 
-  const [indicatorForm, setIndicatorForm] = useState([])
+  const [indicatorForm, setIndicatorForm] = useState([]);
+
+  const [indicatorFormErrors, setIndicatorFormErrors] = useState([{
+
+  }])
 
   const [form, setForm] = useState({
     legalName: '',
@@ -231,7 +236,22 @@ export default function AddEditOrganization() {
       }
     })
     setOutcomeFormErrors(outcomeFormErrors);
-    return Object.keys(error).length === 0 && outcomeFormErrors.length === 0;
+
+    const indicatorFormErrors = [];
+    indicatorForm.map((indicator, index) => {
+      if(!indicator.name) {
+        if(!indicatorFormErrors[index])
+          indicatorFormErrors[index] = {};
+        indicatorFormErrors[index].name = 'This field cannot be empty';
+      }
+      if(!indicator.description) {
+        if (!indicatorFormErrors[index])
+          indicatorFormErrors[index] = {};
+        indicatorFormErrors[index].description = 'This field cannot be empty';
+      }
+    })
+    setIndicatorFormErrors(indicatorFormErrors)
+    return Object.keys(error).length === 0 && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
 
   if (loading)
@@ -446,34 +466,26 @@ export default function AddEditOrganization() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Indicators </Typography>
         {indicatorForm.map((indicator, index) => {
-          return <OutcomeField
-            importErrors={outcomeFormErrors[index]}
+          return <IndicatorField
+            importErrors={indicatorFormErrors[index]}
             key={'indicator' + index}
             label={'indicator ' + (index + 1)}
             value={indicator}
             required
             onChange={(state) => {
-              setOutcomeForm(outcomeForm => {
+              setIndicatorForm(indicatorForm => {
                 indicatorForm[index] = state;
                 return indicatorForm
               })
             }}
           />;
         })}
-        {/*<OutcomeField*/}
-        {/*value={outcomeForm[0]}*/}
-        {/*onChange={(state) => {*/}
-        {/*  setOutcomeForm(outcomeForm => ({...outcomeForm, 0: state}))*/}
-        {/*}}*/}
-        {/*label={1}*/}
-        {/*/>*/}
 
 
         <Button variant="contained" color="primary" className={classes.button}
                 onClick={
                   () => {
-                    setOutcomeForm(outcomes => (outcomes.concat({name: '', description: '', domain: undefined})));
-                    // outcomeForm.push({name: '', description: '', domain: ''})
+                    setIndicatorForm(indicators => (indicators.concat({name: '', description: ''})));
                   }
                 }
         >
@@ -482,8 +494,8 @@ export default function AddEditOrganization() {
         <Button variant="contained" color="primary" className={classes.button}
                 onClick={
                   () => {
-                    setOutcomeForm(outcomes => {
-                      return outcomes.splice(0, outcomes.length - 1);
+                    setIndicatorForm(indicators => {
+                      return indicators.splice(0, indicators.length - 1);
                     });
                   }
                 }

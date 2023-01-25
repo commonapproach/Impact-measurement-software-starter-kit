@@ -29,7 +29,6 @@ import AddEditGroup from "./components/groups/AddEditGroup";
 import Profile from "./components/userProfile/Profile";
 import Domains from "./components/domain/domains";
 import AddEditDomain from "./components/domain/addEditDomain";
-import Indicators from "./components/organizations/Indicators";
 
 const routes = (
   <Routes>
@@ -50,8 +49,6 @@ const routes = (
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
     <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
     <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
-    {/*indicators*/}
-    <Route path="/indicators/:organizationId" element={<PrivateRoute element={Indicators}/>}/>
     {/*Groups*/}
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
     <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>

@@ -18,10 +18,10 @@ export async function fetchGroup(id, userContext) {
     return getJson('/api/groupAdmin/group/' + id + '/');
 }
 
-export async function updateGroup(id, params, userTypes) {
-  if(userTypes.includes('superuser'))
+export async function updateGroup(id, params, userContext) {
+  if(userContext.isSuperuser)
     return putJson('/api/superuser/group/' + id + '/', params);
-  if(userTypes.includes('groupAdmin'))
+  if(userContext.groupAdminOf?.length > 0)
     return putJson('/api/groupAdmin/group/' + id + '/', params);
 }
 

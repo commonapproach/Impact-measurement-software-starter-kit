@@ -63,6 +63,14 @@ const superuserUpdateGroup = async (req, res, next) => {
     const form = req.body;
     if (!id || !form)
       return res.status(400).json({success: false, message: 'Invalid information is given'});
+    if (form.administrator)
+      form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator})
+    if(!form.administrator)
+      return res.status(400).json({success: false, message: 'Invalid administrator'});
+    if(form.organizations && form.organizations.length > 0)
+      form.organizations = await Promise.all(form.organizations.map(organizationID => {
+        return GDBOrganizationModel.findOne({_id: organizationID});
+      }))
     await GDBGroupModel.findByIdAndUpdate(id, form);
     return res.status(200).json({success: true, message: 'Successfully updated group ' + id});
   } catch (e) {

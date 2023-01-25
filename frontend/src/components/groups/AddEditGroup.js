@@ -127,7 +127,7 @@ export default function AddEditGroup() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateGroup(id, form, userContext.userTypes).then((res) => {
+      updateGroup(id, form, userContext).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/groups');

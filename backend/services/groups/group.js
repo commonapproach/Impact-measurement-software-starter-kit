@@ -6,9 +6,10 @@ const createGroup = async (req, res, next) => {
     const form = req.body;
     if (!form || !form.label || !form.administrator)
       return res.status(400).json({success: false, message: 'Wrong information given'});
-    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator}, {populates: 'groupAdminOfs'});
     if (!form.administrator)
       return res.status(400).json({success: false, message: 'Invalid administrator'});
+
     if (form.organizations && form.organizations.length > 0) {
       form.organizations = await Promise.all(form.organizations.map(organizationId => {
         return GDBOrganizationModel.findOne({_id:organizationId});
@@ -16,6 +17,12 @@ const createGroup = async (req, res, next) => {
     }
     const group = GDBGroupModel(form);
     await group.save();
+
+    // add the group to the admin's property
+    if (!group.administrator.groupAdminOfs)
+      group.administrator.groupAdminOfs = []
+    group.administrator.groupAdminOfs.push(group);
+    await group.administrator.save()
     return res.status(200).json({success: true});
   } catch (e) {
     next(e);
@@ -71,6 +78,22 @@ const superuserUpdateGroup = async (req, res, next) => {
       form.organizations = await Promise.all(form.organizations.map(organizationID => {
         return GDBOrganizationModel.findOne({_id: organizationID});
       }))
+    const group = await GDBGroupModel.findOne({_id: id}, {populates: ['administrator']})
+    if (!group)
+      return res.status(400).json({success: false, message: 'Invalid group id'});
+    if (group.administrator._id !== form.administrator._id){
+      // the group admin have been changed
+      // delete the group from previous admin's property
+      const index = group.administrator.groupAdminOfs.findIndex(groupAdmin => groupAdmin.split('_')[1] === id);
+      if (index > -1)
+        group.administrator.groupAdminOfs.splice(index, 1);
+      // add the group to new admin's property
+      if(!form.administrator.groupAdminOfs)
+        form.administrator.groupAdminOfs = [];
+      form.administrator.groupAdminOfs.push(group);
+    }
+
+    await group.administrator.save();
     await GDBGroupModel.findByIdAndUpdate(id, form);
     return res.status(200).json({success: true, message: 'Successfully updated group ' + id});
   } catch (e) {

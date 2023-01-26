@@ -84,7 +84,7 @@ const superuserUpdateGroup = async (req, res, next) => {
     if (group.administrator._id !== form.administrator._id){
       // the group admin have been changed
       // delete the group from previous admin's property
-      const index = group.administrator.groupAdminOfs.findIndex(groupAdmin => groupAdmin.split('_')[1] === id);
+      const index = group.administrator.groupAdminOfs.findIndex(group => group.split('_')[1] === id);
       if (index > -1)
         group.administrator.groupAdminOfs.splice(index, 1);
       // add the group to new admin's property

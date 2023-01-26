@@ -172,7 +172,8 @@ async function superuserUpdateOrganization(req, res, next) {
     if (!form || !outcomeForm || !indicatorForm)
       return res.status(400).json({success: false, message: 'Form and outcomeForm are needed'});
 
-    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators']});
+    const organization = await GDBOrganizationModel.findOne({_id: id},
+      {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
 
@@ -186,22 +187,50 @@ async function superuserUpdateOrganization(req, res, next) {
     form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
     if (!form.administrator)
       return res.status(400).json({success: false, message: 'Invalid administrator'});
+
+    // update organizationAdmin if needed
     if (organization.administrator._id !== form.administrator._id){
       // then the administrator have to be updated
       // delete organization from previous user's property
       const index = organization.administrator.administratorOfs.findIndex(org => org.split('_')[1] === id);
       organization.administrator.administratorOfs.splice(index, 1);
+      await organization.administrator.save();
       // add organization on current user's property
       if (!form.administrator.administratorOfs)
         form.administrator.administratorOfs = [];
-      form.administrator.administratorOfs.push(organization)
+      form.administrator.administratorOfs.push(organization);
       // update property of organization
-      organization.administrator = form.administrator
+      organization.administrator = form.administrator;
     }
     // organization.administrator = form.administrator;
-    organization.reporters = form.reporters;
-    organization.editors = form.editors;
-    organization.researchers = form.researchers;
+
+    await Promise.all([
+      updateRoles(organization, form, 'reporters', 'reporterOfs'),
+      updateRoles(organization, form, 'researchers', 'researcherOfs'),
+      updateRoles(organization, form, 'editors', 'editorOfs')
+    ])
+    // for each reporter in organization, remove the organizations from its property
+    // await Promise.all(organization.reporters.map(reporter => {
+    //   const index = reporter.reporterOfs.findIndex(org => org.split('_')[1] === id);
+    //   reporter.reporterOfs.splice(index, 1);
+    //   return reporter.save();
+    // }));
+    // // add the organization to every new reporters' property
+    // if (form.reporters.length > 0) {
+    //   form.reporters = await Promise.all(form.reporters.map(reporterId =>
+    //     GDBUserAccountModel.findOne({_id: reporterId})
+    //   ));
+    //   await Promise.all(form.reporters.map(reporter => {
+    //     if(!reporter.reporterOfs)
+    //       reporter.reporterOfs = []
+    //     reporter.reporterOfs.push(organization)
+    //     reporter.save()
+    //   }))
+    //
+    // }
+    // organization.reporters = [...form.reporters]
+    // organization.editors = form.editors;
+    // organization.researchers = form.researchers;
     if (organization.hasId.hasIdentifier !== form.ID) {
       // drop previous one
       await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
@@ -211,7 +240,7 @@ async function superuserUpdateOrganization(req, res, next) {
 
     // handle outcomes
     await updateOutcomes(organization, outcomeForm);
-
+    organization.markModified(['reporters', 'researchers', 'editors']);
     await organization.save();
     return res.status(200).json({
       success: true,
@@ -221,6 +250,34 @@ async function superuserUpdateOrganization(req, res, next) {
     next(e);
   }
 };
+
+
+async function updateRoles(organization, form, organizationProperty, userAccountProperty) {
+  // for each reporter in organization, remove the organizations from its property
+  if(!organization[organizationProperty])
+    organization[organizationProperty] = [];
+  await Promise.all(organization[organizationProperty].map(userAccount => {
+    // if(!userAccount[userAccountProperty])
+    //   userAccount[userAccountProperty] = []
+    const index = userAccount[userAccountProperty].findIndex(org => org.split('_')[1] === organization._id);
+    userAccount[userAccountProperty].splice(index, 1);
+    return userAccount.save();
+  }));
+  // add the organization to every new reporters' property
+  if (form[organizationProperty].length > 0) {
+    form[organizationProperty] = await Promise.all(form[organizationProperty].map(userAccountId =>
+      GDBUserAccountModel.findOne({_id: userAccountId})
+    ));
+    await Promise.all(form[organizationProperty].map(userAccount => {
+      if(!userAccount[userAccountProperty])
+        userAccount[userAccountProperty] = []
+      userAccount[userAccountProperty].push(organization)
+      userAccount.save()
+    }))
+
+  }
+  organization[organizationProperty] = [...form[organizationProperty]]
+}
 
 /*
 Check is theNewOutcome inside previous outcomes
@@ -269,6 +326,7 @@ function includeThisPreviousOutcome(outcomes, theOutcome) {
   }
   return false;
 };
+
 
 const updateOutcomes = async (organization, outcomeForm) => {
   if (!organization.hasOutcomes)

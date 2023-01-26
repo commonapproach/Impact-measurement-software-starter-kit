@@ -20,10 +20,10 @@ export async function createOrganization(params) {
   return postJson('/api/superuser/organization/', params);
 }
 
-export async function updateOrganization(id, params, userTypes) {
-  if(userTypes.includes('superuser'))
+export async function updateOrganization(id, params, userContext) {
+  if(userContext.isSuperuser)
     return putJson('/api/superuser/organization/' + id, params);
-  if(userTypes.includes('admin'))
+  if(userContext.administratorOfs?.length > 0)
     return putJson('/api/admin/organization/' + id, params);
 }
 

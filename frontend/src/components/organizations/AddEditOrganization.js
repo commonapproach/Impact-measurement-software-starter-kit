@@ -187,7 +187,7 @@ export default function AddEditOrganization() {
       });
     } else if (mode === 'edit') {
       console.log(outcomeForm)
-      updateOrganization(id, {form, outcomeForm}, userContext.userTypes).then((res) => {
+      updateOrganization(id, {form, outcomeForm, indicatorForm}, userContext).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');

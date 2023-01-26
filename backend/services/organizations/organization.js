@@ -41,16 +41,15 @@ async function superuserCreateOrganization(req, res, next) {
       return res.status(400).json({success: false, message: 'Administrator: No such user'});
 
     // firstly replace ids to the actual userAccount objects
-    // form.reporters = await GDBUserAccountModel.find({_id: {$in: form.reporters}});
     form.reporters = await Promise.all(form.reporters.map(reporterId => {
       return GDBUserAccountModel.findOne({_id: reporterId});
-    }))
+    }));
     form.editors = await Promise.all(form.editors.map(editorId => {
       return GDBUserAccountModel.findOne({_id: editorId});
-    }))
+    }));
     form.researchers = await Promise.all(form.researchers.map(researcherId => {
       return GDBUserAccountModel.findOne({_id: researcherId});
-    }))
+    }));
 
 
     const organization = GDBOrganizationModel(form);
@@ -73,12 +72,12 @@ async function superuserCreateOrganization(req, res, next) {
     }
 
     // below handles indicator part
-    for (let i = 0; i < indicatorForm.length; i++){
+    for (let i = 0; i < indicatorForm.length; i++) {
       const indicator = indicatorForm[i];
-      if(!indicator.name || !indicator.description)
+      if (!indicator.name || !indicator.description)
         return res.status(400).json({success: false, message: 'Wrong information input'});
       const indicatorObject = GDBIndicatorModel(indicator);
-      if(!organization.hasIndicators)
+      if (!organization.hasIndicators)
         organization.hasIndicators = [];
       await indicatorObject.save();
       organization.hasIndicators.push(indicatorObject);
@@ -87,6 +86,9 @@ async function superuserCreateOrganization(req, res, next) {
     await organization.save();
 
     // then add organization id to the userAccount Object
+    if(!organization.administrator.administratorOfs)
+      organization.administrator.administratorOfs = [];
+    organization.administrator.administratorOfs.push(organization);
     addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
     addOrganizations2UsersRole(organization, 'editors', 'editorOfs');
     addOrganizations2UsersRole(organization, 'researchers', 'researcherOfs');
@@ -114,17 +116,17 @@ async function superuserFetchOrganization(req, res, next) {
     }
     const indicators = organization.hasIndicators || [];
     organization.ID = organization.hasId?.hasIdentifier;
-    if(!organization.researchers)
-      organization.researchers = []
-    if(!organization.reporters)
-      organization.reporters = []
-    if(!organization.editors)
-      organization.editors = []
-    if(organization.administrator)
-      organization.administrator = organization.administrator.split('_')[1]
-    organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1])
+    if (!organization.researchers)
+      organization.researchers = [];
+    if (!organization.reporters)
+      organization.reporters = [];
+    if (!organization.editors)
+      organization.editors = [];
+    if (organization.administrator)
+      organization.administrator = organization.administrator.split('_')[1];
+    organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1]);
     organization.editors = organization.editors.map(editor => editor.split('_')[1]);
-    organization.reporters = organization.reporters.map(reporter => reporter.split('_')[1])
+    organization.reporters = organization.reporters.map(reporter => reporter.split('_')[1]);
     delete organization.hasOutcomes;
     delete organization.hasId;
     delete organization.hasIndicators;
@@ -164,13 +166,13 @@ async function adminFetchOrganization(req, res, next) {
 async function superuserUpdateOrganization(req, res, next) {
   try {
     const {id} = req.params;
-    const {form, outcomeForm} = req.body;
+    const {form, outcomeForm, indicatorForm} = req.body;
     if (!id)
       return res.status(400).json({success: false, message: 'Id is needed'});
-    if (!form || !outcomeForm)
+    if (!form || !outcomeForm || !indicatorForm)
       return res.status(400).json({success: false, message: 'Form and outcomeForm are needed'});
 
-    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes']});
+    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators']});
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
 
@@ -180,7 +182,23 @@ async function superuserUpdateOrganization(req, res, next) {
       return res.status(400).json({success: false, message: 'ID is requested'});
     organization.legalName = form.legalName;
     organization.comment = form.comment;
-    organization.administrator = form.administrator;
+
+    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+    if (!form.administrator)
+      return res.status(400).json({success: false, message: 'Invalid administrator'});
+    if (organization.administrator._id !== form.administrator._id){
+      // then the administrator have to be updated
+      // delete organization from previous user's property
+      const index = organization.administrator.administratorOfs.findIndex(org => org.split('_')[1] === id);
+      organization.administrator.administratorOfs.splice(index, 1);
+      // add organization on current user's property
+      if (!form.administrator.administratorOfs)
+        form.administrator.administratorOfs = [];
+      form.administrator.administratorOfs.push(organization)
+      // update property of organization
+      organization.administrator = form.administrator
+    }
+    // organization.administrator = form.administrator;
     organization.reporters = form.reporters;
     organization.editors = form.editors;
     organization.researchers = form.researchers;

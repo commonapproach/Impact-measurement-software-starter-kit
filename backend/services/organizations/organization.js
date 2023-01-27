@@ -86,7 +86,7 @@ async function superuserCreateOrganization(req, res, next) {
     await organization.save();
 
     // then add organization id to the userAccount Object
-    if(!organization.administrator.administratorOfs)
+    if (!organization.administrator.administratorOfs)
       organization.administrator.administratorOfs = [];
     organization.administrator.administratorOfs.push(organization);
     addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
@@ -163,10 +163,21 @@ async function adminFetchOrganization(req, res, next) {
   }
 }
 
+function cacheUser(userAccount, userAccountDict) {
+  if (!userAccountDict[userAccount._id])
+    userAccountDict[userAccount._id] = userAccount;
+}
+function cacheListOfUsers(users, userAccountDict) {
+  users.map(userAccount => {
+    cacheUser(userAccount, userAccountDict)
+  });
+}
+
 async function superuserUpdateOrganization(req, res, next) {
   try {
     const {id} = req.params;
     const {form, outcomeForm, indicatorForm} = req.body;
+    const userAccountDict = {};
     if (!id)
       return res.status(400).json({success: false, message: 'Id is needed'});
     if (!form || !outcomeForm || !indicatorForm)
@@ -174,22 +185,43 @@ async function superuserUpdateOrganization(req, res, next) {
 
     const organization = await GDBOrganizationModel.findOne({_id: id},
       {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors']});
+
     if (!organization)
       return res.status(400).json({success: false, message: 'No such organization'});
-
     if (!form.legalName)
       return res.status(400).json({success: false, message: 'Legal name is requested'});
     if (!form.ID)
       return res.status(400).json({success: false, message: 'ID is requested'});
+
+    // cache all userAccounts in the organization
+    if (organization.administrator)
+      cacheUser(organization.administrator, userAccountDict);
+
+    if (organization.reporters)
+      cacheListOfUsers(organization.reporters, userAccountDict);
+
+    if (organization.editors)
+      cacheListOfUsers(organization.editors, userAccountDict);
+
+    if (organization.researchers)
+      cacheListOfUsers(organization.researchers, userAccountDict);
+
+
     organization.legalName = form.legalName;
     organization.comment = form.comment;
 
-    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+    if(userAccountDict[form.administrator]){
+      form.administrator = userAccountDict[form.administrator];
+    } else {
+      form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+      cacheUser(form.administrator, userAccountDict);
+    }
+
     if (!form.administrator)
       return res.status(400).json({success: false, message: 'Invalid administrator'});
 
     // update organizationAdmin if needed
-    if (organization.administrator._id !== form.administrator._id){
+    if (organization.administrator._id !== form.administrator._id) {
       // then the administrator have to be updated
       // delete organization from previous user's property
       const index = organization.administrator.administratorOfs.findIndex(org => org.split('_')[1] === id);
@@ -205,32 +237,10 @@ async function superuserUpdateOrganization(req, res, next) {
     // organization.administrator = form.administrator;
 
     await Promise.all([
-      updateRoles(organization, form, 'reporters', 'reporterOfs'),
-      updateRoles(organization, form, 'researchers', 'researcherOfs'),
-      updateRoles(organization, form, 'editors', 'editorOfs')
-    ])
-    // for each reporter in organization, remove the organizations from its property
-    // await Promise.all(organization.reporters.map(reporter => {
-    //   const index = reporter.reporterOfs.findIndex(org => org.split('_')[1] === id);
-    //   reporter.reporterOfs.splice(index, 1);
-    //   return reporter.save();
-    // }));
-    // // add the organization to every new reporters' property
-    // if (form.reporters.length > 0) {
-    //   form.reporters = await Promise.all(form.reporters.map(reporterId =>
-    //     GDBUserAccountModel.findOne({_id: reporterId})
-    //   ));
-    //   await Promise.all(form.reporters.map(reporter => {
-    //     if(!reporter.reporterOfs)
-    //       reporter.reporterOfs = []
-    //     reporter.reporterOfs.push(organization)
-    //     reporter.save()
-    //   }))
-    //
-    // }
-    // organization.reporters = [...form.reporters]
-    // organization.editors = form.editors;
-    // organization.researchers = form.researchers;
+      updateRoles(organization, form, 'reporters', 'reporterOfs', userAccountDict),
+      updateRoles(organization, form, 'researchers', 'researcherOfs', userAccountDict),
+      updateRoles(organization, form, 'editors', 'editorOfs', userAccountDict)
+    ]);
     if (organization.hasId.hasIdentifier !== form.ID) {
       // drop previous one
       await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
@@ -252,31 +262,36 @@ async function superuserUpdateOrganization(req, res, next) {
 };
 
 
-async function updateRoles(organization, form, organizationProperty, userAccountProperty) {
+async function updateRoles(organization, form, organizationProperty, userAccountProperty, userAccountDict) {
   // for each reporter in organization, remove the organizations from its property
-  if(!organization[organizationProperty])
+  if (!organization[organizationProperty])
     organization[organizationProperty] = [];
   await Promise.all(organization[organizationProperty].map(userAccount => {
-    // if(!userAccount[userAccountProperty])
-    //   userAccount[userAccountProperty] = []
     const index = userAccount[userAccountProperty].findIndex(org => org.split('_')[1] === organization._id);
     userAccount[userAccountProperty].splice(index, 1);
     return userAccount.save();
   }));
   // add the organization to every new reporters' property
   if (form[organizationProperty].length > 0) {
-    form[organizationProperty] = await Promise.all(form[organizationProperty].map(userAccountId =>
-      GDBUserAccountModel.findOne({_id: userAccountId})
+    form[organizationProperty] = await Promise.all(form[organizationProperty].map(userAccountId => {
+      if (userAccountDict[userAccountId]) {
+        return userAccountDict[userAccountId]
+      } else {
+        return GDBUserAccountModel.findOne({_id: userAccountId})
+      }
+    }
+
     ));
+    cacheListOfUsers(form[organizationProperty], userAccountDict);
     await Promise.all(form[organizationProperty].map(userAccount => {
-      if(!userAccount[userAccountProperty])
-        userAccount[userAccountProperty] = []
-      userAccount[userAccountProperty].push(organization)
-      userAccount.save()
-    }))
+      if (!userAccount[userAccountProperty])
+        userAccount[userAccountProperty] = [];
+      userAccount[userAccountProperty].push(organization);
+      // return userAccount.save();
+    }));
 
   }
-  organization[organizationProperty] = [...form[organizationProperty]]
+  organization[organizationProperty] = [...form[organizationProperty]];
 }
 
 /*

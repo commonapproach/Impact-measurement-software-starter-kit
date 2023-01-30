@@ -80,7 +80,7 @@ export default function DoubleAuth() {
             email: userAccount.email,
             givenName: userAccount.person?.givenName,
             familyName: userAccount.person?.familyName,
-            isSuperuser: userAccount.isSuperuser || [],
+            isSuperuser: userAccount.isSuperuser,
             editorOf: userAccount.editorOf || [],
             reporterOf: userAccount.reporterOf || [],
             administratorOf: userAccount.administratorOf || [],

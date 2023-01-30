@@ -18,6 +18,7 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
+const {organizationRoute} = require("../routes");
 
 const app = express();
 
@@ -48,9 +49,9 @@ app.use('/api/general', generalUserRoute);
 
 // routes only for superuser
 app.use('/api/superuser', superuserRoute);
-app.use('/api/groupAdmin', groupAdminRoute);
-app.use('/api/admin', adminRoute);
-// app.use('/api', characteristicRoute);
+// app.use('/api/groupAdmin', groupAdminRoute);
+// app.use('/api/admin', adminRoute);
+app.use('/api/organization', organizationRoute);
 // app.use('/api', questionRoute);
 // app.use('/api', dynamicFormRoute);
 // app.use('/api', genericRoute);

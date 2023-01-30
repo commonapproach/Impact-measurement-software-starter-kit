@@ -22,118 +22,130 @@ function addOrganizations2UsersRole(organization, usertype, property) {
 }
 
 
-async function superuserCreateOrganization(req, res, next) {
+async function superuserCreateOrganization(req, res) {
+  const {form, outcomeForm, indicatorForm} = req.body;
+  if (!form || !outcomeForm || !indicatorForm)
+    throw Server400Error('Wrong information input');
+  if (!form.legalName)
+    throw Server400Error('Legal name is requested');
+  if (!form.ID)
+    throw Server400Error('Organization ID is requested');
+  form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
+  // handle administrators, editors, reporters, researchers
+
+  // firstly replace ids to the actual userAccount object
+  // then add organization id to the userAccount Object
+  form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+  if (!form.administrator)
+    throw Server400Error('Administrator: No such user');
+
+  // firstly replace ids to the actual userAccount objects
+  form.reporters = await Promise.all(form.reporters.map(reporterId => {
+    return GDBUserAccountModel.findOne({_id: reporterId});
+  }));
+  form.editors = await Promise.all(form.editors.map(editorId => {
+    return GDBUserAccountModel.findOne({_id: editorId});
+  }));
+  form.researchers = await Promise.all(form.researchers.map(researcherId => {
+    return GDBUserAccountModel.findOne({_id: researcherId});
+  }));
+
+
+  const organization = GDBOrganizationModel(form);
+  // below handles outcome part
+  for (let i = 0; i < outcomeForm.length; i++) {
+    const outcome = outcomeForm[i];
+    if (!outcome.name || !outcome.description || !outcome.domain)
+      throw Server400Error('Wrong information input');
+    const domainObject = await GDBDomainModel.findOne({_id: outcome.domain});
+    if (!domainObject)
+      throw Server400Error('Wrong domain id');
+    const outcomeObject = GDBOutcomeModel({
+      name: outcome.name, description: outcome.description, domain: domainObject
+    });
+    if (!organization.hasOutcomes) {
+      organization.hasOutcomes = [];
+    }
+    await outcomeObject.save();
+    organization.hasOutcomes.push(outcomeObject);
+  }
+
+  // below handles indicator part
+  for (let i = 0; i < indicatorForm.length; i++) {
+    const indicator = indicatorForm[i];
+    if (!indicator.name || !indicator.description)
+      throw Server400Error('Wrong information input');
+    const indicatorObject = GDBIndicatorModel(indicator);
+    if (!organization.hasIndicators)
+      organization.hasIndicators = [];
+    await indicatorObject.save();
+    organization.hasIndicators.push(indicatorObject);
+  }
+
+  await organization.save();
+
+  // then add organization id to the userAccount Object
+  if (!organization.administrator.administratorOfs)
+    organization.administrator.administratorOfs = [];
+  organization.administrator.administratorOfs.push(organization);
+  addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
+  addOrganizations2UsersRole(organization, 'editors', 'editorOfs');
+  addOrganizations2UsersRole(organization, 'researchers', 'researcherOfs');
+  await organization.save();
+
+  return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});
+}
+
+async function fetchOrganization(req, res, next) {
   try {
-    const {form, outcomeForm, indicatorForm} = req.body;
-    if (!form || !outcomeForm || !indicatorForm)
-      return res.status(400).json({success: false, message: 'Wrong information input'});
-    if (!form.legalName)
-      return res.status(400).json({success: false, message: 'Legal name is requested'});
-    if (!form.ID)
-      return res.status(400).json({success: false, message: 'Organization ID is requested'});
-    form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
-    // handle administrators, editors, reporters, researchers
-
-    // firstly replace ids to the actual userAccount object
-    // then add organization id to the userAccount Object
-    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
-    if (!form.administrator)
-      return res.status(400).json({success: false, message: 'Administrator: No such user'});
-
-    // firstly replace ids to the actual userAccount objects
-    form.reporters = await Promise.all(form.reporters.map(reporterId => {
-      return GDBUserAccountModel.findOne({_id: reporterId});
-    }));
-    form.editors = await Promise.all(form.editors.map(editorId => {
-      return GDBUserAccountModel.findOne({_id: editorId});
-    }));
-    form.researchers = await Promise.all(form.researchers.map(researcherId => {
-      return GDBUserAccountModel.findOne({_id: researcherId});
-    }));
-
-
-    const organization = GDBOrganizationModel(form);
-    // below handles outcome part
-    for (let i = 0; i < outcomeForm.length; i++) {
-      const outcome = outcomeForm[i];
-      if (!outcome.name || !outcome.description || !outcome.domain)
-        return res.status(400).json({success: false, message: 'Wrong information input'});
-      const domainObject = await GDBDomainModel.findOne({_id: outcome.domain});
-      if (!domainObject)
-        return res.status(400).json({success: false, message: 'Wrong domain id'});
-      const outcomeObject = GDBOutcomeModel({
-        name: outcome.name, description: outcome.description, domain: domainObject
-      });
-      if (!organization.hasOutcomes) {
-        organization.hasOutcomes = [];
-      }
-      await outcomeObject.save();
-      organization.hasOutcomes.push(outcomeObject);
+    if (req.session.isSuperuser) {
+      return superuserFetchOrganization(req, res);
     }
-
-    // below handles indicator part
-    for (let i = 0; i < indicatorForm.length; i++) {
-      const indicator = indicatorForm[i];
-      if (!indicator.name || !indicator.description)
-        return res.status(400).json({success: false, message: 'Wrong information input'});
-      const indicatorObject = GDBIndicatorModel(indicator);
-      if (!organization.hasIndicators)
-        organization.hasIndicators = [];
-      await indicatorObject.save();
-      organization.hasIndicators.push(indicatorObject);
-    }
-
-    await organization.save();
-
-    // then add organization id to the userAccount Object
-    if (!organization.administrator.administratorOfs)
-      organization.administrator.administratorOfs = [];
-    organization.administrator.administratorOfs.push(organization);
-    addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
-    addOrganizations2UsersRole(organization, 'editors', 'editorOfs');
-    addOrganizations2UsersRole(organization, 'researchers', 'researcherOfs');
-    await organization.save();
-
-    return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});
   } catch (e) {
     next(e);
   }
 }
 
-async function superuserFetchOrganization(req, res, next) {
+async function createOrganization(req, res, next) {
   try {
-    const {id} = req.params;
-    if (!id)
-      return res.status(400).json({success: false, message: 'Organization ID is needed'});
-    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators']});
-    if (!organization)
-      return res.status(400).json({success: false, message: 'No such organization'});
-    const outcomes = organization.hasOutcomes || [];
-    if (outcomes.length > 0) {
-      outcomes.map(outcome => {
-        outcome.domain = outcome.domain.split('_')[1];
-      });
+    if (req.session.isSuperuser) {
+      return superuserCreateOrganization(req, res);
     }
-    const indicators = organization.hasIndicators || [];
-    organization.ID = organization.hasId?.hasIdentifier;
-    if (!organization.researchers)
-      organization.researchers = [];
-    if (!organization.reporters)
-      organization.reporters = [];
-    if (!organization.editors)
-      organization.editors = [];
-    if (organization.administrator)
-      organization.administrator = organization.administrator.split('_')[1];
-    organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1]);
-    organization.editors = organization.editors.map(editor => editor.split('_')[1]);
-    organization.reporters = organization.reporters.map(reporter => reporter.split('_')[1]);
-    delete organization.hasOutcomes;
-    delete organization.hasId;
-    delete organization.hasIndicators;
-    return res.status(200).json({success: true, organization, outcomes, indicators});
   } catch (e) {
-    next(e);
+
   }
+}
+
+async function superuserFetchOrganization(req, res) {
+  const {id} = req.params;
+  if (!id)
+    throw Server400Error('Organization ID is needed');
+  const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators']});
+  if (!organization)
+    throw Server400Error('No such organization');
+  const outcomes = organization.hasOutcomes || [];
+  if (outcomes.length > 0) {
+    outcomes.map(outcome => {
+      outcome.domain = outcome.domain.split('_')[1];
+    });
+  }
+  const indicators = organization.hasIndicators || [];
+  organization.ID = organization.hasId?.hasIdentifier;
+  if (!organization.researchers)
+    organization.researchers = [];
+  if (!organization.reporters)
+    organization.reporters = [];
+  if (!organization.editors)
+    organization.editors = [];
+  if (organization.administrator)
+    organization.administrator = organization.administrator.split('_')[1];
+  organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1]);
+  organization.editors = organization.editors.map(editor => editor.split('_')[1]);
+  organization.reporters = organization.reporters.map(reporter => reporter.split('_')[1]);
+  delete organization.hasOutcomes;
+  delete organization.hasId;
+  delete organization.hasIndicators;
+  return res.status(200).json({success: true, organization, outcomes, indicators});
 }
 
 async function adminFetchOrganization(req, res, next) {
@@ -163,102 +175,110 @@ async function adminFetchOrganization(req, res, next) {
   }
 }
 
+function updateOrganization(req, res, next) {
+  try {
+    if (req.session.isSuperuser)
+      return superuserUpdateOrganization(req, res);
+  } catch (e) {
+    next(e);
+  }
+}
+
 function cacheUser(userAccount, userAccountDict) {
   if (!userAccountDict[userAccount._id])
     userAccountDict[userAccount._id] = userAccount;
 }
+
 function cacheListOfUsers(users, userAccountDict) {
   users.map(userAccount => {
-    cacheUser(userAccount, userAccountDict)
+    cacheUser(userAccount, userAccountDict);
   });
 }
 
-async function superuserUpdateOrganization(req, res, next) {
-  try {
-    const {id} = req.params;
-    const {form, outcomeForm, indicatorForm} = req.body;
-    const userAccountDict = {};
-    if (!id)
-      return res.status(400).json({success: false, message: 'Id is needed'});
-    if (!form || !outcomeForm || !indicatorForm)
-      return res.status(400).json({success: false, message: 'Form and outcomeForm are needed'});
+async function superuserUpdateOrganization(req, res) {
 
-    const organization = await GDBOrganizationModel.findOne({_id: id},
-      {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors']});
+  const {id} = req.params;
+  const {form, outcomeForm, indicatorForm} = req.body;
+  const userAccountDict = {};
+  if (!id)
+    throw Server400Error('Id is needed');
+  if (!form || !outcomeForm || !indicatorForm)
+    throw Server400Error('Form and outcomeForm are needed');
 
-    if (!organization)
-      return res.status(400).json({success: false, message: 'No such organization'});
-    if (!form.legalName)
-      return res.status(400).json({success: false, message: 'Legal name is requested'});
-    if (!form.ID)
-      return res.status(400).json({success: false, message: 'ID is requested'});
+  const organization = await GDBOrganizationModel.findOne({_id: id},
+    {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors']});
 
-    // cache all userAccounts in the organization
-    if (organization.administrator)
-      cacheUser(organization.administrator, userAccountDict);
+  if (!organization)
+    throw Server400Error('No such organization');
+  if (!form.legalName)
+    throw Server400Error('Legal name is requested');
+  if (!form.ID)
+    throw Server400Error('ID is requested');
 
-    if (organization.reporters)
-      cacheListOfUsers(organization.reporters, userAccountDict);
+  // cache all userAccounts in the organization
+  if (organization.administrator)
+    cacheUser(organization.administrator, userAccountDict);
 
-    if (organization.editors)
-      cacheListOfUsers(organization.editors, userAccountDict);
+  if (organization.reporters)
+    cacheListOfUsers(organization.reporters, userAccountDict);
 
-    if (organization.researchers)
-      cacheListOfUsers(organization.researchers, userAccountDict);
+  if (organization.editors)
+    cacheListOfUsers(organization.editors, userAccountDict);
+
+  if (organization.researchers)
+    cacheListOfUsers(organization.researchers, userAccountDict);
 
 
-    organization.legalName = form.legalName;
-    organization.comment = form.comment;
+  organization.legalName = form.legalName;
+  organization.comment = form.comment;
 
-    if(userAccountDict[form.administrator]){
-      form.administrator = userAccountDict[form.administrator];
-    } else {
-      form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
-      cacheUser(form.administrator, userAccountDict);
-    }
-
-    if (!form.administrator)
-      return res.status(400).json({success: false, message: 'Invalid administrator'});
-
-    // update organizationAdmin if needed
-    if (organization.administrator._id !== form.administrator._id) {
-      // then the administrator have to be updated
-      // delete organization from previous user's property
-      const index = organization.administrator.administratorOfs.findIndex(org => org.split('_')[1] === id);
-      organization.administrator.administratorOfs.splice(index, 1);
-      await organization.administrator.save();
-      // add organization on current user's property
-      if (!form.administrator.administratorOfs)
-        form.administrator.administratorOfs = [];
-      form.administrator.administratorOfs.push(organization);
-      // update property of organization
-      organization.administrator = form.administrator;
-    }
-    // organization.administrator = form.administrator;
-
-    await Promise.all([
-      updateRoles(organization, form, 'reporters', 'reporterOfs', userAccountDict),
-      updateRoles(organization, form, 'researchers', 'researcherOfs', userAccountDict),
-      updateRoles(organization, form, 'editors', 'editorOfs', userAccountDict)
-    ]);
-    if (organization.hasId.hasIdentifier !== form.ID) {
-      // drop previous one
-      await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
-      // and add a new one
-      organization.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
-    }
-
-    // handle outcomes
-    await updateOutcomes(organization, outcomeForm);
-    organization.markModified(['reporters', 'researchers', 'editors']);
-    await organization.save();
-    return res.status(200).json({
-      success: true,
-      message: 'Successfully updated organization ' + organization.legalName
-    });
-  } catch (e) {
-    next(e);
+  if (userAccountDict[form.administrator]) {
+    form.administrator = userAccountDict[form.administrator];
+  } else {
+    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+    cacheUser(form.administrator, userAccountDict);
   }
+
+  if (!form.administrator)
+    throw Server400Error('Invalid administrator');
+
+  // update organizationAdmin if needed
+  if (organization.administrator._id !== form.administrator._id) {
+    // then the administrator have to be updated
+    // delete organization from previous user's property
+    const index = organization.administrator.administratorOfs.findIndex(org => org.split('_')[1] === id);
+    organization.administrator.administratorOfs.splice(index, 1);
+    await organization.administrator.save();
+    // add organization on current user's property
+    if (!form.administrator.administratorOfs)
+      form.administrator.administratorOfs = [];
+    form.administrator.administratorOfs.push(organization);
+    // update property of organization
+    organization.administrator = form.administrator;
+  }
+  // organization.administrator = form.administrator;
+
+  await Promise.all([
+    updateRoles(organization, form, 'reporters', 'reporterOfs', userAccountDict),
+    updateRoles(organization, form, 'researchers', 'researcherOfs', userAccountDict),
+    updateRoles(organization, form, 'editors', 'editorOfs', userAccountDict)
+  ]);
+  if (organization.hasId.hasIdentifier !== form.ID) {
+    // drop previous one
+    await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
+    // and add a new one
+    organization.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
+  }
+
+  // handle outcomes
+  await updateOutcomes(organization, outcomeForm);
+  organization.markModified(['reporters', 'researchers', 'editors']);
+  await organization.save();
+  return res.status(200).json({
+    success: true,
+    message: 'Successfully updated organization ' + organization.legalName
+  });
+
 };
 
 
@@ -274,13 +294,12 @@ async function updateRoles(organization, form, organizationProperty, userAccount
   // add the organization to every new reporters' property
   if (form[organizationProperty].length > 0) {
     form[organizationProperty] = await Promise.all(form[organizationProperty].map(userAccountId => {
-      if (userAccountDict[userAccountId]) {
-        return userAccountDict[userAccountId]
-      } else {
-        return GDBUserAccountModel.findOne({_id: userAccountId})
+        if (userAccountDict[userAccountId]) {
+          return userAccountDict[userAccountId];
+        } else {
+          return GDBUserAccountModel.findOne({_id: userAccountId});
+        }
       }
-    }
-
     ));
     cacheListOfUsers(form[organizationProperty], userAccountDict);
     await Promise.all(form[organizationProperty].map(userAccount => {
@@ -427,9 +446,9 @@ async function superuserDeleteOrganization(req, res, next) {
 
 module.exports = {
   adminUpdateOrganization,
-  superuserCreateOrganization,
-  superuserFetchOrganization,
-  superuserUpdateOrganization,
+  updateOrganization,
   superuserDeleteOrganization,
-  adminFetchOrganization
+  adminFetchOrganization,
+  fetchOrganization,
+  createOrganization
 };

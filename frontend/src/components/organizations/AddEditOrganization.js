@@ -396,7 +396,7 @@ export default function AddEditOrganization() {
                                       onClick={handleConfirm} children="confirm" autoFocus/>]}
                      open={state.submitDialog}/>
       </Paper>
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      {outcomeForm?.length > 0? <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Outcomes </Typography>
         {outcomeForm.map((outcome, index) => {
           return <OutcomeField
@@ -439,29 +439,33 @@ export default function AddEditOrganization() {
                       return outcomes.splice(0, outcomes.length - 1);
                     });
                   }
-                  }
-                  >
-                  Remove
-                  </Button>
+                }
+        >
+          Remove
+        </Button>
 
-                  <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                  dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                  'Are you sure you want to update this Organization?'}
-                  buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                  key={'cancel'}>{'cancel'}</Button>,
-                  <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                  key={'confirm'}
-                  onClick={handleConfirm} children="confirm" autoFocus/>]}
-                  open={state.submitDialog}/>
+        AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
+                       'Are you sure you want to update this Organization?'}
+                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                                       key={'cancel'}>{'cancel'}</Button>,
+                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                                      key={'confirm'}
+                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
+                     open={state.submitDialog}/>
         {/*<Link to={'/indicators/' + id}>*/}
         {/*<Typography variant="body2" className={classes.link}>*/}
         {/*  Add/Manage Indicators?*/}
         {/*</Typography>*/}
         {/*</Link>*/}
-                  </Paper>
+      </Paper>:
+        <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h6'}>The organization doesn't contain outcomes yet </Typography> </Paper>}
 
-      <Paper sx={{p: 2}} variant={'outlined'}>
+
+      {indicatorForm?.length > 0? <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Indicators </Typography>
+
         {indicatorForm.map((indicator, index) => {
           return <IndicatorField
             importErrors={indicatorFormErrors[index]}
@@ -500,21 +504,15 @@ export default function AddEditOrganization() {
           Remove
         </Button>
 
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                       'Are you sure you want to update this Organization?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
-                     open={state.submitDialog}/>
         {/*<Link to={'/indicators/' + id}>*/}
         {/*<Typography variant="body2" className={classes.link}>*/}
         {/*  Add/Manage Indicators?*/}
         {/*</Typography>*/}
         {/*</Link>*/}
-      </Paper>
+      </Paper>:  <Paper sx={{p: 2}} variant={'outlined'}>
+        <Typography variant={'h6'}>The organization doesn't contain indicators yet </Typography> </Paper>}
+
+
 
 
 

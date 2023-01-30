@@ -30,15 +30,27 @@ function Dashboard() {
 
       {userContext.isSuperuser || userContext.groupAdminOf.length > 0?
         <NavButton to={`/groups`} icon={<People/>} key={'groups'}
-                  text="Manage Groups"/>:<div/>}
+                  text="Manage Groups"/>:null}
 
       {userContext.isSuperuser || userContext.administratorOf.length > 0?
         <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
-      <div/>}
+      null}
 
       {userContext.isSuperuser?<NavButton to={`/users`} icon={<People/>} key={'users'}
-                  text="Manage Users"/>:<div/>}
+                  text="Manage Users"/>:null}
+
+      {userContext.researcherOf.length > 0?
+        <NavButton to={`/groups`} icon={<Edit/>} key={'indicators'}
+                   text="Manage Indicators"/>:null}
+
+      {userContext.researcherOf.length > 0?
+        <NavButton to={`/groups`} icon={<Edit/>} key={'indicator reports'}
+                   text="Manage Indicator Reports"/>:null}
+
+      {userContext.researcherOf.length > 0?
+        <NavButton to={`/groups`} icon={<Edit/>} key={'outcomes'}
+                   text="Manage Outcomes"/>:null}
 
 
       <NavButton to={'/domains'} icon={<Edit/>} key={'domains'}

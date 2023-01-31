@@ -4,6 +4,6 @@ const {groupAdminFetchOrganizations} = require("../../services/organizations/org
 
 const router = express.Router({mergeParams: true});
 
-router.get('/', groupAdminFetchOrganizations)
+// router.get('/', groupAdminFetchOrganizations)
 
 module.exports = router;

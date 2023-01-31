@@ -3,6 +3,6 @@ const {superuserFetchOrganizations} = require("../../services/organizations/orga
 
 const router = express.Router({mergeParams: true});
 
-router.get('/', superuserFetchOrganizations)
+// router.get('/', superuserFetchOrganizations)
 
 module.exports = router;

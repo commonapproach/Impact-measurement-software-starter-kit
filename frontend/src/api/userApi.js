@@ -173,10 +173,8 @@ export function fetchUser(id, userContext) {
  * @returns {Promise<any>}
  */
 export function fetchUsers(userContext) {
-  if (userContext.isSuperuser) {
-    return getJson('/api/superuser/users/');
-  } else if(userContext.administratorOf.length){
-    return getJson('/api/admin/users/');
+  if (userContext.isSuperuser || userContext.administratorOf.length) {
+    return getJson('/api/users/');
   }
 
 

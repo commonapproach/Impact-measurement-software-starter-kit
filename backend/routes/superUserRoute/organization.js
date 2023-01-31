@@ -5,9 +5,9 @@ const {superuserCreateOrganization, superuserFetchOrganization, superuserUpdateO
 
 const router = express.Router({mergeParams: true});
 
-router.post('/', superuserCreateOrganization)
-router.get('/:id', superuserFetchOrganization)
-router.put('/:id', superuserUpdateOrganization)
-router.delete('/:id', superuserDeleteOrganization)
+// router.post('/', superuserCreateOrganization)
+// router.get('/:id', superuserFetchOrganization)
+// router.put('/:id', superuserUpdateOrganization)
+// router.delete('/:id', superuserDeleteOrganization)
 
 module.exports = router;

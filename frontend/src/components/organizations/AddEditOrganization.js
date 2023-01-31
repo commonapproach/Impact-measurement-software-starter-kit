@@ -79,40 +79,7 @@ export default function AddEditOrganization() {
   const [trigger, setTrigger] = useState(false)
 
   useEffect(() => {
-    const options = {
-      reporters: {},
-      editors: {},
-      researchers: {},
-      administrators: [],
-    }
 
-      // fetchUsers('editor', userContext.userTypes).then(({data}) => {
-      //   data.map(editor => {
-      //     options.editors[editor] = editor;
-      //   });
-      // }),
-      // fetchUsers('reporter', userContext.userTypes).then(({data}) => {
-      //   data.map(reporter => {
-      //     options.reporters[reporter] = reporter;
-      //   });
-      // }),
-      // fetchUsers('admin', userContext.userTypes).then(({data}) => {
-      //   options.administrators = data;
-      // }),
-      // fetchUsers('researcher', userContext.userTypes).then(({data}) => {
-      //   data.map(researcher => {
-      //     options.researchers[researcher] = researcher;
-      //   });
-      // }),
-      // fetchUsers('superuser', userContext.userTypes).then(({data}) => {
-      //   data.map((superuser) => {
-      //     options.reporters[superuser] = superuser;
-      //     options.editors[superuser] = superuser;
-      //     options.researchers[superuser] = superuser;
-      //     options.administrators.push(superuser);
-      //
-      //   });
-      // }),
     fetchUsers(userContext).then(({data, success}) => {
       const objectForm = {};
       data.map(user => {
@@ -143,6 +110,7 @@ export default function AddEditOrganization() {
           if (e.json)
             setErrors(e.json);
           setLoading(false);
+          console.log(e)
           enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
         });
       } else if (mode === 'edit' && !id) {
@@ -155,6 +123,7 @@ export default function AddEditOrganization() {
       if (e.json)
         setErrors(e.json);
       setLoading(false);
+
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
 

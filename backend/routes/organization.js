@@ -1,13 +1,14 @@
 const express = require('express');
-const { createOrganization,
-  superuserDeleteOrganization, fetchOrganization, updateOrganization
+const {
+  fetchOrganizationHandler, createOrganizationHandler,
+  updateOrganizationHandler
 } = require("../services/organizations/organization");
 
 const router = express.Router({mergeParams: true});
 
-router.post('/', fetchOrganization)
-router.get('/:id', createOrganization)
-router.put('/:id', updateOrganization)
-router.delete('/:id', superuserDeleteOrganization)
+router.post('/', createOrganizationHandler)
+router.get('/:id', fetchOrganizationHandler)
+router.put('/:id', updateOrganizationHandler)
+// router.delete('/:id', superuserDeleteOrganization)
 
 module.exports = router;

@@ -4,6 +4,9 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBDomainModel} = require("../../models/domain");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBIndicatorModel} = require("../../models/indicator");
+const {GDBGroupModel} = require("../../models/group");
+const {fetchIndicators} = require("../indicators/indicator");
+const {hasAccess} = require("../../helpers");
 
 /**
  * Add organization to each account in organization[usertype] 's associated property
@@ -22,14 +25,14 @@ function addOrganizations2UsersRole(organization, usertype, property) {
 }
 
 
-async function superuserCreateOrganization(req, res) {
+async function createOrganization(req, res) {
   const {form, outcomeForm, indicatorForm} = req.body;
   if (!form || !outcomeForm || !indicatorForm)
-    throw Server400Error('Wrong information input');
+    throw new Server400Error('Wrong information input');
   if (!form.legalName)
-    throw Server400Error('Legal name is requested');
+    throw new Server400Error('Legal name is requested');
   if (!form.ID)
-    throw Server400Error('Organization ID is requested');
+    throw new Server400Error('Organization ID is requested');
   form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
   // handle administrators, editors, reporters, researchers
 
@@ -37,7 +40,7 @@ async function superuserCreateOrganization(req, res) {
   // then add organization id to the userAccount Object
   form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
   if (!form.administrator)
-    throw Server400Error('Administrator: No such user');
+    throw new Server400Error('Administrator: No such user');
 
   // firstly replace ids to the actual userAccount objects
   form.reporters = await Promise.all(form.reporters.map(reporterId => {
@@ -56,10 +59,10 @@ async function superuserCreateOrganization(req, res) {
   for (let i = 0; i < outcomeForm.length; i++) {
     const outcome = outcomeForm[i];
     if (!outcome.name || !outcome.description || !outcome.domain)
-      throw Server400Error('Wrong information input');
+      throw new Server400Error('Wrong information input');
     const domainObject = await GDBDomainModel.findOne({_id: outcome.domain});
     if (!domainObject)
-      throw Server400Error('Wrong domain id');
+      throw new Server400Error('Wrong domain id');
     const outcomeObject = GDBOutcomeModel({
       name: outcome.name, description: outcome.description, domain: domainObject
     });
@@ -96,33 +99,39 @@ async function superuserCreateOrganization(req, res) {
   return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});
 }
 
-async function fetchOrganization(req, res, next) {
+async function fetchOrganizationHandler(req, res, next) {
   try {
-    if (req.session.isSuperuser) {
-      return superuserFetchOrganization(req, res);
+    if (await hasAccess(req, 'fetchOrganization')) {
+      return await fetchOrganization(req, res);
+    }
+
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+}
+
+
+async function createOrganizationHandler(req, res, next) {
+  try {
+    if (await hasAccess(req, 'createOrganization')) {
+      return await createOrganization(req, res);
+    } else {
+      return res.status(400).json({message: 'Wrong Auth'});
     }
   } catch (e) {
     next(e);
   }
 }
 
-async function createOrganization(req, res, next) {
-  try {
-    if (req.session.isSuperuser) {
-      return superuserCreateOrganization(req, res);
-    }
-  } catch (e) {
+async function fetchOrganization(req, res) {
 
-  }
-}
-
-async function superuserFetchOrganization(req, res) {
   const {id} = req.params;
   if (!id)
-    throw Server400Error('Organization ID is needed');
+    throw new Server400Error('Organization ID is needed');
   const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators']});
   if (!organization)
-    throw Server400Error('No such organization');
+    throw new Server400Error('No such organization');
   const outcomes = organization.hasOutcomes || [];
   if (outcomes.length > 0) {
     outcomes.map(outcome => {
@@ -146,6 +155,7 @@ async function superuserFetchOrganization(req, res) {
   delete organization.hasId;
   delete organization.hasIndicators;
   return res.status(200).json({success: true, organization, outcomes, indicators});
+
 }
 
 async function adminFetchOrganization(req, res, next) {
@@ -175,10 +185,11 @@ async function adminFetchOrganization(req, res, next) {
   }
 }
 
-function updateOrganization(req, res, next) {
+async function updateOrganizationHandler(req, res, next) {
   try {
-    if (req.session.isSuperuser)
-      return superuserUpdateOrganization(req, res);
+    if (await hasAccess(req, 'updateOrganization'))
+      return await updateOrganization(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
   }
@@ -195,7 +206,7 @@ function cacheListOfUsers(users, userAccountDict) {
   });
 }
 
-async function superuserUpdateOrganization(req, res) {
+async function updateOrganization(req, res) {
 
   const {id} = req.params;
   const {form, outcomeForm, indicatorForm} = req.body;
@@ -446,9 +457,8 @@ async function superuserDeleteOrganization(req, res, next) {
 
 module.exports = {
   adminUpdateOrganization,
-  updateOrganization,
-  superuserDeleteOrganization,
+  updateOrganizationHandler,
   adminFetchOrganization,
-  fetchOrganization,
-  createOrganization
+  fetchOrganizationHandler,
+  createOrganizationHandler
 };

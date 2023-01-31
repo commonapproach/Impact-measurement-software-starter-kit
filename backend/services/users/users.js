@@ -2,23 +2,21 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {userType2UserTypeURI} = require("../../helpers/dicts");
 const {GraphDB} = require('../../utils/graphdb');
 const {SPARQL} = require('../../utils/graphdb/helpers');
-const superUserFetchUsers = async (req, res, next) => {
-  try {
-      const users = await GDBUserAccountModel.find({}, {populates: ['person']});
-      users.map((user) => {
-        delete user.hash;
-        delete user.salt;
-        delete user.securityQuestions;
-      })
-      return res.status(200).json({data: users, success: true});
+const {hasAccess} = require("../../helpers");
 
-  } catch (e) {
-    next(e);
-  }
+const fetchUsers = async (req, res) => {
+  const users = await GDBUserAccountModel.find({}, {populates: ['person']});
+  users.map((user) => {
+    delete user.hash;
+    delete user.salt;
+    delete user.securityQuestions;
+  });
+  return res.status(200).json({data: users, success: true});
+
 
 };
 
-const adminFetchUsers = superUserFetchUsers;
+// const adminFetchUsers = superUserFetchUsers;
 
 const superuserDeleteUser = async (req, res, next) => {
   try {
@@ -32,5 +30,15 @@ const superuserDeleteUser = async (req, res, next) => {
   }
 };
 
+const fetchUsersHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req.session, 'fetchUsers'))
+      return await fetchUsers(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
 
-module.exports = {superUserFetchUsers, superuserDeleteUser, adminFetchUsers};
+
+module.exports = {superuserDeleteUser, fetchUsersHandler};

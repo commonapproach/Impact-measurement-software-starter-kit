@@ -4,7 +4,7 @@ const {adminFetchUsers} = require("../../services/users/users");
 const router = express.Router({mergeParams: true});
 
 
-router.get('/', adminFetchUsers);
-router.get('/:userType', adminFetchUsers);
+// router.get('/', adminFetchUsers);
+// router.get('/:userType', adminFetchUsers);
 
 module.exports = router;

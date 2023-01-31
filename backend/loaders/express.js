@@ -18,7 +18,9 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
-const {organizationRoute} = require("../routes");
+const {organizationRoute, organizationsRoute, usersRoute} = require("../routes");
+
+const {userRoute} = require("../routes/superUserRoute");
 
 const app = express();
 
@@ -51,8 +53,9 @@ app.use('/api/general', generalUserRoute);
 app.use('/api/superuser', superuserRoute);
 // app.use('/api/groupAdmin', groupAdminRoute);
 // app.use('/api/admin', adminRoute);
+app.use('/api/users', usersRoute);
 app.use('/api/organization', organizationRoute);
-// app.use('/api', questionRoute);
+app.use('/api/organizations', organizationsRoute);
 // app.use('/api', dynamicFormRoute);
 // app.use('/api', genericRoute);
 // app.use('/api', advancedSearchRoute);

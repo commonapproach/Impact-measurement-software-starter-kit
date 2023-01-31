@@ -125,7 +125,6 @@ async function createOrganizationHandler(req, res, next) {
 }
 
 async function fetchOrganization(req, res) {
-
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Organization ID is needed');

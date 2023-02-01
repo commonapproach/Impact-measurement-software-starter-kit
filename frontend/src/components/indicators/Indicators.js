@@ -118,7 +118,7 @@ export default function Indicators() {
             onClick={() => navigate('/indicator/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Organization"
+            label="Add new Indicator"
             variant="outlined"/>
           :
           <div/>

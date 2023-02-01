@@ -5,7 +5,7 @@ const {fetchDomain} = require("../../services/domain/domain");
 
 const router = express.Router();
 
-router.get('/:id', fetchDomain);
+// router.get('/:id', fetchDomain);
 
 
 

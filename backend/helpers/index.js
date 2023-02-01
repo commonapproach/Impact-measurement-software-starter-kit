@@ -13,7 +13,7 @@ function organizationBelongsToUser(session, organizationId) {
   const checkerList = session.administratorOfs.filter(organizationURL =>
     organizationURL.split('_')[1] === organizationId
   );
-  return checkerList.length > 0
+  return checkerList.length > 0;
 }
 
 /**
@@ -25,6 +25,7 @@ function organizationBelongsToUser(session, organizationId) {
 async function hasAccess(req, operationType) {
   const session = req.session;
   switch (operationType) {
+    // organizations
     case 'createOrganization':
       return session.isSuperuser;
     case 'updateOrganization':
@@ -34,34 +35,47 @@ async function hasAccess(req, operationType) {
         // firstly check the organization is below to the user
         const organizationId = req.params.id;
         const form = req.body.form;
-        if (organizationBelongsToUser(session, organizationId)){
+        if (organizationBelongsToUser(session, organizationId)) {
           // then check has the user update the administrator
           const organization = await GDBOrganizationModel.findOne({_id: organizationId});
           if (organization.administrator.split('_')[1] === form.administrator)
             return true;
         }
       }
-      return false;
+      break;
     case 'fetchOrganization':
       if (session.isSuperuser)
         return true;
       if (session.administratorOfs.length) {
         // check weather the organization belongs to the user
         const organizationId = req.params.id;
-       if (organizationBelongsToUser(session, organizationId))
-         return true;
+        if (organizationBelongsToUser(session, organizationId))
+          return true;
       }
-      return false;
+      break;
     case 'fetchOrganizations':
-      if(session.isSuperuser)
-        return true
-      return false;
+      if (session.isSuperuser)
+        return true;
+      break;
+
+    // users
     case 'fetchUsers':
-      return true
+      return true;
+
+    // domains
+    case 'fetchDomain':
+      return true;
+    case 'createDomain':
+    case 'updateDomain':
+      if (session.isSuperuser)
+        return true;
+      break;
+    case 'fetchDomains':
+      return true;
   }
 
-      return false;
+  return false;
 
-  }
+}
 
 module.exports = {URI2Id, hasAccess};

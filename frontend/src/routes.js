@@ -29,6 +29,8 @@ import AddEditGroup from "./components/groups/AddEditGroup";
 import Profile from "./components/userProfile/Profile";
 import Domains from "./components/domain/domains";
 import AddEditDomain from "./components/domain/addEditDomain";
+import Organization_indicators from "./components/indicators/Organization-indicators";
+import Indicators from "./components/indicators/Indicators";
 
 const routes = (
   <Routes>
@@ -62,6 +64,11 @@ const routes = (
     <Route path="/domains" element={<PrivateRoute element={Domains}/>}/>
     <Route path="/domains/new" element={<PrivateRoute element={AddEditDomain}/>}/>
     <Route path="/domains/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
+    {/*indicators*/}
+    <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
+    <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>
+    <Route path="/indicator/new" element={<PrivateRoute element={AddEditDomain}/>}/>
+    <Route path="/indicator/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

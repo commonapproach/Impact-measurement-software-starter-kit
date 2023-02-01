@@ -56,8 +56,8 @@ function Dashboard() {
       <NavButton to={'/domains'} icon={<Edit/>} key={'domains'}
                  text="Manage Domains"/>
 
-      {/*<NavButton to={'/needs'} icon={<Edit/>}*/}
-      {/*           text="Manage Needs"/>*/}
+      <NavButton to={'/organization-indicators'} icon={<Edit/>} key={'organization-indicators'}
+                 text="Manage Indicators"/>
 
       {/*<NavButton to={'/needSatisfiers'} icon={<Edit/>}*/}
       {/*           text="Manage Need Satisfiers"/>*/}

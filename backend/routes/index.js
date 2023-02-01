@@ -3,5 +3,6 @@ module.exports = {
   organizationsRoute: require('../routes/organizations'),
   usersRoute: require('../routes/users'),
   domainRoute: require('../routes/domain'),
-  domainsRoute: require('../routes/domains')
+  domainsRoute: require('../routes/domains'),
+  indicatorsRoute: require('../routes/indicators')
 }

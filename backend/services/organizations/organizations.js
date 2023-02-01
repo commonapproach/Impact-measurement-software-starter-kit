@@ -5,15 +5,20 @@ const fetchOrganizationsHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchOrganizations'))
       return await fetchOrganizations(req, res);
-    return res.status(400).json({message: 'Wrong Auth'})
+    return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
   }
 };
 
 const fetchOrganizations = async (req, res) => {
+  let organizations;
 
-  const organizations = await GDBOrganizationModel.find({});
+  if (req.session.isSuperuser) {
+    organizations = await GDBOrganizationModel.find({});
+    return res.status(200).json({success: true, organizations: organizations});
+  }
+
   return res.status(200).json({success: true, organizations: organizations});
 
 };

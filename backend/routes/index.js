@@ -4,5 +4,6 @@ module.exports = {
   usersRoute: require('../routes/users'),
   domainRoute: require('../routes/domain'),
   domainsRoute: require('../routes/domains'),
-  indicatorsRoute: require('../routes/indicators')
+  indicatorsRoute: require('../routes/indicators'),
+  indicatorRoute: require('../routes/indicator')
 }

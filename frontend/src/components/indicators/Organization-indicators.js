@@ -92,13 +92,13 @@ export default function Organization_indicators() {
     //   },
     // },
 
-    {
-      label: ' ',
-      body: ({_id}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectId={_id}
-                      hideViewOption hideEditOption hideDeleteOption
-                      handleDelete={() => showDeleteDialog(_id)}/>
-    }
+    // {
+    //   label: ' ',
+    //   body: ({_id}) =>
+    //     <DropdownMenu urlPrefix={'organizations'} objectId={_id}
+    //                   hideViewOption hideEditOption hideDeleteOption
+    //                   handleDelete={() => showDeleteDialog(_id)}/>
+    // }
   ];
 
   if (state.loading)

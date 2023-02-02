@@ -31,6 +31,7 @@ import Domains from "./components/domain/domains";
 import AddEditDomain from "./components/domain/addEditDomain";
 import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
+import AddEditIndicator from "./components/indicators/addEditIndicator";
 
 const routes = (
   <Routes>
@@ -67,7 +68,7 @@ const routes = (
     {/*indicators*/}
     <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
     <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>
-    <Route path="/indicator/new" element={<PrivateRoute element={AddEditDomain}/>}/>
+    <Route path="/indicator/:orgId/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path="/indicator/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
 
 

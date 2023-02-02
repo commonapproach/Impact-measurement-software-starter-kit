@@ -5,7 +5,7 @@ const GDBIndicatorModel = createGraphDBModel({
   name: {type: String, internalKey: 'tove_org:hasName'},
   description: {type: String, internalKey: 'cids:hasDescription'},
   indicatorReport: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'},
-  forOrganization: {type: [Types.NamedIndividual], internalKey: 'cids:forIndicator'}
+  forOrganization: {type: [Types.NamedIndividual], internalKey: 'cids:forOrganization'}
 }, {
   rdfTypes: ['cids:Indicator'], name: 'indicator'
 });

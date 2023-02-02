@@ -65,8 +65,16 @@ async function hasAccess(req, operationType) {
     // indicators
     case 'fetchIndicators':
       if (session.isSuperuser)
-        return true
-      return false
+        return true;
+      return false;
+    case 'fetchIndicator':
+      if (session.isSuperuser)
+        return true;
+      return false;
+    case 'createIndicator':
+      if(session.isSuperuser)
+        return true;
+      return false;
 
     // domains
     case 'fetchDomain':

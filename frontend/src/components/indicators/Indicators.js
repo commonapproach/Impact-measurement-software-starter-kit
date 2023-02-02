@@ -65,7 +65,7 @@ export default function Indicators() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return <Link color to={`/indicator/edit/${_id}`}>
+        return <Link color to={`/indicator/edit/${id}/${_id}`}>
           {name}
         </Link>
       },
@@ -115,7 +115,7 @@ export default function Indicators() {
         customToolbar={
           userContext.isSuperuser?
           <Chip
-            onClick={() => navigate('/indicator/new')}
+            onClick={() => navigate(`/indicator/${id}/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Indicator"

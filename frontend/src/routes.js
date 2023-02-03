@@ -51,11 +51,11 @@ const routes = (
     {/*organization*/}
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
     <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
-    <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
+    <Route path="/organizations/edit/:id" element={<PrivateRoute element={AddEditOrganization}/>}/>
     {/*Groups*/}
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
     <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>
-    <Route path="/groups/:id/edit" element={<PrivateRoute element={AddEditGroup}/>}/>
+    <Route path="/groups/edit/:id" element={<PrivateRoute element={AddEditGroup}/>}/>
     {/*profile*/}
     <Route path="/profile/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
     <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
@@ -64,7 +64,7 @@ const routes = (
     {/*domain*/}
     <Route path="/domains" element={<PrivateRoute element={Domains}/>}/>
     <Route path="/domains/new" element={<PrivateRoute element={AddEditDomain}/>}/>
-    <Route path="/domains/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
+    <Route path="/domains/edit/:id" element={<PrivateRoute element={AddEditDomain}/>}/>
     {/*indicators*/}
     <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
     <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>

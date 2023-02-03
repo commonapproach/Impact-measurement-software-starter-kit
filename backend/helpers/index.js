@@ -72,7 +72,8 @@ async function hasAccess(req, operationType) {
         return true;
       return false;
     case 'createIndicator':
-      if(session.isSuperuser)
+    case 'updateIndicator':
+      if (session.isSuperuser)
         return true;
       return false;
 

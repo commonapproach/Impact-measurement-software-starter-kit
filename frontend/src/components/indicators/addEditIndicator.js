@@ -10,7 +10,7 @@ import {fetchOrganizations, } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
-import {createIndicator, fetchIndicator} from "../../api/indicatorApi";
+import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
 
 const useStyles = makeStyles(() => ({
@@ -103,10 +103,10 @@ export default function AddEditIndicator() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && id) {
-      updateGroup(id, form, userContext).then((res) => {
+      updateIndicator({form}, id).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/indicators');
+          navigate(-1);
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -121,7 +121,6 @@ export default function AddEditIndicator() {
   };
 
   const validate = () => {
-    console.log(form);
     const error = {};
     if (form.name === '')
       error.name = 'The field cannot be empty';

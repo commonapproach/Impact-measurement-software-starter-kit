@@ -112,14 +112,14 @@ export default function Organization_indicators() {
         columns={columns}
         idField="id"
         customToolbar={
-        // userContext.isSuperuser?
-          // <Chip
-          //   onClick={() => navigate('/organizations/new')}
-          //   color="primary"
-          //   icon={<AddIcon/>}
-          //   label="Add new Organization"
-          //   variant="outlined"/>
-          // :
+        userContext.isSuperuser?
+          <Chip
+            onClick={() => navigate('/indicator/new')}
+            color="primary"
+            icon={<AddIcon/>}
+            label="Add a new Indicator"
+            variant="outlined"/>
+          :
           <div/>
         }
 

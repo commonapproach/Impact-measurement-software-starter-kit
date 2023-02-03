@@ -69,7 +69,8 @@ const routes = (
     <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
     <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>
     <Route path="/indicator/:orgId/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
-    <Route path="/indicator/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
+    <Route path="/indicator/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path="/indicator/:id/edit" element={<PrivateRoute element={AddEditIndicator}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

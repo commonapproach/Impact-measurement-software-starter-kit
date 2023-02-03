@@ -65,7 +65,7 @@ export default function Indicators() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return <Link color to={`/indicator/edit/${id}/${_id}`}>
+        return <Link color to={`/indicator/${_id}/edit`}>
           {name}
         </Link>
       },

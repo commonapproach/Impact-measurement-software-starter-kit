@@ -42,10 +42,20 @@ const fetchIndicatorHandler = async (req, res, next) => {
 
 const fetchIndicator = async (req, res) => {
   const {id} = req.params;
+  if (!id)
+    throw new Server400Error('Id is not given')
   const indicator = await GDBIndicatorModel.findOne({_id: id});
   indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(orgURI => {
     return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
   }));
+  indicator.organizations = indicator.forOrganizations.map(organization => {
+    return organization._id;
+  });
+  // indicator.forOrganizations.map(organization => {
+  //   indicator.organizations[organization._id] = organization.legalName;
+  // })
+  delete indicator.forOrganizations
+  return res.status(200).json({success: true, indicator})
 
 };
 

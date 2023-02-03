@@ -54,7 +54,8 @@ export default function AddEditIndicator() {
       navigate(-1);
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
-    if(mode === 'edit' && id && orgId){
+    if(mode === 'edit' && id){
+      console.log('correct')
       fetchIndicator(id, userContext).then(({success, indicator}) => {
         if(success){
           setForm(indicator);
@@ -70,8 +71,9 @@ export default function AddEditIndicator() {
       navigate(-1);
       enqueueSnackbar("No ID or orgId provided", {variant: 'error'});
     } else if (mode === 'new' && !orgId){
-      navigate(-1);
-      enqueueSnackbar("No orgId provided", {variant: 'error'});
+      setLoading(false);
+      // navigate(-1);
+      // enqueueSnackbar("No orgId provided", {variant: 'error'});
     }else if (mode === 'new') {
       setForm(form => ({...form, organizations: [orgId]}))
       setLoading(false);
@@ -81,14 +83,13 @@ export default function AddEditIndicator() {
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log('valid')
       setState(state => ({...state, submitDialog: true}));
     }
   };
 
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
-    if (mode === 'new' && orgId) {
+    if (mode === 'new') {
       createIndicator({form}, userContext).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});

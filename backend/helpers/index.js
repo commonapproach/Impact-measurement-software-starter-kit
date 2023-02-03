@@ -1,4 +1,7 @@
 const {GDBOrganizationModel} = require("../models/organization");
+const {Server400Error} = require("../utils");
+const {GDBGroupModel} = require("../models/group");
+const {GDBIndicatorModel} = require("../models/indicator");
 
 function URI2Id(uri) {
   return uri.split('_')[1];
@@ -66,15 +69,56 @@ async function hasAccess(req, operationType) {
     case 'fetchIndicators':
       if (session.isSuperuser)
         return true;
-      return false;
+      if (session.groupAdminOfs.length > 0){
+        const {organizationId} = req.params;
+        if (!organizationId)
+          throw new Server400Error('organizationId is needed')
+
+        // fetch all groups belong to the user
+        const groups = await Promise.all(session.groupAdminOfs.map(groupURI => {
+            return GDBGroupModel.findOne({_id: groupURI.split('_')[1]}, {populates: ['organizations']});
+          }
+        ))
+        // check does there any group contain the organization with organizationId
+        const checker = groups.filter(group => {
+          return group.organizations.includes(`:organization_${organizationId}`)
+        })
+        if (checker.length > 0)
+          return true
+      }
+      break;
     case 'fetchIndicator':
       if (session.isSuperuser)
         return true;
-      return false;
+      if (session.groupAdminOfs.length > 0) {
+        // check does the indicator belong to an organization belongs to a group belongs to the user
+
+        // fetch the indicator from the database
+        const {id} = req.params;
+        if (!id)
+          throw new Server400Error('Id is not given');
+
+        // fetch all groups belong to the user
+        const groups = await Promise.all(session.groupAdminOfs.map(groupURI => {
+            return GDBGroupModel.findOne({_id: groupURI.split('_')[1]}, {populates: ['organizations']});
+          }
+        ))
+        for (let group of groups){
+          // fetch all organizations belongs to the group
+          group.organizations = await Promise.all(group.organizations.map(organizationURI => {
+            return GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
+          }))
+          // check if there any organization contain the indicator
+          for (let organization of group.organizations) {
+            if (organization.hasIndicators.includes(`:indicator_${id}`))
+              return true
+          }
+        }
+      }
+      break;
     case 'createIndicator':
     case 'updateIndicator':
-      if (session.isSuperuser)
-        return true;
+
       return false;
 
     // domains

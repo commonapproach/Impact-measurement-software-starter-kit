@@ -9,10 +9,10 @@ const fetchIndicators = async (req, res) => {
 
   const {organizationId} = req.params;
   if (!organizationId)
-    return res.status(400).json({success: false, message: 'organizationId is needed'});
+    throw new Server400Error('organizationId is needed');
   const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']});
   if (!organization)
-    return res.status(400).json({success: false, message: 'No such organization'});
+    throw new Server400Error('No such organization');
   if (!organization.hasIndicators)
     return res.status(200).json({success: true, indicators: []});
   return res.status(200).json({success: true, indicators: organization.hasIndicators});
@@ -46,6 +46,8 @@ const fetchIndicator = async (req, res) => {
   if (!id)
     throw new Server400Error('Id is not given');
   const indicator = await GDBIndicatorModel.findOne({_id: id});
+  if(!indicator)
+    throw new Server400Error('No such indicator');
   indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(orgURI => {
     return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
   }));

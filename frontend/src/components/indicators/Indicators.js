@@ -97,7 +97,7 @@ export default function Indicators() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'indicator'} objectId={_id} hideViewOption
+        <DropdownMenu urlPrefix={'indicator'} objectId={_id}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];

@@ -70,7 +70,7 @@ const routes = (
     <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>
     <Route path="/indicator/:orgId/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path="/indicator/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
-    <Route path="/indicator/:id/edit" element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path="/indicator/:id/:operationMode" element={<PrivateRoute element={AddEditIndicator}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

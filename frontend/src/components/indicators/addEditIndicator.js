@@ -29,8 +29,8 @@ export default function AddEditIndicator() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id, orgId} = useParams();
-  const mode = id ? 'edit' : 'new';
+  const {id, orgId, operationMode} = useParams();
+  const mode = id? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -50,12 +50,7 @@ export default function AddEditIndicator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if(false){ // temporally be set as false
-      navigate(-1);
-      enqueueSnackbar('Wrong auth', {variant: 'error'})
-    }
-    if(mode === 'edit' && id){
-      console.log('correct')
+    if((mode === 'edit' && id) || (mode === 'view' && id)){
       fetchIndicator(id, userContext).then(({success, indicator}) => {
         if(success){
           setForm(indicator);
@@ -74,9 +69,12 @@ export default function AddEditIndicator() {
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new') {
+    }else if (mode === 'new' && orgId) {
       setForm(form => ({...form, organizations: [orgId]}))
       setLoading(false);
+    } else {
+      navigate(-1);
+      enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
 
   }, [mode, id]);
@@ -144,6 +142,7 @@ export default function AddEditIndicator() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Indicator </Typography>
         <IndicatorField
+          disabled={mode === 'view'}
           disabledOrganization={!!orgId}
           defaultValue={form}
           required
@@ -153,9 +152,11 @@ export default function AddEditIndicator() {
           importErrors={errors}
         />
 
-        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+        {mode==='view'?
+          <div/>:
+          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit
-        </Button>
+        </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :

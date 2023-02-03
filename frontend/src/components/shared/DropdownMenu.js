@@ -44,7 +44,7 @@ export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideVie
         }}
       >
         {!hideViewOption &&
-        <MenuItem onClick={handleLink(`/${urlPrefix}/${objectId}`)}>
+        <MenuItem onClick={handleLink(`/${urlPrefix}/${objectId}/view`)}>
           <ListItemIcon>
             <OpenInBrowser fontSize="small" color="primary"/>
           </ListItemIcon>

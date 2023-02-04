@@ -32,6 +32,9 @@ import AddEditDomain from "./components/domain/addEditDomain";
 import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
 import AddEditIndicator from "./components/indicators/addEditIndicator";
+import Organization_outcomes from "./components/outcomes/Organization-indicators";
+import Outcomes from "./components/outcomes/Indicators";
+import AddEditOutcome from "./components/outcomes/addEditIndicator";
 
 const routes = (
   <Routes>
@@ -64,13 +67,19 @@ const routes = (
     {/*domain*/}
     <Route path="/domains" element={<PrivateRoute element={Domains}/>}/>
     <Route path="/domains/new" element={<PrivateRoute element={AddEditDomain}/>}/>
-    <Route path="/domains/edit/:id" element={<PrivateRoute element={AddEditDomain}/>}/>
+    <Route path="/domains/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
     {/*indicators*/}
     <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
     <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>
     <Route path="/indicator/:orgId/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path="/indicator/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path="/indicator/:id/:operationMode" element={<PrivateRoute element={AddEditIndicator}/>}/>
+    {/*outcomes*/}
+    <Route path="/organization-outcomes" element={<PrivateRoute element={Organization_outcomes}/>}/>
+    <Route path="/outcomes/:id" element={<PrivateRoute element={Outcomes}/>}/>
+    <Route path="/outcome/:orgId/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path="/outcomes/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path="/outcomes/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

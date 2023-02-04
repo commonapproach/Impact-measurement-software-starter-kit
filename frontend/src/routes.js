@@ -51,7 +51,7 @@ const routes = (
     {/*organization*/}
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
     <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
-    <Route path="/organizations/edit/:id" element={<PrivateRoute element={AddEditOrganization}/>}/>
+    <Route path="/organizations/:id/edit" element={<PrivateRoute element={AddEditOrganization}/>}/>
     {/*Groups*/}
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
     <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>

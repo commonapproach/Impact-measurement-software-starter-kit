@@ -32,7 +32,7 @@ const superuserDeleteUser = async (req, res, next) => {
 
 const fetchUsersHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req.session, 'fetchUsers'))
+    if (await hasAccess(req, 'fetchUsers'))
       return await fetchUsers(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {

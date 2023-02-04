@@ -63,7 +63,7 @@ export default function Organizations() {
     {
       label: 'Legal Name',
       body: ({_id, legalName}) => {
-        return <Link color to={`/organizations/edit/${_id}`}>
+        return <Link color to={`/organizations/${_id}/edit/`}>
           {legalName}
         </Link>
       },

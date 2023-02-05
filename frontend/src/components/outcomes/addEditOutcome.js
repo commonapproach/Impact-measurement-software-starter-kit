@@ -6,12 +6,11 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {fetchOrganizations, } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
-import IndicatorField from "../shared/indicatorField";
+import OutcomeField from "../shared/OutcomeField";
+import {createOutcome} from "../../api/outcomeApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -45,6 +44,7 @@ export default function AddEditOutcome() {
   const [form, setForm] = useState({
     name: '',
     description: '',
+    domain: null,
     organizations:[]
   });
   const [loading, setLoading] = useState(true);
@@ -81,6 +81,7 @@ export default function AddEditOutcome() {
 
   const handleSubmit = () => {
     if (validate()) {
+      console.log(form)
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -88,7 +89,7 @@ export default function AddEditOutcome() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicator({form}, userContext).then((ret) => {
+      createOutcome({form}, userContext).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -139,8 +140,8 @@ export default function AddEditOutcome() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Indicator </Typography>
-        <IndicatorField
+        <Typography variant={'h4'}> Outcome </Typography>
+        <OutcomeField
           disabled={mode === 'view'}
           disabledOrganization={!!orgId}
           defaultValue={form}

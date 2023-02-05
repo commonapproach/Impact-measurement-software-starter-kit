@@ -18,7 +18,9 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
-const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRoute, indicatorsRoute, indicatorRoute} = require("../routes");
+const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRoute, indicatorsRoute, indicatorRoute,
+  outcomesRoute, outcomeRoute
+} = require("../routes");
 
 const {userRoute} = require("../routes/superUserRoute");
 
@@ -60,7 +62,8 @@ app.use('/api/domain', domainRoute);
 app.use('/api/domains', domainsRoute);
 app.use('/api/indicator', indicatorRoute)
 app.use('/api/indicators', indicatorsRoute);
-// app.use('/api', serviceProviderRoute);
+app.use('/api/outcome', outcomeRoute);
+app.use('/api/outcomes', outcomesRoute);
 // app.use('/api', needRoute);
 // app.use('/api', needSatisfierRoute);
 // app.use('/api', internalTypeRoute);

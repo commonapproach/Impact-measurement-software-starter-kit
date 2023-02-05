@@ -32,9 +32,9 @@ import AddEditDomain from "./components/domain/addEditDomain";
 import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
 import AddEditIndicator from "./components/indicators/addEditIndicator";
-import Organization_outcomes from "./components/outcomes/Organization-indicators";
-import Outcomes from "./components/outcomes/Indicators";
-import AddEditOutcome from "./components/outcomes/addEditIndicator";
+import Organization_outcomes from "./components/outcomes/Organization-outcomes";
+import Outcomes from "./components/outcomes/outcomes";
+import AddEditOutcome from "./components/outcomes/addEditOutcome";
 
 const routes = (
   <Routes>
@@ -78,8 +78,8 @@ const routes = (
     <Route path="/organization-outcomes" element={<PrivateRoute element={Organization_outcomes}/>}/>
     <Route path="/outcomes/:id" element={<PrivateRoute element={Outcomes}/>}/>
     <Route path="/outcome/:orgId/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
-    <Route path="/outcomes/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
-    <Route path="/outcomes/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path="/outcome/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

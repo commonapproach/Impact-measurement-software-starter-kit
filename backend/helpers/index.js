@@ -121,7 +121,7 @@ async function hasAccess(req, operationType) {
         if (!organizationId)
           throw new Server400Error('organizationId is needed');
         if (organizationBelongsToUser(userAccount, organizationId, 'administratorOfs'))
-          return true
+          return true;
       }
       if (userAccount.researcherOfs.length > 0) {
         // pass if the organization belongs to any organization which is in the same group
@@ -162,9 +162,9 @@ async function hasAccess(req, operationType) {
       }
       break;
     case 'createIndicator':
-      if(userAccount.isSuperuser) // todo: temp
-        return true
-      if (userAccount.editorOfs.length > 0){
+      if (userAccount.isSuperuser) // todo: temp
+        return true;
+      if (userAccount.editorOfs.length > 0) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
@@ -172,10 +172,10 @@ async function hasAccess(req, operationType) {
           throw new Server400Error('Invalid input');
         // all organizations must be in userAccount.editorOfs
         const checkerList = form.organizations.map(organizationId => {
-          return organizationBelongsToUser(userAccount, organizationId, 'editorOfs')
-        })
+          return organizationBelongsToUser(userAccount, organizationId, 'editorOfs');
+        });
         // if any of organization isn't in userAccount.editorOfs, they doesn't satisfy
-        if(!checkerList.includes(false))
+        if (!checkerList.includes(false))
           return true;
       }
 
@@ -183,8 +183,21 @@ async function hasAccess(req, operationType) {
       break;
     case 'updateIndicator':
       if (userAccount.isSuperuser) // todo: temp
+        return true;
+      break
+
+
+
+    // outcomes
+    case 'fetchOutcomes':
+      if (userAccount.isSuperuser) // todo: temp
         return true
-      return false;
+      break;
+    case 'createOutcome':
+      if (userAccount.isSuperuser) // todo: temp
+        return true
+      break;
+
 
     // domains
     case 'fetchDomain':

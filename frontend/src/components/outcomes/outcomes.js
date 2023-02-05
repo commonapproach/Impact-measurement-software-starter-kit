@@ -4,9 +4,8 @@ import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
-import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
-import {fetchIndicators} from "../../api/indicatorApi";
+import {fetchOutcomes} from "../../api/outcomeApi";
 
 export default function Outcomes() {
   const navigate = useNavigate();
@@ -24,9 +23,9 @@ export default function Outcomes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicators(id, userContext).then(res => {
+    fetchOutcomes(id, userContext).then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.indicators}));
+        setState(state => ({...state, loading: false, data: res.outcomes}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
@@ -65,7 +64,7 @@ export default function Outcomes() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return <Link color to={`/indicator/${_id}/edit`}>
+        return <Link color to={`/outcome/${_id}/edit`}>
           {name}
         </Link>
       },
@@ -97,28 +96,28 @@ export default function Outcomes() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'indicator'} objectId={_id}
+        <DropdownMenu urlPrefix={'outcome'} objectId={_id}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading indicators...`}/>;
+    return <Loading message={`Loading outcomes...`}/>;
 
   return (
     <Container>
       <DataTable
-        title={"Indicators"}
+        title={"Outcomes"}
         data={state.data}
         columns={columns}
         idField="id"
         customToolbar={
           userContext.isSuperuser?
           <Chip
-            onClick={() => navigate(`/indicator/${id}/new`)}
+            onClick={() => navigate(`/outcome/${id}/new`)}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Indicator"
+            label="Add new Outcome"
             variant="outlined"/>
           :
           <div/>

@@ -1,7 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
 import {fetchDomains} from "../../api/domainApi";
+import {fetchOrganizations} from "../../api/organizationApi";
+import {UserContext} from "../../context";
+import Dropdown from "./fields/MultiSelectField";
 
 
 const filterOptions = createFilterOptions({
@@ -35,7 +38,7 @@ function LoadingAutoComplete({label, options, property, state, onChange, disable
   );
 }
 
-export default function OutcomeField({value: defaultValue, required, onChange, label, disabled, importErrors}) {
+export default function OutcomeField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization}) {
 
   const [state, setState] = useState(defaultValue || {});
 
@@ -44,6 +47,9 @@ export default function OutcomeField({value: defaultValue, required, onChange, l
   const [loading, setLoading] = useState(true);
 
   const [errors, setErrors] = useState({...importErrors});
+
+  const userContext = useContext(UserContext);
+
 
   useEffect(() => {
     Promise.all([
@@ -56,6 +62,13 @@ export default function OutcomeField({value: defaultValue, required, onChange, l
               }
             );
         }),
+      fetchOrganizations(userContext).then(({success, organizations}) => {
+        if(success){
+          const options ={} ;
+          organizations.map(organization => options[organization._id] = organization.legalName)
+          setOptions(op => ({...op, organizations: options}))
+        }
+      })
     ]).then(() => setLoading(false));
 
   }, []);
@@ -81,7 +94,7 @@ export default function OutcomeField({value: defaultValue, required, onChange, l
       {!loading &&
         <>
           <Grid container columnSpacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -103,7 +116,7 @@ export default function OutcomeField({value: defaultValue, required, onChange, l
                 }
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <LoadingAutoComplete
                 label="Domain"
                 options={options}
@@ -119,6 +132,26 @@ export default function OutcomeField({value: defaultValue, required, onChange, l
                     setErrors(errors => ({...errors, domain: 'This field cannot be empty'}));
                   }else {
                     setErrors(errors => ({...errors, domain: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Dropdown
+                label={'Organizations'}
+                key={'organizations'}
+                value={state.organizations}
+                onChange={handleChange('organizations')}
+                options={options.organizations}
+                error={!!errors.organizations}
+                helperText={errors.organizations}
+                disabled={disabled || disabledOrganization}
+                onBlur={() => {
+                  if (state.organizations.length === 0) {
+                    setErrors(errors => ({...errors, organizations: 'This field cannot be empty'}));
+                  } else {
+                    setErrors(errors => ({...errors, organizations: null}));
                   }
                 }
                 }

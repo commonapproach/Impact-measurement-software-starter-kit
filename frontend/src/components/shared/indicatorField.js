@@ -77,7 +77,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
       {
         <>
           <Grid container columnSpacing={2}>
-            <Grid item xs={5}>
+            <Grid item xs={6}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -114,7 +114,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                   if (state.organizations.length === 0) {
                     setErrors(errors => ({...errors, organizations: 'This field cannot be empty'}));
                   }else {
-                    setErrors(errors => ({...errors, name: null}));
+                    setErrors(errors => ({...errors, organizations: null}));
                   }
                 }
                 }

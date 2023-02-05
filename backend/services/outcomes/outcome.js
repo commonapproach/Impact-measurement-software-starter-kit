@@ -1,6 +1,5 @@
 const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers");
-const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBDomainModel} = require("../../models/domain");
 const {GDBOutcomeModel} = require("../../models/outcome");
@@ -11,12 +10,12 @@ const fetchOutcomes = async (req, res) => {
   const {organizationId} = req.params;
   if (!organizationId)
     throw new Server400Error('organizationId is needed');
-  const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']});
+  const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
   if (!organization)
     throw new Server400Error('No such organization');
   if (!organization.hasOutcomes)
     return res.status(200).json({success: true, outcomes: []});
-  return res.status(200).json({success: true, outcomes: organization.hasIndicators});
+  return res.status(200).json({success: true, outcomes: organization.hasOutcomes});
 
 };
 

@@ -50,15 +50,15 @@ export default function AddEditOrganization() {
     {}
   );
 
-  const [outcomeFormErrors, setOutcomeFormErrors] = useState([{
+  // const [outcomeFormErrors, setOutcomeFormErrors] = useState([{
+  //
+  // }])
 
-  }])
+  // const [indicatorForm, setIndicatorForm] = useState([]);
 
-  const [indicatorForm, setIndicatorForm] = useState([]);
-
-  const [indicatorFormErrors, setIndicatorFormErrors] = useState([{
-
-  }])
+  // const [indicatorFormErrors, setIndicatorFormErrors] = useState([{
+  //
+  // }])
 
   const [form, setForm] = useState({
     legalName: '',
@@ -69,14 +69,13 @@ export default function AddEditOrganization() {
     researchers: [],
     comment: '',
   });
-  const [outcomeForm, setOutcomeForm] = useState([
-  ]);
+  // const [outcomeForm, setOutcomeForm] = useState([
+  // ]);
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     objectForm: {},
   });
 
-  const [trigger, setTrigger] = useState(false)
 
   useEffect(() => {
 
@@ -102,8 +101,8 @@ export default function AddEditOrganization() {
               researchers: organization.researchers || [],
               comment: organization.comment || ''
             });
-            setOutcomeForm(outcomes)
-            setIndicatorForm(indicators)
+            // setOutcomeForm(outcomes)
+            // setIndicatorForm(indicators)
             setLoading(false);
           }
         }).catch(e => {
@@ -132,7 +131,6 @@ export default function AddEditOrganization() {
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log(outcomeForm)
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -140,7 +138,7 @@ export default function AddEditOrganization() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOrganization({form, outcomeForm, indicatorForm}).then((ret) => {
+      createOrganization({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
@@ -155,8 +153,7 @@ export default function AddEditOrganization() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      console.log(outcomeForm)
-      updateOrganization(id, {form, outcomeForm, indicatorForm}, userContext).then((res) => {
+      updateOrganization(id, {form}, userContext).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
@@ -183,41 +180,42 @@ export default function AddEditOrganization() {
     }
     setErrors(error);
 
-    const outcomeFormErrors = [];
-    outcomeForm.map((outcome, index) => {
-      if(!outcome.name) {
-        if (!outcomeFormErrors[index])
-          outcomeFormErrors[index] = {};
-        outcomeFormErrors[index].name = 'This field cannot be empty';
-      }
-      if(!outcome.domain) {
-        if (!outcomeFormErrors[index])
-          outcomeFormErrors[index] = {};
-        outcomeFormErrors[index].domain = 'This field cannot be empty';
-      }
-      if(!outcome.description) {
-        if (!outcomeFormErrors[index])
-          outcomeFormErrors[index] = {};
-        outcomeFormErrors[index].description = 'This field cannot be empty';
-      }
-    })
-    setOutcomeFormErrors(outcomeFormErrors);
+    // const outcomeFormErrors = [];
+    // outcomeForm.map((outcome, index) => {
+    //   if(!outcome.name) {
+    //     if (!outcomeFormErrors[index])
+    //       outcomeFormErrors[index] = {};
+    //     outcomeFormErrors[index].name = 'This field cannot be empty';
+    //   }
+    //   if(!outcome.domain) {
+    //     if (!outcomeFormErrors[index])
+    //       outcomeFormErrors[index] = {};
+    //     outcomeFormErrors[index].domain = 'This field cannot be empty';
+    //   }
+    //   if(!outcome.description) {
+    //     if (!outcomeFormErrors[index])
+    //       outcomeFormErrors[index] = {};
+    //     outcomeFormErrors[index].description = 'This field cannot be empty';
+    //   }
+    // })
+    // setOutcomeFormErrors(outcomeFormErrors);
 
-    const indicatorFormErrors = [];
-    indicatorForm.map((indicator, index) => {
-      if(!indicator.name) {
-        if(!indicatorFormErrors[index])
-          indicatorFormErrors[index] = {};
-        indicatorFormErrors[index].name = 'This field cannot be empty';
-      }
-      if(!indicator.description) {
-        if (!indicatorFormErrors[index])
-          indicatorFormErrors[index] = {};
-        indicatorFormErrors[index].description = 'This field cannot be empty';
-      }
-    })
-    setIndicatorFormErrors(indicatorFormErrors)
-    return Object.keys(error).length === 0 && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
+    // const indicatorFormErrors = [];
+    // indicatorForm.map((indicator, index) => {
+    //   if(!indicator.name) {
+    //     if(!indicatorFormErrors[index])
+    //       indicatorFormErrors[index] = {};
+    //     indicatorFormErrors[index].name = 'This field cannot be empty';
+    //   }
+    //   if(!indicator.description) {
+    //     if (!indicatorFormErrors[index])
+    //       indicatorFormErrors[index] = {};
+    //     indicatorFormErrors[index].description = 'This field cannot be empty';
+    //   }
+    // })
+    // setIndicatorFormErrors(indicatorFormErrors)
+    return Object.keys(error).length === 0
+      // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
 
   if (loading)
@@ -365,121 +363,121 @@ export default function AddEditOrganization() {
                                       onClick={handleConfirm} children="confirm" autoFocus/>]}
                      open={state.submitDialog}/>
       </Paper>
-      {outcomeForm?.length > 0? <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Outcomes </Typography>
-        {outcomeForm.map((outcome, index) => {
-          return <OutcomeField
-            importErrors={outcomeFormErrors[index]}
-            key={'outcome' + index}
-            label={'outcome ' + (index + 1)}
-            value={outcome}
-            required
-            onChange={(state) => {
-              setOutcomeForm(outcomeForm => {
-                outcomeForm[index] = state;
-                return outcomeForm
-              })
-            }}
-          />;
-        })}
-        {/*<OutcomeField*/}
-        {/*value={outcomeForm[0]}*/}
-        {/*onChange={(state) => {*/}
-        {/*  setOutcomeForm(outcomeForm => ({...outcomeForm, 0: state}))*/}
-        {/*}}*/}
-        {/*label={1}*/}
+      {/*{outcomeForm?.length > 0? <Paper sx={{p: 2}} variant={'outlined'}>*/}
+      {/*  <Typography variant={'h4'}> Outcomes </Typography>*/}
+      {/*  {outcomeForm.map((outcome, index) => {*/}
+      {/*    return <OutcomeField*/}
+      {/*      importErrors={outcomeFormErrors[index]}*/}
+      {/*      key={'outcome' + index}*/}
+      {/*      label={'outcome ' + (index + 1)}*/}
+      {/*      value={outcome}*/}
+      {/*      required*/}
+      {/*      onChange={(state) => {*/}
+      {/*        setOutcomeForm(outcomeForm => {*/}
+      {/*          outcomeForm[index] = state;*/}
+      {/*          return outcomeForm*/}
+      {/*        })*/}
+      {/*      }}*/}
+      {/*    />;*/}
+      {/*  })}*/}
+      {/*  /!*<OutcomeField*!/*/}
+      {/*  /!*value={outcomeForm[0]}*!/*/}
+      {/*  /!*onChange={(state) => {*!/*/}
+      {/*  /!*  setOutcomeForm(outcomeForm => ({...outcomeForm, 0: state}))*!/*/}
+      {/*  /!*}}*!/*/}
+      {/*  /!*label={1}*!/*/}
         {/*/>*/}
 
 
-        <Button variant="contained" color="primary" className={classes.button}
-                onClick={
-                  () => {
-                    setOutcomeForm(outcomes => (outcomes.concat({name: '', description: '', domain: undefined})));
-                    // outcomeForm.push({name: '', description: '', domain: ''})
-                  }
-                }
-        >
-          Add new
-        </Button>
-        <Button variant="contained" color="primary" className={classes.button}
-                onClick={
-                  () => {
-                    setOutcomeForm(outcomes => {
-                      return outcomes.splice(0, outcomes.length - 1);
-                    });
-                  }
-                }
-        >
-          Remove
-        </Button>
+      {/*  <Button variant="contained" color="primary" className={classes.button}*/}
+      {/*          onClick={*/}
+      {/*            () => {*/}
+      {/*              setOutcomeForm(outcomes => (outcomes.concat({name: '', description: '', domain: undefined})));*/}
+      {/*              // outcomeForm.push({name: '', description: '', domain: ''})*/}
+      {/*            }*/}
+      {/*          }*/}
+      {/*  >*/}
+      {/*    Add new*/}
+      {/*  </Button>*/}
+      {/*  <Button variant="contained" color="primary" className={classes.button}*/}
+      {/*          onClick={*/}
+      {/*            () => {*/}
+      {/*              setOutcomeForm(outcomes => {*/}
+      {/*                return outcomes.splice(0, outcomes.length - 1);*/}
+      {/*              });*/}
+      {/*            }*/}
+      {/*          }*/}
+      {/*  >*/}
+      {/*    Remove*/}
+      {/*  </Button>*/}
 
-        AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                       'Are you sure you want to update this Organization?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
-                     open={state.submitDialog}/>
+      {/*  AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}*/}
+      {/*               dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :*/}
+      {/*                 'Are you sure you want to update this Organization?'}*/}
+      {/*               buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}*/}
+      {/*                                 key={'cancel'}>{'cancel'}</Button>,*/}
+      {/*                 <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}*/}
+      {/*                                key={'confirm'}*/}
+      {/*                                onClick={handleConfirm} children="confirm" autoFocus/>]}*/}
+      {/*               open={state.submitDialog}/>*/}
+      {/*  /!*<Link to={'/indicators/' + id}>*!/*/}
+      {/*  /!*<Typography variant="body2" className={classes.link}>*!/*/}
+      {/*  /!*  Add/Manage Indicators?*!/*/}
+      {/*  /!*</Typography>*!/*/}
+      {/*  /!*</Link>*!/*/}
+      {/*</Paper>:*/}
+      {/*  <Paper sx={{p: 2}} variant={'outlined'}>*/}
+      {/*    <Typography variant={'h6'}>The organization doesn't contain outcomes yet </Typography> </Paper>}*/}
+
+
+      {/*{indicatorForm?.length > 0? <Paper sx={{p: 2}} variant={'outlined'}>*/}
+      {/*  <Typography variant={'h4'}> Indicators </Typography>*/}
+
+      {/*  {indicatorForm.map((indicator, index) => {*/}
+      {/*    return <IndicatorField*/}
+      {/*      importErrors={indicatorFormErrors[index]}*/}
+      {/*      key={'indicator' + index}*/}
+      {/*      label={'indicator ' + (index + 1)}*/}
+      {/*      value={indicator}*/}
+      {/*      required*/}
+      {/*      onChange={(state) => {*/}
+      {/*        setIndicatorForm(indicatorForm => {*/}
+      {/*          indicatorForm[index] = state;*/}
+      {/*          return indicatorForm*/}
+      {/*        })*/}
+      {/*      }}*/}
+      {/*    />;*/}
+      {/*  })}*/}
+
+
+      {/*  <Button variant="contained" color="primary" className={classes.button}*/}
+      {/*          onClick={*/}
+      {/*            () => {*/}
+      {/*              setIndicatorForm(indicators => (indicators.concat({name: '', description: ''})));*/}
+      {/*            }*/}
+      {/*          }*/}
+      {/*  >*/}
+      {/*    Add new*/}
+      {/*  </Button>*/}
+      {/*  <Button variant="contained" color="primary" className={classes.button}*/}
+      {/*          onClick={*/}
+      {/*            () => {*/}
+      {/*              setIndicatorForm(indicators => {*/}
+      {/*                return indicators.splice(0, indicators.length - 1);*/}
+      {/*              });*/}
+      {/*            }*/}
+      {/*          }*/}
+      {/*  >*/}
+      {/*    Remove*/}
+      {/*  </Button>*/}
+
         {/*<Link to={'/indicators/' + id}>*/}
         {/*<Typography variant="body2" className={classes.link}>*/}
         {/*  Add/Manage Indicators?*/}
         {/*</Typography>*/}
         {/*</Link>*/}
-      </Paper>:
-        <Paper sx={{p: 2}} variant={'outlined'}>
-          <Typography variant={'h6'}>The organization doesn't contain outcomes yet </Typography> </Paper>}
-
-
-      {indicatorForm?.length > 0? <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Indicators </Typography>
-
-        {indicatorForm.map((indicator, index) => {
-          return <IndicatorField
-            importErrors={indicatorFormErrors[index]}
-            key={'indicator' + index}
-            label={'indicator ' + (index + 1)}
-            value={indicator}
-            required
-            onChange={(state) => {
-              setIndicatorForm(indicatorForm => {
-                indicatorForm[index] = state;
-                return indicatorForm
-              })
-            }}
-          />;
-        })}
-
-
-        <Button variant="contained" color="primary" className={classes.button}
-                onClick={
-                  () => {
-                    setIndicatorForm(indicators => (indicators.concat({name: '', description: ''})));
-                  }
-                }
-        >
-          Add new
-        </Button>
-        <Button variant="contained" color="primary" className={classes.button}
-                onClick={
-                  () => {
-                    setIndicatorForm(indicators => {
-                      return indicators.splice(0, indicators.length - 1);
-                    });
-                  }
-                }
-        >
-          Remove
-        </Button>
-
-        {/*<Link to={'/indicators/' + id}>*/}
-        {/*<Typography variant="body2" className={classes.link}>*/}
-        {/*  Add/Manage Indicators?*/}
-        {/*</Typography>*/}
-        {/*</Link>*/}
-      </Paper>:  <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h6'}>The organization doesn't contain indicators yet </Typography> </Paper>}
+      {/*</Paper>:  <Paper sx={{p: 2}} variant={'outlined'}>*/}
+      {/*  <Typography variant={'h6'}>The organization doesn't contain indicators yet </Typography> </Paper>}*/}
 
 
 

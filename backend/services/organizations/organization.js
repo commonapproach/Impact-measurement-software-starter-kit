@@ -27,7 +27,7 @@ function addOrganizations2UsersRole(organization, usertype, property) {
 
 async function createOrganization(req, res) {
   const {form, outcomeForm, indicatorForm} = req.body;
-  if (!form || !outcomeForm || !indicatorForm)
+  if (!form)
     throw new Server400Error('Wrong information input');
   if (!form.legalName)
     throw new Server400Error('Legal name is requested');
@@ -56,34 +56,34 @@ async function createOrganization(req, res) {
 
   const organization = GDBOrganizationModel(form);
   // below handles outcome part
-  for (let i = 0; i < outcomeForm.length; i++) {
-    const outcome = outcomeForm[i];
-    if (!outcome.name || !outcome.description || !outcome.domain)
-      throw new Server400Error('Wrong information input');
-    const domainObject = await GDBDomainModel.findOne({_id: outcome.domain});
-    if (!domainObject)
-      throw new Server400Error('Wrong domain id');
-    const outcomeObject = GDBOutcomeModel({
-      name: outcome.name, description: outcome.description, domain: domainObject
-    });
-    if (!organization.hasOutcomes) {
-      organization.hasOutcomes = [];
-    }
-    await outcomeObject.save();
-    organization.hasOutcomes.push(outcomeObject);
-  }
-
-  // below handles indicator part
-  for (let i = 0; i < indicatorForm.length; i++) {
-    const indicator = indicatorForm[i];
-    if (!indicator.name || !indicator.description)
-      throw Server400Error('Wrong information input');
-    const indicatorObject = GDBIndicatorModel(indicator);
-    if (!organization.hasIndicators)
-      organization.hasIndicators = [];
-    await indicatorObject.save();
-    organization.hasIndicators.push(indicatorObject);
-  }
+  // for (let i = 0; i < outcomeForm.length; i++) {
+  //   const outcome = outcomeForm[i];
+  //   if (!outcome.name || !outcome.description || !outcome.domain)
+  //     throw new Server400Error('Wrong information input');
+  //   const domainObject = await GDBDomainModel.findOne({_id: outcome.domain});
+  //   if (!domainObject)
+  //     throw new Server400Error('Wrong domain id');
+  //   const outcomeObject = GDBOutcomeModel({
+  //     name: outcome.name, description: outcome.description, domain: domainObject
+  //   });
+  //   if (!organization.hasOutcomes) {
+  //     organization.hasOutcomes = [];
+  //   }
+  //   await outcomeObject.save();
+  //   organization.hasOutcomes.push(outcomeObject);
+  // }
+  //
+  // // below handles indicator part
+  // for (let i = 0; i < indicatorForm.length; i++) {
+  //   const indicator = indicatorForm[i];
+  //   if (!indicator.name || !indicator.description)
+  //     throw Server400Error('Wrong information input');
+  //   const indicatorObject = GDBIndicatorModel(indicator);
+  //   if (!organization.hasIndicators)
+  //     organization.hasIndicators = [];
+  //   await indicatorObject.save();
+  //   organization.hasIndicators.push(indicatorObject);
+  // }
 
   await organization.save();
 
@@ -208,11 +208,11 @@ function cacheListOfUsers(users, userAccountDict) {
 async function updateOrganization(req, res) {
 
   const {id} = req.params;
-  const {form, outcomeForm, indicatorForm} = req.body;
+  const {form} = req.body;
   const userAccountDict = {};
   if (!id)
     throw Server400Error('Id is needed');
-  if (!form || !outcomeForm || !indicatorForm)
+  if (!form)
     throw Server400Error('Form and outcomeForm are needed');
 
   const organization = await GDBOrganizationModel.findOne({_id: id},
@@ -281,7 +281,7 @@ async function updateOrganization(req, res) {
   }
 
   // handle outcomes
-  await updateOutcomes(organization, outcomeForm);
+  // await updateOutcomes(organization, outcomeForm);
   organization.markModified(['reporters', 'researchers', 'editors']);
   await organization.save();
   return res.status(200).json({

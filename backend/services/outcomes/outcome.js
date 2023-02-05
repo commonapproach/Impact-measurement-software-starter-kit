@@ -31,10 +31,10 @@ const fetchOutcomesHandler = async (req, res, next) => {
   }
 };
 
-const fetchIndicatorHandler = async (req, res, next) => {
+const fetchOutcomeHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchIndicator'))
-      return await fetchIndicator(req, res);
+    if (await hasAccess(req, 'fetchOutcome'))
+      return await fetchOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {
@@ -42,24 +42,25 @@ const fetchIndicatorHandler = async (req, res, next) => {
   }
 };
 
-const fetchIndicator = async (req, res) => {
+const fetchOutcome = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is not given');
-  const indicator = await GDBIndicatorModel.findOne({_id: id});
-  if(!indicator)
-    throw new Server400Error('No such indicator');
-  indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(orgURI => {
+  const outcome = await GDBOutcomeModel.findOne({_id: id});
+  if(!outcome)
+    throw new Server400Error('No such outcome');
+  outcome.domain = outcome.domain.split('_')[1];
+  outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
     return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
   }));
-  indicator.organizations = indicator.forOrganizations.map(organization => {
+  outcome.organizations = outcome.forOrganizations.map(organization => {
     return organization._id;
   });
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
-  delete indicator.forOrganizations;
-  return res.status(200).json({success: true, indicator});
+  delete outcome.forOrganizations;
+  return res.status(200).json({success: true, outcome});
 
 };
 
@@ -174,4 +175,4 @@ const createOutcome = async (req, res) => {
 };
 
 
-module.exports = {updateIndicatorHandler, createOutcomeHandler, fetchOutcomesHandler, fetchIndicatorHandler};
+module.exports = {updateIndicatorHandler, createOutcomeHandler, fetchOutcomesHandler, fetchOutcomeHandler};

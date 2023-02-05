@@ -197,6 +197,11 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser) // todo: temp
         return true
       break;
+    case 'fetchOutcome':
+      if (userAccount.isSuperuser) // todo: temp
+        return true
+      break;
+
 
 
     // domains

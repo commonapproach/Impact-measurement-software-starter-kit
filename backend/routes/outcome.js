@@ -1,11 +1,11 @@
 const express = require('express');
-const {createOutcomeHandler} = require("../services/outcomes/outcome");
+const {createOutcomeHandler, fetchOutcomeHandler} = require("../services/outcomes/outcome");
 
 
 
 const router = express.Router();
 
-// router.get('/:id', fetchIndicatorHandler);
+router.get('/:id', fetchOutcomeHandler);
 router.post('/', createOutcomeHandler);
 // router.put('/:id', updateIndicatorHandler)
 

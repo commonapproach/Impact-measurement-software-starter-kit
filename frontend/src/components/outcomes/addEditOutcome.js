@@ -10,7 +10,7 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
 import OutcomeField from "../shared/OutcomeField";
-import {createOutcome} from "../../api/outcomeApi";
+import {createOutcome, fetchOutcome} from "../../api/outcomeApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -51,9 +51,9 @@ export default function AddEditOutcome() {
 
   useEffect(() => {
     if((mode === 'edit' && id) || (mode === 'view' && id)){
-      fetchIndicator(id, userContext).then(({success, indicator}) => {
+      fetchOutcome(id, userContext).then(({success, outcome}) => {
         if(success){
-          setForm(indicator);
+          setForm(outcome);
           setLoading(false)
         }
       }).catch(e => {

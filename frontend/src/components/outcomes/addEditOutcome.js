@@ -8,9 +8,8 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
 import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, fetchOutcome} from "../../api/outcomeApi";
+import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -104,7 +103,7 @@ export default function AddEditOutcome() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && id) {
-      updateIndicator({form}, id).then((res) => {
+      updateOutcome({form}, id).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -114,7 +113,7 @@ export default function AddEditOutcome() {
         if (e.json) {
           setErrors(e.json);
         }
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating indicator', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating outcome', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }

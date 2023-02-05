@@ -201,6 +201,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser) // todo: temp
         return true
       break;
+    case 'updateOutcome':
+      if (userAccount.isSuperuser) // todo: temp
+        return true
+      break;
 
 
 

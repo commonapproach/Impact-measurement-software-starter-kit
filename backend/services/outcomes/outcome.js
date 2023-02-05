@@ -86,27 +86,33 @@ function cacheListOfOrganizations(organizations, organizationDict) {
   });
 }
 
-const updateIndicator = async (req, res) => {
+const updateOutcome = async (req, res) => {
   const {form} = req.body;
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || form.length === 0)
+  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.domain)
     throw new Server400Error('Invalid input');
-  const indicator = await GDBIndicatorModel.findOne({_id: id});
-  if (!indicator)
-    throw new Server400Error('No such indicator');
-  indicator.name = form.name;
-  indicator.description = form.description;
+  const outcome = await GDBOutcomeModel.findOne({_id: id});
+  if (!outcome)
+    throw new Server400Error('No such outcome');
+  outcome.name = form.name;
+  outcome.description = form.description;
+  if (outcome.domain.split('_')[1] !== form.domain){
+    // domain have to be updated
+    const newDomain = await GDBDomainModel.findOne({_id: form.domain});
+    if (!newDomain)
+      throw new Server400Error('No such domain');
+    outcome.domain = newDomain;
+  }
   const organizationDict = {}
 
-
-  // fetch indicator.forOrganizations from database
-  indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(organizationURI =>
+  // fetch outcome.forOrganizations from database
+  outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(organizationURI =>
     GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
   ))
-  // cache indicator.forOrganizations into dict
-  cacheListOfOrganizations(indicator.forOrganizations, organizationDict);
+  // cache outcome.forOrganizations into dict
+  cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
   // fetch form.organizations from database
   form.organizations = await Promise.all(form.organizations.map(organizationId => {
     // if the organization already in the dict, simply get from dict
@@ -116,35 +122,34 @@ const updateIndicator = async (req, res) => {
     return GDBOrganizationModel.findOne({_id: organizationId});
     }
   ))
+
   // cache organizations which is not in dict
   cacheListOfOrganizations(form.organizations, organizationDict);
 
-
-  // remove the indicator from every organizations in indicator.forOrganizations
-  await Promise.all(indicator.forOrganizations.map(organization => {
-    const index = organization.hasIndicators.findIndex(indicator => indicator._id === id);
-    organization.hasIndicators.splice(index, 1);
+  // remove the outcome from every organizations in outcome.forOrganizations
+  await Promise.all(outcome.forOrganizations.map(organization => {
+    const index = organization.hasOutcomes.findIndex(outcome => outcome._id === id);
+    organization.hasOutcomes.splice(index, 1);
     return organization.save();
   }));
 
-  // add the indicator to every organizations in form.organizations
+  // add the outcome to every organizations in form.organizations
   await Promise.all(form.organizations.map(organization => {
-    if (!organization.hasIndicators)
-      organization.hasIndicators = []
-    organization.hasIndicators.push(indicator)
+    if (!organization.hasOutcomes)
+      organization.hasOutcomes = []
+    organization.hasOutcomes.push(outcome)
     return organization.save();
   }))
 
-  indicator.forOrganizations = form.organizations;
-  await indicator.save();
+  outcome.forOrganizations = form.organizations;
+  await outcome.save();
   return res.status(200).json({success: true});
-
 };
 
-const updateIndicatorHandler = async (req, res, next) => {
+const updateOutcomeHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'updateIndicator'))
-      return await updateIndicator(req, res);
+    if (await hasAccess(req, 'updateOutcome'))
+      return await updateOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
     next(e);
@@ -175,4 +180,4 @@ const createOutcome = async (req, res) => {
 };
 
 
-module.exports = {updateIndicatorHandler, createOutcomeHandler, fetchOutcomesHandler, fetchOutcomeHandler};
+module.exports = {updateOutcomeHandler, createOutcomeHandler, fetchOutcomesHandler, fetchOutcomeHandler};

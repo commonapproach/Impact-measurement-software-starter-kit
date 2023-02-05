@@ -89,7 +89,7 @@ const updateIndicator = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || form.length === 0)
+  if (!form || !form.description || !form.name || form.organizations.length === 0)
     throw new Server400Error('Invalid input');
   const indicator = await GDBIndicatorModel.findOne({_id: id});
   if (!indicator)

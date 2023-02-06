@@ -40,27 +40,24 @@ function Dashboard() {
       {userContext.isSuperuser?<NavButton to={`/users`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:null}
 
-      {userContext.researcherOf.length > 0?
-        <NavButton to={`/groups`} icon={<Edit/>} key={'indicators'}
-                   text="Manage Indicators"/>:null}
+      {/*{userContext.researcherOf.length > 0?*/}
+      {/*  <NavButton to={`/groups`} icon={<Edit/>} key={'indicators'}*/}
+      {/*             text="Manage Indicators"/>:null}*/}
 
-      {userContext.researcherOf.length > 0?
-        <NavButton to={`/groups`} icon={<Edit/>} key={'indicator reports'}
-                   text="Manage Indicator Reports"/>:null}
-
-      {userContext.researcherOf.length > 0?
-        <NavButton to={`/groups`} icon={<Edit/>} key={'outcomes'}
-                   text="Manage Outcomes"/>:null}
-
-
-      <NavButton to={'/domains'} icon={<Edit/>} key={'domains'}
-                 text="Manage Domains"/>
+      {/*{userContext.researcherOf.length > 0?*/}
+      {/*  <NavButton to={`/groups`} icon={<Edit/>} key={'indicator reports'}*/}
+      {/*             text="Manage Indicator Reports"/>:null}*/}
 
       <NavButton to={'/organization-indicators'} icon={<Edit/>} key={'organization-indicators'}
                  text="Manage Indicators"/>
 
       <NavButton to={'/organization-outcomes'} icon={<Edit/>} key={'organization-outcomes'}
                  text="Manage Outcomes"/>
+
+      <NavButton to={'/domains'} icon={<Edit/>} key={'domains'}
+                 text="Manage Domains"/>
+
+
 
 
       {/*<NavButton to={'/settings/manage-forms/client'} icon={<Edit/>}*/}

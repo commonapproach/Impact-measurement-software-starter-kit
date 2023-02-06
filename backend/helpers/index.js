@@ -71,6 +71,27 @@ const organizationsInSameGroups = async (userAccount, role, organizations) => {
 }
 
 /**
+ * The function will return true if the user serves as a specific role for
+ * the organization(associated with organizationId) or for an organization
+ * which is in a same group with the organization(associated with organizationId)
+ * @param organizationId the id of the organization
+ * @param userAccount user's account
+ * @param role role of the user, ex. 'administratorOfs'
+ * @returns {Promise<boolean>}
+ */
+const isAPartnerOrganization = async (organizationId, userAccount, role) => {
+  // return true if the user is one of the researcher of the organization
+  if (userAccount[role].includes(`:organization_${organizationId}`))
+    return true;
+  // fetch all organizations associated with each organizations in userAccount.researcherOfs
+  const allOrganizations = [];
+  await organizationsInSameGroups(userAccount, role, allOrganizations);
+  if (allOrganizations.includes(`:organization_${organizationId}`))
+    return true
+  return false
+}
+
+/**
  * the function is a middleware returns a bool indicating
  * if the user has access to the operation
  * @param req user's request
@@ -155,15 +176,20 @@ async function hasAccess(req, operationType) {
         const {organizationId} = req.params;
         if (!organizationId)
           throw new Server400Error('organizationId is needed');
-        // return true if the user is one of the researcher of the organization
-        if (userAccount.researcherOfs.includes(`:organization_${organizationId}`))
-          return true;
-        // fetch all organizations associated with each organizations in userAccount.researcherOfs
-        const allOrganizations = [];
-        await organizationsInSameGroups(userAccount, 'researcherOfs', allOrganizations);
-        if (allOrganizations.includes(`:organization_${organizationId}`))
+        if (await isAPartnerOrganization(organizationId, userAccount, 'researcherOfs'))
           return true
       }
+
+      if (userAccount.editorOfs.length > 0) {
+        // pass if the organization belongs to any organization which is in the same group
+        const {organizationId} = req.params;
+        if (!organizationId)
+          throw new Server400Error('organizationId is needed');
+        if (await isAPartnerOrganization(organizationId, userAccount, 'editorOfs'))
+          return true
+      }
+
+
       break;
     case 'fetchIndicator':
       if (userAccount.isSuperuser)

@@ -178,6 +178,20 @@ async function hasAccess(req, operationType) {
         if (!checkerList.includes(false))
           return true;
       }
+      if (userAccount.researcherOfs.length > 0) {
+        // only allowed for the organization they are in userAccount.researcherOfs
+        // so all organizations in the form must be in userAccount.editorOfs
+        const {form} = req.body;
+        if (!form || !form.organizations || !form.name || !form.description)
+          throw new Server400Error('Invalid input');
+        // all organizations must be in userAccount.editorOfs
+        const checkerList = form.organizations.map(organizationId => {
+          return organizationBelongsToUser(userAccount, organizationId, 'researcherOfs');
+        });
+        // if any of organization isn't in userAccount.editorOfs, they doesn't satisfy
+        if (!checkerList.includes(false))
+          return true;
+      }
 
 
       break;

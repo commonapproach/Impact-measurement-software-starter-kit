@@ -3,6 +3,8 @@ const {Server400Error} = require("../utils");
 const {GDBGroupModel} = require("../models/group");
 const {GDBIndicatorModel} = require("../models/indicator");
 const {GDBUserAccountModel} = require("../models/userAccount");
+const {GraphDB} = require("../utils/graphdb");
+const {SPARQL} = require('../utils/graphdb/helpers')
 
 function URI2Id(uri) {
   return uri.split('_')[1];
@@ -42,6 +44,31 @@ async function organizationBelongsToGroupAdmin(userAccount, organizationId) {
   return false;
 }
 
+/**
+ * the function gives all organizations which are in the same group
+ * with organizations this user servers for as a specific role
+ * @param userAccount the userAccount
+ * @param role role of the user, ex. 'administratorOfs'
+ * @param organizations should be an empty list
+ * @returns {Promise<*[]>}
+ */
+const organizationsInSameGroups = async (userAccount, role, organizations) => {
+  await Promise.all(userAccount[role].map(organizationURI => {
+    const organizationId = organizationURI.split('_')[1]
+    const query = `
+        PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
+        select * where { 
+	          ?group :hasOrganization :organization_${organizationId}.
+    	      ?group :hasOrganization ?organization.
+        }`
+    return GraphDB.sendSelectQuery(query, false, (res) => {
+      const organizationURI = SPARQL.getPrefixedURI(res.organization.id)
+      if (organizationURI.split('_')[1] !== organizationId && !organizations.includes(organizationURI))
+        organizations.push(organizationURI);
+    });
+    }))
+
+}
 
 /**
  * the function is a middleware returns a bool indicating
@@ -93,8 +120,8 @@ async function hasAccess(req, operationType) {
 
     // indicators
     case 'fetchIndicators':
-      if (userAccount.isSuperuser)
-        return true;
+      // if (userAccount.isSuperuser)
+      //   return true;
       if (userAccount.groupAdminOfs.length > 0) {
         // pass if the organization belongs to the group administrated by the groupAdmin
         const {organizationId} = req.params;
@@ -128,8 +155,14 @@ async function hasAccess(req, operationType) {
         const {organizationId} = req.params;
         if (!organizationId)
           throw new Server400Error('organizationId is needed');
+        // return true if the user is one of the researcher of the organization
         if (userAccount.researcherOfs.includes(`:organization_${organizationId}`))
           return true;
+        // fetch all organizations associated with each organizations in userAccount.researcherOfs
+        const allOrganizations = [];
+        await organizationsInSameGroups(userAccount, 'researcherOfs', allOrganizations);
+        if (allOrganizations.includes(`:organization_${organizationId}`))
+          return true
       }
       break;
     case 'fetchIndicator':

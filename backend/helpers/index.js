@@ -4,7 +4,7 @@ const {GDBGroupModel} = require("../models/group");
 const {GDBIndicatorModel} = require("../models/indicator");
 const {GDBUserAccountModel} = require("../models/userAccount");
 const {GraphDB} = require("../utils/graphdb");
-const {SPARQL} = require('../utils/graphdb/helpers')
+const {SPARQL} = require('../utils/graphdb/helpers');
 
 function URI2Id(uri) {
   return uri.split('_')[1];
@@ -54,21 +54,21 @@ async function organizationBelongsToGroupAdmin(userAccount, organizationId) {
  */
 const organizationsInSameGroups = async (userAccount, role, organizations) => {
   await Promise.all(userAccount[role].map(organizationURI => {
-    const organizationId = organizationURI.split('_')[1]
+    const organizationId = organizationURI.split('_')[1];
     const query = `
         PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
         select * where { 
 	          ?group :hasOrganization :organization_${organizationId}.
     	      ?group :hasOrganization ?organization.
-        }`
+        }`;
     return GraphDB.sendSelectQuery(query, false, (res) => {
-      const organizationURI = SPARQL.getPrefixedURI(res.organization.id)
+      const organizationURI = SPARQL.getPrefixedURI(res.organization.id);
       if (organizationURI.split('_')[1] !== organizationId && !organizations.includes(organizationURI))
         organizations.push(organizationURI);
     });
-    }))
+  }));
 
-}
+};
 
 /**
  * The function will return true if the user serves as a specific role for
@@ -80,15 +80,41 @@ const organizationsInSameGroups = async (userAccount, role, organizations) => {
  * @returns {Promise<boolean>}
  */
 const isAPartnerOrganization = async (organizationId, userAccount, role) => {
-  // return true if the user is one of the researcher of the organization
+  // return true if the user is one of the role user of the organization
   if (userAccount[role].includes(`:organization_${organizationId}`))
     return true;
-  // fetch all organizations associated with each organizations in userAccount.researcherOfs
+  // fetch all organizations associated with each organizations in userAccount[role]
   const allOrganizations = [];
   await organizationsInSameGroups(userAccount, role, allOrganizations);
   if (allOrganizations.includes(`:organization_${organizationId}`))
-    return true
-  return false
+    return true;
+  return false;
+};
+
+/**
+ * return true if the resource is belong to a organization either which the user serves as a role, or
+ * is a partner of the user. Please check the defnition of the 'partner organization' in the description
+ * of isAPartnerOrganization
+ * @param resource the resource's object
+ * @param userAccount the user account
+ * @param role the role, ex. 'administratorOfs'
+ * @returns {Promise<boolean>}
+ */
+async function isReachableBy(resource, userAccount, role) {
+
+  for (const organizationURI of resource.forOrganizations) {
+    if (userAccount[role].includes(organizationURI)){
+      // if any organization which associated with the indicator is same with an organization which
+      // the user serves as a role
+      // pass
+      return true;
+    }
+    if (await isAPartnerOrganization(organizationURI.split('_')[1], userAccount, role)) {
+      // if any organization which associated with the indicator is a partner organization of the indicator
+      // pass
+      return true;
+    }
+  }
 }
 
 /**
@@ -177,7 +203,7 @@ async function hasAccess(req, operationType) {
         if (!organizationId)
           throw new Server400Error('organizationId is needed');
         if (await isAPartnerOrganization(organizationId, userAccount, 'researcherOfs'))
-          return true
+          return true;
       }
 
       if (userAccount.editorOfs.length > 0) {
@@ -186,7 +212,7 @@ async function hasAccess(req, operationType) {
         if (!organizationId)
           throw new Server400Error('organizationId is needed');
         if (await isAPartnerOrganization(organizationId, userAccount, 'editorOfs'))
-          return true
+          return true;
       }
 
 
@@ -218,6 +244,41 @@ async function hasAccess(req, operationType) {
               return true;
           }
         }
+      }
+      if (userAccount.editorOfs.length) {
+        const {id} = req.params;
+        if (!id)
+          throw new Server400Error('Id is not given');
+        const indicator = await GDBIndicatorModel.findOne({_id: id});
+        if (!indicator)
+          throw new Server400Error('No such indicator');
+
+        if (await isReachableBy(indicator, userAccount, 'editorOfs'))
+          return true
+      }
+
+      if (userAccount.researcherOfs.length) {
+        const {id} = req.params;
+        if (!id)
+          throw new Server400Error('Id is not given');
+        const indicator = await GDBIndicatorModel.findOne({_id: id});
+        if (!indicator)
+          throw new Server400Error('No such indicator');
+
+        if(await isReachableBy(indicator, userAccount, 'researcherOfs'))
+          return true
+      }
+
+      if(userAccount.administratorOfs.length) {
+        const {id} = req.params;
+        if (!id)
+          throw new Server400Error('Id is not given');
+        const indicator = await GDBIndicatorModel.findOne({_id: id});
+        if (!indicator)
+          throw new Server400Error('No such indicator');
+
+        if(await isReachableBy(indicator, userAccount, 'administratorOfs'))
+          return true
       }
       break;
     case 'createIndicator':
@@ -257,26 +318,26 @@ async function hasAccess(req, operationType) {
     case 'updateIndicator':
       if (userAccount.isSuperuser) // todo: temp
         return true;
-      break
+      break;
 
 
 
     // outcomes
     case 'fetchOutcomes':
       if (userAccount.isSuperuser) // todo: temp
-        return true
+        return true;
       break;
     case 'createOutcome':
       if (userAccount.isSuperuser) // todo: temp
-        return true
+        return true;
       break;
     case 'fetchOutcome':
       if (userAccount.isSuperuser) // todo: temp
-        return true
+        return true;
       break;
     case 'updateOutcome':
       if (userAccount.isSuperuser) // todo: temp
-        return true
+        return true;
       break;
 
 

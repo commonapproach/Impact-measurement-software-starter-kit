@@ -13,6 +13,7 @@ import {fetchUserTypes} from "../../api/userTypesApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {useSnackbar} from 'notistack';
 import GeneralField from "../shared/fields/GeneralField";
+import {fetchOrganizations} from "../../api/organizationApi";
 
 
 const useStyles = makeStyles(() => ({
@@ -35,13 +36,26 @@ export default function UserInvite() {
       email: '',
       firstName: '',
       lastName: '',
-      middleName: ''
+      middleName: '',
+      associatedOrganizations: []
     },
     errors: {},
     dialog: false,
     loadingButton: false
   });
+  const [optionOrganizations, setOptionOrganizations] = useState({});
 
+  useEffect(() => {
+    fetchOrganizations(userContext).then(({success, organizations}) => {
+      if(success){
+        const options ={} ;
+        organizations.map(organization => options[organization._id] = organization.legalName)
+        setOptionOrganizations(options);
+      }
+    }).catch((e) => {
+      enqueueSnackbar(state.errors.message || "Error occur when fetching organizations", {variant: 'error'});
+    })
+  }, [])
 
   /**
    * @returns {boolean} true if valid.
@@ -74,7 +88,6 @@ export default function UserInvite() {
   };
 
   const handleConfirm = async () => {
-
     console.log('valid');
     try {
       setState(state => ({...state, loadingButton: true}));
@@ -99,29 +112,6 @@ export default function UserInvite() {
       <Typography variant="h5">
         {'Create new user'}
       </Typography>
-
-      {/*<Dropdown*/}
-      {/*  label="User Types"*/}
-      {/*  key={'userTypes'}*/}
-      {/*  value={state.form.userTypes}*/}
-      {/*  onChange={e => {*/}
-      {/*    state.form.userTypes = e.target.value;*/}
-      {/*  }}*/}
-      {/*  options={userTypes}*/}
-      {/*  onBlur={() => {*/}
-      {/*    if (state.form.userTypes.length === 0) {*/}
-      {/*      setState(state => ({...state, errors: {...state.errors, 'userTypes': 'This field is required'}}));*/}
-      {/*    } else {*/}
-      {/*      setState(state => ({...state, errors: {...state.errors, 'userTypes': null}}));*/}
-      {/*    }*/}
-      {/*  }*/}
-      {/*  }*/}
-      {/*  error={!!state.errors.userTypes}*/}
-      {/*  helperText={state.errors.userTypes}*/}
-      {/*  // sx={{mb: 2}}*/}
-      {/*  noEmpty*/}
-      {/*  required={true}*/}
-      {/*/>*/}
 
       <GeneralField
         key={'email'}
@@ -180,6 +170,28 @@ export default function UserInvite() {
         onChange={e => state.form.middleName = e.target.value}
         error={!!state.errors.middleName}
         helperText={state.errors.middleName}
+      />
+      <Dropdown
+        label="Associated Organizations"
+        key={'associatedOrganizations'}
+        value={state.form.associatedOrganizations}
+        onChange={e => {
+          state.form.associatedOrganizations = e.target.value;
+        }}
+        options={optionOrganizations}
+        onBlur={() => {
+          if (state.form.userTypes.length === 0) {
+            setState(state => ({...state, errors: {...state.errors, associatedOrganizations: 'This field is required'}}));
+          } else {
+            setState(state => ({...state, errors: {...state.errors, associatedOrganizations: null}}));
+          }
+        }
+        }
+        error={!!state.errors.associatedOrganizations}
+        helperText={state.errors.associatedOrganizations}
+        // sx={{mb: 2}}
+        noEmpty
+        required={true}
       />
       <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
         Invite

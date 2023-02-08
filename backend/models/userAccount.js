@@ -1,7 +1,6 @@
 const {GraphDB, Types, createGraphDBModel, DeleteType} = require('../utils/graphdb');
 
 const {GDBPersonModel} = require('./person');
-// const {GDBOrganizationModel} = require("./organization");
 
 const GDBSecurityQuestion = createGraphDBModel({
   question: {type: String, internalKey: ':hasQuestion'},
@@ -18,6 +17,7 @@ const GDBUserAccountModel = createGraphDBModel({
   salt: {type: String, internalKey: ':hasSalt'},
   person: {type: GDBPersonModel, internalKey: 'cids:forPerson', onDelete: DeleteType.CASCADE},
   // userType:{type: [Types.NamedIndividual], internalKey: ':userType'},
+  // sponsoringOrg: {type: [GDBOrganizationModel], internalKey: ':sponsoringOrganization'},
   isSuperuser: {type: Boolean, internalKey: ':isSuperuser'},
   editorOf: {type: [Types.NamedIndividual], internalKey: ':editorOf'},
   reporterOf: {type: [Types.NamedIndividual], internalKey: ':reporterOf'},

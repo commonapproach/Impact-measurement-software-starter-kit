@@ -9,6 +9,7 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
 import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
+import IndicatorReportField from "../shared/IndicatorReportField";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,12 +23,12 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-export default function AddEditOutcome() {
+export default function AddEditIndicatorReport() {
 
   const classes = useStyles();
   const navigate = useNavigate();
   const {id, orgId, operationMode} = useParams();
-  const mode = id? operationMode : 'new';
+  const mode = id ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -43,16 +44,20 @@ export default function AddEditOutcome() {
     name: '',
     comment: '',
     organization: null,
-    indicator:null,
+    indicator: null,
+    numericalValue: '',
+    unitOfMeasure: '',
+    startTime: '',
+    endTime: ''
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if((mode === 'edit' && id) || (mode === 'view' && id)){
+    if ((mode === 'edit' && id) || (mode === 'view' && id)) {
       fetchOutcome(id, userContext).then(({success, outcome}) => {
-        if(success){
+        if (success) {
           setForm(outcome);
-          setLoading(false)
+          setLoading(false);
         }
       }).catch(e => {
         if (e.json)
@@ -60,26 +65,26 @@ export default function AddEditOutcome() {
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if(mode === 'edit' && (!id || !orgId) ) {
+    } else if (mode === 'edit' && (!id || !orgId)) {
       navigate(-1);
       enqueueSnackbar("No ID or orgId provided", {variant: 'error'});
-    } else if (mode === 'new' && !orgId){
+    } else if (mode === 'new' && !orgId) {
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new' && orgId) {
-      setForm(form => ({...form, organizations: [orgId]}))
+    } else if (mode === 'new' && orgId) {
+      setForm(form => ({...form, organizations: [orgId]}));
       setLoading(false);
     } else {
       navigate(-1);
-      enqueueSnackbar('Wrong auth', {variant: 'error'})
+      enqueueSnackbar('Wrong auth', {variant: 'error'});
     }
 
   }, [mode, id]);
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log(form)
+      console.log(form);
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -97,7 +102,7 @@ export default function AddEditOutcome() {
         if (e.json) {
           setErrors(e.json);
         }
-        console.log(e)
+        console.log(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -120,14 +125,24 @@ export default function AddEditOutcome() {
   };
 
   const validate = () => {
+    console.log(form);
     const error = {};
-    if (form.name === '')
+    if (!form.name)
       error.name = 'The field cannot be empty';
-
-    if (!form.description)
-      error.description = 'The field cannot be empty'
-    if(form.organizations.length === 0)
-      error.organizations = 'The field cannot be empty'
+    if (!form.comment)
+      error.comment = 'The field cannot be empty';
+    if (!form.organization)
+      error.organization = 'The field cannot be empty';
+    if (!form.indicator)
+      error.indicator = 'The field cannot be empty';
+    if (!form.startTime)
+      error.startTime = 'The field cannot be empty';
+    if (!form.endTime)
+      error.endTime = 'The field cannot be empty';
+    if (!form.numericalValue)
+      error.numericalValue = 'The field cannot be empty';
+    if (!form.unitOfMeasure)
+      error.unitOfMeasure = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -139,7 +154,7 @@ export default function AddEditOutcome() {
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Outcome </Typography>
-        <OutcomeField
+        <IndicatorReportField
           disabled={mode === 'view'}
           disabledOrganization={!!orgId}
           defaultValue={form}
@@ -150,11 +165,11 @@ export default function AddEditOutcome() {
           importErrors={errors}
         />
 
-        {mode==='view'?
-          <div/>:
+        {mode === 'view' ?
+          <div/> :
           <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-          Submit
-        </Button>}
+            Submit
+          </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :

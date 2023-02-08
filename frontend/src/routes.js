@@ -35,6 +35,7 @@ import AddEditIndicator from "./components/indicators/addEditIndicator";
 import Organization_outcomes from "./components/outcomes/Organization-outcomes";
 import Outcomes from "./components/outcomes/outcomes";
 import AddEditOutcome from "./components/outcomes/addEditOutcome";
+import AddEditIndicatorReport from "./components/indicatorReport/AddEditIndicatorReport";
 
 const routes = (
   <Routes>
@@ -80,6 +81,8 @@ const routes = (
     <Route path="/outcome/:orgId/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
+
+    <Route path="/indicatorReport/new" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

@@ -48,7 +48,8 @@ export default function AddEditIndicatorReport() {
     numericalValue: '',
     unitOfMeasure: '',
     startTime: '',
-    endTime: ''
+    endTime: '',
+    dateCreated: ''
   });
   const [loading, setLoading] = useState(true);
 
@@ -145,10 +146,12 @@ export default function AddEditIndicatorReport() {
 
     if (!form.numericalValue)
       error.numericalValue = 'The field cannot be empty';
-    if (isNaN(form.numericalValue))
+    if (form.numericalValue && isNaN(form.numericalValue))
       error.numericalValue = 'The field must be a number';
     if (!form.unitOfMeasure)
       error.unitOfMeasure = 'The field cannot be empty';
+    if (!form.dateCreated)
+      error.dateCreated = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };

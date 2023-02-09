@@ -8,7 +8,7 @@ import {
 } from '@mui/x-date-pickers';
 import MuiPhoneNumber from "material-ui-phone-number";
 
-export const dateFormat = 'yyyy-MM-dd';
+export const dateFormat = 'yyyy-MM-dd HH:mm:ss';
 export const dateTimeFormat = 'yyyy-MM-dd HH:mm:ss';
 export const timeFormat = 'HH:mm:ss';
 
@@ -66,7 +66,7 @@ export default function GeneralField({type, onChange, value: defaultValue, ...pr
             onAccept={() => props.onBlur()}
             renderInput={(params) =>
               <TextField {...params}
-                         sx={{minWidth: 350}}
+                         sx={{minWidth: props.minWidth|| 350}}
                          margin="normal"
                          required={props.required}
                          error={params.error || props.error}

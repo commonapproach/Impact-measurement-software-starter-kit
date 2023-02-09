@@ -21,7 +21,7 @@ const createIndicatorReportHandler = async (req, res, next) => {
 const createIndicatorReport = async (req, res) => {
   const {form} = req.body;
   if (!form || !form.name || !form.comment || !form.organization || !form.indicator
-    || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime)
+    || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
     throw new Server400Error('Wrong input');
 
   const organization = await GDBOrganizationModel.findOne({_id: form.organization});
@@ -30,6 +30,8 @@ const createIndicatorReport = async (req, res) => {
   const indicator = await GDBIndicatorModel.findOne({_id: form.indicator});
   if (!indicator)
     throw new Server400Error('No such indicator');
+  if(form.startTime > form.endTime)
+    throw new Server400Error('Start time must be earlier than end time');
 
   const indicatorReport = GDBIndicatorReportModel({
     name: form.name,
@@ -40,6 +42,7 @@ const createIndicatorReport = async (req, res) => {
       hasBeginning: {date: new Date(form.startTime)},
       hasEnd: {date: new Date(form.endTime)}
     }),
+    dateCreated: new Date(form.dateCreated),
     value: GDBMeasureModel({numericalValue: form.numericalValue, unitOfMeasure: {label: form.unitOfMeasure}}),
   });
 
@@ -75,6 +78,7 @@ const fetchIndicatorReport = async (req, res) => {
     unitOfMeasure: indicatorReport.value.unitOfMeasure.label,
     startTime: indicatorReport.hasTime.hasBeginning.date,
     endTime: indicatorReport.hasTime.hasEnd.date,
+    dateCreated: indicatorReport.dateCreated
   }
   return res.status(200).json({indicatorReport: form, success: true});
 };

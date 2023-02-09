@@ -236,6 +236,28 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 }
               />
             </Grid>
+            <Grid item xs={4}>
+              <GeneralField
+                fullWidth
+                type={'date'}
+                value={state.dateCreated}
+                label={'Date Created'}
+                onChange={handleChange('dateCreated')}
+                required={required}
+                disabled={disabled}
+                error={!!errors.dateCreated}
+                helperText={errors.dateCreated}
+                minWidth={250}
+                onBlur={() => {
+                  if (!state.dateCreated) {
+                    setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
+                  } else {
+                    setErrors(errors => ({...errors, dateCreated: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
             <Grid item xs={6}>
               <GeneralField
                 fullWidth

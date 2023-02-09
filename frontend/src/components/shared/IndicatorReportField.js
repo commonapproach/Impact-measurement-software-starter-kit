@@ -35,6 +35,7 @@ function LoadingAutoComplete({
       fullWidth
       value={state}
       onChange={onChange}
+      disabled={disabled}
       filterOptions={filterOptions}
       renderInput={(params) =>
         <TextField
@@ -125,7 +126,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
       <Typography variant="h5">
-        {loading && <CircularProgress color="inherit" size={20}/>} {label} {required ? '*' : ''}
+        {loading && <CircularProgress color="inherit" size={20}/>} {label}
       </Typography>
       {!loading &&
         <>
@@ -168,6 +169,8 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               onBlur={() => {
                 if (!state.numericalValue) {
                   setErrors(errors => ({...errors, numericalValue: 'This field cannot be empty'}));
+                } if(isNaN(state.numericalValue)) {
+                  setErrors(errors => ({...errors, numericalValue: 'This field must be a number'}));
                 } else {
                   setErrors(errors => ({...errors, numericalValue: null}));
                 }
@@ -197,7 +200,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 }
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <LoadingAutoComplete
                 label="Organization"
                 options={options.organization}
@@ -217,16 +220,16 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 }
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <LoadingAutoComplete
                 label="Indicator"
+                disabled={disabled || !state.organization}
                 options={state.organization? options[`organization_${state.organization}`]: []}
-                state={state.indicator}
+                state={state.organization? state.indicator: null}
                 onChange={handleChange('indicator')}
                 error={!!errors.indicator}
                 helperText={errors.indicator}
                 required={required}
-                disabled={disabled}
                 onBlur={() => {
                   if (state.indicator) {
                     setErrors(errors => ({...errors, indicator: null}));

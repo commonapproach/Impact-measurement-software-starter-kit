@@ -30,7 +30,7 @@ const createIndicatorReport = async (req, res) => {
   const indicator = await GDBIndicatorModel.findOne({_id: form.indicator});
   if (!indicator)
     throw new Server400Error('No such indicator');
-  if(form.startTime > form.endTime)
+  if (form.startTime > form.endTime)
     throw new Server400Error('Start time must be earlier than end time');
 
   const indicatorReport = GDBIndicatorReportModel({
@@ -79,8 +79,60 @@ const fetchIndicatorReport = async (req, res) => {
     startTime: indicatorReport.hasTime.hasBeginning.date,
     endTime: indicatorReport.hasTime.hasEnd.date,
     dateCreated: indicatorReport.dateCreated
-  }
+  };
   return res.status(200).json({indicatorReport: form, success: true});
 };
 
-module.exports = {createIndicatorReportHandler, fetchIndicatorReportHandler};
+const updateIndicatorReportHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'update' + RESOURCE))
+      return await updateIndicatorReport(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const updateIndicatorReport = async (req, res) => {
+  const {form} = req.body;
+  const {id} = req.params;
+  if (!id || !form || !form.name || !form.comment || !form.organization || !form.indicator
+    || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
+    throw new Server400Error('Wrong input');
+
+  const indicatorReport = await GDBIndicatorReportModel.findOne({_id: id},
+    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value.unitOfMeasure']});
+  if (!indicatorReport)
+    throw new Server400Error('No such Indicator Report');
+
+  indicatorReport.name = form.name;
+  indicatorReport.comment = form.comment;
+
+  // update organization and indicator
+  if (indicatorReport.forOrganization.split('_')[1] !== form.organization) {
+    const organization = await GDBOrganizationModel.findOne({_id: form.organization});
+    if (!organization)
+      throw new Server400Error('No such organization');
+    indicatorReport.forOrganization = organization;
+  }
+  if (indicatorReport.forIndicator.split('_')[1] !== form.indicator) {
+    const indicator = await GDBIndicatorModel.findOne({_id: form.indicator});
+    if (!indicator)
+      throw new Server400Error('No such indicator');
+    indicatorReport.forIndicator = indicator;
+  }
+
+  if (form.startTime > form.endTime)
+    throw new Server400Error('Start time must be earlier than end time');
+  indicatorReport.hasTime.hasBeginning.date = new Date(form.startTime);
+  indicatorReport.hasTime.hasEnd.date = new Date(form.endTime);
+  indicatorReport.dateCreated = new Date(form.dateCreated);
+
+  indicatorReport.value.numericalValue = form.numericalValue;
+  indicatorReport.value.unitOfMeasure.label = form.unitOfMeasure
+
+  await indicatorReport.save();
+  return res.status(200).json({success: true});
+};
+
+module.exports = {createIndicatorReportHandler, fetchIndicatorReportHandler, updateIndicatorReportHandler};

@@ -9,7 +9,7 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {updateOutcome} from "../../api/outcomeApi";
 import IndicatorReportField from "../shared/IndicatorReportField";
-import {createIndicatorReport, fetchIndicatorReport} from "../../api/indicatorReportApi";
+import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -108,11 +108,11 @@ export default function AddEditIndicatorReport() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && id) {
-      updateOutcome({form}, id).then((res) => {
+      updateIndicatorReport(id, userContext,{form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
+          navigate('/dashboard');
         }
       }).catch(e => {
         if (e.json) {

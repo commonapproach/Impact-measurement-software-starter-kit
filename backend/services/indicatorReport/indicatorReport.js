@@ -48,4 +48,35 @@ const createIndicatorReport = async (req, res) => {
 
 };
 
-module.exports = {createIndicatorReportHandler};
+const fetchIndicatorReportHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + RESOURCE))
+      return await fetchIndicatorReport(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchIndicatorReport = async (req, res) => {
+  const {id} = req.params;
+  if (!id)
+    throw new Server400Error('Wrong input');
+  const indicatorReport = await GDBIndicatorReportModel.findOne({_id: id},
+    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value.unitOfMeasure']});
+  if (!indicatorReport)
+    throw new Server400Error('No such indicator Report');
+  const form = {
+    name: indicatorReport.name,
+    comment: indicatorReport.comment,
+    organization: indicatorReport.forOrganization.split('_')[1],
+    indicator: indicatorReport.forIndicator.split('_')[1],
+    numericalValue: indicatorReport.value.numericalValue,
+    unitOfMeasure: indicatorReport.value.unitOfMeasure.label,
+    startTime: indicatorReport.hasTime.hasBeginning.date,
+    endTime: indicatorReport.hasTime.hasEnd.date,
+  }
+  return res.status(200).json({indicatorReport: form, success: true});
+};
+
+module.exports = {createIndicatorReportHandler, fetchIndicatorReportHandler};

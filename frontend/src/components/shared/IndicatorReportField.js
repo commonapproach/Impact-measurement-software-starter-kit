@@ -54,7 +54,7 @@ function LoadingAutoComplete({
 export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors,}) {
 
   const [state, setState] = useState(
-    // defaultValue ||
+    defaultValue ||
     {});
 
   const [options, setOptions] = useState({});

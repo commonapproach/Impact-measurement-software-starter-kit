@@ -83,6 +83,7 @@ const routes = (
     <Route path="/outcome/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
 
     <Route path="/indicatorReport/new" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
+    <Route path="/indicatorReport/:id/:operationMode" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

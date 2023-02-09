@@ -7,10 +7,9 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
+import {updateOutcome} from "../../api/outcomeApi";
 import IndicatorReportField from "../shared/IndicatorReportField";
-import {createIndicatorReport} from "../../api/indicatorReportApi";
+import {createIndicatorReport, fetchIndicatorReport} from "../../api/indicatorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -55,9 +54,9 @@ export default function AddEditIndicatorReport() {
 
   useEffect(() => {
     if ((mode === 'edit' && id) || (mode === 'view' && id)) {
-      fetchOutcome(id, userContext).then(({success, outcome}) => {
+      fetchIndicatorReport(id, userContext).then(({success, indicatorReport}) => {
         if (success) {
-          setForm(outcome);
+          setForm(indicatorReport);
           setLoading(false);
         }
       }).catch(e => {

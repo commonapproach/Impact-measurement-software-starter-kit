@@ -1,10 +1,10 @@
 const express = require('express');
-const {createIndicatorReportHandler} = require("../services/indicatorReport/indicatorReport");
+const {createIndicatorReportHandler, fetchIndicatorReportHandler} = require("../services/indicatorReport/indicatorReport");
 
 
 const router = express.Router();
 
-// router.get('/:id', fetchIndicatorHandler);
+router.get('/:id', fetchIndicatorReportHandler);
 router.post('/', createIndicatorReportHandler)
 // router.put('/:id', updateIndicatorHandler)
 

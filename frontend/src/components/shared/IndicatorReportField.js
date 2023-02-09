@@ -227,14 +227,12 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 helperText={errors.indicator}
                 required={required}
                 disabled={disabled}
-                // onBlur={() => {
-                //   if (!state.indicator) {
-                //     setErrors(errors => ({...errors, indicator: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, indicator: null}));
-                //   }
-                // }
-                // }
+                onBlur={() => {
+                  if (state.indicator) {
+                    setErrors(errors => ({...errors, indicator: null}));
+                  }
+                }
+                }
               />
             </Grid>
             <Grid item xs={6}>

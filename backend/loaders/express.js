@@ -19,7 +19,7 @@ const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRoute, indicatorsRoute, indicatorRoute,
-  outcomesRoute, outcomeRoute
+  outcomesRoute, outcomeRoute, indicatorReportRoute
 } = require("../routes");
 
 const {userRoute} = require("../routes/superUserRoute");
@@ -64,7 +64,7 @@ app.use('/api/indicator', indicatorRoute)
 app.use('/api/indicators', indicatorsRoute);
 app.use('/api/outcome', outcomeRoute);
 app.use('/api/outcomes', outcomesRoute);
-// app.use('/api', needRoute);
+app.use('/api/indicatorReport', indicatorReportRoute);
 // app.use('/api', needSatisfierRoute);
 // app.use('/api', internalTypeRoute);
 

@@ -10,6 +10,7 @@ import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
 import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
 import IndicatorReportField from "../shared/IndicatorReportField";
+import {createIndicatorReport} from "../../api/indicatorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -92,7 +93,7 @@ export default function AddEditIndicatorReport() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOutcome({form}, userContext).then((ret) => {
+      createIndicatorReport({form}, userContext).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -103,7 +104,7 @@ export default function AddEditIndicatorReport() {
           setErrors(e.json);
         }
         console.log(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating indicator report', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && id) {
@@ -153,7 +154,7 @@ export default function AddEditIndicatorReport() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Outcome </Typography>
+        <Typography variant={'h4'}> Indicator Report </Typography>
         <IndicatorReportField
           disabled={mode === 'view'}
           disabledOrganization={!!orgId}

@@ -167,8 +167,8 @@ async function hasAccess(req, operationType) {
 
     // indicators
     case 'fetchIndicators':
-      // if (userAccount.isSuperuser)
-      //   return true;
+      if (userAccount.isSuperuser)
+        return true;
       if (userAccount.groupAdminOfs.length > 0) {
         // pass if the organization belongs to the group administrated by the groupAdmin
         const {organizationId} = req.params;
@@ -346,12 +346,25 @@ async function hasAccess(req, operationType) {
     case 'fetchDomain':
       return true;
     case 'createDomain':
+      if (userAccount.isSuperuser)
+        return true;
+      break
     case 'updateDomain':
       if (userAccount.isSuperuser)
         return true;
       break;
     case 'fetchDomains':
-      return true;
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+
+    case 'createIndicatorReport':
+      if (userAccount.isSuperuser) // todo: temp
+        return true;
+      break
+
+
   }
 
   return false;

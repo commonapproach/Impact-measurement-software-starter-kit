@@ -7,5 +7,6 @@ module.exports = {
   indicatorsRoute: require('../routes/indicators'),
   indicatorRoute: require('../routes/indicator'),
   outcomeRoute: require('../routes/outcome'),
-  outcomesRoute: require('../routes/outcomes')
+  outcomesRoute: require('../routes/outcomes'),
+  indicatorReportRoute: require('../routes/indicatorReport')
 }

@@ -1,6 +1,7 @@
 const {createGraphDBModel, Types} = require("../utils/graphdb");
 const {GDBDateTimeIntervalModel} = require("./time");
 const {GDBMeasureModel} = require("./measure");
+const {GDBOwnershipModel} = require("./ownership");
 
 const GDBIndicatorReportModel = createGraphDBModel({
   name: {type: String, internalKey: 'tove_org:hasName'},

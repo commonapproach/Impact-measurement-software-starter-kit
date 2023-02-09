@@ -1,10 +1,8 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchDomains} from "../../api/domainApi";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
-import Dropdown from "./fields/MultiSelectField";
 import {useSnackbar} from "notistack";
 import {fetchIndicators} from "../../api/indicatorApi";
 import GeneralField from "./fields/GeneralField";

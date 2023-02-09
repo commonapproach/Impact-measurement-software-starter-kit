@@ -243,7 +243,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 type={'datetime'}
                 value={state.startTime}
                 label={'Start Time'}
-                onChange={e => state.startTime = e.target.value}
+                onChange={handleChange('startTime')}
                 required={required}
                 disabled={disabled}
                 error={!!errors.startTime}
@@ -265,7 +265,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 type={'datetime'}
                 value={state.endTime}
                 label={'End Time'}
-                onChange={e => state.endTime = e.target.value}
+                onChange={handleChange('endTime')}
                 required={required}
                 disabled={disabled}
                 error={!!errors.endTime}

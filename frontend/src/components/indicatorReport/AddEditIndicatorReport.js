@@ -125,7 +125,6 @@ export default function AddEditIndicatorReport() {
   };
 
   const validate = () => {
-    console.log(form);
     const error = {};
     if (!form.name)
       error.name = 'The field cannot be empty';
@@ -139,8 +138,15 @@ export default function AddEditIndicatorReport() {
       error.startTime = 'The field cannot be empty';
     if (!form.endTime)
       error.endTime = 'The field cannot be empty';
+    if (!!form.startTime && !!form.endTime && form.startTime > form.endTime){
+      error.startTime = 'The date must be earlier than the end date'
+      error.endTime = 'The date must be later than the start date';
+    }
+
     if (!form.numericalValue)
       error.numericalValue = 'The field cannot be empty';
+    if (isNaN(form.numericalValue))
+      error.numericalValue = 'The field must be a number';
     if (!form.unitOfMeasure)
       error.unitOfMeasure = 'The field cannot be empty';
     setErrors(error);

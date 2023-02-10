@@ -67,7 +67,7 @@ export default function Groups() {
     {
       label: 'Label',
       body: ({_id, label}) => {
-        return <Link color to={`/groups/${_id}`}>
+        return <Link color to={`/groups/${_id}/edit`}>
           {label}
         </Link>
       },

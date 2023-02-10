@@ -5,6 +5,8 @@ const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBDateTimeIntervalModel} = require("../../models/time");
 const {GDBMeasureModel} = require("../../models/measure");
+const {GDBUserAccountModel} = require("../../models/userAccount");
+const {GDBOwnershipModel} = require("../../models/ownership");
 
 const RESOURCE = 'IndicatorReport';
 
@@ -19,6 +21,9 @@ const createIndicatorReportHandler = async (req, res, next) => {
 };
 
 const createIndicatorReport = async (req, res) => {
+  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  if (!userAccount)
+    throw new Server400Error('Wrong auth');
   const {form} = req.body;
   if (!form || !form.name || !form.comment || !form.organization || !form.indicator
     || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
@@ -46,7 +51,14 @@ const createIndicatorReport = async (req, res) => {
     value: GDBMeasureModel({numericalValue: form.numericalValue, unitOfMeasure: {label: form.unitOfMeasure}}),
   });
 
+
   await indicatorReport.save();
+  const ownership = GDBOwnershipModel({
+    resource: indicatorReport,
+    owner: userAccount,
+    dateOfCreated: new Date(),
+  });
+  await ownership.save();
   return res.status(200).json({success: true});
 
 };

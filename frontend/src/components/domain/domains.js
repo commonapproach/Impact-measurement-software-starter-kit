@@ -63,7 +63,7 @@ export default function Domains() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return <Link color to={`/domains/edit/${_id}`}>
+        return <Link color to={`/domains/${_id}/edit`}>
           {name}
         </Link>
       },

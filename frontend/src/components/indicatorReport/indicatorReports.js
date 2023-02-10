@@ -97,7 +97,7 @@ export default function IndicatorReports() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'outcome'} objectId={_id}
+        <DropdownMenu urlPrefix={'indicatorReport'} objectId={_id}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];

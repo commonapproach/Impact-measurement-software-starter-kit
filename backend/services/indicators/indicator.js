@@ -3,6 +3,8 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
+const {GDBUserAccountModel} = require("../../models/userAccount");
+const {GDBOwnershipModel} = require("../../models/ownership");
 
 
 const fetchIndicators = async (req, res) => {
@@ -150,6 +152,9 @@ const updateIndicatorHandler = async (req, res, next) => {
 };
 
 const createIndicator = async (req, res) => {
+  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  if (!userAccount)
+    throw new Server400Error('Wrong auth');
   const {form} = req.body;
   if (!form || !form.organizations || !form.name || !form.description)
     throw new Server400Error('Invalid input');
@@ -166,6 +171,12 @@ const createIndicator = async (req, res) => {
     organization.hasIndicators.push(indicator);
     return organization.save();
   }));
+  const ownership = GDBOwnershipModel({
+    resource: indicator,
+    owner: userAccount,
+    dateOfCreated: new Date(),
+  });
+  await ownership.save();
   return res.status(200).json({success: true});
 };
 

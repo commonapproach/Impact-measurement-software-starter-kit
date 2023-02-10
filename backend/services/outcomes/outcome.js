@@ -3,6 +3,8 @@ const {hasAccess} = require("../../helpers");
 const {Server400Error} = require("../../utils");
 const {GDBDomainModel} = require("../../models/domain");
 const {GDBOutcomeModel} = require("../../models/outcome");
+const {GDBOwnershipModel} = require("../../models/ownership");
+const {GDBUserAccountModel} = require("../../models/userAccount");
 
 
 const fetchOutcomes = async (req, res) => {
@@ -156,6 +158,9 @@ const updateOutcomeHandler = async (req, res, next) => {
 };
 
 const createOutcome = async (req, res) => {
+  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  if (!userAccount)
+    throw new Server400Error('Wrong auth');
   const {form} = req.body;
   if (!form || !form.organizations || !form.name || !form.description || !form.domain)
     throw new Server400Error('Invalid input');
@@ -175,6 +180,12 @@ const createOutcome = async (req, res) => {
     organization.hasOutcomes.push(outcome);
     return organization.save();
   }));
+  const ownership = GDBOwnershipModel({
+    resource: outcome,
+    owner: userAccount,
+    dateOfCreated: new Date(),
+  });
+  await ownership.save();
   return res.status(200).json({success: true});
 };
 

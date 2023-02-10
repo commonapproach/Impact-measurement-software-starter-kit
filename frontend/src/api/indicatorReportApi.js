@@ -14,3 +14,8 @@ export async function updateIndicatorReport(id, userContext, params) {
   if (userContext.isSuperuser)
     return putJson(`/api/indicatorReport/${id}`, params)
 }
+
+export async function fetchIndicatorReports(orgId, userContext) {
+  if (userContext.isSuperuser)
+    return getJson(`/api/indicatorReports/${orgId}`)
+}

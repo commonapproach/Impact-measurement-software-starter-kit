@@ -135,4 +135,24 @@ const updateIndicatorReport = async (req, res) => {
   return res.status(200).json({success: true});
 };
 
-module.exports = {createIndicatorReportHandler, fetchIndicatorReportHandler, updateIndicatorReportHandler};
+const fetchIndicatorReportsHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetch' + RESOURCE + 's'))
+      return await fetchIndicatorReports(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchIndicatorReports = async (req, res) => {
+  const {orgId} = req.params;
+  if (!orgId)
+    throw new Server400Error('Wrong input');
+  const indicatorReports = await GDBIndicatorReportModel.find({forOrganization: `:organization_${orgId}`},
+    // {populates: ['forIndicator']}
+  );
+  return res.status(200).json({success: true, indicatorReports})
+}
+
+module.exports = {createIndicatorReportHandler, fetchIndicatorReportHandler, updateIndicatorReportHandler, fetchIndicatorReportsHandler};

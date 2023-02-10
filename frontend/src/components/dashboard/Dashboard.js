@@ -55,7 +55,7 @@ function Dashboard() {
                  text="Manage Outcomes"/>
 
       <NavButton to={'/organization-indicatorReports'} icon={<Edit/>} key={'indicatorReports'}
-                 text="Manage Indicator Reports" disabled/>
+                 text="Manage Indicator Reports"/>
 
       <NavButton to={'/domains'} icon={<Edit/>} key={'domains'}
                  text="Manage Domains"/>

@@ -50,7 +50,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors,}) {
+export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization}) {
 
   const [state, setState] = useState(
     defaultValue ||
@@ -207,7 +207,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 error={!!errors.organization}
                 helperText={errors.organization}
                 required={required}
-                disabled={disabled}
+                disabled={disabled || disabledOrganization}
                 onBlur={() => {
                   if (!state.organization) {
                     setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));

@@ -7,7 +7,6 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import {updateOutcome} from "../../api/outcomeApi";
 import IndicatorReportField from "../shared/IndicatorReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 
@@ -64,6 +63,7 @@ export default function AddEditIndicatorReport() {
         if (e.json)
           setErrors(e.json);
         setLoading(false);
+        navigate(-1);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else if (mode === 'edit' && (!id || !orgId)) {
@@ -74,7 +74,7 @@ export default function AddEditIndicatorReport() {
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
     } else if (mode === 'new' && orgId) {
-      setForm(form => ({...form, organizations: [orgId]}));
+      setForm(form => ({...form, organization: orgId}));
       setLoading(false);
     } else {
       navigate(-1);

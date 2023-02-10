@@ -371,6 +371,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser) // todo: temp
         return true
       break
+    case 'fetchIndicatorReports':
+      if (userAccount.isSuperuser) // todo: temp
+        return true
+      break
 
 
   }

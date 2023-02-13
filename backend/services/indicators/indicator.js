@@ -165,7 +165,7 @@ const createIndicator = async (req, res) => {
   const indicator = GDBIndicatorModel(form);
   await indicator.save();
   // add the indicator to the organizations
-  const list = await Promise.all(indicator.forOrganizations.map(organization => {
+  await Promise.all(indicator.forOrganizations.map(organization => {
     if (!organization.hasIndicators)
       organization.hasIndicators = [];
     organization.hasIndicators.push(indicator);

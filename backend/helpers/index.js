@@ -8,6 +8,29 @@ const {SPARQL} = require('../utils/graphdb/helpers');
 const {GDBOutcomeModel} = require("../models/outcome");
 const {GDBIndicatorReportModel} = require("../models/indicatorReport");
 
+/**
+ * the function takes a graphdb object or URI and check if it is in the list,
+ * add it in if it is not in the list,
+ * ignore it if it is in the list
+ * the object's type must be same with previous object's type in the list
+ * @param list
+ * @param object
+ */
+function addObjectToList(list, object) {
+  if (typeof object === 'string'){
+    // the object is a URI
+    if (!list.includes(object))
+      list.push(object);
+  } else {
+    // the object is a Graphdb object
+    const result = list.filter(previousObject => {
+      return previousObject._id === object._id;
+    });
+    if (result.length === 0)
+      list.push(object)
+  }
+}
+
 function URI2Id(uri) {
   return uri.split('_')[1];
 }
@@ -47,7 +70,7 @@ async function organizationBelongsToGroupAdmin(userAccount, organizationId) {
 }
 
 /**
- * the function gives all organizations which are in the same group
+ * the function gives all organizations' URIs which are in the same groups
  * with organizations this user servers for as a specific role
  * @param userAccount the userAccount
  * @param role role of the user, ex. 'administratorOfs'
@@ -153,8 +176,11 @@ async function hasAccess(req, operationType) {
       }
       break;
     case 'fetchOrganizations':
-      if (userAccount.isSuperuser)
-        return true;
+      // every users should be able to fetch organizations,
+      // however, the ret they got are different depends on their role
+      if(userAccount.isSuperuser || userAccount.groupAdminOfs?.length || userAccount.administratorOfs?.length ||
+        userAccount.reporterOfs?.length || userAccount.editorOfs?.length || userAccount.researcherOfs?.length)
+      return true;
       break;
 
     // users
@@ -705,4 +731,4 @@ async function hasAccess(req, operationType) {
 
 }
 
-module.exports = {URI2Id, hasAccess};
+module.exports = {URI2Id, hasAccess, organizationsInSameGroups, addObjectToList};

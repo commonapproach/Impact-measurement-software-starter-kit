@@ -89,75 +89,75 @@ function TopNavBar() {
                 },
               }}
             >
-              <MenuItem onClick={handleLink(`/clients`)}>
-                <ListItemIcon>
-                  <FamilyRestroomIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Clients</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/clients`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <FamilyRestroomIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Clients</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/services`)}>
-                <ListItemIcon>
-                  <LocationCityIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Services</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/services`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <LocationCityIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Services</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/serviceOccurrences`)}>
-                <ListItemIcon>
-                  <LocationCityIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Service Occurrences</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/serviceOccurrences`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <LocationCityIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Service Occurrences</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/appointments`)}>
-                <ListItemIcon>
-                  <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Appointments</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/appointments`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Appointments</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/serviceRegistrations`)}>
-                <ListItemIcon>
-                  <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Service Registrations</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/serviceRegistrations`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Service Registrations</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/serviceProvisions`)}>
-                <ListItemIcon>
-                  <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Service Provisions</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/serviceProvisions`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Service Provisions</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/referrals`)}>
-                <ListItemIcon>
-                  <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Referrals</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/referrals`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Referrals</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/goods`)}>
-                <ListItemIcon>
-                  <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Goods</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/goods`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Goods</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/providers`)}>
-                <ListItemIcon>
-                  <GroupsIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Providers</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/providers`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <GroupsIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Providers</Typography>*/}
+              {/*</MenuItem>*/}
 
-              <MenuItem onClick={handleLink(`/reporting`)}>
-                <ListItemIcon>
-                  <ReportIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Reporting</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink(`/reporting`)}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <ReportIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Reporting</Typography>*/}
+              {/*</MenuItem>*/}
 
             </Menu>
           </div>

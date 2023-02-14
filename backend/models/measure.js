@@ -8,11 +8,11 @@ const GDBUnitOfMeasure = createGraphDBModel({
 
 const GDBMeasureModel = createGraphDBModel({
   numericalValue: {type: String, internalKey: 'iso21972:numerical_value'},
-  unitOfMeasure: {type: GDBUnitOfMeasure, internalKey: 'iso21972:unit_of_measure'}
+  unitOfMeasure: {type: GDBUnitOfMeasure, internalKey: 'iso21972:hasUnit'}
 }, {
   rdfTypes: ['iso21972:Measure'], name: 'measure'
 });
 
 module.exports = {
-  GDBMeasureModel
+  GDBMeasureModel, GDBUnitOfMeasure
 }

@@ -171,28 +171,28 @@ export default function UserInvite() {
         error={!!state.errors.middleName}
         helperText={state.errors.middleName}
       />
-      {/*<Dropdown*/}
-      {/*  label="Associated Organizations"*/}
-      {/*  key={'associatedOrganizations'}*/}
-      {/*  value={state.form.associatedOrganizations}*/}
-      {/*  onChange={e => {*/}
-      {/*    state.form.associatedOrganizations = e.target.value;*/}
-      {/*  }}*/}
-      {/*  options={optionOrganizations}*/}
-      {/*  onBlur={() => {*/}
-      {/*    if (state.form.userTypes.length === 0) {*/}
-      {/*      setState(state => ({...state, errors: {...state.errors, associatedOrganizations: 'This field is required'}}));*/}
-      {/*    } else {*/}
-      {/*      setState(state => ({...state, errors: {...state.errors, associatedOrganizations: null}}));*/}
-      {/*    }*/}
-      {/*  }*/}
-      {/*  }*/}
-      {/*  error={!!state.errors.associatedOrganizations}*/}
-      {/*  helperText={state.errors.associatedOrganizations}*/}
-      {/*  // sx={{mb: 2}}*/}
-      {/*  noEmpty*/}
-      {/*  required={true}*/}
-      {/*/>*/}
+      <Dropdown
+        label="Associated Organizations"
+        key={'associatedOrganizations'}
+        value={state.form.associatedOrganizations}
+        onChange={e => {
+          state.form.associatedOrganizations = e.target.value;
+        }}
+        options={optionOrganizations}
+        onBlur={() => {
+          if (state.form.userTypes.length === 0) {
+            setState(state => ({...state, errors: {...state.errors, associatedOrganizations: 'This field is required'}}));
+          } else {
+            setState(state => ({...state, errors: {...state.errors, associatedOrganizations: null}}));
+          }
+        }
+        }
+        error={!!state.errors.associatedOrganizations}
+        helperText={state.errors.associatedOrganizations}
+        // sx={{mb: 2}}
+        noEmpty
+        required={true}
+      />
       <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
         Invite
       </Button>

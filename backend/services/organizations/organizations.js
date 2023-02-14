@@ -1,5 +1,7 @@
-const {GDBOrganizationModel} = require("../../models/organization");
-const {hasAccess} = require("../../helpers");
+const {GDBOrganizationModel, GDBOrganizationIdModel} = require("../../models/organization");
+const {hasAccess, addObjectToList, organizationsInSameGroups} = require("../../helpers");
+const {GDBUserAccountModel} = require("../../models/userAccount");
+const {GDBGroupModel} = require("../../models/group");
 
 const fetchOrganizationsHandler = async (req, res, next) => {
   try {
@@ -12,17 +14,37 @@ const fetchOrganizationsHandler = async (req, res, next) => {
 };
 
 const fetchOrganizations = async (req, res) => {
-  let organizations;
+  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  let organizations = [];
 
-  if (req.session.isSuperuser) {
+  if (userAccount.isSuperuser) {
     organizations = await GDBOrganizationModel.find({});
     return res.status(200).json({success: true, organizations: organizations});
   }
 
+  if (userAccount.groupAdminOfs?.length) {
+    // add all organization is his group in to the list
+
+    // fetch all groups belongs to him
+    const groups = await GDBGroupModel.find({administrator: {_id:userAccount._id}}, {populates: ['organizations']})
+    groups.map(group => {
+      group.organizations.map(organization => {
+        // fetch all reachable organizations and add them in
+        addObjectToList(organizations, organization);
+      })
+    })
+  }
+
+  if (userAccount.administratorOfs?.length){
+    // await organizationsInSameGroups(userAccount, 'administratorOfs', )
+  }
+
+
+
   return res.status(200).json({success: true, organizations: organizations});
 
 };
-// const groupAdminFetchOrganizations = superuserFetchOrganizations;
+
 
 const adminFetchOrganizations = async (req, res, next) => {
 
@@ -33,7 +55,5 @@ const adminFetchOrganizations = async (req, res, next) => {
 };
 
 module.exports = {
-  adminFetchOrganizations,
   fetchOrganizationsHandler,
-  adminFetchOrganizations
 };

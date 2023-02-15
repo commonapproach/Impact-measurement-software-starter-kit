@@ -79,4 +79,4 @@ const inviteNewUser = async (req, res) => {
 };
 
 
-module.exports = {inviteNewUser};
+module.exports = {inviteNewUserHandler};

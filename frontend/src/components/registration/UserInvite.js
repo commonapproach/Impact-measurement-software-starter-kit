@@ -9,7 +9,6 @@ import {AlertDialog} from "../shared/Dialogs";
 import {verifyEmail} from "../../helpers";
 import LoadingButton from "../shared/LoadingButton";
 import {UserContext} from "../../context";
-import {fetchUserTypes} from "../../api/userTypesApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {useSnackbar} from 'notistack';
 import GeneralField from "../shared/fields/GeneralField";
@@ -69,6 +68,8 @@ export default function UserInvite() {
       errors.firstName = 'This field is required';
     if(!state.form.lastName)
       errors.lastName = 'This field is required';
+    if(!state.form.associatedOrganizations.length === 0)
+      errors.associatedOrganizations = 'This field is required'
 
     if (Object.keys(errors).length !== 0) {
       setState(state => ({...state, errors}));
@@ -88,7 +89,6 @@ export default function UserInvite() {
   };
 
   const handleConfirm = async () => {
-    console.log('valid');
     try {
       setState(state => ({...state, loadingButton: true}));
       const {success, message} = await createUser({form: state.form});
@@ -104,8 +104,8 @@ export default function UserInvite() {
   };
 
 
-  // if (state.loading)
-  //   return <Loading message={'Fetching UserTypes'}/>;
+  if (state.loading)
+    return <Loading message={'Fetching Organizations'}/>;
 
   return (
     <Container className={classes.root}>
@@ -180,7 +180,7 @@ export default function UserInvite() {
         }}
         options={optionOrganizations}
         onBlur={() => {
-          if (state.form.userTypes.length === 0) {
+          if (state.form.associatedOrganizations.length === 0) {
             setState(state => ({...state, errors: {...state.errors, associatedOrganizations: 'This field is required'}}));
           } else {
             setState(state => ({...state, errors: {...state.errors, associatedOrganizations: null}}));

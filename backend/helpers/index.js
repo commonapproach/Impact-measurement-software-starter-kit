@@ -147,6 +147,10 @@ async function hasAccess(req, operationType) {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   switch (operationType) {
+    // users
+    case 'inviteNewUser':
+      return userAccount.isSuperuser;
+
     // organizations
     case 'createOrganization':
       return userAccount.isSuperuser;

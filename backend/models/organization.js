@@ -11,6 +11,7 @@ const GDBOrganizationIdModel = createGraphDBModel({
 
 const GDBOrganizationModel = createGraphDBModel({
   comment: {type: String, internalKey: 'rdfs:comment'},
+  hasUser: {type: [GDBUserAccountModel], internalKey: ':hasUser'},
   administrator: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},
   reporter: {type: [GDBUserAccountModel], internalKey: ':hasReporter'},
   editor: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},

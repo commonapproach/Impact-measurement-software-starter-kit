@@ -1,8 +1,8 @@
 const express = require('express');
-const {inviteNewUser} = require("../../services/users/invite");
-const {superuserFetchUserById, superuserUpdateUserById} = require("../../services/user/user");
-const {superuserDeleteUser} = require("../../services/users/users");
-const {regularUserSuperuserGetProfile, regularUserSuperuserUpdateProfile} = require("../../services/profile/profile");
+const {inviteNewUser} = require("../services/users/invite");
+const {superuserFetchUserById, superuserUpdateUserById} = require("../services/user/user");
+const {superuserDeleteUser} = require("../services/users/users");
+const {regularUserSuperuserGetProfile, regularUserSuperuserUpdateProfile} = require("../services/profile/profile");
 
 const router = express.Router({mergeParams: true});
 

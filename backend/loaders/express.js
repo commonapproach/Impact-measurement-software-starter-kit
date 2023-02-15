@@ -8,10 +8,6 @@ const cors = require('cors');
 const {
   baseRoute,
 } = require('../routes/baseRoute');
-const superuserRoute = require('../routes/superUserRoute/superuserRoute');
-const generalUserRoute = require('../routes/general/generalUserRoute');
-const groupAdminRoute = require('../routes/groupAdminRoute/groupAdminRoute');
-const adminRoute = require('../routes/admin/adminRoute')
 const {authMiddleware, errorHandler} = require('../services/middleware');
 
 
@@ -19,10 +15,10 @@ const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRoute, indicatorsRoute, indicatorRoute,
-  outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute
+  outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute
 } = require("../routes");
 
-const {userRoute} = require("../routes/superUserRoute");
+const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
 
 const app = express();
 
@@ -47,14 +43,15 @@ app.use('/api', baseRoute);
 app.use('/api', authMiddleware('Session expired, please login again'));
 // Check authorization
 
-app.use('/api/general', generalUserRoute);
+// app.use('/api/general', generalUserRoute);
 
 // Private routes
 
 // routes only for superuser
-app.use('/api/superuser', superuserRoute);
+// app.use('/api/superuser', superuserRoute);
 // app.use('/api/groupAdmin', groupAdminRoute);
 // app.use('/api/admin', adminRoute);
+app.use('/api/user', userRoute);
 app.use('/api/users', usersRoute);
 app.use('/api/organization', organizationRoute);
 app.use('/api/organizations', organizationsRoute);
@@ -66,6 +63,12 @@ app.use('/api/outcome', outcomeRoute);
 app.use('/api/outcomes', outcomesRoute);
 app.use('/api/indicatorReports', indicatorReportsRoute);
 app.use('/api/indicatorReport', indicatorReportRoute);
+app.use('/api/userTypes', userTypesRoute);
+app.use('/api/profile', profileRoute);
+app.use('/api/dynamicClassInstances', dynamicClassInstancesRoute);
+app.use('/api/domains', domainsRoute);
+app.use('/api/domain', domainRoute);
+
 
 // app.use('/api', internalTypeRoute);
 

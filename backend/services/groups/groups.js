@@ -21,7 +21,6 @@ const fetchGroups = async (req, res) => {
     return res.status(200).json({groups});
   }
 
-
 };
 
 const groupAdminFetchGroups = async (req, res, next) => {

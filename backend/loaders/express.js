@@ -19,7 +19,6 @@ const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRo
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
-const {superuserFetchGroups} = require("../services/groups/groups");
 
 const app = express();
 

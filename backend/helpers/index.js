@@ -235,6 +235,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'fetchGroup':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
 
     // users

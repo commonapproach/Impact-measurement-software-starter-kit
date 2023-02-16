@@ -222,6 +222,21 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    // groups
+    case 'fetchGroups':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'createGroup':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'updateGroup':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+
     // users
     case 'fetchUsers':
       return true;
@@ -769,5 +784,6 @@ async function hasAccess(req, operationType) {
   return false;
 
 }
+
 
 module.exports = {URI2Id, hasAccess, organizationsInSameGroups, addObjectToList};

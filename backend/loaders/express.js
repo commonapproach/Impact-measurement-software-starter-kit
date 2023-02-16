@@ -15,10 +15,11 @@ const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRoute, indicatorsRoute, indicatorRoute,
-  outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute
+  outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
+const {superuserFetchGroups} = require("../services/groups/groups");
 
 const app = express();
 
@@ -68,6 +69,8 @@ app.use('/api/profile', profileRoute);
 app.use('/api/dynamicClassInstances', dynamicClassInstancesRoute);
 app.use('/api/domains', domainsRoute);
 app.use('/api/domain', domainRoute);
+app.use('/api/groups', groupsRoute);
+app.use('/api/group', groupRoute);
 
 
 // app.use('/api', internalTypeRoute);

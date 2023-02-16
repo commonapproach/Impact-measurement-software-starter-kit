@@ -1,9 +1,9 @@
 const express = require('express');
-const {superuserFetchGroups} = require("../../services/groups/groups");
+const {fetchGroupsHandler} = require("../services/groups/groups");
 
 
 const router = express.Router({mergeParams: true});
 
-router.get('/', superuserFetchGroups)
+router.get('/', fetchGroupsHandler)
 
 module.exports = router;

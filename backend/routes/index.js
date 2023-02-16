@@ -11,4 +11,6 @@ module.exports = {
   indicatorReportsRoute: require('./indicatorReports'),
   indicatorReportRoute: require('./indicatorReport'),
   userRoute: require('./user'),
+  groupsRoute: require('./groups'),
+  groupRoute: require('./group')
 }

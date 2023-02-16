@@ -3,7 +3,6 @@ import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
-import { formatPhoneNumber } from "../../helpers/phone_number_helpers";
 import { useSnackbar } from 'notistack';
 import {deleteGroup, fetchGroups} from "../../api/groupApi";
 import {UserContext} from "../../context";

@@ -1,5 +1,5 @@
 const {GDBDomainModel} = require("../../models/domain");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 
 const createDomain = async (req, res) => {
 

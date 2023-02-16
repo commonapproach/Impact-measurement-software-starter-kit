@@ -1,7 +1,8 @@
 const {GDBOrganizationModel, GDBOrganizationIdModel} = require("../../models/organization");
-const {hasAccess, addObjectToList, organizationsInSameGroups} = require("../../helpers");
+const {addObjectToList, organizationsInSameGroups} = require("../../helpers");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBGroupModel} = require("../../models/group");
+const {hasAccess} = require('../../helpers/hasAccess')
 
 const fetchOrganizationsHandler = async (req, res, next) => {
   try {

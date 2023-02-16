@@ -1,5 +1,5 @@
 const {GDBOrganizationModel} = require("../../models/organization");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBDomainModel} = require("../../models/domain");
 const {GDBOutcomeModel} = require("../../models/outcome");

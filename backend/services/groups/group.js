@@ -1,7 +1,7 @@
 const {GDBGroupModel} = require("../../models/group");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 
 const createGroupHandler = async (req, res, next) => {
   try {

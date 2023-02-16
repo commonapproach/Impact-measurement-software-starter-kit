@@ -2,7 +2,7 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {userType2UserTypeURI} = require("../../helpers/dicts");
 const {GraphDB} = require('../../utils/graphdb');
 const {SPARQL} = require('../../utils/graphdb/helpers');
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 
 const fetchUsers = async (req, res) => {
   const users = await GDBUserAccountModel.find({}, {populates: ['person']});

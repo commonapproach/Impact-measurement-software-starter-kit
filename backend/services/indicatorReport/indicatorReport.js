@@ -1,4 +1,4 @@
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");

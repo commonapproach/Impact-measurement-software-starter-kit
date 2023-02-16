@@ -3,7 +3,7 @@ const {jwtConfig} = require("../../config");
 const {sendVerificationMail} = require("../../utils");
 const {Server400Error} = require("../../utils");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBOrganizationModel} = require("../../models/organization");
 
 const inviteNewUserHandler = async (req, res, next) => {

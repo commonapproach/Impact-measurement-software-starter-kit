@@ -1,5 +1,5 @@
 const {GDBGroupModel} = require("../../models/group");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 
 

@@ -1,5 +1,5 @@
 const {GDBDomainModel} = require("../../models/domain");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 
 const fetchDomains = async (req, res) => {
     const domains = await GDBDomainModel.find({});

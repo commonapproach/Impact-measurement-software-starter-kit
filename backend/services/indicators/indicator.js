@@ -1,6 +1,6 @@
 const {json} = require("express");
 const {GDBOrganizationModel} = require("../../models/organization");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBUserAccountModel} = require("../../models/userAccount");

@@ -6,7 +6,7 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {GDBGroupModel} = require("../../models/group");
 const {fetchIndicators} = require("../indicators/indicator");
-const {hasAccess} = require("../../helpers");
+const {hasAccess} = require("../../helpers/hasAccess");
 
 /**
  * Add organization to each account in organization[usertype] 's associated property

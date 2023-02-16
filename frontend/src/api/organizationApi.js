@@ -6,8 +6,7 @@ export async function fetchOrganizations(userContext) {
 }
 
 export async function fetchOrganization(orgId, userContext) {
-  if (userContext.isSuperuser || userContext.groupAdminOf?.length > 0)
-    return getJson('/api/organization/' + orgId);
+  return getJson('/api/organization/' + orgId);
 }
 
 export async function createOrganization(params) {

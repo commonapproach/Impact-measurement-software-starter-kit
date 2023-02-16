@@ -17,7 +17,7 @@ const {GDBIndicatorReportModel} = require("../models/indicatorReport");
  * @param object
  */
 function addObjectToList(list, object) {
-  if (typeof object === 'string'){
+  if (typeof object === 'string') {
     // the object is a URI
     if (!list.includes(object))
       list.push(object);
@@ -27,7 +27,7 @@ function addObjectToList(list, object) {
       return previousObject._id === object._id;
     });
     if (result.length === 0)
-      list.push(object)
+      list.push(object);
   }
 }
 
@@ -70,33 +70,58 @@ async function organizationBelongsToGroupAdmin(userAccount, organizationId) {
 }
 
 /**
- * the function gives all organizations' URIs which are in the same groups
+ * if role is provided, the function gives all organizations' URIs which are in the same groups
  * with organizations this user servers for as a specific role
+ * if role is not provided, the function gives all organizations' URIs which are in the same groups
+ * with organizations this user servers for
  * @param userAccount the userAccount
  * @param role role of the user, ex. 'administratorOfs'
  * @param organizations should be an empty list
  * @returns {Promise<*[]>}
  */
-const organizationsInSameGroups = async (userAccount, role, organizations) => {
-  await Promise.all(userAccount[role].map(organizationURI => {
-    const organizationId = organizationURI.split('_')[1];
-    const query = `
+const organizationsInSameGroups = async (userAccount, organizations, role) => {
+    if (role) {
+      await Promise.all(userAccount[role].map(organizationURI => {
+        const organizationId = organizationURI.split('_')[1];
+        const query = `
         PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
         select * where { 
 	          ?group :hasOrganization :organization_${organizationId}.
     	      ?group :hasOrganization ?organization.
         }`;
-    return GraphDB.sendSelectQuery(query, false, (res) => {
-      const organizationURI = SPARQL.getPrefixedURI(res.organization.id);
-      if (organizationURI.split('_')[1] !== organizationId && !organizations.includes(organizationURI))
-        organizations.push(organizationURI);
-    });
-  }));
+        return GraphDB.sendSelectQuery(query, false, (res) => {
+          const organizationURI = SPARQL.getPrefixedURI(res.organization.id);
+          if (organizationURI.split('_')[1] !== organizationId && !organizations.includes(organizationURI))
+            organizations.push(organizationURI);
+        });
+      }));
+    } else {
+      await Promise.all(userAccount.associatedOrganizations.map(organizationURI => {
+        const organizationId = organizationURI.split('_')[1];
+        const query = `
+        PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
+        select * where { 
+	          ?group :hasOrganization :organization_${organizationId}.
+    	      ?group :hasOrganization ?organization.
+        }`;
+        return GraphDB.sendSelectQuery(query, false, (res) => {
+          const organizationURI = SPARQL.getPrefixedURI(res.organization.id);
+          if (organizationURI.split('_')[1] !== organizationId && !organizations.includes(organizationURI))
+            organizations.push(organizationURI);
+        });
+      }));
+    }
 
-};
+
+  }
+;
+
 
 /**
- * The function will return true if the user serves as a specific role for
+ * If the role is provided, the function will return true if the user serves as a specific role for
+ * the organization(associated with organizationId) or for an organization
+ * which is in a same group with the organization(associated with organizationId)
+ * If the role is not provided, the function will return true if the user serves for
  * the organization(associated with organizationId) or for an organization
  * which is in a same group with the organization(associated with organizationId)
  * @param organizationId the id of the organization
@@ -105,15 +130,25 @@ const organizationsInSameGroups = async (userAccount, role, organizations) => {
  * @returns {Promise<boolean>}
  */
 const isAPartnerOrganization = async (organizationId, userAccount, role) => {
-  // return true if the user is one of the role user of the organization
-  if (userAccount[role].includes(`:organization_${organizationId}`))
-    return true;
-  // fetch all organizations associated with each organizations in userAccount[role]
-  const allOrganizations = [];
-  await organizationsInSameGroups(userAccount, role, allOrganizations);
-  if (allOrganizations.includes(`:organization_${organizationId}`))
-    return true;
-  return false;
+  if (role) {// return true if the user is one of the role user of the organization
+    if (userAccount[role].includes(`:organization_${organizationId}`))
+      return true;
+    // fetch all organizations associated with each organizations in userAccount[role]
+    const allOrganizations = [];
+    await organizationsInSameGroups(userAccount, allOrganizations, role);
+    if (allOrganizations.includes(`:organization_${organizationId}`))
+      return true;
+    return false;
+  } else {
+    // return true if the user is one of the sponsored user of the organization
+    if (userAccount.associatedOrganizations.includes(`:organization_${organizationId}`))
+      return true;
+    const allOrganizations = [];
+    await organizationsInSameGroups(userAccount, allOrganizations);
+    if (allOrganizations.includes(`:organization_${organizationId}`))
+      return true;
+    return false;
+  }
 };
 
 /**
@@ -182,9 +217,9 @@ async function hasAccess(req, operationType) {
     case 'fetchOrganizations':
       // every users should be able to fetch organizations,
       // however, the ret they got are different depends on their role
-      if(userAccount.isSuperuser || userAccount.groupAdminOfs?.length || userAccount.administratorOfs?.length ||
+      if (userAccount.isSuperuser || userAccount.groupAdminOfs?.length || userAccount.administratorOfs?.length ||
         userAccount.reporterOfs?.length || userAccount.editorOfs?.length || userAccount.researcherOfs?.length)
-      return true;
+        return true;
       break;
 
     // users
@@ -606,7 +641,7 @@ async function hasAccess(req, operationType) {
               indicatorURI => {
                 return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]});
               }
-            ))
+            ));
             for (let indicator of organization.hasIndicators) {
               if (indicator.indicatorReports.includes(`:indicatorReport_${id}`))
                 return true;

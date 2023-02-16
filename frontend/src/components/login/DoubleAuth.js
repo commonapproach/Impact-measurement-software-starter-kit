@@ -86,6 +86,7 @@ export default function DoubleAuth() {
             administratorOf: userAccount.administratorOf || [],
             groupAdminOf: userAccount.groupAdminOf || [],
             researcherOf: userAccount.researcherOf || [],
+            associatedOrganizations: userAccount.associatedOrganizations || [],
           });
 
           setState(state => ({...state, loadingButton: false}));

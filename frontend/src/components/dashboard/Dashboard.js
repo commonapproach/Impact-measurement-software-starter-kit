@@ -32,7 +32,7 @@ function Dashboard() {
         <NavButton to={`/groups`} icon={<People/>} key={'groups'}
                   text="Manage Groups"/>:null}
 
-      {userContext.isSuperuser || userContext.administratorOf.length > 0?
+      {userContext.isSuperuser || userContext.associatedOrganizations.length?
         <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
       null}

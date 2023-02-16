@@ -46,15 +46,15 @@ export default function UserInvite() {
 
   useEffect(() => {
     fetchOrganizations(userContext).then(({success, organizations}) => {
-      if(success){
-        const options ={} ;
-        organizations.map(organization => options[organization._id] = organization.legalName)
+      if (success) {
+        const options = {};
+        organizations.map(organization => options[organization._id] = organization.legalName);
         setOptionOrganizations(options);
       }
     }).catch((e) => {
       enqueueSnackbar(state.errors.message || "Error occur when fetching organizations", {variant: 'error'});
-    })
-  }, [])
+    });
+  }, []);
 
   /**
    * @returns {boolean} true if valid.
@@ -64,12 +64,14 @@ export default function UserInvite() {
     // if (state.form.userTypes.length === 0)
     //   errors.userTypes = 'This field is required';
     verifyEmail(state.form.email, 'email', errors);
-    if(!state.form.firstName)
+    if (!state.form.firstName)
       errors.firstName = 'This field is required';
-    if(!state.form.lastName)
+    if (!state.form.lastName)
       errors.lastName = 'This field is required';
-    if(!state.form.associatedOrganizations.length === 0)
-      errors.associatedOrganizations = 'This field is required'
+    if (!state.form.associatedOrganizations.length)
+      errors.associatedOrganizations = 'This field is required';
+
+
 
     if (Object.keys(errors).length !== 0) {
       setState(state => ({...state, errors}));
@@ -121,11 +123,11 @@ export default function UserInvite() {
         required
         onChange={e => state.form.email = e.target.value}
         onBlur={() => {
-          const correct = verifyEmail(state.form.email, 'email', state.errors)
-          if(correct){
-            setState(state => ({...state, errors: {...state.errors, email: correct}}))
+          const correct = verifyEmail(state.form.email, 'email', state.errors);
+          if (correct) {
+            setState(state => ({...state, errors: {...state.errors, email: correct}}));
           } else {
-            setState(state => ({...state, errors: {...state.errors, email: undefined}}))
+            setState(state => ({...state, errors: {...state.errors, email: undefined}}));
           }
         }}
         error={!!state.errors.email}
@@ -138,10 +140,10 @@ export default function UserInvite() {
         required
         onChange={e => state.form.firstName = e.target.value}
         onBlur={() => {
-          if(!state.form.firstName){
-            setState(state => ({...state, errors: {...state.errors, firstName: 'First name is required'}}))
+          if (!state.form.firstName) {
+            setState(state => ({...state, errors: {...state.errors, firstName: 'First name is required'}}));
           } else {
-            setState(state => ({...state, errors: {...state.errors, firstName: undefined}}))
+            setState(state => ({...state, errors: {...state.errors, firstName: undefined}}));
           }
         }}
         error={!!state.errors.firstName}
@@ -154,10 +156,10 @@ export default function UserInvite() {
         required
         onChange={e => state.form.lastName = e.target.value}
         onBlur={() => {
-          if(!state.form.lastName){
-            setState(state => ({...state, errors: {...state.errors, lastName: 'First name is required'}}))
+          if (!state.form.lastName) {
+            setState(state => ({...state, errors: {...state.errors, lastName: 'First name is required'}}));
           } else {
-            setState(state => ({...state, errors: {...state.errors, lastName: undefined}}))
+            setState(state => ({...state, errors: {...state.errors, lastName: undefined}}));
           }
         }}
         error={!!state.errors.lastName}
@@ -181,7 +183,10 @@ export default function UserInvite() {
         options={optionOrganizations}
         onBlur={() => {
           if (state.form.associatedOrganizations.length === 0) {
-            setState(state => ({...state, errors: {...state.errors, associatedOrganizations: 'This field is required'}}));
+            setState(state => ({
+              ...state,
+              errors: {...state.errors, associatedOrganizations: 'This field is required'}
+            }));
           } else {
             setState(state => ({...state, errors: {...state.errors, associatedOrganizations: null}}));
           }

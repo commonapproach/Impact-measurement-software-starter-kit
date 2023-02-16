@@ -105,20 +105,19 @@ const checkUserSecurityQuestion = async (req, res, next) => {
           req.session.administratorOf = userAccount.administratorOfs;
           req.session.groupAdminOf = userAccount.groupAdminOfs;
           req.session.researcherOf = userAccount.researcherOfs;
+          req.session.associatedOrganizations = userAccount.associatedOrganizations;
           return res.status(200).json({success: true, matched: true, message: 'matched',
             userAccount: {
               person: userAccount.person,
               email: userAccount.email,
               _id: userAccount._id,
-              // userTypes: userAccount.userTypes.map(usertypeURI => {
-              //   return userTypeURI2UserType[usertypeURI]
-              // })
               isSuperuser: userAccount.isSuperuser,
               editorOf: userAccount.editorOfs,
               reporterOf: userAccount.reporterOfs,
               administratorOf: userAccount.administratorOfs,
               groupAdminOf: userAccount.groupAdminOfs,
               researcherOf: userAccount.researcherOfs,
+              associatedOrganizations: userAccount.associatedOrganizations,
             }});
         } else {
           return res.status(203).json({success: false, matched: false, message: 'incorrect'});

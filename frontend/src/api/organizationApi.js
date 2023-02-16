@@ -1,8 +1,8 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
 export async function fetchOrganizations(userContext) {
-  if (userContext.isSuperuser || userContext.groupAdminOf?.length > 0 || userContext.administratorOf?.length > 0)
-    return getJson('/api/organizations');
+
+  return getJson('/api/organizations');
 }
 
 export async function fetchOrganization(orgId, userContext) {

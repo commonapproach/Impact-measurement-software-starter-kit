@@ -1,23 +1,31 @@
-import React, { useCallback, useState } from 'react';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { format, parse } from 'date-fns';
-import { TextField } from '@mui/material'
+import React, {useCallback, useState} from 'react';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {format, parse} from 'date-fns';
+import {TextField} from '@mui/material';
 import {
   LocalizationProvider,
   DatePicker, DateTimePicker, TimePicker
 } from '@mui/x-date-pickers';
 import MuiPhoneNumber from "material-ui-phone-number";
+import {Help as HelpIcon} from "@mui/icons-material";
+import {Link} from "../index";
 
 export const dateFormat = 'yyyy-MM-dd HH:mm:ss';
 export const dateTimeFormat = 'yyyy-MM-dd HH:mm:ss';
 export const timeFormat = 'HH:mm:ss';
 
-export default function GeneralField({type, onChange, value: defaultValue, ...props}) {
+export default function GeneralField({
+                                       type,
+                                       onChange,
+                                       value: defaultValue,
+                                       questionMarkOnClick,
+                                       ...props
+                                     }) {
 
   let customFormat = dateFormat, Picker = DatePicker;
   if (type === 'datetime') {
     customFormat = dateTimeFormat;
-    Picker = DateTimePicker
+    Picker = DateTimePicker;
   } else if (type === 'time') {
     customFormat = timeFormat;
     Picker = TimePicker;
@@ -31,8 +39,7 @@ export default function GeneralField({type, onChange, value: defaultValue, ...pr
           return parse(defaultValue, customFormat, new Date());
         else if (typeof defaultValue === "number")
           return new Date(defaultValue);
-      }
-      else
+      } else
         return null;
     }
     return defaultValue || '';
@@ -66,7 +73,7 @@ export default function GeneralField({type, onChange, value: defaultValue, ...pr
             onAccept={() => props.onBlur()}
             renderInput={(params) =>
               <TextField {...params}
-                         sx={{minWidth: props.minWidth|| 350}}
+                         sx={{minWidth: props.minWidth || 350}}
                          margin="normal"
                          required={props.required}
                          error={params.error || props.error}
@@ -77,6 +84,12 @@ export default function GeneralField({type, onChange, value: defaultValue, ...pr
             {...props}
           />
         </LocalizationProvider>
+        {questionMarkOnClick? <HelpIcon
+          cursor={'pointer'}
+          onClick={questionMarkOnClick}
+          sx={{mt: '32px'}}
+          color={"primary"}
+        />:<div/>}
       </div>
     );
   else if (type === 'phoneNumber')
@@ -87,13 +100,19 @@ export default function GeneralField({type, onChange, value: defaultValue, ...pr
           {...props}
           value={value}
           onChange={val => {
-            onChange({target: {value: val}})
-            setValue(val)
+            onChange({target: {value: val}});
+            setValue(val);
           }}
           // disableAreaCodes
           sx={{mt: '16px', minWidth: 350}}
           variant="outlined"
         />
+        {questionMarkOnClick? <HelpIcon
+          cursor={'pointer'}
+          onClick={questionMarkOnClick}
+          sx={{mt: '32px'}}
+          color={"primary"}
+        />:<div/>}
       </div>
     );
   else
@@ -106,6 +125,14 @@ export default function GeneralField({type, onChange, value: defaultValue, ...pr
           onChange={handleChange}
           value={value}
         />
+        {questionMarkOnClick? <HelpIcon
+          cursor={'pointer'}
+          onClick={questionMarkOnClick}
+          sx={{mt: '32px'}}
+          color={"primary"}
+        />:<div/>}
+
+
       </div>
     );
 }

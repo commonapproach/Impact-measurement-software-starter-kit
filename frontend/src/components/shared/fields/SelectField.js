@@ -3,6 +3,7 @@ import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from "@mui/
 import { makeStyles } from "@mui/styles";
 
 import { UN_SET } from '../../../constants';
+import {Help as HelpIcon} from "@mui/icons-material";
 
 const useStyles = makeStyles(theme => ({
   formControl: {
@@ -30,7 +31,7 @@ const useStyles = makeStyles(theme => ({
  */
 export default function SelectField({
                                       label, InputLabelProps, className, options, noDefaultStyle, noEmpty, controlled,
-                                      defaultOptionTitle = 'Not Set', onChange, formControlProps, helperText, ...props
+                                      defaultOptionTitle = 'Not Set', onChange, formControlProps, helperText, questionMarkOnClick, ...props
                                     }) {
   const classes = useStyles();
   const [value, setValue] = useState(noEmpty ? '' : UN_SET);
@@ -46,25 +47,36 @@ export default function SelectField({
 
   return (
     <div>
-      <FormControl className={(noDefaultStyle || className) ? className : classes.formControl}
-                   error={props.error}
-                   required={props.required}
-                   {...formControlProps}>
-        {label && <InputLabel {...InputLabelProps}>{label}</InputLabel>}
-        <Select
-          margin="none"
-          label={label}
-          {...props}
-          value={controlled ? props.value : value}
-          onChange={controlled ? onChange : handleChange}
-        >
-          {!noEmpty && <MenuItem key="key0" value={UN_SET}>{defaultOptionTitle}</MenuItem>}
-          {Array.isArray(options)
-            ? options.map(option => <MenuItem key={option} value={option}>{option}</MenuItem>)
-            : Object.entries(options).map(([key, label]) => <MenuItem key={label} value={key}>{label}</MenuItem>)}
-        </Select>
-        {helperText && <FormHelperText>{helperText}</FormHelperText>}
-      </FormControl>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <FormControl className={(noDefaultStyle || className) ? className : classes.formControl}
+                     error={props.error}
+                     required={props.required}
+                     {...formControlProps}>
+          {label && <InputLabel {...InputLabelProps}>{label}</InputLabel>}
+          <Select
+            margin="none"
+            label={label}
+            {...props}
+            value={controlled ? props.value : value}
+            onChange={controlled ? onChange : handleChange}
+          >
+            {!noEmpty && <MenuItem key="key0" value={UN_SET}>{defaultOptionTitle}</MenuItem>}
+            {Array.isArray(options)
+              ? options.map(option => <MenuItem key={option} value={option}>{option}</MenuItem>)
+              : Object.entries(options).map(([key, label]) => <MenuItem key={label} value={key}>{label}</MenuItem>)}
+          </Select>
+
+        </FormControl>
+        {questionMarkOnClick?<HelpIcon
+          cursor={'pointer'}
+          onClick={questionMarkOnClick}
+          sx={{mt: '25px'}}
+          color={"primary"}
+        />:<div/>}
+
+      </div>
+
+      {helperText && <FormHelperText error sx={{ml:'10px'}}>{helperText}</FormHelperText>}
     </div>
   );
 }

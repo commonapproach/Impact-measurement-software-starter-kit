@@ -24,9 +24,10 @@ const fetchIndicators = async (req, res) => {
     const indicatorURIs = []
     // fetch all available indicatorURIs from reachableOrganizations
     reachableOrganizations.map(organization => {
-      organization.hasIndicators.map(indicatorURI => {
-        addObjectToList(indicatorURIs, indicatorURI)
-      })
+      if(organization.hasIndicators)
+        organization.hasIndicators.map(indicatorURI => {
+          addObjectToList(indicatorURIs, indicatorURI)
+        })
     })
     // replace indicatorURIs to actual indicator objects
     const indicators = await Promise.all(indicatorURIs.map(indicatorURI => {

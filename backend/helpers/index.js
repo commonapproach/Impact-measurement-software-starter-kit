@@ -2,6 +2,7 @@
 const {GDBGroupModel} = require("../models/group");
 const {GraphDB} = require("../utils/graphdb");
 const {SPARQL} = require('../utils/graphdb/helpers');
+const {GDBOrganizationModel} = require("../models/organization");
 
 /**
  * the function takes a graphdb object or URI and check if it is in the list,
@@ -166,8 +167,40 @@ async function isReachableBy(resource, userAccount, role) {
   }
 }
 
+async function allReachableOrganizations(userAccount, ) {
+
+  let organizations = [];
+  if (userAccount.groupAdminOfs?.length) {
+    // add all organization is his group in to the list
+    // fetch all groups belongs to him
+    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}}, {populates: ['organizations']});
+    groups.map(group => {
+      group.organizations.map(organization => {
+        // fetch all reachable organizations and add them in
+        addObjectToList(organizations, organization);
+      });
+    });
+  }
+  // add organizations which the user associated with to the list
+  (await Promise.all(userAccount.associatedOrganizations.map(orgURI => {
+    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]})
+  }))).map(org => {
+    addObjectToList(organizations, org)
+  })
+  // also add organizations which is same groups to the list
+  let orgsInSameGroups = [];
+  await organizationsInSameGroups(userAccount, orgsInSameGroups);
+  orgsInSameGroups = await Promise.all(orgsInSameGroups.map(orgURI => {
+    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
+  }));
+  orgsInSameGroups.map(org => {
+    addObjectToList(organizations, org)
+  });
+  return organizations;
+}
 
 
 
-module.exports = {URI2Id, organizationsInSameGroups, addObjectToList,
+
+module.exports = {URI2Id, organizationsInSameGroups, addObjectToList, allReachableOrganizations,
   organizationBelongsToUser, organizationBelongsToGroupAdmin, isReachableBy, isAPartnerOrganization};

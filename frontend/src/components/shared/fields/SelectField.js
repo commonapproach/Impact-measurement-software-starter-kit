@@ -52,7 +52,7 @@ export default function SelectField({
                      error={props.error}
                      required={props.required}
                      {...formControlProps}>
-          {label && <InputLabel {...InputLabelProps}>{label}</InputLabel>}
+          {label && <InputLabel {...InputLabelProps} disabled={props.disabled}>{label}</InputLabel>}
           <Select
             margin="none"
             label={label}

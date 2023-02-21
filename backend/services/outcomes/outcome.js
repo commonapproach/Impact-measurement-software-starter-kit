@@ -5,19 +5,46 @@ const {GDBDomainModel} = require("../../models/domain");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {GDBIndicatorModel} = require("../../models/indicator");
+const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 
 
 const fetchOutcomes = async (req, res) => {
 
   const {organizationId} = req.params;
-  if (!organizationId)
-    throw new Server400Error('organizationId is needed');
-  const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
-  if (!organization)
-    throw new Server400Error('No such organization');
-  if (!organization.hasOutcomes)
-    return res.status(200).json({success: true, outcomes: []});
-  return res.status(200).json({success: true, outcomes: organization.hasOutcomes});
+  if (!organizationId) {
+    // the organizationId is not given, return all outcomes which is reachable by the user
+    const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+    if (userAccount.isSuperuser){
+      // simple return all indicators to him
+      const outcomes = await GDBOutcomeModel.find({});
+      return res.status(200).json({success: true, outcomes});
+    }
+    // take all reachable organizations
+    const reachableOrganizations = await allReachableOrganizations(userAccount);
+    const outcomeURIs = []
+    // fetch all available indicatorURIs from reachableOrganizations
+    reachableOrganizations.map(organization => {
+      if(organization.hasOutcomes)
+        organization.hasOutcomes.map(outcomeURI => {
+          addObjectToList(outcomeURIs, outcomeURI)
+        })
+    })
+    // replace indicatorURIs to actual indicator objects
+    const outcomes = await Promise.all(outcomeURIs.map(outcomeURI => {
+      return GDBOutcomeModel.findOne({_id: outcomeURI.split('_')[1]});
+    }))
+    return res.status(200).json({success: true, outcomes});
+  } else {
+    // the organizationId is given, return all outcomes belongs to the organization
+    const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
+    if (!organization)
+      throw new Server400Error('No such organization');
+    if (!organization.hasOutcomes)
+      return res.status(200).json({success: true, outcomes: []});
+    return res.status(200).json({success: true, outcomes: organization.hasOutcomes});
+  }
+
 
 };
 

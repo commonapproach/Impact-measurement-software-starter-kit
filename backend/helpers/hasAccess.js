@@ -5,7 +5,12 @@ const {GDBGroupModel} = require("../models/group");
 const {GDBIndicatorModel} = require("../models/indicator");
 const {GDBOutcomeModel} = require("../models/outcome");
 const {GDBIndicatorReportModel} = require("../models/indicatorReport");
-const {organizationBelongsToGroupAdmin, organizationBelongsToUser, isReachableBy, isAPartnerOrganization} = require("./index");
+const {
+  organizationBelongsToGroupAdmin,
+  organizationBelongsToUser,
+  isReachableBy,
+  isAPartnerOrganization
+} = require("./index");
 
 /**
  * the function is a middleware returns a bool indicating
@@ -21,6 +26,10 @@ async function hasAccess(req, operationType) {
     // users
     case 'inviteNewUser':
       return userAccount.isSuperuser;
+    case 'fetchProfile':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
     // organizations
     case 'createOrganization':
@@ -624,4 +633,5 @@ async function hasAccess(req, operationType) {
   return false;
 
 }
-module.exports = {hasAccess}
+
+module.exports = {hasAccess};

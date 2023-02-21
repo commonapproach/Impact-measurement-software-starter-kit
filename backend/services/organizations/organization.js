@@ -3,9 +3,6 @@ const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBDomainModel} = require("../../models/domain");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {GDBIndicatorModel} = require("../../models/indicator");
-const {GDBGroupModel} = require("../../models/group");
-const {fetchIndicators} = require("../indicators/indicator");
 const {hasAccess} = require("../../helpers/hasAccess");
 
 /**
@@ -26,7 +23,7 @@ function addOrganizations2UsersRole(organization, usertype, property) {
 
 
 async function createOrganization(req, res) {
-  const {form, outcomeForm, indicatorForm} = req.body;
+  const {form} = req.body;
   if (!form)
     throw new Server400Error('Wrong information input');
   if (!form.legalName)
@@ -38,23 +35,27 @@ async function createOrganization(req, res) {
 
   // firstly replace ids to the actual userAccount object
   // then add organization id to the userAccount Object
-  form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
-  if (!form.administrator)
-    throw new Server400Error('Administrator: No such user');
+  // form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+  // if (!form.administrator)
+  //   throw new Server400Error('Administrator: No such user');
+  //
+  // // firstly replace ids to the actual userAccount objects
+  // form.reporters = await Promise.all(form.reporters.map(reporterId => {
+  //   return GDBUserAccountModel.findOne({_id: reporterId});
+  // }));
+  // form.editors = await Promise.all(form.editors.map(editorId => {
+  //   return GDBUserAccountModel.findOne({_id: editorId});
+  // }));
+  // form.researchers = await Promise.all(form.researchers.map(researcherId => {
+  //   return GDBUserAccountModel.findOne({_id: researcherId});
+  // }));
 
-  // firstly replace ids to the actual userAccount objects
-  form.reporters = await Promise.all(form.reporters.map(reporterId => {
-    return GDBUserAccountModel.findOne({_id: reporterId});
-  }));
-  form.editors = await Promise.all(form.editors.map(editorId => {
-    return GDBUserAccountModel.findOne({_id: editorId});
-  }));
-  form.researchers = await Promise.all(form.researchers.map(researcherId => {
-    return GDBUserAccountModel.findOne({_id: researcherId});
-  }));
 
-
-  const organization = GDBOrganizationModel(form);
+  const organization = GDBOrganizationModel({
+    legalName: form.legalName,
+    hasId: form.hasId,
+    comment: form.comment
+  });
   // below handles outcome part
   // for (let i = 0; i < outcomeForm.length; i++) {
   //   const outcome = outcomeForm[i];
@@ -88,12 +89,12 @@ async function createOrganization(req, res) {
   await organization.save();
 
   // then add organization id to the userAccount Object
-  if (!organization.administrator.administratorOfs)
-    organization.administrator.administratorOfs = [];
-  organization.administrator.administratorOfs.push(organization);
-  addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
-  addOrganizations2UsersRole(organization, 'editors', 'editorOfs');
-  addOrganizations2UsersRole(organization, 'researchers', 'researcherOfs');
+  // if (!organization.administrator.administratorOfs)
+  //   organization.administrator.administratorOfs = [];
+  // organization.administrator.administratorOfs.push(organization);
+  // addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
+  // addOrganizations2UsersRole(organization, 'editors', 'editorOfs');
+  // addOrganizations2UsersRole(organization, 'researchers', 'researcherOfs');
   await organization.save();
 
   return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});

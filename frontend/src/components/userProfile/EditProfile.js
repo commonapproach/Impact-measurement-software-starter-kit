@@ -13,6 +13,8 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {genderOptions} from "../../store/defaults";
 import AddressField from "../shared/AddressFieldField";
+import Dropdown from "../shared/fields/MultiSelectField";
+import {fetchOrganizations} from "../../api/organizationApi";
 
 
 const useStyles = makeStyles(() => ({
@@ -42,6 +44,7 @@ export default function EditProfile() {
     middleName: '',
     givenName: '',
     formalName: '',
+    associatedOrganizations: [],
     address: {},
     gender: '',
     altEmail: '',
@@ -52,9 +55,11 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(true);
   const [loadingButton, setLoadingButton] = useState(false);
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
+  const [optionOrganizations, setOptionOrganizations] = useState({});
 
 
   useEffect(() => {
+
     getProfile(id, userContext).then(({success, person}) => {
       if (success) {
         if(person.phoneNumber)
@@ -70,6 +75,18 @@ export default function EditProfile() {
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
   }, [id]);
+
+  useEffect(() => {
+    fetchOrganizations(userContext).then(({success, organizations}) => {
+      if (success) {
+        const options = {};
+        organizations.map(organization => options[organization._id] = organization.legalName);
+        setOptionOrganizations(options);
+      }
+    }).catch((e) => {
+      enqueueSnackbar(errors.message || "Error occur when fetching organizations", {variant: 'error'});
+    });
+  }, []);
 
   /**
    * This is frontend validation for any new input information.
@@ -138,7 +155,7 @@ export default function EditProfile() {
       if (success) {
         setLoadingButton(false);
         setDialogSubmit(false);
-        if(userContext.userTypes.includes('superuser')){
+        if(userContext.isSuperuser){
           navigate('/users/' + id + '/edit')
         }else{
           navigate('/profile/' + id + '/');
@@ -185,6 +202,30 @@ export default function EditProfile() {
             value={form.middleName}
             disabled
           /> : <div/>}
+
+        <Dropdown
+          label="Associated Organizations"
+          key={'associatedOrganizations'}
+          value={form.associatedOrganizations}
+          onChange={e => {
+            form.associatedOrganizations = e.target.value;
+          }}
+          options={optionOrganizations}
+          onBlur={() => {
+            if (form.associatedOrganizations.length === 0) {
+              setErrors(errors => ({...errors, associatedOrganizations: 'This field is required'}
+              ));
+            } else {
+              setErrors(errors => ({...errors, associatedOrganizations: null}))
+            }
+          }
+          }
+          error={!!errors.associatedOrganizations}
+          helperText={errors.associatedOrganizations}
+          // sx={{mb: 2}}
+          noEmpty
+          required={true}
+        />
 
         <GeneralField
           key={'phoneNumber'}

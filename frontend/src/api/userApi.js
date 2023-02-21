@@ -89,12 +89,6 @@ export async function verifyChangePrimaryEmail(token) {
   return postJson('/api/user/updatePrimaryEmail', {token});
 }
 
-//have not been used so far.
-export function createUsers(params) {
-  // TODO: implement backend?
-  return postJson('/users/', {csv: params});
-}
-
 
 /**
  * this will get user information from backend.
@@ -102,9 +96,7 @@ export function createUsers(params) {
  * @returns {Promise<Response|any>}
  */
 export function getProfile(id, userContext) {
-  if (userContext.isSuperuser)
-    return getJson('/api/superuser/user/profile/edit/' + id + '/');
-  return getJson('/api/general/profile/' + id + '/');
+  return getJson('/api/user/profile/' + id + '/');
 }
 
 //have not been used so far.
@@ -129,9 +121,10 @@ export async function updatePrimaryEmail(id, email) {
  * @returns {Promise<*>}
  */
 export function updateProfile(id, params, userContext) {
-  if (userContext.isSuperuser)
-    return postJson('/api/superuser/user/profile/' + id + '/', params);
-  return postJson('/api/general/profile/' + id + '/', params);
+  return postJson('/api/user/profile/' + id + '/', params);
+  // if (userContext.isSuperuser)
+  //   return postJson('/api/superuser/user/profile/' + id + '/', params);
+  // return postJson('/api/general/profile/' + id + '/', params);
 }
 
 export function updateSecurityQuestion(id, params) {
@@ -164,16 +157,19 @@ export async function updatePassword(id, params) {
  * @returns {Promise<any>}
  */
 export function fetchUser(id, userContext) {
-  if(userContext.isSuperuser)
-    return getJson('/api/superuser/user/' + id + '/');
+  if (userContext.isSuperuser)
+    return getJson('/api/user/' + id + '/');
 }
 
 /**
  * This function fetches all users.
  * @returns {Promise<any>}
  */
-export function fetchUsers(userContext) {
-  return getJson('/api/users/');
+export function fetchUsers(userContext, orgId) {
+  if (!orgId)
+    return getJson('/api/users/');
+  if (orgId)
+    return getJson(`/api/users/${orgId}`);
 
 
 }

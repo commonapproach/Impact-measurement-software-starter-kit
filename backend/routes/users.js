@@ -5,5 +5,6 @@ const router = express.Router({mergeParams: true});
 
 
 router.get('/', fetchUsersHandler);
+router.get('/:orgId', fetchUsersHandler);
 
 module.exports = router;

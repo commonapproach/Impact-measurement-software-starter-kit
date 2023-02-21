@@ -3,20 +3,37 @@ const {userType2UserTypeURI} = require("../../helpers/dicts");
 const {GraphDB} = require('../../utils/graphdb');
 const {SPARQL} = require('../../utils/graphdb/helpers');
 const {hasAccess} = require("../../helpers/hasAccess");
+const {GDBOrganizationModel} = require("../../models/organization");
+const {Server400Error} = require("../../utils");
 
 const fetchUsers = async (req, res) => {
-  const users = await GDBUserAccountModel.find({}, {populates: ['person']});
-  users.map((user) => {
-    delete user.hash;
-    delete user.salt;
-    delete user.securityQuestions;
-  });
-  return res.status(200).json({data: users, success: true});
+  if (req.params.orgId) {
+    // will only fetch users belong to an organization
+    const organization = await GDBOrganizationModel.findOne({_id: req.params.orgId}, {populates: ['hasUsers', 'hasUsers.person']});
+    if (!organization)
+      throw new Server400Error('No such organization');
+    if (!organization.hasUsers)
+      organization.hasUsers = []
+    organization.hasUsers.map((user) => {
+      delete user.hash;
+      delete user.salt;
+      delete user.securityQuestions;
+    });
+    return res.status(200).json({data: organization.hasUsers, success: true})
+
+  } else {
+    const users = await GDBUserAccountModel.find({}, {populates: ['person']});
+    users.map((user) => {
+      delete user.hash;
+      delete user.salt;
+      delete user.securityQuestions;
+    });
+    return res.status(200).json({data: users, success: true});
+  }
 
 
 };
 
-// const adminFetchUsers = superUserFetchUsers;
 
 const superuserDeleteUser = async (req, res, next) => {
   try {

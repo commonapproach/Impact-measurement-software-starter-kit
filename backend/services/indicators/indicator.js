@@ -5,19 +5,44 @@ const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBOwnershipModel} = require("../../models/ownership");
+const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 
 
 const fetchIndicators = async (req, res) => {
 
   const {organizationId} = req.params;
-  if (!organizationId)
-    throw new Server400Error('organizationId is needed');
-  const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']});
-  if (!organization)
-    throw new Server400Error('No such organization');
-  if (!organization.hasIndicators)
-    return res.status(200).json({success: true, indicators: []});
-  return res.status(200).json({success: true, indicators: organization.hasIndicators});
+  if (!organizationId) {
+    // the organizationId is not given, return all indicators which is reachable by the user
+    const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+    if (userAccount.isSuperuser){
+      // simple return all indicators to him
+      const indicators = await GDBIndicatorModel.find({});
+      return res.status(200).json({success: true, indicators});
+    }
+    // take all reachable organizations
+    const reachableOrganizations = await allReachableOrganizations(userAccount);
+    const indicatorURIs = []
+    // fetch all available indicatorURIs from reachableOrganizations
+    reachableOrganizations.map(organization => {
+      organization.hasIndicators.map(indicatorURI => {
+        addObjectToList(indicatorURIs, indicatorURI)
+      })
+    })
+    // replace indicatorURIs to actual indicator objects
+    const indicators = await Promise.all(indicatorURIs.map(indicatorURI => {
+      return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]});
+    }))
+    return res.status(200).json({success: true, indicators});
+  } else {
+    // the organizationId is given, return all indicators belongs to the organization
+    const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']});
+    if (!organization)
+      throw new Server400Error('No such organization');
+    if (!organization.hasIndicators)
+      return res.status(200).json({success: true, indicators: []});
+    return res.status(200).json({success: true, indicators: organization.hasIndicators});
+  }
+
 
 };
 
@@ -48,7 +73,7 @@ const fetchIndicator = async (req, res) => {
   if (!id)
     throw new Server400Error('Id is not given');
   const indicator = await GDBIndicatorModel.findOne({_id: id});
-  if(!indicator)
+  if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(orgURI => {
     return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
@@ -98,24 +123,24 @@ const updateIndicator = async (req, res) => {
     throw new Server400Error('No such indicator');
   indicator.name = form.name;
   indicator.description = form.description;
-  const organizationDict = {}
+  const organizationDict = {};
 
 
   // fetch indicator.forOrganizations from database
   indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(organizationURI =>
     GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
-  ))
+  ));
   // cache indicator.forOrganizations into dict
   cacheListOfOrganizations(indicator.forOrganizations, organizationDict);
   // fetch form.organizations from database
   form.organizations = await Promise.all(form.organizations.map(organizationId => {
-    // if the organization already in the dict, simply get from dict
-    if (organizationDict[organizationId])
-      return organizationDict[organizationId]
-    // otherwise, fetch
-    return GDBOrganizationModel.findOne({_id: organizationId});
+      // if the organization already in the dict, simply get from dict
+      if (organizationDict[organizationId])
+        return organizationDict[organizationId];
+      // otherwise, fetch
+      return GDBOrganizationModel.findOne({_id: organizationId});
     }
-  ))
+  ));
   // cache organizations which is not in dict
   cacheListOfOrganizations(form.organizations, organizationDict);
 
@@ -130,10 +155,10 @@ const updateIndicator = async (req, res) => {
   // add the indicator to every organizations in form.organizations
   await Promise.all(form.organizations.map(organization => {
     if (!organization.hasIndicators)
-      organization.hasIndicators = []
-    organization.hasIndicators.push(indicator)
+      organization.hasIndicators = [];
+    organization.hasIndicators.push(indicator);
     return organization.save();
-  }))
+  }));
 
   indicator.forOrganizations = form.organizations;
   await indicator.save();

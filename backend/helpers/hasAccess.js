@@ -24,7 +24,7 @@ async function hasAccess(req, operationType) {
     throw new Server400Error('Wrong auth');
   switch (operationType) {
     case 'reportFrontendError':
-      return true
+      return true;
 
     // users
     case 'inviteNewUser':
@@ -85,10 +85,35 @@ async function hasAccess(req, operationType) {
     case 'updateGroup':
       if (userAccount.isSuperuser)
         return true;
+      if (userAccount.groupAdminOfs) {
+        // only allow groupAdmin to remove organizations as well as
+        const {id} = req.params;
+        if (!id)
+          throw new Server400Error('Id is needed')
+        const form = req.body;
+        const group = await GDBGroupModel.findOne({_id:id})
+        if (!group)
+          throw new Server400Error('No such group')
+        if (form.label === group.label && form.administrator === group.administrator.split('_')[1]){
+          // label and administrator cannot be changed
+          const previousOrganizationIds = group.organizations.map(organizationURI => organizationURI.split('_')[1])
+          const checkerList = form.organizations.map(organizationId => {
+            return previousOrganizationIds.includes(organizationId)
+          })
+          if(!checkerList.includes(false))
+            return true;
+        }
+      }
       break;
     case 'fetchGroup':
       if (userAccount.isSuperuser)
         return true;
+      if (userAccount.groupAdminOfs) {
+        // check does the group administrated by the user
+        const {id} = req.params;
+        if (userAccount.groupAdminOfs.includes(`:group_${id}`))
+          return true;
+      }
       break;
 
 

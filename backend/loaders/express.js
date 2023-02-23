@@ -19,8 +19,10 @@ const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRo
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
+const { MDBApiModel} = require("../models/logging/api");
 
 const app = express();
+
 
 // Trust our reverse proxy
 app.set('trust proxy', ['::ffff:172.31.12.233', '172.31.12.233']);
@@ -35,13 +37,27 @@ app.use(cors({
 app.use(cookieParser());
 app.use(cookieSession(config.cookieSession));
 
+app.use((req, res, next) => {
+  const previousJson = res.json
+  res.json = function (...args) {
+    // const recordedRes= new MDBApiResModel({success: args[0].success, message: args[0].message, date: new Date()})
+    (new MDBApiModel({
+      req: {url: req.originalUrl, method: req.method},
+      res: {success: args[0].success, message: args[0].message},
+      date: new Date()
+    })).save()
+    previousJson.call(this, ...args)
+  }
+  next();
+})
 // Public routes
 // Generate token for login (for frontend is in the cookie)
 app.use('/api', baseRoute);
 
 // Authentication required for the below routes
-app.use('/api', authMiddleware('Session expired, please login again'));
 // Check authorization
+app.use('/api', authMiddleware('Session expired, please login again'));
+
 
 // app.use('/api/general', generalUserRoute);
 
@@ -72,14 +88,13 @@ app.use('/api/groups', groupsRoute);
 app.use('/api/group', groupRoute);
 
 
-// app.use('/api', internalTypeRoute);
-
 
 initUserAccounts();
 initStreetTypes();
 initStreetDirections();
 
 app.use(errorHandler);
+
 
 process.env.TZ = 'America/Toronto';
 

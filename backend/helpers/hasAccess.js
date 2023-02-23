@@ -9,7 +9,7 @@ const {
   organizationBelongsToGroupAdmin,
   organizationBelongsToUser,
   isReachableBy,
-  isAPartnerOrganization
+  isAPartnerOrganization, allReachableOrganizations
 } = require("./index");
 
 /**
@@ -37,12 +37,13 @@ async function hasAccess(req, operationType) {
     case 'updateOrganization':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.administratorOfs.length) {
+
+      if (userAccount.administratorOfs) {
         // firstly check the organization is below to the user
         const organizationId = req.params.id;
         const form = req.body.form;
         if (organizationBelongsToUser(userAccount, organizationId, 'administratorOfs')) {
-          // then check has the user update the administrator
+          // then check has the user is updating the administrated organization
           const organization = await GDBOrganizationModel.findOne({_id: organizationId});
           if (organization.administrator.split('_')[1] === form.administrator)
             return true;
@@ -52,19 +53,19 @@ async function hasAccess(req, operationType) {
     case 'fetchOrganization':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.administratorOfs.length) {
-        // check is the organization administrated to the user
-        const organizationId = req.params.id;
-        if (organizationBelongsToUser(userAccount, organizationId, 'administratorOfs'))
-          return true;
-      }
+
+      // check if the userAccount is associated with the organization
+      const organizationId = req.params.id;
+      const organizations = await allReachableOrganizations(userAccount);
+      const checkerList = organizations.filter(organization => organization._id === organizationId);
+      if (checkerList.length)
+        return true;
+
       break;
     case 'fetchOrganizations':
       // every users should be able to fetch organizations,
       // however, the ret they got are different depends on their role
-      if (userAccount.isSuperuser || userAccount.groupAdminOfs?.length || userAccount.administratorOfs?.length ||
-        userAccount.reporterOfs?.length || userAccount.editorOfs?.length || userAccount.researcherOfs?.length)
-        return true;
+      return true;
       break;
 
     // groups
@@ -94,7 +95,7 @@ async function hasAccess(req, operationType) {
     case 'fetchIndicators':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.groupAdminOfs.length > 0) {
+      if (userAccount.groupAdminOfs) {
         // pass if the organization belongs to the group administrated by the groupAdmin
         const {organizationId} = req.params;
         if (!organizationId)
@@ -114,7 +115,7 @@ async function hasAccess(req, operationType) {
       //   if (checker.length > 0)
       //     return true;
       // }
-      if (userAccount.administratorOfs.length > 0) {
+      if (userAccount.administratorOfs) {
         // pass if the organization belongs to the userAccount
         const {organizationId} = req.params;
         if (!organizationId)
@@ -122,7 +123,7 @@ async function hasAccess(req, operationType) {
         if (organizationBelongsToUser(userAccount, organizationId, 'administratorOfs'))
           return true;
       }
-      if (userAccount.researcherOfs.length > 0) {
+      if (userAccount.researcherOfs) {
         // pass if the organization belongs to any organization which is in the same group
         const {organizationId} = req.params;
         if (!organizationId)
@@ -131,7 +132,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.editorOfs.length > 0) {
+      if (userAccount.editorOfs) {
         // pass if the organization belongs to any organization which is in the same group
         const {organizationId} = req.params;
         if (!organizationId)
@@ -140,7 +141,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.reporterOfs.length) {
+      if (userAccount.reporterOfs) {
         // pass if the organization belongs to any organization which is in the same group
         const {organizationId} = req.params;
         if (!organizationId)
@@ -153,7 +154,7 @@ async function hasAccess(req, operationType) {
     case 'fetchIndicator':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.groupAdminOfs.length > 0) {
+      if (userAccount.groupAdminOfs?.length > 0) {
         // check does the indicator belong to an organization belongs to a group belongs to the user
 
         // fetch the indicator from the database
@@ -178,7 +179,7 @@ async function hasAccess(req, operationType) {
           }
         }
       }
-      if (userAccount.editorOfs.length) {
+      if (userAccount.editorOfs) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -190,7 +191,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.researcherOfs.length) {
+      if (userAccount.researcherOfs) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -202,7 +203,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.reporterOfs.length) {
+      if (userAccount.reporterOfs) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -213,7 +214,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.administratorOfs.length) {
+      if (userAccount.administratorOfs) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -228,7 +229,7 @@ async function hasAccess(req, operationType) {
     case 'createIndicator':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.editorOfs.length > 0) {
+      if (userAccount.editorOfs) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
@@ -260,7 +261,7 @@ async function hasAccess(req, operationType) {
 
       break;
     case 'updateIndicator':
-      if (userAccount.isSuperuser) // todo: temp
+      if (userAccount.isSuperuser)
         return true;
       if (userAccount.editorOfs) {
         // only allowed for the organization they are in userAccount.editorOfs
@@ -282,9 +283,9 @@ async function hasAccess(req, operationType) {
 
     // outcomes
     case 'fetchOutcomes':
-      if (userAccount.isSuperuser) // todo: temp
+      if (userAccount.isSuperuser)
         return true;
-      if (userAccount.groupAdminOfs.length) {
+      if (userAccount.groupAdminOfs) {
         // pass if the organization belongs to the group administrated by the groupAdmin
         const {organizationId} = req.params;
         if (!organizationId)
@@ -292,7 +293,7 @@ async function hasAccess(req, operationType) {
         if (await organizationBelongsToGroupAdmin(userAccount, organizationId))
           return true;
       }
-      if (userAccount.administratorOfs.length) {
+      if (userAccount.administratorOfs) {
         // pass if the organization belongs to the userAccount
         const {organizationId} = req.params;
         if (!organizationId)
@@ -300,7 +301,7 @@ async function hasAccess(req, operationType) {
         if (organizationBelongsToUser(userAccount, organizationId, 'administratorOfs'))
           return true;
       }
-      if (userAccount.researcherOfs.length) {
+      if (userAccount.researcherOfs) {
         // pass if the organization belongs to any organization which is in the same group
         const {organizationId} = req.params;
         if (!organizationId)
@@ -309,7 +310,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.editorOfs.length) {
+      if (userAccount.editorOfs) {
         // pass if the organization belongs to any organization which is in the same group
         const {organizationId} = req.params;
         if (!organizationId)
@@ -318,7 +319,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.reporterOfs.length) {
+      if (userAccount.reporterOfs) {
         // pass if the organization belongs to any organization which is in the same group
         const {organizationId} = req.params;
         if (!organizationId)
@@ -330,7 +331,7 @@ async function hasAccess(req, operationType) {
     case 'createOutcome':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.editorOfs.length > 0) {
+      if (userAccount.editorOfs) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
@@ -423,7 +424,7 @@ async function hasAccess(req, operationType) {
       }
       break;
     case 'updateOutcome':
-      if (userAccount.isSuperuser) // todo: temp
+      if (userAccount.isSuperuser)
         return true;
       if (userAccount.editorOfs) {
         // only allowed for the organization they are in userAccount.editorOfs
@@ -461,7 +462,7 @@ async function hasAccess(req, operationType) {
     case 'createIndicatorReport':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.editorOfs.length) {
+      if (userAccount.editorOfs?.length) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
@@ -481,7 +482,7 @@ async function hasAccess(req, operationType) {
     case 'fetchIndicatorReport':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.groupAdminOfs.length) {
+      if (userAccount.groupAdminOfs?.length) {
         // check does the IndicatorReport belong to an organization belongs to a group belongs to the user
 
         // fetch the IndicatorReport from the database
@@ -581,7 +582,7 @@ async function hasAccess(req, operationType) {
 
       break;
     case 'fetchIndicatorReports':
-      if (userAccount.isSuperuser) // todo: temp
+      if (userAccount.isSuperuser)
         return true;
       if (userAccount.groupAdminOfs.length) {
         // pass if the organization belongs to the group administrated by the groupAdmin

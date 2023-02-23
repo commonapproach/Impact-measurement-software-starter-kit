@@ -27,11 +27,12 @@ export default function Indicators() {
     fetchIndicators(id, userContext).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.indicators}));
-    }).catch(e => {
-      setState(state => ({...state, loading: false}))
-      navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    });
+    })
+      // .catch(e => {
+    //   setState(state => ({...state, loading: false}))
+    //   navigate('/dashboard');
+    //   enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    // });
   }, [trigger]);
 
   // const showDeleteDialog = (id) => {

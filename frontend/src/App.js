@@ -9,6 +9,7 @@ import { blue, pink } from '@mui/material/colors'
 import routes from "./routes";
 import { UserContext, getUserContext } from './context';
 import { SnackbarProvider } from 'notistack';
+import ErrorBoundary from "./ErrorBoundary";
 
 const theme = createTheme({
   palette: {
@@ -30,20 +31,20 @@ export default function App() {
 
   return (
     <div className="App">
-      <StyledEngineProvider injectFirst>
-        <UserContext.Provider value={userContext}>
-          <ThemeProvider theme={theme}>
-            <SnackbarProvider>
-              <TopNavbar/>
-              <div style={{paddingTop: 50, paddingBottom: 22}}>
-                {/*<Breadcurum/>*/}
-                {routes}
-              </div>
-            </SnackbarProvider>
-            <Footer/>
-          </ThemeProvider>
-        </UserContext.Provider>
-      </StyledEngineProvider>
+        <StyledEngineProvider injectFirst>
+          <UserContext.Provider value={userContext}>
+            <ThemeProvider theme={theme}>
+              <SnackbarProvider>
+                <TopNavbar/>
+                <div style={{paddingTop: 50, paddingBottom: 22}}>
+                  {/*<Breadcurum/>*/}
+                  {routes}
+                </div>
+              </SnackbarProvider>
+              <Footer/>
+            </ThemeProvider>
+          </UserContext.Provider>
+        </StyledEngineProvider>
     </div>
   );
 }

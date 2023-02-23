@@ -167,7 +167,7 @@ async function isReachableBy(resource, userAccount, role) {
   }
 }
 
-async function allReachableOrganizations(userAccount, ) {
+async function allReachableOrganizations(userAccount) {
 
   let organizations = [];
   if (userAccount.groupAdminOfs?.length) {

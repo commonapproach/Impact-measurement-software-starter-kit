@@ -7,7 +7,6 @@ const {authGeneralMiddleware} = require("../../services/middleware");
 
 const router = express.Router();
 
-router.use('/:id', authGeneralMiddleware('A user can only handle its own affairs'))
 router.get('/:id/', fetchProfileHandler);
 router.post('/:id/resetPassword/', regularUserUpdatePassword);
 router.post('/:id/securityQuestions/', regularUserUpdateSecurityQuestions)

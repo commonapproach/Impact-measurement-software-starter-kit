@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {deleteGroup, fetchGroups} from "../../api/groupApi";
 import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function Groups() {
   const navigate = useNavigate();
@@ -21,16 +22,17 @@ export default function Groups() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    if(!userContext.isSuperuser && !userContext.groupAdminOf.length > 0){
+    if(!userContext.isSuperuser && !userContext.groupAdminOf.length){
       navigate('/dashboard');
       enqueueSnackbar( "Wrong Auth", {variant: 'error'});
     }
-      fetchGroups(userContext).then(({groups}) => {
+      fetchGroups().then(({groups}) => {
       setState(state => ({...state, loading: false, data: groups}));
     }).catch(e => {
+      reportErrorToBackend(e);
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'})
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'})
     });
   }, [trigger]);
 

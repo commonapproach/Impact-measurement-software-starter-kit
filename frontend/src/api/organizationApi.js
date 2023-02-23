@@ -1,7 +1,6 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
-export async function fetchOrganizations(userContext) {
-
+export async function fetchOrganizations() {
   return getJson('/api/organizations');
 }
 

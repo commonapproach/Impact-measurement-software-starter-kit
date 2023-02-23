@@ -28,25 +28,17 @@ function Dashboard() {
       {/*  <NavButton to={`/provider/${organization.id}/edit/organization`} icon={<Edit/>}*/}
       {/*             text="Edit Organization Profile for Home Agency"/>}*/}
 
-      {userContext.isSuperuser || userContext.groupAdminOf.length > 0?
+      {userContext.isSuperuser || userContext.groupAdminOf.length?
         <NavButton to={`/groups`} icon={<People/>} key={'groups'}
                   text="Manage Groups"/>:null}
 
-      {userContext.isSuperuser || userContext.associatedOrganizations.length?
+      {userContext.isSuperuser || userContext.groupAdminOf.length || userContext.administratorOfs.length?
         <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
       null}
 
       {userContext.isSuperuser?<NavButton to={`/users`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:null}
-
-      {/*{userContext.researcherOf.length > 0?*/}
-      {/*  <NavButton to={`/groups`} icon={<Edit/>} key={'indicators'}*/}
-      {/*             text="Manage Indicators"/>:null}*/}
-
-      {/*{userContext.researcherOf.length > 0?*/}
-      {/*  <NavButton to={`/groups`} icon={<Edit/>} key={'indicator reports'}*/}
-      {/*             text="Manage Indicator Reports"/>:null}*/}
 
       <NavButton to={'/organization-indicators'} icon={<Edit/>} key={'organization-indicators'}
                  text="Manage Indicators"/>

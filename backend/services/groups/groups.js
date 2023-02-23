@@ -18,20 +18,15 @@ const fetchGroups = async (req, res) => {
   const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
   if (userAccount.isSuperuser) {
     const groups = await GDBGroupModel.find({});
-    return res.status(200).json({groups});
+    return res.status(200).json({success: true, groups});
+  }
+  if (userAccount.groupAdminOfs) {
+    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}});
+    return res.status(200).json({success: true, groups});
   }
 
 };
 
-const groupAdminFetchGroups = async (req, res, next) => {
-  try {
-    const groupAdminId = req.session._id;
-    const groups = await GDBGroupModel.find({administrator: {_id: groupAdminId}});
-    return res.status(200).json({groups});
-  } catch (e) {
-    next(e);
-  }
-};
 
 
-module.exports = {fetchGroupsHandler, groupAdminFetchGroups};
+module.exports = {fetchGroupsHandler};

@@ -1,6 +1,6 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
-export async function fetchGroups(userContext) {
+export async function fetchGroups() {
   return getJson('/api/groups/');
 
 }
@@ -9,16 +9,12 @@ export async function deleteGroup(id) {
   return deleteJson('/api/superuser/group/' + id + '/');
 }
 
-export async function fetchGroup(id, userContext) {
+export async function fetchGroup(id) {
   return getJson(`/api/group/${id}/`)
 }
 
-export async function updateGroup(id, params, userContext) {
+export async function updateGroup(id, params) {
   return putJson('/api/group/' + id + '/', params);
-  if (userContext.isSuperuser)
-    return putJson('/api/superuser/group/' + id + '/', params);
-  if (userContext.groupAdminOf?.length > 0)
-    return putJson('/api/groupAdmin/group/' + id + '/', params);
 }
 
 export async function createGroup(params) {

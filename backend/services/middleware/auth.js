@@ -3,7 +3,6 @@
  * If the user is logged in then continue the request, otherwise response the request with a message.
  * @param {string} [message] - message sends back via api
  */
-const {MDBApiReqModel} = require("../../models/logging/errorLogging");
 const authMiddleware = (message) => (req, res, next) => {
   // Only logged-in user has this property
   if (req.session.email) {
@@ -18,5 +17,4 @@ const authMiddleware = (message) => (req, res, next) => {
 
 module.exports = {
   authMiddleware,
-  apiRecorder,
 };

@@ -23,6 +23,9 @@ async function hasAccess(req, operationType) {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   switch (operationType) {
+    case 'reportFrontendError':
+      return true
+
     // users
     case 'inviteNewUser':
       return userAccount.isSuperuser;
@@ -71,6 +74,8 @@ async function hasAccess(req, operationType) {
     // groups
     case 'fetchGroups':
       if (userAccount.isSuperuser)
+        return true;
+      if (userAccount.groupAdminOfs)
         return true;
       break;
     case 'createGroup':

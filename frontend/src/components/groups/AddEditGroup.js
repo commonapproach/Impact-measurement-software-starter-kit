@@ -13,6 +13,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -61,20 +62,32 @@ export default function AddEditGroup() {
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
     Promise.all([
-      fetchOrganizations(userContext)
+      fetchOrganizations()
         .then(({organizations}) => {
         organizations.map(organization => {
           options.organizations[organization._id] = organization.legalName;
         })
+      }).catch(e => {
+        if (e.json)
+          setErrors(e.json);
+        reportErrorToBackend(e)
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
       }),
-      fetchUsers(userContext).then(({data}) => {
+      fetchUsers().then(({data}) => {
         data.map((user) => {
           options.administrators[user._id] = `${user.person.familyName} ${user.person.givenName} ID: ${user._id}`;
         })
+      }).catch(e => {
+        if (e.json)
+          setErrors(e.json);
+        reportErrorToBackend(e)
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching users", {variant: 'error'});
       }),
     ]).then(() => {
       if (mode === 'edit' && id) {
-        fetchGroup(id, userContext).then(res => {
+        fetchGroup(id,).then(res => {
           if (res.success) {
             const group = res.group;
             setForm({
@@ -85,6 +98,12 @@ export default function AddEditGroup() {
             });
             setLoading(false);
           }
+        }).catch(e => {
+          if (e.json)
+            setErrors(e.json);
+          reportErrorToBackend(e)
+          setLoading(false);
+          enqueueSnackbar(e.json?.message || "Error occurs when fetching group", {variant: 'error'});
         });
       } else if (mode === 'edit' && !id) {
         navigate('/groups');
@@ -95,6 +114,7 @@ export default function AddEditGroup() {
     }).catch(e => {
       if (e.json)
         setErrors(e.json);
+      reportErrorToBackend(e)
       setLoading(false);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
@@ -123,11 +143,12 @@ export default function AddEditGroup() {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateGroup(id, form, userContext).then((res) => {
+      updateGroup(id, form).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/groups');
@@ -137,6 +158,7 @@ export default function AddEditGroup() {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e)
         enqueueSnackbar(e.json?.message || 'Error occurs when updating group', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });

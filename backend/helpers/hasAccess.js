@@ -88,9 +88,9 @@ async function hasAccess(req, operationType) {
       if (userAccount.groupAdminOfs) {
         // only allow groupAdmin to remove organizations as well as
         const {id} = req.params;
-        if (!id)
-          throw new Server400Error('Id is needed')
         const form = req.body;
+        if (!id || !form)
+          throw new Server400Error('Invalid input')
         const group = await GDBGroupModel.findOne({_id:id})
         if (!group)
           throw new Server400Error('No such group')

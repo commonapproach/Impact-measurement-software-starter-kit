@@ -17,11 +17,17 @@ const fetchGroups = async (req, res) => {
 
   const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
   if (userAccount.isSuperuser) {
-    const groups = await GDBGroupModel.find({});
+    const groups = await GDBGroupModel.find({}, {populates: ['administrator.person']});
+    groups.map(group => {
+      group.administrator = `${group.administrator._id}: ${group.administrator.person.givenName} ${group.administrator.person.familyName}`
+    })
     return res.status(200).json({success: true, groups});
   }
   if (userAccount.groupAdminOfs) {
-    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}});
+    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}}, {populates: ['administrator.person']});
+    groups.map(group => {
+      group.administrator = `${group.administrator._id}: ${group.administrator.person.givenName} ${group.administrator.person.familyName}`
+    })
     return res.status(200).json({success: true, groups});
   }
 

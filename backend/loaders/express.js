@@ -15,7 +15,8 @@ const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRoute, indicatorsRoute, indicatorRoute,
-  outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute
+  outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
+  errorReportRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -67,6 +68,7 @@ app.use('/api', authMiddleware('Session expired, please login again'));
 // app.use('/api/superuser', superuserRoute);
 // app.use('/api/groupAdmin', groupAdminRoute);
 // app.use('/api/admin', adminRoute);
+app.use('/api/reportError', errorReportRoute)
 app.use('/api/user', userRoute);
 app.use('/api/users', usersRoute);
 app.use('/api/organization', organizationRoute);

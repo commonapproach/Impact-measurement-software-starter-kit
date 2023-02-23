@@ -9,6 +9,14 @@ const MDBErrorLoggingModel = mongoose.model('Error', new mongoose.Schema({
   req: {type: Object, required: true}
 }));
 
+const MDBFrontendErrorLoggingModel = mongoose.model('FrontendError', new mongoose.Schema({
+  userId: {type: String, required: true},
+  name: {type: String, required: true},
+  message: {type: String, required: true},
+  stack: {type: String, required: true},
+  date: {type: Date, required: true},
+}));
+
 module.exports = {
-  MDBErrorLoggingModel
+  MDBErrorLoggingModel, MDBFrontendErrorLoggingModel
 }

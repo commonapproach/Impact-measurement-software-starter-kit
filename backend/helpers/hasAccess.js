@@ -40,15 +40,16 @@ async function hasAccess(req, operationType) {
     case 'updateOrganization':
       if (userAccount.isSuperuser)
         return true;
-
       if (userAccount.administratorOfs) {
-        // firstly check the organization is below to the user
+
         const organizationId = req.params.id;
         const form = req.body.form;
+        // firstly check is the user administrating the organization
         if (organizationBelongsToUser(userAccount, organizationId, 'administratorOfs')) {
-          // then check has the user is updating the administrated organization
-          const organization = await GDBOrganizationModel.findOne({_id: organizationId});
-          if (organization.administrator.split('_')[1] === form.administrator)
+          // then check is the user updating the restricted properties
+          const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasId']});
+          if (organization.administrator.split('_')[1] === form.administrator && organization.legalName === form.legalName
+          && organization.hasId.hasIdentifier === form.ID)
             return true;
         }
       }

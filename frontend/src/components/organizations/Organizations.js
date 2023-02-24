@@ -66,9 +66,11 @@ export default function Organizations() {
     {
       label: 'Legal Name',
       body: ({_id, legalName}) => {
-        return <Link color to={`/organizations/${_id}/edit/`}>
+        return userContext.isSuperuser || userContext.administratorOf?
+          <Link color to={`/organizations/${_id}/edit/`}>
           {legalName}
-        </Link>
+        </Link>:
+          {legalName}
       },
       sortBy: ({legalName}) => legalName
     },
@@ -78,22 +80,6 @@ export default function Organizations() {
         return administrator;
       }
     },
-    // {
-    //   label: 'Last name',
-    //   body: ({person}) => {
-    //     if(person && person.familyName)
-    //       return person.familyName
-    //     return 'Not Provided'
-    //   }
-    // },
-    // {
-    //   label: 'Phone Number',
-    //   body: ({primaryContact}) => {
-    //     if (primaryContact && primaryContact.telephone)
-    //       return formatPhoneNumber(primaryContact.telephone);
-    //     return 'Not Provided';
-    //   },
-    // },
 
     {
       label: ' ',

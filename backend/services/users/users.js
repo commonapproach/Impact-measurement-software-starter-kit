@@ -9,7 +9,7 @@ const {Server400Error} = require("../../utils");
 const fetchUsers = async (req, res) => {
   if (req.params.orgId) {
     // will only fetch users belong to an organization
-    const organization = await GDBOrganizationModel.findOne({_id: req.params.orgId}, {populates: ['hasUsers', 'hasUsers.person']});
+    const organization = await GDBOrganizationModel.findOne({_id: req.params.orgId}, {populates: ['hasUsers.person']});
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.hasUsers)

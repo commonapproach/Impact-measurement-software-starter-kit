@@ -165,7 +165,7 @@ export function fetchUser(id, userContext) {
  * This function fetches all users.
  * @returns {Promise<any>}
  */
-export function fetchUsers( orgId) {
+export function fetchUsers(orgId) {
   if (!orgId)
     return getJson('/api/users/');
   if (orgId)

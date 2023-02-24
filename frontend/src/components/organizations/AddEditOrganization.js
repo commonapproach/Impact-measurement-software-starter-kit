@@ -12,6 +12,7 @@ import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -77,7 +78,7 @@ export default function AddEditOrganization() {
 
   useEffect(() => {
 
-    fetchUsers(userContext, id).then(({data, success}) => {
+    fetchUsers(id).then(({data, success}) => {
       const objectForm = {};
       data.map(user => {
         objectForm[user._id] = `${user.person.givenName} ${user.person.familyName} ID: ${user._id}`;
@@ -107,7 +108,7 @@ export default function AddEditOrganization() {
           if (e.json)
             setErrors(e.json);
           setLoading(false);
-          console.log(e);
+          reportErrorToBackend(e)
           enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
         });
       } else if (mode === 'edit' && !id) {
@@ -119,7 +120,7 @@ export default function AddEditOrganization() {
     }).catch(e => {
       if (e.json)
         setErrors(e.json);
-      console.log(e)
+      reportErrorToBackend(e)
       setLoading(false);
 
       enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
@@ -148,6 +149,7 @@ export default function AddEditOrganization() {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e)
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -162,6 +164,7 @@ export default function AddEditOrganization() {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e)
         enqueueSnackbar(e.json?.message || 'Error occurs when updating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -265,7 +268,7 @@ export default function AddEditOrganization() {
         />
 
         <SelectField
-          disabled={mode === 'new'}
+          disabled={mode === 'new' || !userContext.isSuperuser}
           key={'administrator'}
           label={'Organization Administrator'}
           value={form.administrator}

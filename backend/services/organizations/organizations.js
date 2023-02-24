@@ -21,7 +21,12 @@ const fetchOrganizations = async (req, res) => {
   if (userAccount.isSuperuser) {
     const organizations = await GDBOrganizationModel.find({}, {populates: ['administrator.person']});
     organizations.map(organization => {
-      organization.administrator = `${organization.administrator._id}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
+      if(organization.administrator) {
+        organization.administrator = `${organization.administrator._id}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
+      } else {
+        // organization may doesn't have admin
+        organization.administrator = ''
+      }
     })
     return res.status(200).json({success: true, organizations: organizations});
   }

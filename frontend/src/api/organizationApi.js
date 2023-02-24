@@ -13,7 +13,7 @@ export async function createOrganization(params) {
 }
 
 export async function updateOrganization(id, params, userContext) {
-  if (userContext.isSuperuser || userContext.administratorOfs?.length > 0)
+  if (userContext.isSuperuser || userContext.administratorOf.length)
     return putJson('/api/organization/' + id, params);
 }
 

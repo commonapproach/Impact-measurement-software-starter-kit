@@ -6,10 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function Organizations() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
+
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
@@ -26,6 +28,7 @@ export default function Organizations() {
       if(res.success)
       setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {
+      reportErrorToBackend(e)
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
@@ -95,7 +98,8 @@ export default function Organizations() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption hideDeleteOption={!userContext.isSuperuser}
+        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption hideDeleteOption
+                      hideEditOption={!userContext.isSuperuser && !userContext.administratorOf.length}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -110,14 +114,14 @@ export default function Organizations() {
         data={state.data}
         columns={columns}
         idField="id"
-        customToolbar={userContext.isSuperuser?
+        customToolbar={
           <Chip
+            disabled={!userContext.isSuperuser}
             onClick={() => navigate('/organizations/new')}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Organization"
-            variant="outlined"/>:
-          <div/>
+            variant="outlined"/>
         }
 
       />

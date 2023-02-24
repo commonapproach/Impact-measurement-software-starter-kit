@@ -27,12 +27,16 @@ const fetchOrganizations = async (req, res) => {
         // organization may doesn't have admin
         organization.administrator = ''
       }
+      organization.editable = true;
     })
     return res.status(200).json({success: true, organizations: organizations});
   }
 
   const organizations = await allReachableOrganizations(userAccount);
   organizations.map(organization => {
+    // if the organization is administrated by the user, set it as editable
+    if(organization.administrator._id === userAccount._id)
+      organization.editable = true;
     organization.administrator = `${organization.administrator._id}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
   })
 

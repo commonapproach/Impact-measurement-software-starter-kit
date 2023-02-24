@@ -65,12 +65,12 @@ export default function Organizations() {
   const columns = [
     {
       label: 'Legal Name',
-      body: ({_id, legalName}) => {
-        return userContext.isSuperuser || userContext.administratorOf?
+      body: ({_id, legalName, editable}) => {
+        return editable?
           <Link color to={`/organizations/${_id}/edit/`}>
           {legalName}
         </Link>:
-          {legalName}
+          legalName
       },
       sortBy: ({legalName}) => legalName
     },
@@ -83,9 +83,9 @@ export default function Organizations() {
 
     {
       label: ' ',
-      body: ({_id}) =>
+      body: ({_id, editable}) =>
         <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption hideDeleteOption
-                      hideEditOption={!userContext.isSuperuser && !userContext.administratorOf.length}
+                      hideEditOption={!editable}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];

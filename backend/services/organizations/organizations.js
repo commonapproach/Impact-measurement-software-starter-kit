@@ -1,7 +1,6 @@
-const {GDBOrganizationModel, GDBOrganizationIdModel} = require("../../models/organization");
-const {addObjectToList, organizationsInSameGroups, allReachableOrganizations} = require("../../helpers");
+const {GDBOrganizationModel} = require("../../models/organization");
+const {allReachableOrganizations} = require("../../helpers");
 const {GDBUserAccountModel} = require("../../models/userAccount");
-const {GDBGroupModel} = require("../../models/group");
 const {hasAccess} = require('../../helpers/hasAccess')
 
 const fetchOrganizationsHandler = async (req, res, next) => {
@@ -20,11 +19,17 @@ const fetchOrganizations = async (req, res) => {
 
   // if the user is the superuser, return all organizations to him
   if (userAccount.isSuperuser) {
-    const organizations = await GDBOrganizationModel.find({});
+    const organizations = await GDBOrganizationModel.find({}, {populates: ['administrator.person']});
+    organizations.map(organization => {
+      organization.administrator = `${organization.administrator._id}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
+    })
     return res.status(200).json({success: true, organizations: organizations});
   }
 
   const organizations = await allReachableOrganizations(userAccount);
+  organizations.map(organization => {
+    organization.administrator = `${organization.administrator._id}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
+  })
 
   return res.status(200).json({success: true, organizations: organizations});
 

@@ -173,7 +173,7 @@ async function allReachableOrganizations(userAccount) {
   if (userAccount.groupAdminOfs?.length) {
     // add all organization is his group in to the list
     // fetch all groups belongs to him
-    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}}, {populates: ['organizations']});
+    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}}, {populates: ['organizations.administrator.person']});
     groups.map(group => {
       group.organizations.map(organization => {
         // fetch all reachable organizations and add them in
@@ -183,7 +183,7 @@ async function allReachableOrganizations(userAccount) {
   }
   // add organizations which the user associated with to the list
   (await Promise.all(userAccount.associatedOrganizations.map(orgURI => {
-    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]})
+    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]}, {populates: ['administrator.person']})
   }))).map(org => {
     addObjectToList(organizations, org)
   })
@@ -191,7 +191,7 @@ async function allReachableOrganizations(userAccount) {
   let orgsInSameGroups = [];
   await organizationsInSameGroups(userAccount, orgsInSameGroups);
   orgsInSameGroups = await Promise.all(orgsInSameGroups.map(orgURI => {
-    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
+    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]}, {populates: ['administrator.person']});
   }));
   orgsInSameGroups.map(org => {
     addObjectToList(organizations, org)

@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext} from 'react';
-import { Chip, Container } from "@mui/material";
-import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
-import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
-import { useNavigate } from "react-router-dom";
-import { useSnackbar } from 'notistack';
+import React, {useEffect, useState, useContext} from 'react';
+import {Chip, Container} from "@mui/material";
+import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
+import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
+import {useNavigate} from "react-router-dom";
+import {useSnackbar} from 'notistack';
 import {deleteGroup, fetchGroups} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -22,17 +22,17 @@ export default function Groups() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    if(!userContext.isSuperuser && !userContext.groupAdminOf.length){
+    if (!userContext.isSuperuser && !userContext.groupAdminOf.length) {
       navigate('/dashboard');
-      enqueueSnackbar( "Wrong Auth", {variant: 'error'});
+      enqueueSnackbar("Wrong Auth", {variant: 'error'});
     }
-      fetchGroups().then(({groups}) => {
+    fetchGroups().then(({groups}) => {
       setState(state => ({...state, loading: false, data: groups}));
     }).catch(e => {
       reportErrorToBackend(e);
-      setState(state => ({...state, loading: false}))
+      setState(state => ({...state, loading: false}));
       navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'})
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
     });
   }, [trigger]);
 
@@ -46,15 +46,15 @@ export default function Groups() {
   const handleDelete = async (id, form) => {
 
 
-    deleteGroup(id).then(({success, message})=>{
+    deleteGroup(id).then(({success, message}) => {
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
         }));
         setTrigger(!trigger);
-        enqueueSnackbar(message || "Success", {variant: 'success'})
+        enqueueSnackbar(message || "Success", {variant: 'success'});
       }
-    }).catch((e)=>{
+    }).catch((e) => {
       setState(state => ({
         ...state, showDeleteDialog: false,
       }));
@@ -70,16 +70,16 @@ export default function Groups() {
       body: ({_id, label}) => {
         return <Link color to={`/groups/${_id}/edit`}>
           {label}
-        </Link>
+        </Link>;
       },
       sortBy: ({email}) => email
     },
     {
       label: 'Administrator',
       body: ({administrator}) => {
-        if(administrator)
-          return administrator
-        return 'Not Provided'
+        if (administrator)
+          return administrator;
+        return 'Not Provided';
       }
     },
     // {
@@ -106,7 +106,7 @@ export default function Groups() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'groups'} objectId={_id} hideDeleteOption={!userContext.isSuperuser}
+        <DropdownMenu urlPrefix={'groups'} objectId={_id} hideDeleteOption
                       hideViewOption handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -122,14 +122,13 @@ export default function Groups() {
         columns={columns}
         idField="id"
         customToolbar={
-          userContext.isSuperuser?
             <Chip
-            onClick={() => navigate('/groups/new')}
-            color="primary"
-            icon={<AddIcon/>}
-            label="Add group"
-            variant="outlined"/>:
-            <div/>
+              disabled={!userContext.isSuperuser}
+              onClick={() => navigate('/groups/new')}
+              color="primary"
+              icon={<AddIcon/>}
+              label="Add group"
+              variant="outlined"/>
         }
 
       />

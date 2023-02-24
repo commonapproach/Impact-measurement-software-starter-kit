@@ -57,7 +57,7 @@ export default function AddEditGroup() {
   });
 
   useEffect(() => {
-    if(!userContext.isSuperuser && !userContext.groupAdmin.length > 0){
+    if(!userContext.isSuperuser && !userContext.groupAdminOf.length > 0){
       navigate('/groups');
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
@@ -124,7 +124,6 @@ export default function AddEditGroup() {
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log('valid')
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -207,6 +206,7 @@ export default function AddEditGroup() {
         />
           <SelectField
           key={'administrator'}
+          disabled={!userContext.isSuperuser}
           label={'Group Administrator'}
           value={form.administrator}
           options={options.administrators}

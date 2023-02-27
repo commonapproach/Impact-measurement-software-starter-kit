@@ -2,6 +2,7 @@
   "name": "snm_client",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://csse-uoft.github.io/Pathfinder",
   "dependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
@@ -23,6 +24,7 @@
     "redux": "^4.0.5"
   },
   "devDependencies": {
+    "gh-pages": "^5.0.0",
     "react-scripts": "5.0.1",
     "source-map-explorer": "^2.5.2"
   },
@@ -31,7 +33,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "analyze": "source-map-explorer 'build/static/js/*.js'"
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build"
+
   },
   "browserslist": [
     ">0.2%",

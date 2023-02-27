@@ -9,7 +9,6 @@ import { blue, pink } from '@mui/material/colors'
 import routes from "./routes";
 import { UserContext, getUserContext } from './context';
 import { SnackbarProvider } from 'notistack';
-import ErrorBoundary from "./ErrorBoundary";
 
 const theme = createTheme({
   palette: {

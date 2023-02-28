@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {deleteDomain, fetchDomains} from "../../api/domainApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function Domains() {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ export default function Domains() {
       setState(state => ({
         ...state, showDeleteDialog: false,
       }));
+      reportErrorToBackend(e)
       setTrigger(!trigger);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });

@@ -9,6 +9,7 @@ import {AlertDialog} from "../shared/Dialogs";
 import {createDomain, fetchDomain, updateDomain} from "../../api/domainApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -65,6 +66,10 @@ export default function AddEditDomain() {
             });
             setLoading(false);
           }
+        }).catch(e => {
+          reportErrorToBackend(e)
+          enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+          navigate('/domains')
         });
       } else if (mode === 'edit' && !id) {
         navigate('/organizations');

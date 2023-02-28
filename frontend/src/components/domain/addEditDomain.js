@@ -99,6 +99,7 @@ export default function AddEditDomain() {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating domain', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -113,6 +114,7 @@ export default function AddEditDomain() {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when updating the domain', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });

@@ -63,9 +63,9 @@ export default function Domains() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return <Link color to={`/domains/${_id}/edit`}>
+        return userContext.isSuperuser? <Link color to={`/domains/${_id}/edit`}>
           {name}
-        </Link>
+        </Link>:name
       },
       sortBy: ({legalName}) => legalName
     },
@@ -79,7 +79,7 @@ export default function Domains() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'domains'} objectId={_id} hideViewOption hideDeleteOption={!userContext.isSuperuser}
+        <DropdownMenu urlPrefix={'domains'} objectId={_id} hideViewOption hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -94,14 +94,14 @@ export default function Domains() {
         data={state.data}
         columns={columns}
         idField="id"
-        customToolbar={userContext.isSuperuser?
+        customToolbar={
           <Chip
+            disabled={!userContext.isSuperuser}
             onClick={() => navigate('/Domains/new')}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Domain"
-            variant="outlined"/>:
-          <div/>
+            variant="outlined"/>
         }
 
       />

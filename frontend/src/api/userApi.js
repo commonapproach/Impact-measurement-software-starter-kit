@@ -120,7 +120,7 @@ export async function updatePrimaryEmail(id, email) {
  * @param params
  * @returns {Promise<*>}
  */
-export function updateProfile(id, params, userContext) {
+export function updateProfile(id, params) {
   return postJson('/api/user/profile/' + id + '/', params);
   // if (userContext.isSuperuser)
   //   return postJson('/api/superuser/user/profile/' + id + '/', params);

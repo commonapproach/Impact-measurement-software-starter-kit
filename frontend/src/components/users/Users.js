@@ -7,6 +7,7 @@ import {useNavigate} from "react-router-dom";
 import {formatPhoneNumber} from "../../helpers/phone_number_helpers";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function Users() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function Users() {
       // console.log(data)
       setState(state => ({...state, loading: false, data: data.data}));
     }).catch(e => {
+      reportErrorToBackend(e)
       setState(state => ({...state, loading: false}));
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});

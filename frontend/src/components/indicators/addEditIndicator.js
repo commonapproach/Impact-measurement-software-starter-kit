@@ -12,6 +12,7 @@ import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -59,21 +60,22 @@ export default function AddEditIndicator() {
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
+        reportErrorToBackend(e)
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
     } else if(mode === 'edit' && (!id || !orgId) ) {
-      navigate(-1);
+      navigate('/organization-indicators');
       enqueueSnackbar("No ID or orgId provided", {variant: 'error'});
     } else if (mode === 'new' && !orgId){
       setLoading(false);
-      // navigate(-1);
+      // navigate('/organization-indicators');
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
     }else if (mode === 'new' && orgId) {
       setForm(form => ({...form, organizations: [orgId]}))
       setLoading(false);
     } else {
-      navigate(-1);
+      navigate('/organization-indicators');
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
 
@@ -91,7 +93,7 @@ export default function AddEditIndicator() {
       createIndicator({form}, userContext).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
+          navigate('/organization-indicators');
           enqueueSnackbar(ret.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -99,6 +101,7 @@ export default function AddEditIndicator() {
           setErrors(e.json);
         }
         console.log(e)
+        reportErrorToBackend(e)
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -106,13 +109,14 @@ export default function AddEditIndicator() {
       updateIndicator({form}, id).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate(-1);
+          navigate('/organization-indicators');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e)
         enqueueSnackbar(e.json?.message || 'Error occurs when updating indicator', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });

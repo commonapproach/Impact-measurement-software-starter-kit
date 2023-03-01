@@ -200,9 +200,9 @@ async function hasAccess(req, operationType) {
         ));
         for (let group of groups) {
           // fetch all organizations belongs to the group
-          group.organizations = await Promise.all(group.organizations.map(organizationURI => {
-            return GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]});
-          }));
+          // group.organizations = await Promise.all(group.organizations.map(organizationURI => {
+          //   return GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]});
+          // }));
           // check if there any organization contain the indicator
           for (let organization of group.organizations) {
             if (organization.hasIndicators.includes(`:indicator_${id}`))

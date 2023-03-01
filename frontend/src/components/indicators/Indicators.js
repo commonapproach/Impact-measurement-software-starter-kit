@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {fetchIndicators} from "../../api/indicatorApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function Indicators() {
   const navigate = useNavigate();
@@ -24,15 +25,14 @@ export default function Indicators() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicators(id, userContext).then(res => {
+    fetchIndicators(id).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.indicators}));
-    })
-      // .catch(e => {
-    //   setState(state => ({...state, loading: false}))
-    //   navigate('/dashboard');
-    //   enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    // });
+    }).catch(e => {
+      setState(state => ({...state, loading: false}))
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    });
   }, [trigger]);
 
   // const showDeleteDialog = (id) => {
@@ -65,10 +65,13 @@ export default function Indicators() {
   const columns = [
     {
       label: 'Name',
-      body: ({_id, name}) => {
-        return <Link color to={`/indicator/${_id}/edit`}>
+      body: ({_id, name, editable}) => {
+        console.log(editable)
+        return editable?
+          <Link color to={`/indicator/${_id}/edit`}>
           {name}
-        </Link>
+        </Link>:
+          name
       },
       sortBy: ({name}) => name
     },
@@ -98,7 +101,8 @@ export default function Indicators() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'indicator'} objectId={_id}
+        <DropdownMenu urlPrefix={'indicator'} objectId={_id} hideDeleteOption
+                      hideEditOption={!userContext.isSuperuser && !userContext.editorOf.length}
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];

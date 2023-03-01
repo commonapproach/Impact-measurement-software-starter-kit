@@ -52,9 +52,13 @@ export default function IndicatorField({defaultValue, required, onChange, label,
 
   useEffect(() => {
     fetchOrganizations(userContext).then(({success, organizations}) => {
-      if(success){
-        const options ={} ;
-        organizations.map(organization => options[organization._id] = organization.legalName)
+      if(success) {
+        const options ={};
+        organizations.map(organization => {
+          // felt out the organization this user serves as the editor
+          if(userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
+            options[organization._id] = organization.legalName;
+        })
         setOptions(options)
       }
     })

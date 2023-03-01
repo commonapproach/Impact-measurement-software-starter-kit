@@ -38,7 +38,8 @@ function Dashboard() {
                   text="Manage Organizations"/>:
       null}
 
-      {userContext.isSuperuser?<NavButton to={`/users`} icon={<People/>} key={'users'}
+      {userContext.isSuperuser?
+        <NavButton to={`/users`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:null}
 
       <NavButton to={'/organization-indicators'} icon={<Edit/>} key={'organization-indicators'}

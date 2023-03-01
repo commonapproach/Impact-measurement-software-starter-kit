@@ -1,4 +1,3 @@
-
 const {GDBGroupModel} = require("../models/group");
 const {GraphDB} = require("../utils/graphdb");
 const {SPARQL} = require('../utils/graphdb/helpers');
@@ -15,15 +14,21 @@ const {GDBOrganizationModel} = require("../models/organization");
 function addObjectToList(list, object) {
   if (typeof object === 'string') {
     // the object is a URI
-    if (!list.includes(object))
+    if (!list.includes(object)) {
       list.push(object);
+      return true;
+    }
+    return false;
   } else {
     // the object is a Graphdb object
     const result = list.filter(previousObject => {
       return previousObject._id === object._id;
     });
-    if (result.length === 0)
+    if (result.length === 0) {
       list.push(object);
+      return true;
+    }
+    return false;
   }
 }
 
@@ -183,10 +188,10 @@ async function allReachableOrganizations(userAccount) {
   }
   // add organizations which the user associated with to the list
   (await Promise.all(userAccount.associatedOrganizations.map(orgURI => {
-    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]}, {populates: ['administrator.person']})
+    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]}, {populates: ['administrator.person']});
   }))).map(org => {
-    addObjectToList(organizations, org)
-  })
+    addObjectToList(organizations, org);
+  });
   // also add organizations which is same groups to the list
   let orgsInSameGroups = [];
   await organizationsInSameGroups(userAccount, orgsInSameGroups);
@@ -194,13 +199,13 @@ async function allReachableOrganizations(userAccount) {
     return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]}, {populates: ['administrator.person']});
   }));
   orgsInSameGroups.map(org => {
-    addObjectToList(organizations, org)
+    addObjectToList(organizations, org);
   });
   return organizations;
 }
 
 
-
-
-module.exports = {URI2Id, organizationsInSameGroups, addObjectToList, allReachableOrganizations,
-  organizationBelongsToUser, organizationBelongsToGroupAdmin, isReachableBy, isAPartnerOrganization};
+module.exports = {
+  URI2Id, organizationsInSameGroups, addObjectToList, allReachableOrganizations,
+  organizationBelongsToUser, organizationBelongsToGroupAdmin, isReachableBy, isAPartnerOrganization
+};

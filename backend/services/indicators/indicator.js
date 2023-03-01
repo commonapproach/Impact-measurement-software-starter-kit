@@ -10,29 +10,44 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 
 const fetchIndicators = async (req, res) => {
 
+  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
   const {organizationId} = req.params;
   if (!organizationId) {
     // the organizationId is not given, return all indicators which is reachable by the user
-    const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
-    if (userAccount.isSuperuser){
+
+    if (userAccount.isSuperuser) {
       // simple return all indicators to him
       const indicators = await GDBIndicatorModel.find({});
+      indicators.map(indicator => indicator.editable = true);
       return res.status(200).json({success: true, indicators});
     }
     // take all reachable organizations
     const reachableOrganizations = await allReachableOrganizations(userAccount);
-    const indicatorURIs = []
+    const indicatorURIs = [];
     // fetch all available indicatorURIs from reachableOrganizations
+    const editableIndicatorIDs = [];
     reachableOrganizations.map(organization => {
-      if(organization.hasIndicators)
+      if (organization.hasIndicators)
         organization.hasIndicators.map(indicatorURI => {
-          addObjectToList(indicatorURIs, indicatorURI)
-        })
-    })
+          if (addObjectToList(indicatorURIs, indicatorURI)) {
+            // if the indicator is actually added
+            if (organization.editors.includes(`:userAccount_${userAccount._id}`)) {
+              // and if the userAccount is one of the editor of the organization
+              // the indicator will be marked
+              editableIndicatorIDs.push(indicatorURI.split('_')[1]);
+            }
+          }
+        });
+    });
     // replace indicatorURIs to actual indicator objects
     const indicators = await Promise.all(indicatorURIs.map(indicatorURI => {
       return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]});
-    }))
+    }));
+    // for all indicators, if its id in editableIndicatorIDs, then it is editable
+    indicators.map(indicator => {
+      if(editableIndicatorIDs.includes(indicator._id))
+        indicator.editable = true;
+    })
     return res.status(200).json({success: true, indicators});
   } else {
     // the organizationId is given, return all indicators belongs to the organization
@@ -41,6 +56,10 @@ const fetchIndicators = async (req, res) => {
       throw new Server400Error('No such organization');
     if (!organization.hasIndicators)
       return res.status(200).json({success: true, indicators: []});
+    if(userAccount.isSuperuser || organization.editors.includes(`:userAccount_${userAccount._id}`))
+      organization.hasIndicators.map(indicator => {
+        indicator.editable = true;
+      })
     return res.status(200).json({success: true, indicators: organization.hasIndicators});
   }
 

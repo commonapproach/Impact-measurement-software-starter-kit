@@ -7,7 +7,6 @@ import {UserContext, defaultUserContext} from "../../context";
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleSharpIcon from '@mui/icons-material/AccountCircleSharp';
 import ReportIcon from '@mui/icons-material/Report';
-import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -15,6 +14,9 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import LoginIcon from '@mui/icons-material/Login';
+import OutputIcon from '@mui/icons-material/Output'
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import SummarizeIcon from '@mui/icons-material/Summarize';
 
 const ITEM_HEIGHT = 48;
 
@@ -89,33 +91,28 @@ function TopNavBar() {
                 },
               }}
             >
-              {/*<MenuItem onClick={handleLink(`/clients`)}>*/}
-              {/*  <ListItemIcon>*/}
-              {/*    <FamilyRestroomIcon fontSize="medium" sx={{color: 'black'}}/>*/}
-              {/*  </ListItemIcon>*/}
-              {/*  <Typography variant="inherit">Clients</Typography>*/}
-              {/*</MenuItem>*/}
 
-              {/*<MenuItem onClick={handleLink(`/services`)}>*/}
-              {/*  <ListItemIcon>*/}
-              {/*    <LocationCityIcon fontSize="medium" sx={{color: 'black'}}/>*/}
-              {/*  </ListItemIcon>*/}
-              {/*  <Typography variant="inherit">Services</Typography>*/}
-              {/*</MenuItem>*/}
+              <MenuItem onClick={handleLink(`/organization-indicators`)}>
+                <ListItemIcon>
+                  <DragIndicatorIcon fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Indicators</Typography>
+              </MenuItem>
 
-              {/*<MenuItem onClick={handleLink(`/serviceOccurrences`)}>*/}
-              {/*  <ListItemIcon>*/}
-              {/*    <LocationCityIcon fontSize="medium" sx={{color: 'black'}}/>*/}
-              {/*  </ListItemIcon>*/}
-              {/*  <Typography variant="inherit">Service Occurrences</Typography>*/}
-              {/*</MenuItem>*/}
+              <MenuItem onClick={handleLink(`/organization-outcomes`)}>
+                <ListItemIcon>
+                  <OutputIcon fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Outcomes</Typography>
+              </MenuItem>
 
-              {/*<MenuItem onClick={handleLink(`/appointments`)}>*/}
-              {/*  <ListItemIcon>*/}
-              {/*    <BusinessCenterIcon fontSize="medium" sx={{color: 'black'}}/>*/}
-              {/*  </ListItemIcon>*/}
-              {/*  <Typography variant="inherit">Appointments</Typography>*/}
-              {/*</MenuItem>*/}
+              <MenuItem onClick={handleLink(`/organization-indicatorReports`)}>
+                <ListItemIcon>
+                  <SummarizeIcon fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Reports</Typography>
+              </MenuItem>
+
 
               {/*<MenuItem onClick={handleLink(`/serviceRegistrations`)}>*/}
               {/*  <ListItemIcon>*/}

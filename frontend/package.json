@@ -33,7 +33,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "predeploy": "yarn build; cp build/index.html /build/404.html",
+    "predeploy": "yarn build; cp build/index.html build/404.html",
     "deploy": "gh-pages -d build"
 
   },

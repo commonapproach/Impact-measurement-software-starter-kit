@@ -1,8 +1,8 @@
 const hostname = window && window.location && window.location.hostname;
 
 let serverHost;
-if (hostname === 'www.socialneedsmarketplace.ca') {
-  serverHost = 'https://api.socialneedsmarketplace.ca'
+if (hostname === 'www.common-approach.ca') {
+  serverHost = 'https://api.common-approach.ca'
 } else {
   serverHost = 'https://localhost:5000';
 }

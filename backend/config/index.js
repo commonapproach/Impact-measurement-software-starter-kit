@@ -16,8 +16,8 @@ const config = {
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
-    'https://csse-uoft.github.io'
-    // 'https://www.socialneedsmarketplace.ca',
+    'https://csse-uoft.github.io',
+    'https://www.common-approach.ca',
     // 'https://www.snmi.ca'
     ],
 

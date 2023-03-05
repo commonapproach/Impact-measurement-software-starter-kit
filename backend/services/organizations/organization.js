@@ -158,32 +158,32 @@ async function fetchOrganization(req, res) {
 
 }
 
-async function adminFetchOrganization(req, res, next) {
-  try {
-    const {id} = req.params;
-    const sessionId = req.session._id;
-    if (!id)
-      return res.status(400).json({success: false, message: 'Organization ID is needed'});
-    const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['administrator', 'hasId', 'hasOutcomes']});
-    if (!organization)
-      return res.status(400).json({success: false, message: 'No such organization'});
-    if (organization.administrator._id !== sessionId)
-      return res.status(400).json({success: false, message: 'The user is not the admin of the organization'});
-    organization.administrator = `:userAccount_${organization.administrator._id}`;
-    const outcomes = organization.hasOutcomes || [];
-    if (outcomes.length > 0) {
-      outcomes.map(outcome => {
-        outcome.domain = outcome.domain.split('_')[1];
-      });
-    }
-    organization.ID = organization.hasId?.hasIdentifier;
-    delete organization.hasOutcomes;
-    delete organization.hasId;
-    return res.status(200).json({success: true, organization, outcomes});
-  } catch (e) {
-    next(e);
-  }
-}
+// async function adminFetchOrganization(req, res, next) {
+//   try {
+//     const {id} = req.params;
+//     const sessionId = req.session._id;
+//     if (!id)
+//       return res.status(400).json({success: false, message: 'Organization ID is needed'});
+//     const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['administrator', 'hasId', 'hasOutcomes']});
+//     if (!organization)
+//       return res.status(400).json({success: false, message: 'No such organization'});
+//     if (organization.administrator._id !== sessionId)
+//       return res.status(400).json({success: false, message: 'The user is not the admin of the organization'});
+//     organization.administrator = `:userAccount_${organization.administrator._id}`;
+//     const outcomes = organization.hasOutcomes || [];
+//     if (outcomes.length > 0) {
+//       outcomes.map(outcome => {
+//         outcome.domain = outcome.domain.split('_')[1];
+//       });
+//     }
+//     organization.ID = organization.hasId?.hasIdentifier;
+//     delete organization.hasOutcomes;
+//     delete organization.hasId;
+//     return res.status(200).json({success: true, organization, outcomes});
+//   } catch (e) {
+//     next(e);
+//   }
+// }
 
 async function updateOrganizationHandler(req, res, next) {
   try {
@@ -254,18 +254,27 @@ async function updateOrganization(req, res) {
     throw Server400Error('Invalid administrator');
 
   // update organizationAdmin if needed
-  if (organization.administrator._id !== form.administrator._id) {
-    // then the administrator have to be updated
-    // delete organization from previous user's property
-    const index = organization.administrator.administratorOfs.findIndex(org => org.split('_')[1] === id);
-    organization.administrator.administratorOfs.splice(index, 1);
-    await organization.administrator.save();
-    // add organization on current user's property
-    if (!form.administrator.administratorOfs)
-      form.administrator.administratorOfs = [];
-    form.administrator.administratorOfs.push(organization);
-    // update property of organization
-    organization.administrator = form.administrator;
+  if (organization.administrator?._id !== form.administrator._id) {
+    if (!organization.administrator) {
+      // then there is no organization administrator yet, add it
+      organization.administrator = form.administrator;
+      if(!organization.administrator.administratorOfs)
+        organization.administrator.administratorOfs = [];
+      organization.administrator.administratorOfs.push(organization);
+    } else {
+      // then the administrator have to be updated
+      // delete organization from previous user's property
+      const index = organization.administrator.administratorOfs.findIndex(org => org.split('_')[1] === id);
+      organization.administrator.administratorOfs.splice(index, 1);
+      await organization.administrator.save();
+      // add organization on current user's property
+      if (!form.administrator.administratorOfs)
+        form.administrator.administratorOfs = [];
+      form.administrator.administratorOfs.push(organization);
+      // update property of organization
+      organization.administrator = form.administrator;
+    }
+
   }
   // organization.administrator = form.administrator;
 
@@ -458,7 +467,6 @@ async function superuserDeleteOrganization(req, res, next) {
 module.exports = {
   adminUpdateOrganization,
   updateOrganizationHandler,
-  adminFetchOrganization,
   fetchOrganizationHandler,
   createOrganizationHandler
 };

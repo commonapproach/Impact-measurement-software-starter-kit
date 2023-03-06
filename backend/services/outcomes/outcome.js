@@ -15,25 +15,26 @@ const fetchOutcomes = async (req, res) => {
   if (!organizationId) {
     // the organizationId is not given, return all outcomes which is reachable by the user
     const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
-    if (userAccount.isSuperuser){
+    if (userAccount.isSuperuser) {
       // simple return all indicators to him
       const outcomes = await GDBOutcomeModel.find({});
-      return res.status(200).json({success: true, outcomes});
+      outcomes.map(outcome => outcome.editable = true)
+      return res.status(200).json({success: true, outcomes, editable:true});
     }
     // take all reachable organizations
     const reachableOrganizations = await allReachableOrganizations(userAccount);
-    const outcomeURIs = []
+    const outcomeURIs = [];
     // fetch all available indicatorURIs from reachableOrganizations
     reachableOrganizations.map(organization => {
-      if(organization.hasOutcomes)
+      if (organization.hasOutcomes)
         organization.hasOutcomes.map(outcomeURI => {
-          addObjectToList(outcomeURIs, outcomeURI)
-        })
-    })
+          addObjectToList(outcomeURIs, outcomeURI);
+        });
+    });
     // replace indicatorURIs to actual indicator objects
     const outcomes = await Promise.all(outcomeURIs.map(outcomeURI => {
       return GDBOutcomeModel.findOne({_id: outcomeURI.split('_')[1]});
-    }))
+    }));
     return res.status(200).json({success: true, outcomes});
   } else {
     // the organizationId is given, return all outcomes belongs to the organization
@@ -43,8 +44,8 @@ const fetchOutcomes = async (req, res) => {
     let editable;
     if (organization.editors?.includes(`:userAccount_${req.session._id}`)) {
       editable = true; // to tell the frontend that the outcome belong to the organization is editable
-      organization.hasOutcomes?.map(outcome => outcome.editable = true)
-      }
+      organization.hasOutcomes?.map(outcome => outcome.editable = true);
+    }
     if (!organization.hasOutcomes)
       return res.status(200).json({success: true, outcomes: [], editable});
 
@@ -81,7 +82,7 @@ const fetchOutcome = async (req, res) => {
   if (!id)
     throw new Server400Error('Id is not given');
   const outcome = await GDBOutcomeModel.findOne({_id: id});
-  if(!outcome)
+  if (!outcome)
     throw new Server400Error('No such outcome');
   outcome.domain = outcome.domain.split('_')[1];
   outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
@@ -132,30 +133,30 @@ const updateOutcome = async (req, res) => {
     throw new Server400Error('No such outcome');
   outcome.name = form.name;
   outcome.description = form.description;
-  if (outcome.domain.split('_')[1] !== form.domain){
+  if (outcome.domain.split('_')[1] !== form.domain) {
     // domain have to be updated
     const newDomain = await GDBDomainModel.findOne({_id: form.domain});
     if (!newDomain)
       throw new Server400Error('No such domain');
     outcome.domain = newDomain;
   }
-  const organizationDict = {}
+  const organizationDict = {};
 
   // fetch outcome.forOrganizations from database
   outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(organizationURI =>
     GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
-  ))
+  ));
   // cache outcome.forOrganizations into dict
   cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
   // fetch form.organizations from database
   form.organizations = await Promise.all(form.organizations.map(organizationId => {
-    // if the organization already in the dict, simply get from dict
-    if (organizationDict[organizationId])
-      return organizationDict[organizationId]
-    // otherwise, fetch
-    return GDBOrganizationModel.findOne({_id: organizationId});
+      // if the organization already in the dict, simply get from dict
+      if (organizationDict[organizationId])
+        return organizationDict[organizationId];
+      // otherwise, fetch
+      return GDBOrganizationModel.findOne({_id: organizationId});
     }
-  ))
+  ));
 
   // cache organizations which is not in dict
   cacheListOfOrganizations(form.organizations, organizationDict);
@@ -170,10 +171,10 @@ const updateOutcome = async (req, res) => {
   // add the outcome to every organizations in form.organizations
   await Promise.all(form.organizations.map(organization => {
     if (!organization.hasOutcomes)
-      organization.hasOutcomes = []
-    organization.hasOutcomes.push(outcome)
+      organization.hasOutcomes = [];
+    organization.hasOutcomes.push(outcome);
     return organization.save();
-  }))
+  }));
 
   outcome.forOrganizations = form.organizations;
   await outcome.save();
@@ -202,7 +203,7 @@ const createOutcome = async (req, res) => {
   ));
   form.domain = await GDBDomainModel.findOne({_id: form.domain});
   if (!form.domain)
-    throw new Server400Error('No such domain')
+    throw new Server400Error('No such domain');
 
   const outcome = GDBOutcomeModel(form);
   await outcome.save();

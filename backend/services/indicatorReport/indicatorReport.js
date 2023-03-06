@@ -161,10 +161,18 @@ const fetchIndicatorReports = async (req, res) => {
   const {orgId} = req.params;
   if (!orgId)
     throw new Server400Error('Wrong input');
+  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  const organization = await GDBOrganizationModel.findOne({_id: orgId});
+  if (!organization)
+    throw new Server400Error('No such organization')
+  let editable;
+  if (userAccount.isSuperuser || organization.editors?.includes(`:userAccount_${req.session._id}`)) {
+    editable = true; // to tell the frontend that the outcome belong to the organization is editable
+  }
   const indicatorReports = await GDBIndicatorReportModel.find({forOrganization: `:organization_${orgId}`},
     // {populates: ['forIndicator']}
   );
-  return res.status(200).json({success: true, indicatorReports})
+  return res.status(200).json({success: true, indicatorReports, editable})
 }
 
 module.exports = {createIndicatorReportHandler, fetchIndicatorReportHandler, updateIndicatorReportHandler, fetchIndicatorReportsHandler};

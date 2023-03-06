@@ -9,6 +9,7 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import IndicatorReportField from "../shared/IndicatorReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -62,6 +63,7 @@ export default function AddEditIndicatorReport() {
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
+        reportErrorToBackend(e)
         setLoading(false);
         navigate(-1);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
@@ -93,7 +95,7 @@ export default function AddEditIndicatorReport() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicatorReport({form}, userContext).then((ret) => {
+      createIndicatorReport({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -104,11 +106,12 @@ export default function AddEditIndicatorReport() {
           setErrors(e.json);
         }
         console.log(e);
+        reportErrorToBackend(e)
         enqueueSnackbar(e.json?.message || 'Error occurs when creating indicator report', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && id) {
-      updateIndicatorReport(id, userContext,{form}).then((res) => {
+      updateIndicatorReport(id,{form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
@@ -118,6 +121,7 @@ export default function AddEditIndicatorReport() {
         if (e.json) {
           setErrors(e.json);
         }
+        reportErrorToBackend(e)
         enqueueSnackbar(e.json?.message || 'Error occurs when updating outcome', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });

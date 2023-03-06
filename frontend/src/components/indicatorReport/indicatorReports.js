@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {fetchOutcomes} from "../../api/outcomeApi";
 import {fetchIndicatorReports} from "../../api/indicatorReportApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function IndicatorReports() {
   const navigate = useNavigate();
@@ -20,14 +21,16 @@ export default function IndicatorReports() {
     selectedId: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
+    editable: false
   });
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicatorReports(id, userContext).then(res => {
+    fetchIndicatorReports(id).then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.indicatorReports}));
+        setState(state => ({...state, loading: false, data: res.indicatorReports, editable: res.editable}));
     }).catch(e => {
+      reportErrorToBackend(e)
       setState(state => ({...state, loading: false}))
       console.log(e)
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
@@ -65,9 +68,9 @@ export default function IndicatorReports() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return <Link color to={`/indicatorReport/${_id}/edit`}>
+        return state.editable?<Link color to={`/indicatorReport/${_id}/edit`}>
           {name}
-        </Link>
+        </Link>:name
       },
       sortBy: ({name}) => name
     },
@@ -97,7 +100,7 @@ export default function IndicatorReports() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'indicatorReport'} objectId={_id}
+        <DropdownMenu urlPrefix={'indicatorReport'} objectId={_id} hideEditOption={!state.editable} hideDeleteOption
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -113,15 +116,13 @@ export default function IndicatorReports() {
         columns={columns}
         idField="id"
         customToolbar={
-          userContext.isSuperuser?
           <Chip
+            disabled={!state.editable}
             onClick={() => navigate(`/indicatorReport/${id}/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new IndicatorReports"
             variant="outlined"/>
-          :
-          <div/>
         }
 
       />

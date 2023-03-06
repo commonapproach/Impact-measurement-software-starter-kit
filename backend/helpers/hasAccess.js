@@ -500,20 +500,23 @@ async function hasAccess(req, operationType) {
         if (!form || !form.name || !form.comment || !form.organization || !form.indicator
           || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
           throw new Server400Error('Invalid input');
-        // all organizations must be in userAccount.editorOfs
-        const checkerList = form.organizations.map(organizationId => {
-          return organizationBelongsToUser(userAccount, organizationId, 'editorOfs');
-        });
-        // if any of organization isn't in userAccount.editorOfs, they doesn't satisfy
-        if (!checkerList.includes(false))
-          return true;
+        // the organization must be in userAccount.editorOfs
+        if(organizationBelongsToUser(userAccount, form.organization, 'editorOfs'))
+          return true
+
+        // const checkerList = form.organizations.map(organizationId => {
+        //   return organizationBelongsToUser(userAccount, organizationId, 'editorOfs');
+        // });
+        // // if any of organization isn't in userAccount.editorOfs, they doesn't satisfy
+        // if (!checkerList.includes(false))
+        //   return true;
       }
 
       break;
     case 'fetchIndicatorReport':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.groupAdminOfs?.length) {
+      if (userAccount.groupAdminOfs) {
         // check does the IndicatorReport belong to an organization belongs to a group belongs to the user
 
         // fetch the IndicatorReport from the database
@@ -528,24 +531,26 @@ async function hasAccess(req, operationType) {
         ));
         for (let group of groups) {
           // fetch all organizations belongs to the group
-          group.organizations = await Promise.all(group.organizations.map(organizationURI => {
-            return GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]});
-          }));
+          // group.organizations = await Promise.all(group.organizations.map(organizationURI => {
+          //   return GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]});
+          // }));
           // check is there any organization contains the indicatorReport
           for (let organization of group.organizations) {
-            organization.hasIndicators = await Promise.all(organization.hasIndicators.map(
-              indicatorURI => {
-                return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]});
+            if(organization.hasIndicators) {
+              organization.hasIndicators = await Promise.all(organization.hasIndicators.map(
+                indicatorURI => {
+                  return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]});
+                }
+              ));
+              for (let indicator of organization.hasIndicators) {
+                if (indicator.indicatorReports?.includes(`:indicatorReport_${id}`))
+                  return true;
               }
-            ));
-            for (let indicator of organization.hasIndicators) {
-              if (indicator.indicatorReports.includes(`:indicatorReport_${id}`))
-                return true;
             }
           }
         }
       }
-      if (userAccount.editorOfs.length) {
+      if (userAccount.editorOfs?.length) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -557,7 +562,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.researcherOfs.length) {
+      if (userAccount.researcherOfs?.length) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -569,7 +574,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.reporterOfs.length) {
+      if (userAccount.reporterOfs?.length) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -580,7 +585,7 @@ async function hasAccess(req, operationType) {
           return true;
       }
 
-      if (userAccount.administratorOfs.length) {
+      if (userAccount.administratorOfs?.length) {
         const {id} = req.params;
         if (!id)
           throw new Server400Error('Id is not given');
@@ -595,66 +600,68 @@ async function hasAccess(req, operationType) {
     case 'updateIndicatorReport':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.editorOfs.length) {
+      if (userAccount.editorOfs?.length) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
         if (!form || !form.name || !form.comment || !form.organization || !form.indicator
           || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
           throw new Server400Error('Invalid input');
+        if(organizationBelongsToUser(userAccount, form.organization, 'editorOfs'))
+          return true
         // all organizations must be in userAccount.editorOfs
-        const checkerList = form.organizations.map(organizationId => {
-          return organizationBelongsToUser(userAccount, organizationId, 'editorOfs');
-        });
+        // const checkerList = form.organizations.map(organizationId => {
+        //   return organizationBelongsToUser(userAccount, organizationId, 'editorOfs');
+        // });
         // if any of organization isn't in userAccount.editorOfs, they doesn't satisfy
-        if (!checkerList.includes(false))
-          return true;
+        // if (!checkerList.includes(false))
+        //   return true;
       }
 
       break;
     case 'fetchIndicatorReports':
       if (userAccount.isSuperuser)
         return true;
-      if (userAccount.groupAdminOfs.length) {
+      if (userAccount.groupAdminOfs?.length) {
         // pass if the organization belongs to the group administrated by the groupAdmin
-        const {organizationId} = req.params;
-        if (!organizationId)
+        const {orgId} = req.params;
+        if (!orgId)
           throw new Server400Error('organizationId is needed');
-        if (await organizationBelongsToGroupAdmin(userAccount, organizationId))
+        if (await organizationBelongsToGroupAdmin(userAccount, orgId))
           return true;
       }
-      if (userAccount.administratorOfs.length) {
+      if (userAccount.administratorOfs?.length) {
         // pass if the organization belongs to the userAccount
-        const {organizationId} = req.params;
-        if (!organizationId)
+        const {orgId} = req.params;
+        if (!orgId)
           throw new Server400Error('organizationId is needed');
-        if (organizationBelongsToUser(userAccount, organizationId, 'administratorOfs'))
+        if (organizationBelongsToUser(userAccount, orgId, 'administratorOfs'))
           return true;
       }
-      if (userAccount.researcherOfs.length) {
+      if (userAccount.researcherOfs?.length) {
         // pass if the organization belongs to any organization which is in the same group
-        const {organizationId} = req.params;
-        if (!organizationId)
+        const {orgId} = req.params;
+        if (!orgId)
           throw new Server400Error('organizationId is needed');
-        if (await isAPartnerOrganization(organizationId, userAccount, 'researcherOfs'))
-          return true;
-      }
-
-      if (userAccount.editorOfs.length) {
-        // pass if the organization belongs to any organization which is in the same group
-        const {organizationId} = req.params;
-        if (!organizationId)
-          throw new Server400Error('organizationId is needed');
-        if (await isAPartnerOrganization(organizationId, userAccount, 'editorOfs'))
+        if (await isAPartnerOrganization(orgId, userAccount, 'researcherOfs'))
           return true;
       }
 
-      if (userAccount.reporterOfs.length) {
+      if (userAccount.editorOfs?.length) {
         // pass if the organization belongs to any organization which is in the same group
-        const {organizationId} = req.params;
-        if (!organizationId)
+        const {orgId} = req.params;
+        if (!orgId)
           throw new Server400Error('organizationId is needed');
-        if (await isAPartnerOrganization(organizationId, userAccount, 'reporterOfs'))
+        if (await isAPartnerOrganization(orgId, userAccount, 'editorOfs'))
+          return true;
+      }
+
+      if (userAccount.reporterOfs?.length) {
+        // pass if the organization belongs to any organization which is in the same group
+        const {orgId} = req.params;
+        if (!orgId)
+          throw new Server400Error('organizationId is needed');
+        if (await isAPartnerOrganization(orgId, userAccount, 'reporterOfs'))
           return true;
       }
       break;

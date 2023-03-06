@@ -6,6 +6,7 @@ import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
 import {fetchIndicators} from "../../api/indicatorApi";
 import GeneralField from "./fields/GeneralField";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 
 const filterOptions = createFilterOptions({
@@ -67,10 +68,14 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
 
 
   useEffect(() => {
-    fetchOrganizations(userContext).then(({success, organizations}) => {
+    fetchOrganizations().then(({success, organizations}) => {
       if (success) {
         const options = {};
-        organizations.map(organization => options[organization._id] = organization.legalName);
+        organizations.map(organization => {
+          // only organization which the user serves as an editor should be able to add
+          if(userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
+            options[organization._id] = organization.legalName;
+        });
         setOptions(op => ({...op, organization: options}));
         return options;
       }
@@ -95,12 +100,21 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
             console.log(op)
             return op
           })
+        }).catch(e => {
+          if (e.json) {
+            setErrors(e.json);
+          }
+          console.log(e);
+          reportErrorToBackend(e)
+          enqueueSnackbar(e.json?.message || 'Error occurs when fetching data', {variant: "error"});
+          setLoading(false);
         });
       }
     ).catch(e => {
       if (e.json) {
         setErrors(e.json);
       }
+      reportErrorToBackend(e)
       console.log(e);
       enqueueSnackbar(e.json?.message || 'Error occurs when fetching data', {variant: "error"});
       setLoading(false);

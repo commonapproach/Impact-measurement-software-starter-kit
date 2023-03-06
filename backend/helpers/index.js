@@ -163,13 +163,24 @@ const isAPartnerOrganization = async (organizationId, userAccount, role) => {
  */
 async function isReachableBy(resource, userAccount, role) {
 
-  for (const organizationURI of resource.forOrganizations) {
-    if (await isAPartnerOrganization(organizationURI.split('_')[1], userAccount, role)) {
-      // if any organization which associated with the indicator is a partner organization of the indicator
+  if (resource.forOrganizations) {
+    for (const organizationURI of resource.forOrganizations) {
+      if (await isAPartnerOrganization(organizationURI.split('_')[1], userAccount, role)) {
+        // if any organization which associated with the indicator is a partner organization of the indicator
+        // pass
+        return true;
+      }
+    }
+  }
+  // when the resource can only belongs to one organization
+  if(resource.forOrganization) {
+    if (await isAPartnerOrganization(resource.forOrganization.split('_')[1], userAccount, role)) {
+      // if the organization which associated with the indicator is a partner organization of the indicator
       // pass
       return true;
     }
   }
+
 }
 
 async function allReachableOrganizations(userAccount) {

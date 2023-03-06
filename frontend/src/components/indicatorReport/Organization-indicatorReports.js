@@ -112,15 +112,13 @@ export default function Organization_indicatorReports() {
         columns={columns}
         idField="id"
         customToolbar={
-        userContext.isSuperuser?
           <Chip
+            disabled={!userContext.isSuperuser && !userContext.editorOf.length}
             onClick={() => navigate('/indicatorReport/new')}
             color="primary"
             icon={<AddIcon/>}
             label="Add a new Indicator Report"
             variant="outlined"/>
-          :
-          <div/>
         }
 
       />

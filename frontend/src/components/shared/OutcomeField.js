@@ -65,7 +65,11 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
       fetchOrganizations(userContext).then(({success, organizations}) => {
         if(success){
           const options ={} ;
-          organizations.map(organization => options[organization._id] = organization.legalName)
+          organizations.map(organization => {
+            // only organization which the user serves as an editor should be able to add
+            if(userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
+              options[organization._id] = organization.legalName;
+          })
           setOptions(op => ({...op, organizations: options}))
         }
       })

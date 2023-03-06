@@ -40,9 +40,15 @@ const fetchOutcomes = async (req, res) => {
     const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
     if (!organization)
       throw new Server400Error('No such organization');
+    let editable;
+    if (organization.editors?.includes(`:userAccount_${req.session._id}`)) {
+      editable = true; // to tell the frontend that the outcome belong to the organization is editable
+      organization.hasOutcomes?.map(outcome => outcome.editable = true)
+      }
     if (!organization.hasOutcomes)
-      return res.status(200).json({success: true, outcomes: []});
-    return res.status(200).json({success: true, outcomes: organization.hasOutcomes});
+      return res.status(200).json({success: true, outcomes: [], editable});
+
+    return res.status(200).json({success: true, outcomes: organization.hasOutcomes, editable});
   }
 
 

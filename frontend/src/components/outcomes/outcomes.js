@@ -6,6 +6,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {fetchOutcomes} from "../../api/outcomeApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function Outcomes() {
   const navigate = useNavigate();
@@ -19,17 +20,19 @@ export default function Outcomes() {
     selectedId: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
+    editable: false,
   });
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOutcomes(id, userContext).then(res => {
+    fetchOutcomes(id).then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.outcomes}));
+        setState(state => ({...state, loading: false, data: res.outcomes, editable: res.editable}));
     }).catch(e => {
+      reportErrorToBackend(e)
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
     });
   }, [trigger]);
 
@@ -63,10 +66,10 @@ export default function Outcomes() {
   const columns = [
     {
       label: 'Name',
-      body: ({_id, name}) => {
-        return <Link color to={`/outcome/${_id}/edit`}>
+      body: ({_id, name, editable}) => {
+        return editable? <Link color to={`/outcome/${_id}/edit`}>
           {name}
-        </Link>
+        </Link>:name
       },
       sortBy: ({name}) => name
     },
@@ -95,8 +98,8 @@ export default function Outcomes() {
 
     {
       label: ' ',
-      body: ({_id}) =>
-        <DropdownMenu urlPrefix={'outcome'} objectId={_id}
+      body: ({_id, editable}) =>
+        <DropdownMenu urlPrefix={'outcome'} objectId={_id} hideEditOption={!editable} hideDeleteOption
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -112,15 +115,13 @@ export default function Outcomes() {
         columns={columns}
         idField="id"
         customToolbar={
-          userContext.isSuperuser?
           <Chip
+            disabled={!state.editable}
             onClick={() => navigate(`/outcome/${id}/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Outcome"
             variant="outlined"/>
-          :
-          <div/>
         }
 
       />

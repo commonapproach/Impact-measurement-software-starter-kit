@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 export default function Organization_outcomes() {
   const navigate = useNavigate();
@@ -22,13 +23,14 @@ export default function Organization_outcomes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOrganizations(userContext).then(res => {
+    fetchOrganizations().then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {
+      reportErrorToBackend(e)
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
     });
   }, [trigger]);
 
@@ -112,15 +114,13 @@ export default function Organization_outcomes() {
         columns={columns}
         idField="id"
         customToolbar={
-        userContext.isSuperuser?
           <Chip
+            disabled={!userContext.isSuperuser && !userContext.editorOf.length}
             onClick={() => navigate('/outcome/new')}
             color="primary"
             icon={<AddIcon/>}
             label="Add a new Outcome"
             variant="outlined"/>
-          :
-          <div/>
         }
 
       />

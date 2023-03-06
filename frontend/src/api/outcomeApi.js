@@ -1,8 +1,7 @@
 import {getJson, postJson, putJson} from "./index";
 
-export async function fetchOutcomes(organizationId, userContext) {
-  if (userContext.isSuperuser)
-    return getJson('/api/outcomes/' + organizationId + '/');
+export async function fetchOutcomes(organizationId,) {
+  return getJson('/api/outcomes/' + organizationId + '/');
 }
 
 export async function fetchOutcome(id, userContext) {

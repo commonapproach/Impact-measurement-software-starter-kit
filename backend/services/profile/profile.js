@@ -132,7 +132,7 @@ const regularUserUpdatePassword = async (req, res, next) => {
 
 const updateProfile = async (req, res) => {
   const {id} = req.params;
-  const {gender, altEmail, address, countryCode, areaCode, phoneNumber, associatedOrganizations} = req.body;
+  const {gender, altEmail, address, countryCode, areaCode, phoneNumber,} = req.body;
   const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person.address', 'person.phoneNumber']});
 
   // remove the user from all previous associated organizations
@@ -146,7 +146,6 @@ const updateProfile = async (req, res) => {
   // add the user to all associated organizations
 
   // store current associated organizations
-
 
   const person = userAccount.person;
   if (gender && Validator.gender(gender))

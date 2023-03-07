@@ -9,7 +9,6 @@ const router = express.Router({mergeParams: true});
 
 router.get('/:id', fetchUserHandler);
 router.post('/invite', inviteNewUserHandler);
-// router.delete('/:id', superuserDeleteUser);
 router.post('/updateUser/:id', updateUserHandler)
 router.get('/profile/:id', fetchProfileHandler)
 router.post('/profile/:id', updateProfileHandler)

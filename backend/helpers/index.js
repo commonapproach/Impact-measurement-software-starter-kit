@@ -32,6 +32,34 @@ function addObjectToList(list, object) {
   }
 }
 
+/**
+ * given two list, find out the objects URIs which are in previous list and are not in current list
+ * @param previousList
+ * @param currentList
+ */
+function findOutObjectBeenRemoved(previousList, currentList) {
+  if(!previousList)
+    return []
+  const result = previousList.filter(uri => {
+    return !currentList.includes(uri)
+  });
+  return result
+}
+
+/**
+ * given two list, find out the objects URIs which are in current list and are not in previous list
+ * @param previousList
+ * @param currentList
+ */
+function findOutObjectbeenAdded(previousList, currentList) {
+  if(!previousList)
+    return currentList
+  const result = currentList.filter(uri => {
+    return !previousList.includes(uri)
+  });
+  return result
+}
+
 function URI2Id(uri) {
   return uri.split('_')[1];
 }
@@ -43,6 +71,9 @@ function URI2Id(uri) {
  * @param role role of the user, ex. 'administratorOfs'
  */
 function organizationBelongsToUser(userAccount, organizationId, role) {
+  if(!userAccount[role]){
+    return false
+  }
   const checkerList = userAccount[role].filter(organizationURL =>
     organizationURL.split('_')[1] === organizationId
   );
@@ -218,5 +249,6 @@ async function allReachableOrganizations(userAccount) {
 
 module.exports = {
   URI2Id, organizationsInSameGroups, addObjectToList, allReachableOrganizations,
-  organizationBelongsToUser, organizationBelongsToGroupAdmin, isReachableBy, isAPartnerOrganization
+  organizationBelongsToUser, organizationBelongsToGroupAdmin, isReachableBy, isAPartnerOrganization,
+  findOutObjectBeenRemoved, findOutObjectbeenAdded
 };

@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from 'react';
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Container, Typography} from "@mui/material";
-import {fetchUser, getProfile, updateProfile} from "../../api/userApi";
+import {fetchUser, getProfile, updateProfile, updateUser} from "../../api/userApi";
 import {Validator} from "../../helpers";
 import {AlertDialog} from "../shared/Dialogs";
 import {Loading} from "../shared";
@@ -62,20 +62,23 @@ export default function EditProfile() {
 
   useEffect(() => {
     Promise.all([getProfile(id), fetchUser(id)]).then(([profileRes, userRes]) => {
-      if(profileRes.success && userRes.success){
-        const person = profileRes.person
+      if (profileRes.success && userRes.success) {
+        const person = profileRes.person;
         if (person.phoneNumber)
           person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
 
         setForm({
-          ...form, ...person, isSuperuser: userRes.user.isSuperuser, associatedOrganizations: userRes.user.associatedOrganizations.map(organizationURI => {
-            return organizationURI.split('_')[1]
+          ...form, ...person,
+          isSuperuser: userRes.user.isSuperuser,
+          associatedOrganizations: userRes.user.associatedOrganizations?.map(organizationURI => {
+            return organizationURI.split('_')[1];
           })
         });
         setLoading(false);
       }
     }).catch(e => {
-      reportErrorToBackend(e)
+      console.log(e)
+      reportErrorToBackend(e);
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
@@ -89,8 +92,9 @@ export default function EditProfile() {
         setOptionOrganizations(options);
       }
     }).catch((e) => {
-      reportErrorToBackend(e)
-      enqueueSnackbar(e.json?.message || "Error occur when fetching organizations", {variant: 'error'});
+      reportErrorToBackend(e);
+      console.log(e)
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
     });
   }, []);
 
@@ -147,6 +151,10 @@ export default function EditProfile() {
         address: form.address,
       };
 
+      const userForm = {
+        associatedOrganizations: form.isSuperuser ? null : form.associatedOrganizations
+      };
+
       if (form.phoneNumber) {
         updateForm.countryCode = 1;
         updateForm.areaCode = Number(form.phoneNumber.match(/\(\d{3}\)/)[0].match(/\d{3}/)[0]);
@@ -157,16 +165,13 @@ export default function EditProfile() {
 
       setLoadingButton(true);
 
-      const {success} = await updateProfile(id, updateForm, userContext);
-      if (success) {
+      const userSuccess = (await updateUser(id, userForm)).success;
+      const profileSuccess = (await updateProfile(id, updateForm)).success;
+      if (profileSuccess && userSuccess) {
+
         setLoadingButton(false);
         setDialogSubmit(false);
-        if(userContext.isSuperuser){
-          navigate('/users/' + id + '/edit')
-        }else{
-          navigate('/profile/' + id + '/');
-        }
-
+        navigate('/users');
         enqueueSnackbar('Success', {variant: 'success'});
       }
     } catch (e) {
@@ -234,7 +239,7 @@ export default function EditProfile() {
           required={true}
         />
 
-        {form.isSuperuser?'The user is a superuser': <div/>}
+        {form.isSuperuser ? 'The user is a superuser' : <div/>}
 
         <GeneralField
           key={'phoneNumber'}

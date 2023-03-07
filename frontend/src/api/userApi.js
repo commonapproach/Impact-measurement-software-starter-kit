@@ -99,11 +99,6 @@ export function getProfile(id) {
   return getJson('/api/user/profile/' + id + '/');
 }
 
-//have not been used so far.
-export function updateUser(id, params) {
-  return postJson('/api/profile/' + id + '/', params);
-}
-
 /**
  * this will send the new primary email user intends to change to the backend.
  * @param id
@@ -122,9 +117,10 @@ export async function updatePrimaryEmail(id, email) {
  */
 export function updateProfile(id, params) {
   return postJson('/api/user/profile/' + id + '/', params);
-  // if (userContext.isSuperuser)
-  //   return postJson('/api/superuser/user/profile/' + id + '/', params);
-  // return postJson('/api/general/profile/' + id + '/', params);
+}
+
+export function updateUser(id, params) {
+  return postJson(`/api/user/updateUser/${id}/`, params)
 }
 
 export function updateSecurityQuestion(id, params) {

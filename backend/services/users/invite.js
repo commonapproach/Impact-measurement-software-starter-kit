@@ -35,16 +35,17 @@ const inviteNewUser = async (req, res) => {
   const userAccount = await GDBUserAccountModel.findOne(
     {email: email}, {populates: ['person']}
   );
-  associatedOrganizations = await Promise.all(associatedOrganizations.map(organizationId => {
-    return GDBOrganizationModel.findOne({_id: organizationId});
-  }));
+
   if (!userAccount) {
     // the user is a new user, store its data inside the database
     const userAccount = GDBUserAccountModel({
       email,
       isSuperuser: false,
-      associatedOrganizations
+      associatedOrganizations: associatedOrganizations.map(organizationID => `:organization_${organizationID}`)
     });
+    associatedOrganizations = await Promise.all(associatedOrganizations.map(organizationId => {
+      return GDBOrganizationModel.findOne({_id: organizationId});
+    }));
     userAccount.person = {givenName: firstName, familyName: lastName, middleName};
     // send email
     const token = sign({

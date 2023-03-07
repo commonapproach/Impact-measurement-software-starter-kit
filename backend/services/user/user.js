@@ -1,7 +1,27 @@
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {hasAccess} = require("../../helpers/hasAccess");
 
-const superuserFetchUserById = async (req, res, next) => {
-  try{
+const fetchUserHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchUser'))
+      return await fetchUser(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const updateUserHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'updateUser'))
+      return await updateUser(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchUser = async (req, res) => {
     const {id} = req.params;
     if(!id)
       return res.status(400).json({success: false, message: 'Id should be given'})
@@ -11,20 +31,11 @@ const superuserFetchUserById = async (req, res, next) => {
     delete user.salt;
     delete user.hash;
     delete user.securityQuestions;
-    // const newUserTypes = {}
-    // user.userTypes.map((userTypeURI)=>{
-    //   newUserTypes[userTypeURI] = userTypeURI2UserType[userTypeURI];
-    // })
-    // user.userTypes = newUserTypes;
     return res.status(200).json({success: true, user: user});
-  }catch (e){
-    next(e);
-  }
 
 }
 
-const superuserUpdateUserById = async (req, res, next) => {
-  try {
+const updateUser= async (req, res) => {
     const {id} = req.params;
     const {email,} = req.body;
     if(!id)
@@ -36,9 +47,6 @@ const superuserUpdateUserById = async (req, res, next) => {
       return res.status(400).json({success: false, message: 'No such user'});
     await user.save();
     return res.status(200).json({success: true});
-  } catch (e) {
-    next(e);
-  }
 }
 
-module.exports = {superuserFetchUserById, superuserUpdateUserById}
+module.exports = {fetchUserHandler, updateUserHandler}

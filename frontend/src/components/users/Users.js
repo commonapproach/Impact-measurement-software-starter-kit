@@ -66,7 +66,7 @@ export default function Users() {
     {
       label: 'Username/Email',
       body: ({_id, email}) => {
-        return <Link color to={`/users/${_id}`}>
+        return <Link color to={`/users/${_id}/edit`}>
           {email}
         </Link>;
       },
@@ -126,7 +126,7 @@ export default function Users() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'users'} objectId={_id}
+        <DropdownMenu urlPrefix={'users'} objectId={_id} hideDeleteOption hideViewOption
                       handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];

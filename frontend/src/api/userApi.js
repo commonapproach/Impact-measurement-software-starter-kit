@@ -95,7 +95,7 @@ export async function verifyChangePrimaryEmail(token) {
  * @param id
  * @returns {Promise<Response|any>}
  */
-export function getProfile(id, userContext) {
+export function getProfile(id) {
   return getJson('/api/user/profile/' + id + '/');
 }
 
@@ -156,9 +156,8 @@ export async function updatePassword(id, params) {
  * @param id
  * @returns {Promise<any>}
  */
-export function fetchUser(id, userContext) {
-  if (userContext.isSuperuser)
-    return getJson('/api/user/' + id + '/');
+export function fetchUser(id) {
+  return getJson('/api/user/' + id + '/');
 }
 
 /**

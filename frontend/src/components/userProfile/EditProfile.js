@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from 'react';
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Container, Typography} from "@mui/material";
-import {getProfile, updateProfile} from "../../api/userApi";
+import {fetchUser, getProfile, updateProfile} from "../../api/userApi";
 import {Validator} from "../../helpers";
 import {AlertDialog} from "../shared/Dialogs";
 import {Loading} from "../shared";
@@ -15,6 +15,7 @@ import {genderOptions} from "../../store/defaults";
 import AddressField from "../shared/AddressFieldField";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchOrganizations} from "../../api/organizationApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 
 const useStyles = makeStyles(() => ({
@@ -49,6 +50,7 @@ export default function EditProfile() {
     gender: '',
     altEmail: '',
     phoneNumber: '',
+    isSuperuser: false
   });
   const [errors, setErrors] = useState({});
   const [dialogSubmit, setDialogSubmit] = useState(false);
@@ -59,32 +61,36 @@ export default function EditProfile() {
 
 
   useEffect(() => {
-
-    getProfile(id, userContext).then(({success, person}) => {
-      if (success) {
-        if(person.phoneNumber)
+    Promise.all([getProfile(id), fetchUser(id)]).then(([profileRes, userRes]) => {
+      if(profileRes.success && userRes.success){
+        const person = profileRes.person
+        if (person.phoneNumber)
           person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
+
         setForm({
-          ...form, ...person
+          ...form, ...person, isSuperuser: userRes.user.isSuperuser, associatedOrganizations: userRes.user.associatedOrganizations.map(organizationURI => {
+            return organizationURI.split('_')[1]
+          })
         });
         setLoading(false);
       }
     }).catch(e => {
-      console.log(e);
+      reportErrorToBackend(e)
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
   }, [id]);
 
   useEffect(() => {
-    fetchOrganizations(userContext).then(({success, organizations}) => {
+    fetchOrganizations().then(({success, organizations}) => {
       if (success) {
         const options = {};
         organizations.map(organization => options[organization._id] = organization.legalName);
         setOptionOrganizations(options);
       }
     }).catch((e) => {
-      enqueueSnackbar(errors.message || "Error occur when fetching organizations", {variant: 'error'});
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching organizations", {variant: 'error'});
     });
   }, []);
 
@@ -204,6 +210,7 @@ export default function EditProfile() {
           /> : <div/>}
 
         <Dropdown
+          disabled={form.isSuperuser}
           label="Associated Organizations"
           key={'associatedOrganizations'}
           value={form.associatedOrganizations}
@@ -216,7 +223,7 @@ export default function EditProfile() {
               setErrors(errors => ({...errors, associatedOrganizations: 'This field is required'}
               ));
             } else {
-              setErrors(errors => ({...errors, associatedOrganizations: null}))
+              setErrors(errors => ({...errors, associatedOrganizations: null}));
             }
           }
           }
@@ -226,6 +233,8 @@ export default function EditProfile() {
           noEmpty
           required={true}
         />
+
+        {form.isSuperuser?'The user is a superuser': <div/>}
 
         <GeneralField
           key={'phoneNumber'}

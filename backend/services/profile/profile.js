@@ -5,7 +5,6 @@ const {SPARQL} = require('../../utils/graphdb/helpers');
 const {validateCredentials, updateUserPassword} = require("../userAccount/user");
 const Hashing = require("../../utils/hashing");
 const {hasAccess} = require("../../helpers/hasAccess");
-const {GDBOrganizationModel} = require("../../models/organization");
 
 
 const fetchProfileHandler = async (req, res, next) => {

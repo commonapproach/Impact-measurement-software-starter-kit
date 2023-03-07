@@ -33,6 +33,14 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'fetchUser':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'updateUser':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
     // organizations
     case 'createOrganization':

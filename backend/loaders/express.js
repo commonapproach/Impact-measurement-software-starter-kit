@@ -59,17 +59,9 @@ app.use('/api', baseRoute);
 // Check authorization
 app.use('/api', authMiddleware('Session expired, please login again'));
 
-
-// app.use('/api/general', generalUserRoute);
-
-// Private routes
-
-// routes only for superuser
-// app.use('/api/superuser', superuserRoute);
-// app.use('/api/groupAdmin', groupAdminRoute);
-// app.use('/api/admin', adminRoute);
 app.use('/api/reportError', errorReportRoute)
 app.use('/api/user', userRoute);
+app.use('/api/dynamicClassInstances', dynamicClassInstancesRoute)
 app.use('/api/users', usersRoute);
 app.use('/api/organization', organizationRoute);
 app.use('/api/organizations', organizationsRoute);

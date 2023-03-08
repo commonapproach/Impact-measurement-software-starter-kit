@@ -40,6 +40,7 @@ export default function EditProfile() {
   const {id} = useParams();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
+  const [messageList, setMessageList] = useState([])
   const [form, setForm] = useState({
     familyName: '',
     middleName: '',
@@ -134,6 +135,12 @@ export default function EditProfile() {
     navigate('/users/' + id + '/edit');
   };
 
+  const handleMessageListCancel = () => {
+    setMessageList([])
+    navigate('/users');
+  }
+
+
 
   // submit button handler
   const handleSubmitChanges = async () => {
@@ -165,9 +172,17 @@ export default function EditProfile() {
 
       setLoadingButton(true);
 
-      const userSuccess = (await updateUser(id, userForm)).success;
+      const {success, messageList} = (await updateUser(id, userForm));
+
+      if (!success && messageList) {
+        setLoadingButton(false);
+        setDialogSubmit(false);
+        setMessageList(messageList);
+
+      }
+
       const profileSuccess = (await updateProfile(id, updateForm)).success;
-      if (profileSuccess && userSuccess) {
+      if (profileSuccess && success) {
 
         setLoadingButton(false);
         setDialogSubmit(false);
@@ -317,6 +332,12 @@ export default function EditProfile() {
           dialogTitle={'Notice!'}
           buttons={<Button onClick={handleDialogCancel} key={'cancelConfirm'} autoFocus> {'confirm'}</Button>}
           open={dialogQuitEdit}/>
+
+        <AlertDialog
+          dialogContentText={messageList.join("\n") + '\nplease remove the user from above roles before doing this action'}
+          dialogTitle={'Action Failed'}
+          buttons={<Button onClick={handleMessageListCancel} key={'messageListCancel'} autoFocus> {'confirm'}</Button>}
+          open={messageList.length}/>
 
 
       </div>

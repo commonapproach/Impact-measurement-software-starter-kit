@@ -161,7 +161,7 @@ function TopNavBar() {
         ) : null}
 
         <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-          Pathfinder
+         Common Approach Sandbox
         </Typography>
 
         {/*The profile button containing dashboard, profile, logout/login*/}

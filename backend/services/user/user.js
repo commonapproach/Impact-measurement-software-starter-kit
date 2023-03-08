@@ -56,7 +56,7 @@ const updateUser = async (req, res) => {
   // check the if the user serves as any role in these organizations
   removedOrganizationURIs.map(organizationURI => {
     const orgID = organizationURI.split('_')[1];
-    if (organizationBelongsToUser(user, organizationURI.split('_')[1], 'editorOf')) {
+    if (organizationBelongsToUser(user, organizationURI.split('_')[1], 'editorOfs')) {
       // if the user serves as a role in the organization
       messageList.push(`The user is served as an editor in ${organizationURI}`);
     }

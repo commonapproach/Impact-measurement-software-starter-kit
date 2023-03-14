@@ -2,9 +2,8 @@ import React, {useContext} from 'react';
 import {Link} from '../shared';
 
 import {Container, Button, Typography} from "@mui/material";
-import {Edit, Create, People, ViewHeadline as Log, CheckCircleOutline as Criteria} from "@mui/icons-material";
+import {Edit, Create, People, ViewHeadline as Log, CheckCircleOutline as Criteria, FileUpload} from "@mui/icons-material";
 import {UserContext} from "../../context";
-import DashboardForSuperUser from "./DashboardForSuperUser";
 import {NavButton} from "./NavButton";
 
 
@@ -53,6 +52,9 @@ function Dashboard() {
 
       <NavButton to={'/domains'} icon={<Edit/>} key={'domains'}
                  text="Manage Domains"/>
+
+      <NavButton to={'/fileUploading'} icon={<FileUpload/>} key={'domains'}
+                 text="File Upload"/>
 
 
 

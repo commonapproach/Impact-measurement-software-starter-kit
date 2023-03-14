@@ -38,6 +38,7 @@ import AddEditOutcome from "./components/outcomes/addEditOutcome";
 import AddEditIndicatorReport from "./components/indicatorReport/AddEditIndicatorReport";
 import Organization_indicatorReports from "./components/indicatorReport/Organization-indicatorReports";
 import IndicatorReports from "./components/indicatorReport/indicatorReports";
+import FileUploadingPage from "./components/uploadingPages/uploadingPage";
 
 const routes = (
   <Routes>
@@ -83,6 +84,9 @@ const routes = (
     <Route path="/outcome/:orgId/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
+      {/*file uploading page*/}
+    <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
+    <Route path="/fileUploading/:orgID/:fileType/:formType" element={<PrivateRoute element={FileUploadingPage}/>}/>
 
 
     <Route path="/organization-indicatorReports" element={<PrivateRoute element={Organization_indicatorReports}/>}/>

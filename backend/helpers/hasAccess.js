@@ -270,8 +270,10 @@ async function hasAccess(req, operationType) {
       }
       break;
     case 'createIndicator':
-      if (userAccount.isSuperuser)
+      if (userAccount.isSuperuser){
         return true;
+      }
+
       if (userAccount.editorOfs) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs

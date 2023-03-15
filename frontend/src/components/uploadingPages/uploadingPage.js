@@ -48,18 +48,29 @@ export default function FileUploadingPage() {
         description: {type: 'string'},
         dateCreated: {type: 'string', format: 'time'},
       },
-      required: ['name', 'description',]
+      required: ['name', 'description']
     },
     'Indicator Report': {
-      // type: 'object',
-      // properties: {
-      //   name: { type: 'string' },
-      //   description: {type: 'string'},
-      //   dateCreated: {type: 'string', format: 'time'},
-      // },
-      // required: ['name', 'description']
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        comment: {type: 'string'},
+        numericalValue: {type: 'number'},
+        unitOfMeasure: {type: 'string'},
+        startTime: {type: 'string'},
+        endTime: {type: 'string'},
+        dateCreated: {type: 'string', format: 'time'},
+      },
+      required: ['name', 'comment', 'numericalValue', 'unitOfMeasure', 'startTime', 'endTime', 'dateCreated']
     },
-    'Outcome':{}
+    'Outcome':{
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        description: {type: 'string'},
+      },
+      required: ['name', 'description']
+    }
   }
 
   const createAPIs = {
@@ -110,7 +121,7 @@ export default function FileUploadingPage() {
 
   const handleConfirm = async () => {
     try {
-      console.log(state.fileContent)
+      setState(state => ({...state, loadingButton: true}));
       const form = {
         name: state.fileContent.name,
         organizations: [state.organization],
@@ -153,7 +164,7 @@ export default function FileUploadingPage() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Organization Basic </Typography>
+        <Typography variant={'h4'}> File Uploading </Typography>
 
         <SelectField
           // disabled={mode === 'new' || !userContext.isSuperuser}
@@ -289,8 +300,8 @@ export default function FileUploadingPage() {
         {/*/>*/}
 
 
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={'Are you sure you want to submit?'}
+        <AlertDialog dialogContentText={state.loadingButton?'Please wait a second...':"You won't be able to edit the information after clicking CONFIRM."}
+                     dialogTitle={state.loadingButton?'Checking is processing...':'Are you sure you want to submit?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

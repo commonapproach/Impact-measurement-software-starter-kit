@@ -61,7 +61,7 @@ export default function FileUploader({title, schema, disabled, onchange, importe
       <button onClick={handleUpload} disabled={!selectedFile || disabled}>
         Upload
       </button>
-      {error? <Typography variant={'subtitle1'} color={'red'}> { error } </Typography> : (checked && !valid)? <Typography variant={'subtitle1'} color={'red'}> { 'The file is not valid' } </Typography> : (valid? <Typography variant={'subtitle1'} color={'green'}> { 'The file is valid' } </Typography>:'')}
+      {error? <Typography variant={'subtitle1'} color={'red'}> { error } </Typography> : (checked && !valid)? <Typography variant={'subtitle1'} color={'red'}> { 'The file is not valid' } </Typography> : ''}
 
     </div>
   );

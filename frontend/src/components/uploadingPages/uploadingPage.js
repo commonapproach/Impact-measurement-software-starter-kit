@@ -109,7 +109,22 @@ export default function FileUploadingPage() {
   };
 
   const handleConfirm = async () => {
-    await createAPIs[state.formType]()
+    try {
+      console.log(state.fileContent)
+      const form = {
+        name: state.fileContent.name,
+        organizations: [state.organization],
+        description: state.fileContent.description
+      }
+      const res = await createAPIs[state.formType]({form});
+      if (res.success) {
+        setState({loadingButton: false, submitDialog: false,});
+        navigate('/dashboard');
+        enqueueSnackbar(res.message || 'Success', {variant: "success"});
+      }
+    } catch (e) {
+
+    }
   }
 
   const validate = () => {

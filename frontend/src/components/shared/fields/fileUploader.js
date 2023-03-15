@@ -12,11 +12,11 @@ export default function FileUploader({title, schema, disabled, onchange, importe
 
   const reader = new FileReader();
 
-  useEffect(() => {
-    if (valid) {
-      onchange(selectedFile)
-    }
-  }, [valid])
+  // useEffect(() => {
+  //   if (valid) {
+  //     onchange(selectedFile)
+  //   }
+  // }, [valid])
 
 // set the onload event handler
   reader.onload = function() {
@@ -27,8 +27,13 @@ export default function FileUploader({title, schema, disabled, onchange, importe
     const parsed_data = JSON.parse(fileContents);
 
     const ajv = new Ajv();
-    const validater = ajv.compile(schema);
-    setValid(validater(parsed_data));
+    const validator = ajv.compile(schema);
+    if(validator(parsed_data)){
+      setValid(true)
+      onchange(parsed_data)
+    } else {
+      setValid(false)
+    }
     setChecked(true)
   };
 

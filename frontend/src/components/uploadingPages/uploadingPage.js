@@ -6,7 +6,7 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createOrganization, fetchOrganization, updateOrganization} from "../../api/organizationApi";
+import {createOrganization, fetchOrganization, fetchOrganizations, updateOrganization} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
@@ -14,6 +14,7 @@ import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import FileUploader from "../shared/fields/fileUploader";
+import {createIndicator} from "../../api/indicatorApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -39,16 +40,45 @@ export default function FileUploadingPage() {
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
+  const schemas = {
+    'Indicator': {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        description: {type: 'string'},
+        dateCreated: {type: 'string', format: 'time'},
+      },
+      required: ['name', 'description',]
+    },
+    'Indicator Report': {
+      // type: 'object',
+      // properties: {
+      //   name: { type: 'string' },
+      //   description: {type: 'string'},
+      //   dateCreated: {type: 'string', format: 'time'},
+      // },
+      // required: ['name', 'description']
+    },
+    'Outcome':{}
+  }
+
+  const createAPIs = {
+    Indicator: createIndicator
+  }
 
   const [state, setState] = useState({
+    loading: true,
     submitDialog: false,
     loadingButton: false,
     fileType: useParams().fileType,
     formType: useParams().formType,
+    organization: useParams().orgID,
+    fileContent: null
   });
   const [options, setOptions] = useState({
     fileTypes: ['JSON'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
+    organizations: {}
   })
   const [errors, setErrors] = useState(
     {}
@@ -56,66 +86,54 @@ export default function FileUploadingPage() {
 
 
   useEffect(() => {
-    // if (fileType !== state.fileType || formType !== state.formType) {
-    //   if (fileType !== state.fileType)
-    //     setState(state => ({...state, fileType: fileType}));
-    //   if (formType !== state.formType)
-    //     setState(state => ({...state, formType: formType}));
-    //   navigate(`/fileUploading/${fileType}/${formType}`);
-    // }
+    fetchOrganizations().then(res => {
+      if(res.success)
+        res.organizations.map(organization => {
+          options.organizations[organization._id] = organization.legalName;
+        })
+        setState(state => ({...state, loading: false}));
+    }).catch(e => {
+      reportErrorToBackend(e)
+      setState(state => ({...state, loading: false}))
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    });
 
 
   }, []);
 
+  const handleSubmit = () => {
+    if (validate()) {
+      setState(state => ({...state, submitDialog: true}));
+    }
+  };
+
+  const handleConfirm = async () => {
+    await createAPIs[state.formType]()
+  }
 
   const validate = () => {
     const error = {};
-    if (!form.legalName) {
-      error.legalName = 'The field cannot be empty';
+    if (!state.fileType) {
+      error.fileType = 'The field cannot be empty';
     }
-    if (!form.ID) {
-      error.ID = 'The field cannot be empty';
+    if (!state.formType) {
+      error.formType = 'The field cannot be empty';
+    }
+    if(!state.organization) {
+      error.organization = 'The field cannot be empty';
+    }
+    if(!state.fileContent) {
+      error.fileContent = 'The field cannot be empty';
     }
     setErrors(error);
-
-    // const outcomeFormErrors = [];
-    // outcomeForm.map((outcome, index) => {
-    //   if(!outcome.name) {
-    //     if (!outcomeFormErrors[index])
-    //       outcomeFormErrors[index] = {};
-    //     outcomeFormErrors[index].name = 'This field cannot be empty';
-    //   }
-    //   if(!outcome.domain) {
-    //     if (!outcomeFormErrors[index])
-    //       outcomeFormErrors[index] = {};
-    //     outcomeFormErrors[index].domain = 'This field cannot be empty';
-    //   }
-    //   if(!outcome.description) {
-    //     if (!outcomeFormErrors[index])
-    //       outcomeFormErrors[index] = {};
-    //     outcomeFormErrors[index].description = 'This field cannot be empty';
-    //   }
-    // })
-    // setOutcomeFormErrors(outcomeFormErrors);
-
-    // const indicatorFormErrors = [];
-    // indicatorForm.map((indicator, index) => {
-    //   if(!indicator.name) {
-    //     if(!indicatorFormErrors[index])
-    //       indicatorFormErrors[index] = {};
-    //     indicatorFormErrors[index].name = 'This field cannot be empty';
-    //   }
-    //   if(!indicator.description) {
-    //     if (!indicatorFormErrors[index])
-    //       indicatorFormErrors[index] = {};
-    //     indicatorFormErrors[index].description = 'This field cannot be empty';
-    //   }
-    // })
-    // setIndicatorFormErrors(indicatorFormErrors)
     return Object.keys(error).length === 0;
-    // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
 
+
+
+  if (state.loading)
+    return <Loading message={`Loading organizations...`}/>;
 
   return (
     <Container maxWidth="md">
@@ -133,7 +151,11 @@ export default function FileUploadingPage() {
             errors.fileType
           }
           onBlur={() => {
-
+            if (!state.fileType) {
+              setErrors(errors => ({...errors, fileType: 'The field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, fileType: null}));
+            }
           }}
           onChange={e => {
             setState(state => ({
@@ -153,7 +175,11 @@ export default function FileUploadingPage() {
             errors.formType
           }
           onBlur={() => {
-
+            if (!state.formType) {
+              setErrors(errors => ({...errors, formType: 'The field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, formType: null}));
+            }
           }}
           onChange={e => {
             setState(state => ({
@@ -162,8 +188,40 @@ export default function FileUploadingPage() {
             );
           }}
         />
+        <SelectField
+          // disabled={mode === 'new' || !userContext.isSuperuser}
+          key={'organization'}
+          label={'Organization'}
+          value={state.organization}
+          options={options.organizations}
+          error={!!errors.organization}
+          helperText={
+            errors.organization
+          }
+          onBlur={() => {
+            if (!state.organization) {
+              setErrors(errors => ({...errors, organization: 'The field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, organization: null}));
+            }
+          }}
+          onChange={e => {
+            setState(state => ({
+                ...state, organization: e.target.value
+              })
+            );
+          }}
+        />
 
-        <FileUploader title={state.fileType && state.formType? `Please upload a ${state.formType} ${state.fileType} file`: 'Please choose file and form type'} disabled={!(state.fileType && state.formType)}/>
+        <FileUploader title={state.fileType && state.formType? `Please upload a ${state.formType} ${state.fileType} file`:
+          'Please choose file and form type'}
+                      disabled={!(state.fileType && state.formType)}
+                      schema={schemas[state.formType]}
+                      onchange={(fileContent) => {
+                        setState(state => ({...state, fileContent: fileContent}))
+                      }}
+                      importedError={errors.fileContent}
+        />
         {/*<Dropdown*/}
         {/*  label="Editors"*/}
         {/*  key={'editors'}*/}
@@ -216,23 +274,22 @@ export default function FileUploadingPage() {
         {/*/>*/}
 
 
-        {/*<AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}*/}
-        {/*             dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :*/}
-        {/*               'Are you sure you want to update this Organization?'}*/}
-        {/*             buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}*/}
-        {/*                               key={'cancel'}>{'cancel'}</Button>,*/}
-        {/*               <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}*/}
-        {/*                              key={'confirm'}*/}
-        {/*                              onClick={handleConfirm} children="confirm" autoFocus/>]}*/}
-        {/*             open={state.submitDialog}/>*/}
+        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                     dialogTitle={'Are you sure you want to submit?'}
+                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                                       key={'cancel'}>{'cancel'}</Button>,
+                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                                      key={'confirm'}
+                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
+                     open={state.submitDialog}/>
       </Paper>
 
 
-      {/*<Paper sx={{p: 2}} variant={'outlined'}>*/}
-      {/*  <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>*/}
-      {/*    Submit*/}
-      {/*  </Button>*/}
-      {/*</Paper>*/}
+      <Paper sx={{p: 2}} variant={'outlined'}>
+        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+          Submit
+        </Button>
+      </Paper>
 
     </Container>);
 

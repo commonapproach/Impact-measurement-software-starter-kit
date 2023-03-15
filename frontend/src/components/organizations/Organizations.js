@@ -24,7 +24,7 @@ export default function Organizations() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOrganizations(userContext).then(res => {
+    fetchOrganizations().then(res => {
       if(res.success)
       setState(state => ({...state, loading: false, data: res.organizations}));
     }).catch(e => {

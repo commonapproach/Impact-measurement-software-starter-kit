@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Typography} from "@mui/material";
 import {reportErrorToBackend} from "../../../api/errorReportApi";
 const Ajv = require("ajv");
 
-export default function FileUploader({title, schema, disabled}) {
+export default function FileUploader({title, schema, disabled, onchange, importedError}) {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [valid, setValid] = useState(false)
+  const [checked, setChecked] = useState(false)
+  const [error, setError] = useState(importedError)
 
 
   const reader = new FileReader();
+
+  useEffect(() => {
+    if (valid) {
+      onchange(selectedFile)
+    }
+  }, [valid])
 
 // set the onload event handler
   reader.onload = function() {
@@ -18,13 +27,15 @@ export default function FileUploader({title, schema, disabled}) {
     const parsed_data = JSON.parse(fileContents);
 
     const ajv = new Ajv();
-    const validate = ajv.compile(schema);
-    const valid = validate(parsed_data);
+    const validater = ajv.compile(schema);
+    setValid(validater(parsed_data));
+    setChecked(true)
   };
 
 
   const handleFileSelect = (event) => {
     setSelectedFile(event.target.files[0]);
+    setError(null)
   };
 
   const handleUpload = () => {
@@ -45,6 +56,8 @@ export default function FileUploader({title, schema, disabled}) {
       <button onClick={handleUpload} disabled={!selectedFile || disabled}>
         Upload
       </button>
+      {error? <Typography variant={'subtitle1'} color={'red'}> { error } </Typography> : (checked && !valid)? <Typography variant={'subtitle1'} color={'red'}> { 'The file is not valid' } </Typography> : (valid? <Typography variant={'subtitle1'} color={'green'}> { 'The file is valid' } </Typography>:'')}
+
     </div>
   );
 }

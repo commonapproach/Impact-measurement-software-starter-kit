@@ -3,12 +3,9 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
-import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {fetchOrganizations, } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
@@ -31,7 +28,7 @@ export default function AddEditIndicator() {
   const classes = useStyles();
   const navigate = useNavigate();
   const {id, orgId, operationMode} = useParams();
-  const mode = id? operationMode : 'new';
+  const mode = id ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -46,37 +43,37 @@ export default function AddEditIndicator() {
   const [form, setForm] = useState({
     name: '',
     description: '',
-    organizations:[]
+    organizations: []
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if((mode === 'edit' && id) || (mode === 'view' && id)){
+    if ((mode === 'edit' && id) || (mode === 'view' && id)) {
       fetchIndicator(id, userContext).then(({success, indicator}) => {
-        if(success){
+        if (success) {
           setForm(indicator);
-          setLoading(false)
+          setLoading(false);
         }
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if(mode === 'edit' && (!id || !orgId) ) {
+    } else if (mode === 'edit' && (!id || !orgId)) {
       navigate('/organization-indicators');
       enqueueSnackbar("No ID or orgId provided", {variant: 'error'});
-    } else if (mode === 'new' && !orgId){
+    } else if (mode === 'new' && !orgId) {
       setLoading(false);
       // navigate('/organization-indicators');
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new' && orgId) {
-      setForm(form => ({...form, organizations: [orgId]}))
+    } else if (mode === 'new' && orgId) {
+      setForm(form => ({...form, organizations: [orgId]}));
       setLoading(false);
     } else {
       navigate('/organization-indicators');
-      enqueueSnackbar('Wrong auth', {variant: 'error'})
+      enqueueSnackbar('Wrong auth', {variant: 'error'});
     }
 
   }, [mode, id]);
@@ -100,8 +97,8 @@ export default function AddEditIndicator() {
         if (e.json) {
           setErrors(e.json);
         }
-        console.log(e)
-        reportErrorToBackend(e)
+        console.log(e);
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -116,7 +113,7 @@ export default function AddEditIndicator() {
         if (e.json) {
           setErrors(e.json);
         }
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when updating indicator', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -130,9 +127,9 @@ export default function AddEditIndicator() {
       error.name = 'The field cannot be empty';
 
     if (!form.description)
-      error.description = 'The field cannot be empty'
-    if(form.organizations.length === 0)
-      error.organizations = 'The field cannot be empty'
+      error.description = 'The field cannot be empty';
+    if (form.organizations.length === 0)
+      error.organizations = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -155,11 +152,11 @@ export default function AddEditIndicator() {
           importErrors={errors}
         />
 
-        {mode==='view'?
-          <div/>:
+        {mode === 'view' ?
+          <div/> :
           <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-          Submit
-        </Button>}
+            Submit
+          </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :

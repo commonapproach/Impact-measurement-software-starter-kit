@@ -35,7 +35,6 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "predeploy": "yarn build; cp build/index.html build/404.html",
     "deploy": "gh-pages -d build"
-
   },
   "browserslist": [
     ">0.2%",

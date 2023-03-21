@@ -118,15 +118,13 @@ export default function Indicators() {
         columns={columns}
         idField="id"
         customToolbar={
-          userContext.isSuperuser?
           <Chip
+            disabled={!userContext.isSuperuser}
             onClick={() => navigate(`/indicator/${id}/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Indicator"
             variant="outlined"/>
-          :
-          <div/>
         }
 
       />

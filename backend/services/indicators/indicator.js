@@ -56,11 +56,14 @@ const fetchIndicators = async (req, res) => {
       throw new Server400Error('No such organization');
     if (!organization.hasIndicators)
       return res.status(200).json({success: true, indicators: []});
-    if(userAccount.isSuperuser || organization.editors.includes(`:userAccount_${userAccount._id}`))
+    let editable;
+    if(userAccount.isSuperuser || organization.editors.includes(`:userAccount_${userAccount._id}`)) {
+      editable = true
       organization.hasIndicators.map(indicator => {
         indicator.editable = true;
-      })
-    return res.status(200).json({success: true, indicators: organization.hasIndicators});
+      });
+    }
+    return res.status(200).json({success: true, indicators: organization.hasIndicators, editable});
   }
 
 
@@ -204,8 +207,23 @@ const createIndicator = async (req, res) => {
   if (!form || !form.organizations || !form.name || !form.description)
     throw new Server400Error('Invalid input');
   form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
-    GDBOrganizationModel.findOne({_id: organizationId})
+    GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']})
   ));
+  // for each organization, does it contain any indicator with same name?
+  let duplicate = false
+  let organizationInProblem
+  form.forOrganizations.map(organization => {
+    if(organization.hasIndicators){
+      organization.hasIndicators.map(indicator => {
+        if (indicator.name === form.name) {
+          duplicate = true;
+          organizationInProblem = organization._id;
+        }
+      });
+    }
+  })
+  if (duplicate && organizationInProblem)
+    throw new Server400Error('The name of the indicator has been occupied in organization ' + organizationInProblem)
 
   const indicator = GDBIndicatorModel(form);
   await indicator.save();

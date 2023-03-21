@@ -25,7 +25,7 @@ const createIndicatorReport = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
-  if (!form || !form.name || !form.comment || !form.organization || !form.indicator
+  if (!form || !form.name || !form.organization || !form.indicator
     || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
     throw new Server400Error('Wrong input');
 
@@ -35,6 +35,10 @@ const createIndicatorReport = async (req, res) => {
   const indicator = await GDBIndicatorModel.findOne({_id: form.indicator});
   if (!indicator)
     throw new Server400Error('No such indicator');
+  if (await GDBIndicatorReportModel.findOne({forOrganization: ':organization_' + form.organization,
+    name: form.name})) {
+    throw new Server400Error('The Indicator Report name is occupied')
+  }
   if (form.startTime > form.endTime)
     throw new Server400Error('Start time must be earlier than end time');
 
@@ -141,7 +145,7 @@ const updateIndicatorReport = async (req, res) => {
   indicatorReport.dateCreated = new Date(form.dateCreated);
 
   indicatorReport.value.numericalValue = form.numericalValue;
-  indicatorReport.value.unitOfMeasure.label = form.unitOfMeasure
+  indicatorReport.value.unitOfMeasure.label = form.unitOfMeasure;
 
   await indicatorReport.save();
   return res.status(200).json({success: true});
@@ -164,7 +168,7 @@ const fetchIndicatorReports = async (req, res) => {
   const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
   const organization = await GDBOrganizationModel.findOne({_id: orgId});
   if (!organization)
-    throw new Server400Error('No such organization')
+    throw new Server400Error('No such organization');
   let editable;
   if (userAccount.isSuperuser || organization.editors?.includes(`:userAccount_${req.session._id}`)) {
     editable = true; // to tell the frontend that the outcome belong to the organization is editable
@@ -172,7 +176,12 @@ const fetchIndicatorReports = async (req, res) => {
   const indicatorReports = await GDBIndicatorReportModel.find({forOrganization: `:organization_${orgId}`},
     // {populates: ['forIndicator']}
   );
-  return res.status(200).json({success: true, indicatorReports, editable})
-}
+  return res.status(200).json({success: true, indicatorReports, editable});
+};
 
-module.exports = {createIndicatorReportHandler, fetchIndicatorReportHandler, updateIndicatorReportHandler, fetchIndicatorReportsHandler};
+module.exports = {
+  createIndicatorReportHandler,
+  fetchIndicatorReportHandler,
+  updateIndicatorReportHandler,
+  fetchIndicatorReportsHandler
+};

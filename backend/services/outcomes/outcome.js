@@ -42,7 +42,7 @@ const fetchOutcomes = async (req, res) => {
     if (!organization)
       throw new Server400Error('No such organization');
     let editable;
-    if (organization.editors?.includes(`:userAccount_${req.session._id}`)) {
+    if (organization.editors?.includes(`:userAccount_${req.session._id}`) || req.session.isSuperuser) {
       editable = true; // to tell the frontend that the outcome belong to the organization is editable
       organization.hasOutcomes?.map(outcome => outcome.editable = true);
     }
@@ -199,8 +199,25 @@ const createOutcome = async (req, res) => {
   if (!form || !form.organizations || !form.name || !form.description || !form.domain)
     throw new Server400Error('Invalid input');
   form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
-    GDBOrganizationModel.findOne({_id: organizationId})
+    GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']})
   ));
+
+  // for each organization, does it contain any indicator with same name?
+  let duplicate = false
+  let organizationInProblem
+  form.forOrganizations.map(organization => {
+    if(organization.hasOutcomes){
+      organization.hasOutcomes.map(outcome => {
+        if (outcome.name === form.name) {
+          duplicate = true;
+          organizationInProblem = organization._id;
+        }
+      });
+    }
+  })
+  if (duplicate && organizationInProblem)
+    throw new Server400Error('The name of the outcome has been occupied in organization ' + organizationInProblem)
+
   form.domain = await GDBDomainModel.findOne({_id: form.domain});
   if (!form.domain)
     throw new Server400Error('No such domain');

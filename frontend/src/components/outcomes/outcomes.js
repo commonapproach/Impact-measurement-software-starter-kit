@@ -67,7 +67,7 @@ export default function Outcomes() {
     {
       label: 'Name',
       body: ({_id, name, editable}) => {
-        return editable? <Link color to={`/outcome/${_id}/edit`}>
+        return editable? <Link color to={`/outcome/${_id}/view`}>
           {name}
         </Link>:name
       },

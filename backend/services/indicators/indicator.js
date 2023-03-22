@@ -41,7 +41,7 @@ const fetchIndicators = async (req, res) => {
     });
     // replace indicatorURIs to actual indicator objects
     const indicators = await Promise.all(indicatorURIs.map(indicatorURI => {
-      return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]});
+      return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]}, {populates: ['unitOfMeasure']});
     }));
     // for all indicators, if its id in editableIndicatorIDs, then it is editable
     indicators.map(indicator => {
@@ -51,7 +51,8 @@ const fetchIndicators = async (req, res) => {
     return res.status(200).json({success: true, indicators});
   } else {
     // the organizationId is given, return all indicators belongs to the organization
-    const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']});
+    const organization = await GDBOrganizationModel.findOne({_id: organizationId},
+      {populates: ['hasIndicators.unitOfMeasure']});
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.hasIndicators)

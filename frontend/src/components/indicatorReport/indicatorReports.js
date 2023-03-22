@@ -68,26 +68,24 @@ export default function IndicatorReports() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return state.editable?<Link color to={`/indicatorReport/${_id}/edit`}>
+        return state.editable?<Link color to={`/indicatorReport/${_id}/view`}>
           {name}
         </Link>:name
       },
       sortBy: ({name}) => name
     },
-    // {
-    //   label: 'Administrator',
-    //   body: ({administrator}) => {
-    //     return administrator;
-    //   }
-    // },
-    // {
-    //   label: 'Last name',
-    //   body: ({person}) => {
-    //     if(person && person.familyName)
-    //       return person.familyName
-    //     return 'Not Provided'
-    //   }
-    // },
+    {
+      label: 'value',
+      body: ({value}) => {
+        return value.numericalValue;
+      }
+    },
+    {
+      label: 'Unit Of Measure',
+      body: ({value}) => {
+        return value.unitOfMeasure.label
+      }
+    },
     // {
     //   label: 'Phone Number',
     //   body: ({primaryContact}) => {

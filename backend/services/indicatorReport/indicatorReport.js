@@ -45,7 +45,7 @@ const createIndicatorReport = async (req, res) => {
     forOrganization: ':organization_' + form.organization,
     name: form.name
   })) {
-    return res.status(200).json({success: false, message: 'The Indicator Report name is occupied'});
+    return res.status(200).json({success: false, message: `${form.name}: The Indicator Report name is occupied`});
   }
   if (form.startTime > form.endTime)
     throw new Server400Error('Start time must be earlier than end time');
@@ -182,7 +182,7 @@ const fetchIndicatorReports = async (req, res) => {
     editable = true; // to tell the frontend that the outcome belong to the organization is editable
   }
   const indicatorReports = await GDBIndicatorReportModel.find({forOrganization: `:organization_${orgId}`},
-    // {populates: ['forIndicator']}
+    {populates: ['value.unitOfMeasure']}
   );
   return res.status(200).json({success: true, indicatorReports, editable});
 };

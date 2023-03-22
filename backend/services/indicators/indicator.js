@@ -223,7 +223,7 @@ const createIndicator = async (req, res) => {
     }
   })
   if (duplicate && organizationInProblem)
-    throw new Server400Error('The name of the indicator has been occupied in organization ' + organizationInProblem)
+    return res.status(200).json({success: false, message: 'The name of the indicator has been occupied in organization ' + organizationInProblem});
 
   const indicator = GDBIndicatorModel(form);
   await indicator.save();

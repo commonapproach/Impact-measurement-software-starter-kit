@@ -216,7 +216,7 @@ const createOutcome = async (req, res) => {
     }
   })
   if (duplicate && organizationInProblem)
-    throw new Server400Error('The name of the outcome has been occupied in organization ' + organizationInProblem)
+    return res.status(200).json({success: false, message: 'The name of the outcome has been occupied in organization ' + organizationInProblem})
 
   form.domain = await GDBDomainModel.findOne({_id: form.domain});
   if (!form.domain)

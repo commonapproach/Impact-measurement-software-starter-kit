@@ -25,6 +25,12 @@ const createIndicatorReport = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
+  if (form.indicatorName) { // handle the case when no such indicator name
+    const indicator = await GDBIndicatorModel.findOne({name: form.indicatorName});
+    if (!indicator)
+      return res.status(200).json({success: false, message: 'Wrong indicatorName'})
+    form.indicator = indicator._id;
+  }
   if (!form || !form.name || !form.organization || !form.indicator
     || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
     throw new Server400Error('Wrong input');
@@ -35,9 +41,11 @@ const createIndicatorReport = async (req, res) => {
   const indicator = await GDBIndicatorModel.findOne({_id: form.indicator});
   if (!indicator)
     throw new Server400Error('No such indicator');
-  if (await GDBIndicatorReportModel.findOne({forOrganization: ':organization_' + form.organization,
-    name: form.name})) {
-    throw new Server400Error('The Indicator Report name is occupied')
+  if (await GDBIndicatorReportModel.findOne({
+    forOrganization: ':organization_' + form.organization,
+    name: form.name
+  })) {
+    return res.status(200).json({success: false, message: 'The Indicator Report name is occupied'});
   }
   if (form.startTime > form.endTime)
     throw new Server400Error('Start time must be earlier than end time');

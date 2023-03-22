@@ -25,7 +25,7 @@ const createIndicatorReport = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
-  if (form.indicatorName) { // handle the case when no such indicator name
+  if (form?.indicatorName) { // handle the case when no such indicator name
     const indicator = await GDBIndicatorModel.findOne({name: form.indicatorName});
     if (!indicator)
       return res.status(200).json({success: false, message: 'Wrong indicatorName'})

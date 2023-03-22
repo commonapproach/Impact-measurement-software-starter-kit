@@ -15,6 +15,8 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import FileUploader from "../shared/fields/fileUploader";
 import {createIndicator} from "../../api/indicatorApi";
+import {createIndicatorReport} from "../../api/indicatorReportApi";
+import {createOutcome} from "../../api/outcomeApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -40,42 +42,13 @@ export default function FileUploadingPage() {
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
-  const schemas = {
-    'Indicator': {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        description: {type: 'string'},
-        dateCreated: {type: 'string', format: 'time'},
-      },
-      required: ['name', 'description']
-    },
-    'Indicator Report': {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        comment: {type: 'string'},
-        numericalValue: {type: 'number'},
-        unitOfMeasure: {type: 'string'},
-        startTime: {type: 'string'},
-        endTime: {type: 'string'},
-        dateCreated: {type: 'string', format: 'time'},
-      },
-      required: ['name', 'comment', 'numericalValue', 'unitOfMeasure', 'startTime', 'endTime', 'dateCreated']
-    },
-    'Outcome':{
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        description: {type: 'string'},
-      },
-      required: ['name', 'description']
-    }
-  }
+
 
   const createAPIs = {
-    Indicator: createIndicator
-  }
+    Indicator: createIndicator,
+    'Indicator Report': createIndicatorReport,
+    Outcome: createOutcome
+  };
 
   const [state, setState] = useState({
     loading: true,
@@ -90,7 +63,7 @@ export default function FileUploadingPage() {
     fileTypes: ['JSON'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
     organizations: {}
-  })
+  });
   const [errors, setErrors] = useState(
     {}
   );
@@ -98,14 +71,14 @@ export default function FileUploadingPage() {
 
   useEffect(() => {
     fetchOrganizations().then(res => {
-      if(res.success)
+      if (res.success)
         res.organizations.map(organization => {
           options.organizations[organization._id] = organization.legalName;
-        })
-        setState(state => ({...state, loading: false}));
+        });
+      setState(state => ({...state, loading: false}));
     }).catch(e => {
-      reportErrorToBackend(e)
-      setState(state => ({...state, loading: false}))
+      reportErrorToBackend(e);
+      setState(state => ({...state, loading: false}));
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
@@ -122,21 +95,57 @@ export default function FileUploadingPage() {
   const handleConfirm = async () => {
     try {
       setState(state => ({...state, loadingButton: true}));
-      const form = {
-        name: state.fileContent.name,
-        organizations: [state.organization],
-        description: state.fileContent.description
+      let responds;
+      if (state.formType === 'Indicator') {
+        responds = await Promise.all(state.fileContent.map(indicator => {
+          const form = {
+            name: indicator.name,
+            organizations: [state.organization],
+            description: indicator.description
+          };
+          return createAPIs[state.formType]({form});
+        }));
+      } else if (state.formType === 'Indicator Report') {
+        console.log(state.fileContent)
+        responds = await Promise.all(state.fileContent.map(indicatorReport => {
+          const form = {
+            name: indicatorReport.name,
+            comment: indicatorReport.comment,
+            indicatorName: indicatorReport.indicatorName,
+            organization: state.organization,
+            numericalValue: indicatorReport.numericalValue,
+            unitOfMeasure: indicatorReport.unitOfMeasure,
+            startTime: indicatorReport.startTime,
+            endTime: indicatorReport.endTime,
+            dateCreated: indicatorReport.dateCreated,
+          };
+          return createAPIs[state.formType]({form});
+        }));
+      } else if (state.formType === 'Outcome') {
+        responds = await Promise.all(state.fileContent.map(outcome => {
+          const form = {
+            name: outcome.name,
+            description: outcome.description,
+            indicatorName: outcome.indicatorName,
+            domainName: outcome.domainName,
+            organization: state.organization,
+          };
+          return createAPIs[state.formType]({form});
+        }));
       }
-      const res = await createAPIs[state.formType]({form});
-      if (res.success) {
+
+      if (!responds.find(res => !res.success)) {
+        console.log('success')
         setState({loadingButton: false, submitDialog: false,});
         navigate('/dashboard');
         enqueueSnackbar(res.message || 'Success', {variant: "success"});
       }
+
+
     } catch (e) {
 
     }
-  }
+  };
 
   const validate = () => {
     const error = {};
@@ -146,16 +155,15 @@ export default function FileUploadingPage() {
     if (!state.formType) {
       error.formType = 'The field cannot be empty';
     }
-    if(!state.organization) {
+    if (!state.organization) {
       error.organization = 'The field cannot be empty';
     }
-    if(!state.fileContent) {
+    if (!state.fileContent) {
       error.fileContent = 'The field cannot be empty';
     }
     setErrors(error);
     return Object.keys(error).length === 0;
   };
-
 
 
   if (state.loading)
@@ -239,75 +247,32 @@ export default function FileUploadingPage() {
           }}
         />
 
-        <FileUploader title={state.fileType && state.formType? `Please upload a ${state.formType} ${state.fileType} file`:
-          'Please choose file and form type'}
-                      disabled={!(state.fileType && state.formType)}
-                      schema={schemas[state.formType]}
-                      onchange={(fileContent) => {
-                        setState(state => ({...state, fileContent: fileContent}))
-                      }}
-                      importedError={errors.fileContent}
+        <FileUploader
+          title={state.fileType && state.formType ? `Please upload a ${state.formType} ${state.fileType} file` :
+            'Please choose file and form type'}
+          disabled={!(state.fileType && state.formType)}
+          formType={state.formType}
+          onchange={(fileContent) => {
+            if (state.formType === 'Indicator' && state.fileType === 'JSON')
+              setState(state => ({...state, fileContent: fileContent}));
+            if (state.formType === 'Indicator Report' && state.fileType === 'JSON')
+              setState(state => ({...state, fileContent: fileContent}));
+            if (state.formType === 'Outcome' && state.fileType === 'JSON')
+              setState(state => ({...state, fileContent: fileContent}));
+          }}
+          importedError={errors.fileContent}
         />
-        {/*<Dropdown*/}
-        {/*  label="Editors"*/}
-        {/*  key={'editors'}*/}
-        {/*  disabled={mode === 'new'}*/}
-        {/*  value={form.editors}*/}
-        {/*  onChange={e => {*/}
-        {/*    form.editors = e.target.value;*/}
-        {/*  }}*/}
-        {/*  options={options.objectForm}*/}
-        {/*  error={!!errors.editors}*/}
-        {/*  helperText={errors.editors}*/}
-        {/*  // sx={{mb: 2}}*/}
-        {/*/>*/}
-        {/*<Dropdown*/}
-        {/*  label="Reporters"*/}
-        {/*  key={'reporters'}*/}
-        {/*  value={form.reporters}*/}
-        {/*  disabled={mode === 'new'}*/}
-        {/*  onChange={e => {*/}
-        {/*    form.reporters = e.target.value;*/}
-        {/*  }}*/}
-        {/*  options={options.objectForm}*/}
-        {/*  error={!!errors.reporters}*/}
-        {/*  helperText={errors.reporters}*/}
-        {/*  // sx={{mb: 2}}*/}
-        {/*/>*/}
-        {/*<Dropdown*/}
-        {/*  label="Researcher"*/}
-        {/*  key={'researcher'}*/}
-        {/*  value={form.researchers}*/}
-        {/*  disabled={mode === 'new'}*/}
-        {/*  onChange={e => {*/}
-        {/*    form.researchers = e.target.value;*/}
-        {/*  }}*/}
-        {/*  options={options.objectForm}*/}
-        {/*  error={!!errors.researchers}*/}
-        {/*  helperText={errors.researchers}*/}
-        {/*  // sx={{mb: 2}}*/}
-        {/*/>*/}
-        {/*<GeneralField*/}
-        {/*  key={'comment'}*/}
-        {/*  label={'Comment'}*/}
-        {/*  value={form.comment}*/}
-        {/*  sx={{mt: '16px', minWidth: 350}}*/}
-        {/*  onChange={e => form.comment = e.target.value}*/}
-        {/*  error={!!errors.comment}*/}
-        {/*  helperText={errors.comment}*/}
-        {/*  minRows={4}*/}
-        {/*  multiline*/}
-        {/*/>*/}
 
 
-        <AlertDialog dialogContentText={state.loadingButton?'Please wait a second...':"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={state.loadingButton?'Checking is processing...':'Are you sure you want to submit?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
-                     open={state.submitDialog}/>
+        <AlertDialog
+          dialogContentText={state.loadingButton ? 'Please wait a second...' : "You won't be able to edit the information after clicking CONFIRM."}
+          dialogTitle={state.loadingButton ? 'Checking is processing...' : 'Are you sure you want to submit?'}
+          buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                            key={'cancel'}>{'cancel'}</Button>,
+            <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                           key={'confirm'}
+                           onClick={handleConfirm} children="confirm" autoFocus/>]}
+          open={state.submitDialog}/>
       </Paper>
 
 

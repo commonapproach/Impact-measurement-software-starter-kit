@@ -196,6 +196,13 @@ const createOutcome = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
+
+  if (form?.domainName) { // handle the case when no such indicator name
+    const domain = await GDBDomainModel.findOne({name: form.domainName});
+    if (!domain)
+      return res.status(200).json({success: false, message: 'Wrong domainName'})
+    form.domain = domain._id;
+  }
   if (!form || !form.organizations || !form.name || !form.description || !form.domain)
     throw new Server400Error('Invalid input');
   form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>

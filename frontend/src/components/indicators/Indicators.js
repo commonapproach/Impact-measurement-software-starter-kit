@@ -68,35 +68,19 @@ export default function Indicators() {
       body: ({_id, name, editable}) => {
         console.log(editable)
         return editable?
-          <Link color to={`/indicator/${_id}/edit`}>
+          <Link color to={`/indicator/${_id}/view`}>
           {name}
         </Link>:
           name
       },
       sortBy: ({name}) => name
     },
-    // {
-    //   label: 'Administrator',
-    //   body: ({administrator}) => {
-    //     return administrator;
-    //   }
-    // },
-    // {
-    //   label: 'Last name',
-    //   body: ({person}) => {
-    //     if(person && person.familyName)
-    //       return person.familyName
-    //     return 'Not Provided'
-    //   }
-    // },
-    // {
-    //   label: 'Phone Number',
-    //   body: ({primaryContact}) => {
-    //     if (primaryContact && primaryContact.telephone)
-    //       return formatPhoneNumber(primaryContact.telephone);
-    //     return 'Not Provided';
-    //   },
-    // },
+    {
+      label: 'Unit of Measure',
+      body: ({unitOfMeasure}) => {
+        return unitOfMeasure?.label;
+      }
+    },
 
     {
       label: ' ',
@@ -128,13 +112,6 @@ export default function Indicators() {
         }
 
       />
-      {/*<DeleteModal*/}
-      {/*  objectId={state.selectedId}*/}
-      {/*  title={state.deleteDialogTitle}*/}
-      {/*  show={state.showDeleteDialog}*/}
-      {/*  onHide={() => setState(state => ({...state, showDeleteDialog: false}))}*/}
-      {/*  delete={handleDelete}*/}
-      {/*/>*/}
     </Container>
   );
 }

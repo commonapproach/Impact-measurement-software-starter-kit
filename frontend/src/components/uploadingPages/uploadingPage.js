@@ -57,7 +57,9 @@ export default function FileUploadingPage() {
     fileType: useParams().fileType,
     formType: useParams().formType,
     organization: useParams().orgID,
-    fileContent: null
+    fileContent: null,
+    errorDialog: false,
+    optionDisabled: false,
   });
   const [options, setOptions] = useState({
     fileTypes: ['JSON'],
@@ -67,6 +69,10 @@ export default function FileUploadingPage() {
   const [errors, setErrors] = useState(
     {}
   );
+  const [errorMessage, setErrorMessage] = useState({
+    title: '',
+    message: ''
+  })
 
 
   useEffect(() => {
@@ -136,14 +142,26 @@ export default function FileUploadingPage() {
 
       if (!responds.find(res => !res.success)) {
         console.log('success')
-        setState({loadingButton: false, submitDialog: false,});
+        setState(state => ({...state, loadingButton: false, submitDialog: false}))
         navigate('/dashboard');
         enqueueSnackbar(res.message || 'Success', {variant: "success"});
+      } else {
+        console.log('fail')
+        let errorMessage = '';
+        responds.map(res => {
+          if (!res.success) {
+            errorMessage += res.message + '\n'
+          }
+        })
+        setState(state => ({...state, loadingButton: false, submitDialog: false, errorDialog: true}))
+        setErrorMessage({title: 'issue...', message: errorMessage})
       }
 
 
     } catch (e) {
-
+      setState(state => ({...state, loadingButton: false, submitDialog: false}))
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     }
   };
 
@@ -175,7 +193,7 @@ export default function FileUploadingPage() {
         <Typography variant={'h4'}> File Uploading </Typography>
 
         <SelectField
-          // disabled={mode === 'new' || !userContext.isSuperuser}
+          disabled={state.optionDisabled}
           key={'fileType'}
           label={'File Type'}
           value={state.fileType}
@@ -199,7 +217,7 @@ export default function FileUploadingPage() {
           }}
         />
         <SelectField
-          // disabled={mode === 'new' || !userContext.isSuperuser}
+          disabled={state.optionDisabled}
           key={'formType'}
           label={'Form Type'}
           value={state.formType}
@@ -223,7 +241,6 @@ export default function FileUploadingPage() {
           }}
         />
         <SelectField
-          // disabled={mode === 'new' || !userContext.isSuperuser}
           key={'organization'}
           label={'Organization'}
           value={state.organization}
@@ -259,6 +276,13 @@ export default function FileUploadingPage() {
               setState(state => ({...state, fileContent: fileContent}));
             if (state.formType === 'Outcome' && state.fileType === 'JSON')
               setState(state => ({...state, fileContent: fileContent}));
+            if (fileContent) {
+              setState(state => ({...state, optionDisabled: true}))
+            }
+
+          }}
+          whenRemovedFile={() => {
+            setState(state => ({...state, optionDisabled: false}))
           }}
           importedError={errors.fileContent}
         />
@@ -273,6 +297,13 @@ export default function FileUploadingPage() {
                            key={'confirm'}
                            onClick={handleConfirm} children="confirm" autoFocus/>]}
           open={state.submitDialog}/>
+
+        <AlertDialog
+          dialogContentText={errorMessage.message}
+          dialogTitle={errorMessage.title}
+          buttons={[<Button onClick={() => setState(state => ({...state, errorDialog: false}))}
+                            key={'cancel'} autoFocus>{'OK'}</Button>,]}
+          open={state.errorDialog}/>
       </Paper>
 
 

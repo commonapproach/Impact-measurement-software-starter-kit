@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Typography} from "@mui/material";
+import {Button, Typography} from "@mui/material";
 import {reportErrorToBackend} from "../../../api/errorReportApi";
-import shadows from "@mui/material/styles/shadows";
 
 const Ajv = require("ajv");
 
-export default function FileUploader({title, formType, disabled, onchange, importedError}) {
-  // const [selectedFile, setSelectedFile] = useState(null);
+export default function FileUploader({title, formType, disabled, onchange, importedError, whenRemovedFile}) {
+  const [selectedFile, setSelectedFile] = useState(null);
   const [valid, setValid] = useState(false);
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState(importedError);
@@ -88,7 +87,8 @@ export default function FileUploader({title, formType, disabled, onchange, impor
 
 
   const handleFileSelect = (event) => {
-    // setSelectedFile(event.target.files[0]);
+    console.log(event)
+    setSelectedFile(event.target.files[0]);
     setChecked(false);
     setError(null);
     try {
@@ -97,6 +97,12 @@ export default function FileUploader({title, formType, disabled, onchange, impor
       reportErrorToBackend(e);
     }
   };
+
+  const handleRemoveFile = (event) => {
+    setSelectedFile(null)
+    document.getElementById('file-input').value = '';
+    whenRemovedFile()
+  }
 
   // const handleUpload = () => {
   //   // You can perform the upload logic here using the selectedFile
@@ -111,13 +117,15 @@ export default function FileUploader({title, formType, disabled, onchange, impor
   return (
     <div>
       <Typography variant={'h6'}> {title} </Typography>
-      <input type="file" onChange={handleFileSelect} disabled={disabled}/>
-      {/*<button onClick={handleUpload} disabled={!selectedFile || disabled}>*/}
-      {/*  Upload*/}
-      {/*</button>*/}
-      {error ? <Typography variant={'subtitle1'} color={'red'}> {error} </Typography> : (checked && !valid) ?
-        <Typography variant={'subtitle1'} color={'red'}> {'The file is not valid'} </Typography> : (checked && valid)?
-        <Typography variant={'subtitle1'} color={'green'}> {'Click sumbit to check'} </Typography>: ''}
+      <input type="file" id={'file-input'} onChange={handleFileSelect} style={{color: 'transparent'}} disabled={disabled} accept={'.json'}/>
+      {selectedFile? <div >
+        <Typography variant={'subtitle2'} style={{display: 'inline-block',}}> {selectedFile?.name} </Typography>
+        <button onClick={handleRemoveFile} style={{display: 'inline-block', marginLeft: '10px'}}>
+          Remove File
+        </button>
+      </div>: <div/>}
+      {error ? <Typography variant={'subtitle1'} color={'red'}> {error} </Typography> : (selectedFile && checked && !valid) ?
+        <Typography variant={'subtitle1'} color={'red'}> {'The file is not valid. Please remove the file.'} </Typography> : ''}
 
     </div>
   );

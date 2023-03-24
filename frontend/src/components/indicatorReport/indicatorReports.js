@@ -86,14 +86,18 @@ export default function IndicatorReports() {
         return value.unitOfMeasure.label
       }
     },
-    // {
-    //   label: 'Phone Number',
-    //   body: ({primaryContact}) => {
-    //     if (primaryContact && primaryContact.telephone)
-    //       return formatPhoneNumber(primaryContact.telephone);
-    //     return 'Not Provided';
-    //   },
-    // },
+    {
+      label: 'Start Time',
+      body: ({hasTime}) => {
+        return (new Date(hasTime.hasBeginning.date)).toString()
+      },
+    },
+    {
+      label: 'End Time',
+      body: ({hasTime}) => {
+        return (new Date(hasTime.hasEnd.date)).toString()
+      },
+    },
 
     {
       label: ' ',

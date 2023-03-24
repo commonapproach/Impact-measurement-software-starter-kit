@@ -182,7 +182,7 @@ const fetchIndicatorReports = async (req, res) => {
     editable = true; // to tell the frontend that the outcome belong to the organization is editable
   }
   const indicatorReports = await GDBIndicatorReportModel.find({forOrganization: `:organization_${orgId}`},
-    {populates: ['value.unitOfMeasure']}
+    {populates: ['value.unitOfMeasure', 'hasTime.hasEnd', 'hasTime.hasBeginning']}
   );
   return res.status(200).json({success: true, indicatorReports, editable});
 };

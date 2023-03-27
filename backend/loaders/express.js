@@ -14,7 +14,7 @@ const {authMiddleware, errorHandler} = require('../services/middleware');
 const config = require('../config');
 const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
-const {organizationRoute, organizationsRoute, usersRoute, domainRoute, domainsRoute, indicatorsRoute, indicatorRoute,
+const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
   errorReportRoute
 } = require("../routes");
@@ -65,8 +65,8 @@ app.use('/api/dynamicClassInstances', dynamicClassInstancesRoute)
 app.use('/api/users', usersRoute);
 app.use('/api/organization', organizationRoute);
 app.use('/api/organizations', organizationsRoute);
-app.use('/api/domain', domainRoute);
-app.use('/api/domains', domainsRoute);
+app.use('/api/theme', themeRoute);
+app.use('/api/themes', themesRoute);
 app.use('/api/indicator', indicatorRoute)
 app.use('/api/indicators', indicatorsRoute);
 app.use('/api/outcome', outcomeRoute);
@@ -76,8 +76,8 @@ app.use('/api/indicatorReport', indicatorReportRoute);
 app.use('/api/userTypes', userTypesRoute);
 app.use('/api/profile', profileRoute);
 app.use('/api/dynamicClassInstances', dynamicClassInstancesRoute);
-app.use('/api/domains', domainsRoute);
-app.use('/api/domain', domainRoute);
+app.use('/api/themes', themesRoute);
+app.use('/api/theme', themeRoute);
 app.use('/api/groups', groupsRoute);
 app.use('/api/group', groupRoute);
 

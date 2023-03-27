@@ -27,8 +27,8 @@ import EditUserForm from "./components/users/EditUserForm";
 import Groups from "./components/groups/Groups";
 import AddEditGroup from "./components/groups/AddEditGroup";
 import Profile from "./components/userProfile/Profile";
-import Domains from "./components/domain/domains";
-import AddEditDomain from "./components/domain/addEditDomain";
+import Themes from "./components/theme/Themes";
+import AddEditTheme from "./components/theme/addEditTheme";
 import Organization_indicators from "./components/indicators/Organization-indicators";
 import Indicators from "./components/indicators/Indicators";
 import AddEditIndicator from "./components/indicators/addEditIndicator";
@@ -68,10 +68,10 @@ const routes = (
     <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
     <Route path="/profile/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
     <Route path="/profile/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
-    {/*domain*/}
-    <Route path="/domains" element={<PrivateRoute element={Domains}/>}/>
-    <Route path="/domains/new" element={<PrivateRoute element={AddEditDomain}/>}/>
-    <Route path="/domains/:id/edit" element={<PrivateRoute element={AddEditDomain}/>}/>
+    {/*theme*/}
+    <Route path="/themes" element={<PrivateRoute element={Themes}/>}/>
+    <Route path="/themes/new" element={<PrivateRoute element={AddEditTheme}/>}/>
+    <Route path="/themes/:id/edit" element={<PrivateRoute element={AddEditTheme}/>}/>
     {/*indicators*/}
     <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
     <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>

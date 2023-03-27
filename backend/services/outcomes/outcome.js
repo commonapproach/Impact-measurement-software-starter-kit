@@ -1,7 +1,7 @@
 const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
-const {GDBDomainModel} = require("../../models/domain");
+const {GDBThemeModel} = require("../../models/theme");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");
@@ -84,7 +84,7 @@ const fetchOutcome = async (req, res) => {
   const outcome = await GDBOutcomeModel.findOne({_id: id});
   if (!outcome)
     throw new Server400Error('No such outcome');
-  outcome.domain = outcome.domain.split('_')[1];
+  outcome.theme = outcome.theme.split('_')[1];
   outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
     return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
   }));
@@ -126,19 +126,19 @@ const updateOutcome = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.domain)
+  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.theme)
     throw new Server400Error('Invalid input');
   const outcome = await GDBOutcomeModel.findOne({_id: id});
   if (!outcome)
     throw new Server400Error('No such outcome');
   outcome.name = form.name;
   outcome.description = form.description;
-  if (outcome.domain.split('_')[1] !== form.domain) {
-    // domain have to be updated
-    const newDomain = await GDBDomainModel.findOne({_id: form.domain});
-    if (!newDomain)
-      throw new Server400Error('No such domain');
-    outcome.domain = newDomain;
+  if (outcome.theme.split('_')[1] !== form.theme) {
+    // theme have to be updated
+    const newTheme = await GDBThemeModel.findOne({_id: form.theme});
+    if (!newTheme)
+      throw new Server400Error('No such theme');
+    outcome.theme = newTheme;
   }
   const organizationDict = {};
 
@@ -197,13 +197,13 @@ const createOutcome = async (req, res) => {
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
 
-  if (form?.domainName) { // handle the case when no such indicator name
-    const domain = await GDBDomainModel.findOne({name: form.domainName});
-    if (!domain)
-      return res.status(200).json({success: false, message: 'Wrong domainName'})
-    form.domain = domain._id;
+  if (form?.themeName) { // handle the case when no such indicator name
+    const theme = await GDBThemeModel.findOne({name: form.themeName});
+    if (!theme)
+      return res.status(200).json({success: false, message: 'Wrong themeName'})
+    form.theme = theme._id;
   }
-  if (!form || !form.organizations || !form.name || !form.description || !form.domain)
+  if (!form || !form.organizations || !form.name || !form.description || !form.theme)
     throw new Server400Error('Invalid input');
   form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
     GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']})
@@ -225,9 +225,9 @@ const createOutcome = async (req, res) => {
   if (duplicate && organizationInProblem)
     return res.status(200).json({success: false, message: 'The name of the outcome has been occupied in organization ' + organizationInProblem})
 
-  form.domain = await GDBDomainModel.findOne({_id: form.domain});
-  if (!form.domain)
-    throw new Server400Error('No such domain');
+  form.theme = await GDBThemeModel.findOne({_id: form.theme});
+  if (!form.theme)
+    throw new Server400Error('No such theme');
 
   const outcome = GDBOutcomeModel(form);
   await outcome.save();

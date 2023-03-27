@@ -6,7 +6,7 @@ import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createDomain, fetchDomain, updateDomain} from "../../api/domainApi";
+import {createTheme, fetchTheme, updateTheme} from "../../api/themeApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -23,7 +23,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-export default function AddEditDomain() {
+export default function AddEditTheme() {
 
   const classes = useStyles();
   const navigate = useNavigate();
@@ -58,18 +58,18 @@ export default function AddEditDomain() {
         enqueueSnackbar("Superuser only", {variant: 'error'});
       }
       if (mode === 'edit' && id) {
-        fetchDomain(id).then(res => {
+        fetchTheme(id).then(res => {
           if (res.success) {
             setForm({
-              name: res.domain.name,
-              description: res.domain.description
+              name: res.theme.name,
+              description: res.theme.description
             });
             setLoading(false);
           }
         }).catch(e => {
           reportErrorToBackend(e)
           enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-          navigate('/domains')
+          navigate('/themes')
         });
       } else if (mode === 'edit' && !id) {
         navigate('/organizations');
@@ -88,10 +88,10 @@ export default function AddEditDomain() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createDomain(form).then((ret) => {
+      createTheme(form).then((ret) => {
         if (ret.success) {
               setState({loadingButton: false, submitDialog: false,});
-              navigate('/domains');
+              navigate('/themes');
               enqueueSnackbar(ret.message || 'Success', {variant: "success"});
             }
         }
@@ -100,14 +100,14 @@ export default function AddEditDomain() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating domain', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating theme', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateDomain(id, form).then((res) => {
+      updateTheme(id, form).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/domains');
+          navigate('/themes');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -115,7 +115,7 @@ export default function AddEditDomain() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating the domain', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating the theme', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -140,7 +140,7 @@ export default function AddEditDomain() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Domain </Typography>
+        <Typography variant={'h4'}> Theme </Typography>
 
         <GeneralField
           disabled={!userContext.isSuperuser}
@@ -188,8 +188,8 @@ export default function AddEditDomain() {
         </Button>
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Domain?' :
-                       'Are you sure you want to update this Domain?'}
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Theme?' :
+                       'Are you sure you want to update this Theme?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

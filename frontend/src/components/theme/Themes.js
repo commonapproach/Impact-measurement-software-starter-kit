@@ -5,10 +5,10 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {deleteDomain, fetchDomains} from "../../api/domainApi";
+import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 
-export default function Domains() {
+export default function Themes() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
 
@@ -23,9 +23,9 @@ export default function Domains() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchDomains().then(res => {
+    fetchThemes().then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.domains}));
+        setState(state => ({...state, loading: false, data: res.themes}));
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       navigate('/dashboard');
@@ -36,13 +36,13 @@ export default function Domains() {
   const showDeleteDialog = (id) => {
     setState(state => ({
       ...state, selectedId: id, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete domain ' + id + ' ?'
+      deleteDialogTitle: 'Delete theme ' + id + ' ?'
     }));
   };
 
   const handleDelete = async (id, form) => {
 
-    deleteDomain(id).then(({success, message})=>{
+    deleteTheme(id).then(({success, message})=>{
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -65,7 +65,7 @@ export default function Domains() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return userContext.isSuperuser? <Link color to={`/domains/${_id}/edit`}>
+        return userContext.isSuperuser? <Link color to={`/themes/${_id}/edit`}>
           {name}
         </Link>:name
       },
@@ -81,28 +81,28 @@ export default function Domains() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'domains'} objectId={_id} hideViewOption hideDeleteOption
+        <DropdownMenu urlPrefix={'themes'} objectId={_id} hideViewOption hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading domains...`}/>;
+    return <Loading message={`Loading themes...`}/>;
 
   return (
     <Container>
       <DataTable
-        title={"Domains"}
+        title={"Themes"}
         data={state.data}
         columns={columns}
         idField="id"
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/Domains/new')}
+            onClick={() => navigate('/Themes/new')}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Domain"
+            label="Add new Theme"
             variant="outlined"/>
         }
 

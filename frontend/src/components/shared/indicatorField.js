@@ -81,7 +81,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
       {
         <>
           <Grid container columnSpacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth

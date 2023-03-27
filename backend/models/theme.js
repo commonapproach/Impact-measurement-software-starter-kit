@@ -1,12 +1,12 @@
 const {createGraphDBModel, Types} = require("../utils/graphdb");
 
-const GDBDomainModel = createGraphDBModel({
+const GDBThemeModel = createGraphDBModel({
   name: {type: String, internalKey: 'tove_org:hasName'},
   description: {type: String, internalKey: 'cids:hasDescription'},
 }, {
-  rdfTypes: ['cids:Domain'], name: 'domain'
+  rdfTypes: ['cids:Theme'], name: 'theme'
 });
 
 module.exports = {
-  GDBDomainModel
+  GDBThemeModel
 }

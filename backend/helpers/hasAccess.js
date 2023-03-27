@@ -380,7 +380,7 @@ async function hasAccess(req, operationType) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
-        if (!form || !form.organizations || !form.name || !form.description || !form.domain)
+        if (!form || !form.organizations || !form.name || !form.description || !form.theme)
           throw new Server400Error('Invalid input');
         // all organizations must be in userAccount.editorOfs
         const checkerList = form.organizations.map(organizationId => {
@@ -475,7 +475,7 @@ async function hasAccess(req, operationType) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
-        if (!form || !form.organizations || !form.name || !form.description || !form.domain)
+        if (!form || !form.organizations || !form.name || !form.description || !form.theme)
           throw new Server400Error('Invalid input');
         // all organizations must be in userAccount.editorOfs
         const checkerList = form.organizations.map(organizationId => {
@@ -489,18 +489,18 @@ async function hasAccess(req, operationType) {
 
 
 
-    // domains
-    case 'fetchDomain': // every one can fetch domain
+    // themes
+    case 'fetchTheme': // every one can fetch theme
       return true;
-    case 'createDomain': // only superuser can create domain
+    case 'createTheme': // only superuser can create theme
       if (userAccount.isSuperuser)
         return true;
       break;
-    case 'updateDomain': // only superuser can update domain
+    case 'updateTheme': // only superuser can update theme
       if (userAccount.isSuperuser)
         return true;
       break;
-    case 'fetchDomains': // every one can fetch domain
+    case 'fetchThemes': // every one can fetch theme
       return true;
 
 

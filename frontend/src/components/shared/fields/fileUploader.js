@@ -41,9 +41,9 @@ export default function FileUploader({title, formType, disabled, onchange, impor
       properties: {
         name: {type: 'string'},
         description: {type: 'string'},
-        domainName: {type: 'string'}
+        themeName: {type: 'string'}
       },
-      required: ['name', 'description', 'domainName']
+      required: ['name', 'description', 'themeName']
     }
   };
 

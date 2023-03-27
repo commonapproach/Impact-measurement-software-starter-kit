@@ -1,7 +1,7 @@
 const {GDBOrganizationModel, GDBOrganizationIdModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
-const {GDBDomainModel} = require("../../models/domain");
+const {GDBThemeModel} = require("../../models/theme");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBPhoneNumberModel} = require("../../models/phoneNumber");
@@ -69,35 +69,6 @@ async function createOrganization(req, res) {
       phoneNumber: form.phoneNumber,
     })
   });
-  // below handles outcome part
-  // for (let i = 0; i < outcomeForm.length; i++) {
-  //   const outcome = outcomeForm[i];
-  //   if (!outcome.name || !outcome.description || !outcome.domain)
-  //     throw new Server400Error('Wrong information input');
-  //   const domainObject = await GDBDomainModel.findOne({_id: outcome.domain});
-  //   if (!domainObject)
-  //     throw new Server400Error('Wrong domain id');
-  //   const outcomeObject = GDBOutcomeModel({
-  //     name: outcome.name, description: outcome.description, domain: domainObject
-  //   });
-  //   if (!organization.hasOutcomes) {
-  //     organization.hasOutcomes = [];
-  //   }
-  //   await outcomeObject.save();
-  //   organization.hasOutcomes.push(outcomeObject);
-  // }
-  //
-  // // below handles indicator part
-  // for (let i = 0; i < indicatorForm.length; i++) {
-  //   const indicator = indicatorForm[i];
-  //   if (!indicator.name || !indicator.description)
-  //     throw Server400Error('Wrong information input');
-  //   const indicatorObject = GDBIndicatorModel(indicator);
-  //   if (!organization.hasIndicators)
-  //     organization.hasIndicators = [];
-  //   await indicatorObject.save();
-  //   organization.hasIndicators.push(indicatorObject);
-  // }
 
   await organization.save();
 
@@ -148,7 +119,7 @@ async function fetchOrganization(req, res) {
   const outcomes = organization.hasOutcomes || [];
   if (outcomes.length > 0) {
     outcomes.map(outcome => {
-      outcome.domain = outcome.domain.split('_')[1];
+      outcome.theme = outcome.theme.split('_')[1];
     });
   }
   const indicators = organization.hasIndicators || [];
@@ -187,7 +158,7 @@ async function fetchOrganization(req, res) {
 //     const outcomes = organization.hasOutcomes || [];
 //     if (outcomes.length > 0) {
 //       outcomes.map(outcome => {
-//         outcome.domain = outcome.domain.split('_')[1];
+//         outcome.theme = outcome.theme.split('_')[1];
 //       });
 //     }
 //     organization.ID = organization.hasId?.hasIdentifier;
@@ -372,13 +343,13 @@ async function includeThisNewOutcome(outcomes, theOutcome) {
     if (outcome._id === theOutcome._id) {
       outcome.name = theOutcome.name;
       outcome.description = theOutcome.description;
-      if (outcome.domain.split('_')[1] !== theOutcome.domain) {
+      if (outcome.theme.split('_')[1] !== theOutcome.theme) {
         console.log(outcome, theOutcome);
-        const domainObject = await GDBDomainModel.findOne({_id: theOutcome.domain});
-        if (!domainObject)
-          throw new Server400Error('No such domain');
-        console.log(domainObject);
-        outcome.domain = domainObject;
+        const themeObject = await GDBThemeModel.findOne({_id: theOutcome.theme});
+        if (!themeObject)
+          throw new Server400Error('No such theme');
+        console.log(themeObject);
+        outcome.theme = themeObject;
       }
       return true;
     }
@@ -425,10 +396,10 @@ const updateOutcomes = async (organization, outcomeForm) => {
   for (let i = 0; i < outcomeForm.length; i++) {
     if (!await includeThisNewOutcome(organization.hasOutcomes, outcomeForm[i])) {
       // the new outcome is not in previous outcomes
-      const domain = await GDBDomainModel.findOne({_id: outcomeForm[i].domain});
-      if (!domain)
-        return res.status(400).json({success: false, message: 'No such domain'});
-      outcomeForm[i].domain = domain;
+      const theme = await GDBThemeModel.findOne({_id: outcomeForm[i].theme});
+      if (!theme)
+        return res.status(400).json({success: false, message: 'No such theme'});
+      outcomeForm[i].theme = theme;
       buf.push(GDBOutcomeModel(outcomeForm[i]));
     }
   }

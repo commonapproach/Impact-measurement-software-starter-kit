@@ -133,7 +133,7 @@ export default function FileUploadingPage() {
             name: outcome.name,
             description: outcome.description,
             indicatorName: outcome.indicatorName,
-            domainName: outcome.domainName,
+            themeName: outcome.themeName,
             organization: state.organization,
           };
           return createAPIs[state.formType]({form});
@@ -154,7 +154,7 @@ export default function FileUploadingPage() {
           }
         })
         setState(state => ({...state, loadingButton: false, submitDialog: false, errorDialog: true}))
-        setErrorMessage({title: 'issue...', message: errorMessage})
+        setErrorMessage({title: 'These items could not be loaded', message: errorMessage})
       }
 
 

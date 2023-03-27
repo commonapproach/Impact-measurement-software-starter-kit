@@ -1,6 +1,6 @@
 const express = require('express');
-const {userTypesRoute, profileRoute, dynamicClassInstancesRoute, domainsRoute, domainRoute} = require('./index')
-const {authGeneralMiddleware} = require("../../services/middleware");
+const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require('./index')
+// const {authGeneralMiddleware} = require("../../services/middleware");
 
 
 const router = express.Router({mergeParams: true});
@@ -9,7 +9,5 @@ const router = express.Router({mergeParams: true});
 router.use('/userTypes', userTypesRoute);
 router.use('/profile', profileRoute);
 router.use('/dynamicClassInstances', dynamicClassInstancesRoute);
-router.use('/domains', domainsRoute);
-router.use('/domain', domainRoute)
 
 module.exports = router;

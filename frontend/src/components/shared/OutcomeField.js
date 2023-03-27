@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchDomains} from "../../api/domainApi";
+import {fetchThemes} from "../../api/themeApi";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
@@ -42,7 +42,7 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({domain: {}});
+  const [options, setOptions] = useState({theme: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -53,12 +53,12 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
 
   useEffect(() => {
     Promise.all([
-      fetchDomains()
+      fetchThemes()
         .then(res => {
           if (res.success)
-            res.domains.map(
-              domain => {
-                options.domain[domain._id] = domain.name;
+            res.themes.map(
+              theme => {
+                options.theme[theme._id] = theme.name;
               }
             );
         }),
@@ -93,12 +93,12 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
       <Typography variant="h5">
-        {loading && <CircularProgress color="inherit" size={20}/>} {label} {required ? '*' : ''}
+        {loading && <CircularProgress color="inherit" size={20}/>} {label}
       </Typography>
       {!loading &&
         <>
           <Grid container columnSpacing={2}>
-            <Grid item xs={3}>
+            <Grid item xs={11.5}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -120,22 +120,22 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
                 }
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={6}>
               <LoadingAutoComplete
-                label="Domain"
+                label="Theme"
                 options={options}
-                property={'domain'}
+                property={'theme'}
                 state={state}
                 onChange={handleChange}
-                error={!!errors.domain}
-                helperText={errors.domain}
+                error={!!errors.theme}
+                helperText={errors.theme}
                 required={required}
                 disabled={disabled}
                 onBlur={() => {
-                  if (!state.domain) {
-                    setErrors(errors => ({...errors, domain: 'This field cannot be empty'}));
+                  if (!state.theme) {
+                    setErrors(errors => ({...errors, theme: 'This field cannot be empty'}));
                   }else {
-                    setErrors(errors => ({...errors, domain: null}));
+                    setErrors(errors => ({...errors, theme: null}));
                   }
                 }
                 }
@@ -161,7 +161,7 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
                 }
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={11.5}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth

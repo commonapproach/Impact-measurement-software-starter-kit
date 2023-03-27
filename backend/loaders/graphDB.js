@@ -9,6 +9,7 @@ const fetch = require('node-fetch');
 const FormData = require('form-data');
 const {sleep} = require('../utils');
 const {namespaces} = require('./namespaces');
+const {configParams} = require("./graphdbParameter");
 
 let dbClient, repository;
 
@@ -32,10 +33,10 @@ async function getGraphDBVersion() {
 async function createRepository(dbClient, dbName) {
   // Create repository configuration
   let config;
-  const version = await getGraphDBVersion();
+  const version = [10,1,3] // await getGraphDBVersion();
   console.log('GraphDB version:', version.join('.'));
   if (version[0] >= 10)
-    config = new RepositoryConfig(dbName, '', new Map(), '', 'Pathfinder', 'graphdb');
+    config = new RepositoryConfig(dbName, '', configParams, '', 'Pathfinder', 'graphdb');
   else
     config = new RepositoryConfig(dbName, '', new Map(), '', 'Pathfinder', 'free');
   // Use the configuration to create new repository

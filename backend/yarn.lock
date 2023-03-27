@@ -623,10 +623,10 @@ google-libphonenumber@>=3.2.22:
   resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.29.tgz#06ca967f632252e4eb2df032288fb4327284edce"
   integrity sha512-eRVj4HIcRR+MGPDlrt1n8/nORoUMhEj3Wns5f61uDaSrLeFdXdKjBhoEOkiMe2pnmOY+UzI1j8O8umjhzPYs1A==
 
-graphdb@^2.0.0:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/graphdb/-/graphdb-2.0.2.tgz#ee1bc2b3fd017134d4c93a4f83c716f735ea564a"
-  integrity sha512-ORbS7yw/kTUdKXyeO7QaXx1I3fxigej3KQQdrVSpu0ZQ1W7OVQHDAd/Gu+x2clpwm6sela94Uh/+YKkQGbZqmA==
+graphdb@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/graphdb/-/graphdb-3.0.0.tgz#6536fa31a0de7f983e26bedf63e63d0656bac22a"
+  integrity sha512-9iMRSnd57vy0zn92Bv6Mf1xzxT+ERARVeoBknI9nZW63wURo9bE/WRUuhtvlhcte8c2xvjGi+y+z4PbIpoNBxg==
   dependencies:
     axios "^0.21.4"
     base64url "^3.0.1"

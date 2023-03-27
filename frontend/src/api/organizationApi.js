@@ -12,9 +12,8 @@ export async function createOrganization(params) {
   return postJson('/api/organization/', params);
 }
 
-export async function updateOrganization(id, params, userContext) {
-  if (userContext.isSuperuser || userContext.administratorOf.length)
-    return putJson('/api/organization/' + id, params);
+export async function updateOrganization(id, params) {
+  return putJson('/api/organization/' + id, params);
 }
 
 export async function deleteOrganization(id) {

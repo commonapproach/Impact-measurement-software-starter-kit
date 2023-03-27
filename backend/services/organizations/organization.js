@@ -4,6 +4,7 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBDomainModel} = require("../../models/domain");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {hasAccess} = require("../../helpers/hasAccess");
+const {GDBPhoneNumberModel} = require("../../models/phoneNumber");
 
 /**
  * Add organization to each account in organization[usertype] 's associated property
@@ -30,7 +31,11 @@ async function createOrganization(req, res) {
     throw new Server400Error('Legal name is requested');
   if (!form.ID)
     throw new Server400Error('Organization ID is requested');
-  form.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
+  form.hasId = GDBOrganizationIdModel({
+    hasIdentifier: form.ID,
+  });
+  if (form.issuedBy)
+    form.hasId.issuedBy = `:organization_${form.issuedBy}`
   // handle administrators, editors, reporters, researchers
 
   // firstly replace ids to the actual userAccount object
@@ -54,7 +59,15 @@ async function createOrganization(req, res) {
   const organization = GDBOrganizationModel({
     legalName: form.legalName,
     hasId: form.hasId,
-    comment: form.comment
+    comment: form.comment,
+    email: form.email,
+    contactName: form.contactName,
+
+    telephone: GDBPhoneNumberModel({
+      areaCode: form.areaCode,
+      countryCode: form.countryCode,
+      phoneNumber: form.phoneNumber,
+    })
   });
   // below handles outcome part
   // for (let i = 0; i < outcomeForm.length; i++) {
@@ -95,7 +108,7 @@ async function createOrganization(req, res) {
   // addOrganizations2UsersRole(organization, 'reporters', 'reporterOfs');
   // addOrganizations2UsersRole(organization, 'editors', 'editorOfs');
   // addOrganizations2UsersRole(organization, 'researchers', 'researcherOfs');
-  await organization.save();
+  // await organization.save();
 
   return res.status(200).json({success: true, message: 'Successfully create organization ' + organization.legalName});
 }
@@ -129,7 +142,7 @@ async function fetchOrganization(req, res) {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Organization ID is needed');
-  const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators']});
+  const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'telephone']});
   if (!organization)
     throw new Server400Error('No such organization');
   const outcomes = organization.hasOutcomes || [];
@@ -140,6 +153,7 @@ async function fetchOrganization(req, res) {
   }
   const indicators = organization.hasIndicators || [];
   organization.ID = organization.hasId?.hasIdentifier;
+  organization.issuedBy = organization.hasId?.issuedBy.split('_')[1]
   if (!organization.researchers)
     organization.researchers = [];
   if (!organization.reporters)
@@ -217,7 +231,7 @@ async function updateOrganization(req, res) {
     throw Server400Error('Form and outcomeForm are needed');
 
   const organization = await GDBOrganizationModel.findOne({_id: id},
-    {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors']});
+    {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors', 'telephone']});
 
   if (!organization)
     throw Server400Error('No such organization');
@@ -242,6 +256,12 @@ async function updateOrganization(req, res) {
 
   organization.legalName = form.legalName;
   organization.comment = form.comment;
+  organization.contactName = form.contactName;
+  organization.email = form.email;
+  organization.telephone.areaCode = form.areaCode;
+  organization.telephone.countryCode = form.countryCode;
+  organization.telephone.phoneNumber = form.phoneNumber;
+
 
   if (userAccountDict[form.administrator]) {
     form.administrator = userAccountDict[form.administrator];
@@ -283,11 +303,14 @@ async function updateOrganization(req, res) {
     updateRoles(organization, form, 'researchers', 'researcherOfs', userAccountDict),
     updateRoles(organization, form, 'editors', 'editorOfs', userAccountDict)
   ]);
+  organization.hasId.hasIdentifier = form.ID;
+  if(form.issuedBy)
+    organization.hasId.issuedBy = `:organization_${form.issuedBy}`
   if (organization.hasId.hasIdentifier !== form.ID) {
     // drop previous one
-    await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
+    // await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
     // and add a new one
-    organization.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
+    // organization.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
   }
 
   // handle outcomes

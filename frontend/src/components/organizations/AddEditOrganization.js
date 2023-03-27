@@ -6,7 +6,7 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createOrganization, fetchOrganization, updateOrganization} from "../../api/organizationApi";
+import {createOrganization, fetchOrganization, fetchOrganizations, updateOrganization} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
@@ -49,78 +49,87 @@ export default function AddEditOrganization() {
     {}
   );
 
-  // const [outcomeFormErrors, setOutcomeFormErrors] = useState([{
-  //
-  // }])
-
-  // const [indicatorForm, setIndicatorForm] = useState([]);
-
-  // const [indicatorFormErrors, setIndicatorFormErrors] = useState([{
-  //
-  // }])
 
   const [form, setForm] = useState({
     legalName: '',
     ID: '',
+    issuedBy: '',
     administrator: '',
     reporters: [],
     editors: [],
     researchers: [],
     comment: '',
+    contactName: '',
+    email: '',
+    telephone: '',
   });
   // const [outcomeForm, setOutcomeForm] = useState([
   // ]);
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
     objectForm: {},
+    issuedBy: {}
   });
 
 
   useEffect(() => {
 
-    fetchUsers(id).then(({data, success}) => {
-      const objectForm = {};
-      data.map(user => {
-        objectForm[user._id] = `${user.person.givenName} ${user.person.familyName} ID: ${user._id}`;
-      });
-      if (success)
-        setOptions({objectForm,});
-
-    }).then(() => {
+    Promise.all([
+      fetchUsers(id).then(({data, success}) => {
+        const objectForm = {};
+        data.map(user => {
+          objectForm[user._id] = `${user.person.givenName} ${user.person.familyName} ID: ${user._id}`;
+        });
+        if (success)
+          setOptions(options => ({...options,objectForm}));
+      }),
+      fetchOrganizations().then(({organizations, success}) => {
+        if (success) {
+          const orgDict = {};
+          organizations.map(org => {
+            if (org._id !== id)
+              orgDict[org._id] = org.legalName;
+          });
+          setOptions(options => ({...options, issuedBy: orgDict}))
+        }
+      }),
+    ]).then(() => {
       if (mode === 'edit' && id) {
-        fetchOrganization(id, userContext).then(res => {
+        fetchOrganization(id).then(res => {
           if (res.success) {
             const {organization} = res;
             setForm({
               legalName: organization.legalName || '',
               ID: organization.ID || '',
+              issuedBy: organization.issuedBy || '',
               administrator: organization.administrator || '',
               reporters: organization.reporters || [],
               editors: organization.editors || [],
               researchers: organization.researchers || [],
-              comment: organization.comment || ''
+              comment: organization.comment || '',
+              contactName: organization.contactName || '',
+              email: organization.email || '',
+              telephone:`+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}`
             });
-            // setOutcomeForm(outcomes)
-            // setIndicatorForm(indicators)
-            setLoading(false);
+            setLoading(false)
           }
         }).catch(e => {
           if (e.json)
             setErrors(e.json);
           setLoading(false);
-          reportErrorToBackend(e)
+          reportErrorToBackend(e);
           enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
         });
       } else if (mode === 'edit' && !id) {
         navigate('/organizations');
         enqueueSnackbar("No ID provided", {variant: 'error'});
-      } else if (mode === 'new') {
-        setLoading(false);
+      } else {
+        setLoading(false)
       }
     }).catch(e => {
       if (e.json)
         setErrors(e.json);
-      reportErrorToBackend(e)
+      reportErrorToBackend(e);
       setLoading(false);
 
       enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
@@ -138,6 +147,13 @@ export default function AddEditOrganization() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
+      if (form.telephone) {
+        form.countryCode = 1;
+        form.areaCode = Number(form.telephone.match(/\(\d{3}\)/)[0].match(/\d{3}/)[0]);
+        form.phoneNumber = Number(form.telephone.split('(')[1].split(') ')[0] +
+          form.telephone.split('(')[1].split(') ')[1].split('-')[0] +
+          form.telephone.split('(')[1].split(') ')[1].split('-')[1]);
+      }
       createOrganization({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
@@ -149,12 +165,19 @@ export default function AddEditOrganization() {
         if (e.json) {
           setErrors(e.json);
         }
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateOrganization(id, {form}, userContext).then((res) => {
+      if (form.telephone) {
+        form.countryCode = 1;
+        form.areaCode = Number(form.telephone.match(/\(\d{3}\)/)[0].match(/\d{3}/)[0]);
+        form.phoneNumber = Number(form.telephone.split('(')[1].split(') ')[0] +
+          form.telephone.split('(')[1].split(') ')[1].split('-')[0] +
+          form.telephone.split('(')[1].split(') ')[1].split('-')[1]);
+      }
+      updateOrganization(id, {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
@@ -164,7 +187,8 @@ export default function AddEditOrganization() {
         if (e.json) {
           setErrors(e.json);
         }
-        reportErrorToBackend(e)
+        console.log(e)
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when updating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -177,45 +201,11 @@ export default function AddEditOrganization() {
     if (!form.legalName) {
       error.legalName = 'The field cannot be empty';
     }
-    if (!form.ID) {
-      error.ID = 'The field cannot be empty';
-    }
+    // if (!form.ID) {
+    //   error.ID = 'The field cannot be empty';
+    // }
     setErrors(error);
 
-    // const outcomeFormErrors = [];
-    // outcomeForm.map((outcome, index) => {
-    //   if(!outcome.name) {
-    //     if (!outcomeFormErrors[index])
-    //       outcomeFormErrors[index] = {};
-    //     outcomeFormErrors[index].name = 'This field cannot be empty';
-    //   }
-    //   if(!outcome.domain) {
-    //     if (!outcomeFormErrors[index])
-    //       outcomeFormErrors[index] = {};
-    //     outcomeFormErrors[index].domain = 'This field cannot be empty';
-    //   }
-    //   if(!outcome.description) {
-    //     if (!outcomeFormErrors[index])
-    //       outcomeFormErrors[index] = {};
-    //     outcomeFormErrors[index].description = 'This field cannot be empty';
-    //   }
-    // })
-    // setOutcomeFormErrors(outcomeFormErrors);
-
-    // const indicatorFormErrors = [];
-    // indicatorForm.map((indicator, index) => {
-    //   if(!indicator.name) {
-    //     if(!indicatorFormErrors[index])
-    //       indicatorFormErrors[index] = {};
-    //     indicatorFormErrors[index].name = 'This field cannot be empty';
-    //   }
-    //   if(!indicator.description) {
-    //     if (!indicatorFormErrors[index])
-    //       indicatorFormErrors[index] = {};
-    //     indicatorFormErrors[index].description = 'This field cannot be empty';
-    //   }
-    // })
-    // setIndicatorFormErrors(indicatorFormErrors)
     return Object.keys(error).length === 0;
     // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
   };
@@ -230,7 +220,7 @@ export default function AddEditOrganization() {
         <GeneralField
           disabled={!userContext.isSuperuser}
           key={'legalName'}
-          label={'Legal Name'}
+          label={'Organization Legal Name'}
           value={form.legalName}
           required
           sx={{mt: '16px', minWidth: 350}}
@@ -250,21 +240,102 @@ export default function AddEditOrganization() {
         <GeneralField
           disabled={!userContext.isSuperuser}
           key={'ID'}
-          label={'ID'}
+          label={'Organization Number'}
           value={form.ID}
           required
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.ID = e.target.value}
           error={!!errors.ID}
           helperText={errors.ID}
-          onBlur={() => {
-            if (form.ID === '') {
-              setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
-            } else {
-              setErrors(errors => ({...errors, ID: ''}));
-            }
+          // onBlur={() => {
+          //   if (form.ID === '') {
+          //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
+          //   } else {
+          //     setErrors(errors => ({...errors, ID: ''}));
+          //   }
+          // }}
+        />
 
+
+        <SelectField
+          // disabled={mode === 'new' || !userContext.isSuperuser}
+          key={'issuedBy'}
+          label={'Number Issued By'}
+          value={form.issuedBy}
+          options={options.issuedBy}
+          error={!!errors.issuedBy}
+          helperText={
+            errors.issuedBy
+          }
+          // onBlur={() => {
+          //   if (form.administrator === '') {
+          //     setErrors(errors => ({...errors, administrator: 'This field cannot be empty'}));
+          //   } else {
+          //     setErrors(errors => ({...errors, administrator: ''}));
+          //   }
+          // }}
+          onChange={e => {
+            setForm(form => ({
+                ...form, issuedBy: e.target.value
+              })
+            );
           }}
+        />
+
+        <GeneralField
+          disabled={!userContext.isSuperuser}
+          key={'telephone'}
+          label={'Telephone'}
+          type={'phoneNumber'}
+          value={form.telephone}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.telephone = e.target.value}
+          error={!!errors.telephone}
+          helperText={errors.telephone}
+          // onBlur={() => {
+          //   if (form.ID === '') {
+          //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
+          //   } else {
+          //     setErrors(errors => ({...errors, ID: ''}));
+          //   }
+          // }}
+        />
+
+        <GeneralField
+          disabled={!userContext.isSuperuser}
+          key={'email'}
+          label={'Contact Email'}
+          value={form.email}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.email = e.target.value}
+          error={!!errors.email}
+          helperText={errors.email}
+          // onBlur={() => {
+          //   if (form.ID === '') {
+          //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
+          //   } else {
+          //     setErrors(errors => ({...errors, ID: ''}));
+          //   }
+          // }}
+        />
+
+        <GeneralField
+          disabled={!userContext.isSuperuser}
+          key={'contactName'}
+          label={'Contact Name'}
+          value={form.contactName}
+          required
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.contactName = e.target.value}
+          error={!!errors.contactName}
+          helperText={errors.contactName}
+          // onBlur={() => {
+          //   if (form.ID === '') {
+          //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
+          //   } else {
+          //     setErrors(errors => ({...errors, ID: ''}));
+          //   }
+          // }}
         />
 
         <SelectField

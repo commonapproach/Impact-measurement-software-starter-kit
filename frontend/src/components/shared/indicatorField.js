@@ -126,6 +126,29 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
+            <Grid item xs={6}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="Unit of Measure"
+                type="text"
+                defaultValue={state.unitOfMeasure}
+                onChange={handleChange('unitOfMeasure')}
+                disabled={disabled}
+                required={required}
+                error={!!errors.unitOfMeasure}
+                helperText={errors.unitOfMeasure}
+                onBlur={() => {
+                  if (!state.unitOfMeasure) {
+                    setErrors(errors => ({...errors, unitOfMeasure: 'This field cannot be empty'}));
+                  }else {
+                    setErrors(errors => ({...errors, unitOfMeasure: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}

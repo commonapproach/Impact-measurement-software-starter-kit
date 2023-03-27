@@ -43,13 +43,14 @@ export default function AddEditIndicator() {
   const [form, setForm] = useState({
     name: '',
     description: '',
+    unitOfMeasure: '',
     organizations: []
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if ((mode === 'edit' && id) || (mode === 'view' && id)) {
-      fetchIndicator(id, userContext).then(({success, indicator}) => {
+      fetchIndicator(id).then(({success, indicator}) => {
         if (success) {
           setForm(indicator);
           setLoading(false);

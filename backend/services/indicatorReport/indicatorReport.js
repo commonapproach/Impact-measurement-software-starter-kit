@@ -32,13 +32,13 @@ const createIndicatorReport = async (req, res) => {
     form.indicator = indicator._id;
   }
   if (!form || !form.name || !form.organization || !form.indicator
-    || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
+    || !form.numericalValue || !form.startTime || !form.endTime || !form.dateCreated)
     throw new Server400Error('Wrong input');
 
   const organization = await GDBOrganizationModel.findOne({_id: form.organization});
   if (!organization)
     throw new Server400Error('No such organization');
-  const indicator = await GDBIndicatorModel.findOne({_id: form.indicator});
+  const indicator = await GDBIndicatorModel.findOne({_id: form.indicator}, {populates: ['unitOfMeasure']});
   if (!indicator)
     throw new Server400Error('No such indicator');
   if (await GDBIndicatorReportModel.findOne({
@@ -60,7 +60,7 @@ const createIndicatorReport = async (req, res) => {
       hasEnd: {date: new Date(form.endTime)}
     }),
     dateCreated: new Date(form.dateCreated),
-    value: GDBMeasureModel({numericalValue: form.numericalValue, unitOfMeasure: {label: form.unitOfMeasure}}),
+    value: GDBMeasureModel({numericalValue: form.numericalValue, unitOfMeasure: indicator.unitOfMeasure}),
   });
 
 
@@ -121,7 +121,7 @@ const updateIndicatorReport = async (req, res) => {
   const {form} = req.body;
   const {id} = req.params;
   if (!id || !form || !form.name || !form.comment || !form.organization || !form.indicator
-    || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
+    || !form.numericalValue || !form.startTime || !form.endTime || !form.dateCreated)
     throw new Server400Error('Wrong input');
 
   const indicatorReport = await GDBIndicatorReportModel.findOne({_id: id},
@@ -140,10 +140,11 @@ const updateIndicatorReport = async (req, res) => {
     indicatorReport.forOrganization = organization;
   }
   if (indicatorReport.forIndicator.split('_')[1] !== form.indicator) {
-    const indicator = await GDBIndicatorModel.findOne({_id: form.indicator});
+    const indicator = await GDBIndicatorModel.findOne({_id: form.indicator}, {populates: ['unitOfMeasure']});
     if (!indicator)
       throw new Server400Error('No such indicator');
     indicatorReport.forIndicator = indicator;
+    indicatorReport.value.unitOfMeasure = indicator.unitOfMeasure
   }
 
   if (form.startTime > form.endTime)
@@ -153,7 +154,6 @@ const updateIndicatorReport = async (req, res) => {
   indicatorReport.dateCreated = new Date(form.dateCreated);
 
   indicatorReport.value.numericalValue = form.numericalValue;
-  indicatorReport.value.unitOfMeasure.label = form.unitOfMeasure;
 
   await indicatorReport.save();
   return res.status(200).json({success: true});

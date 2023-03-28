@@ -143,7 +143,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
       {!loading &&
         <>
           <Grid container columnSpacing={2}>
-            <Grid item xs={4}>
+            <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -190,28 +190,28 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               }
             />
             </Grid>
-            <Grid item xs={4}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
-                label="Unit of Measure"
-                type="text"
-                defaultValue={state.unitOfMeasure}
-                onChange={handleChange('unitOfMeasure')}
-                disabled={disabled}
-                required={required}
-                error={!!errors.unitOfMeasure}
-                helperText={errors.unitOfMeasure}
-                onBlur={() => {
-                  if (!state.unitOfMeasure) {
-                    setErrors(errors => ({...errors, unitOfMeasure: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, unitOfMeasure: null}));
-                  }
-                }
-                }
-              />
-            </Grid>
+            {/*<Grid item xs={4}>*/}
+            {/*  <TextField*/}
+            {/*    sx={{mt: 2}}*/}
+            {/*    fullWidth*/}
+            {/*    label="Unit of Measure"*/}
+            {/*    type="text"*/}
+            {/*    defaultValue={state.unitOfMeasure}*/}
+            {/*    onChange={handleChange('unitOfMeasure')}*/}
+            {/*    disabled={disabled}*/}
+            {/*    required={required}*/}
+            {/*    error={!!errors.unitOfMeasure}*/}
+            {/*    helperText={errors.unitOfMeasure}*/}
+            {/*    onBlur={() => {*/}
+            {/*      if (!state.unitOfMeasure) {*/}
+            {/*        setErrors(errors => ({...errors, unitOfMeasure: 'This field cannot be empty'}));*/}
+            {/*      } else {*/}
+            {/*        setErrors(errors => ({...errors, unitOfMeasure: null}));*/}
+            {/*      }*/}
+            {/*    }*/}
+            {/*    }*/}
+            {/*  />*/}
+            {/*</Grid>*/}
             <Grid item xs={4}>
               <LoadingAutoComplete
                 label="Organization"
@@ -272,12 +272,13 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 }
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
                 value={state.startTime}
                 label={'Start Time'}
+                minWidth={250}
                 onChange={handleChange('startTime')}
                 required={required}
                 disabled={disabled}
@@ -294,12 +295,13 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               />
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
                 value={state.endTime}
                 label={'End Time'}
+                minWidth={250}
                 onChange={handleChange('endTime')}
                 required={required}
                 disabled={disabled}

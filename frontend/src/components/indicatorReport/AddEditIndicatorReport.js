@@ -46,7 +46,7 @@ export default function AddEditIndicatorReport() {
     organization: null,
     indicator: null,
     numericalValue: '',
-    unitOfMeasure: '',
+    // unitOfMeasure: '',
     startTime: '',
     endTime: '',
     dateCreated: ''
@@ -152,8 +152,8 @@ export default function AddEditIndicatorReport() {
       error.numericalValue = 'The field cannot be empty';
     if (form.numericalValue && isNaN(form.numericalValue))
       error.numericalValue = 'The field must be a number';
-    if (!form.unitOfMeasure)
-      error.unitOfMeasure = 'The field cannot be empty';
+    // if (!form.unitOfMeasure)
+    //   error.unitOfMeasure = 'The field cannot be empty';
     if (!form.dateCreated)
       error.dateCreated = 'The field cannot be empty';
     setErrors(error);

@@ -49,7 +49,7 @@ export default function AddEditOutcome() {
 
   useEffect(() => {
     if((mode === 'edit' && id) || (mode === 'view' && id)){
-      fetchOutcome(id, userContext).then(({success, outcome}) => {
+      fetchOutcome(id).then(({success, outcome}) => {
         if(success){
           setForm(outcome);
           setLoading(false)

@@ -5,6 +5,7 @@ import {fetchThemes} from "../../api/themeApi";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
+import {fetchIndicators} from "../../api/indicatorApi";
 
 
 const filterOptions = createFilterOptions({
@@ -13,7 +14,18 @@ const filterOptions = createFilterOptions({
 });
 
 
-function LoadingAutoComplete({label, options, property, state, onChange, disabled, error, helperText, required, onBlur}) {
+function LoadingAutoComplete({
+                               label,
+                               options,
+                               property,
+                               state,
+                               onChange,
+                               disabled,
+                               error,
+                               helperText,
+                               required,
+                               onBlur
+                             }) {
   return (
     <Autocomplete
       sx={{mt: 2}}
@@ -38,15 +50,23 @@ function LoadingAutoComplete({label, options, property, state, onChange, disable
   );
 }
 
-export default function OutcomeField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization}) {
+export default function OutcomeField({
+                                       defaultValue,
+                                       required,
+                                       onChange,
+                                       label,
+                                       disabled,
+                                       importErrors,
+                                     }) {
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({theme: {}});
+  const [options, setOptions] = useState({theme: {}, indicator: {}});
 
   const [loading, setLoading] = useState(true);
 
   const [errors, setErrors] = useState({...importErrors});
+
 
   const userContext = useContext(UserContext);
 
@@ -62,20 +82,34 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
               }
             );
         }),
-      fetchOrganizations(userContext).then(({success, organizations}) => {
-        if(success){
-          const options ={} ;
+      fetchOrganizations().then(({success, organizations}) => {
+        if (success) {
+          const options = {};
           organizations.map(organization => {
             // only organization which the user serves as an editor should be able to add
-            if(userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
+            if (userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
               options[organization._id] = organization.legalName;
-          })
-          setOptions(op => ({...op, organizations: options}))
+          });
+          setOptions(op => ({...op, organization: options}));
         }
-      })
+      }),
     ]).then(() => setLoading(false));
 
   }, []);
+
+  useEffect(() => {
+    if (state.organization) {
+      fetchIndicators(state.organization).then(({success, indicators}) => {
+        if (success) {
+          const inds = {}
+          indicators.map(indicator => {
+            inds[indicator.name] = indicator._id;
+          })
+          setOptions(ops => ({...ops, indicator: inds}))
+        }
+      })
+    }
+  }, [state.organization]);
 
   useEffect(() => {
     setErrors({...importErrors});
@@ -98,7 +132,7 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
       {!loading &&
         <>
           <Grid container columnSpacing={2}>
-            <Grid item xs={11.5}>
+            <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -113,14 +147,14 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
                 onBlur={() => {
                   if (!state.name) {
                     setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
-                  }else {
+                  } else {
                     setErrors(errors => ({...errors, name: null}));
                   }
                 }
                 }
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <LoadingAutoComplete
                 label="Theme"
                 options={options}
@@ -134,34 +168,58 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
                 onBlur={() => {
                   if (!state.theme) {
                     setErrors(errors => ({...errors, theme: 'This field cannot be empty'}));
-                  }else {
+                  } else {
                     setErrors(errors => ({...errors, theme: null}));
                   }
                 }
                 }
               />
             </Grid>
-            <Grid item xs={6}>
-              <Dropdown
-                label={'Organizations'}
-                key={'organizations'}
-                value={state.organizations}
-                onChange={handleChange('organizations')}
-                options={options.organizations}
-                error={!!errors.organizations}
-                helperText={errors.organizations}
-                disabled={disabled || disabledOrganization}
+            <Grid item xs={4}>
+              <LoadingAutoComplete
+                key={'organization'}
+                label={"Organization"}
+                options={options}
+                property={'organization'}
+                state={state}
+                onChange={handleChange}
+                error={!!errors.organization}
+                helperText={errors.organization}
+                required={required}
+                disabled={disabled}
                 onBlur={() => {
-                  if (state.organizations.length === 0) {
-                    setErrors(errors => ({...errors, organizations: 'This field cannot be empty'}));
+                  if (!state.organization) {
+                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
                   } else {
-                    setErrors(errors => ({...errors, organizations: null}));
+                    setErrors(errors => ({...errors, organization: null}));
                   }
                 }
                 }
               />
             </Grid>
-            <Grid item xs={11.5}>
+
+            <Grid item xs={4}>
+              <LoadingAutoComplete
+                label="Indicator"
+                options={options}
+                property={'indicator'}
+                state={state}
+                onChange={handleChange}
+                error={!!errors.indicator}
+                helperText={errors.indicator}
+                required={required}
+                disabled={disabled || !state.organization}
+                onBlur={() => {
+                  if (!state.indicator) {
+                    setErrors(errors => ({...errors, indicator: 'This field cannot be empty'}));
+                  } else {
+                    setErrors(errors => ({...errors, indicator: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth
@@ -178,7 +236,7 @@ export default function OutcomeField({defaultValue, required, onChange, label, d
                 onBlur={() => {
                   if (!state.description) {
                     setErrors(errors => ({...errors, description: 'This field cannot be empty'}));
-                  }else {
+                  } else {
                     setErrors(errors => ({...errors, description: null}));
                   }
                 }

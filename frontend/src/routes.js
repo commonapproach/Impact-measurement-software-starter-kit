@@ -34,7 +34,7 @@ import Indicators from "./components/indicators/Indicators";
 import AddEditIndicator from "./components/indicators/addEditIndicator";
 import Organization_outcomes from "./components/outcomes/Organization-outcomes";
 import Outcomes from "./components/outcomes/outcomes";
-import AddEditOutcome from "./components/outcomes/addEditOutcome";
+import AddEditOutcome from "./components/outcomes/AddEditOutcome";
 import AddEditIndicatorReport from "./components/indicatorReport/AddEditIndicatorReport";
 import Organization_indicatorReports from "./components/indicatorReport/Organization-indicatorReports";
 import IndicatorReports from "./components/indicatorReport/indicatorReports";

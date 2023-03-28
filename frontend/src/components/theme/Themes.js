@@ -65,9 +65,9 @@ export default function Themes() {
     {
       label: 'Name',
       body: ({_id, name}) => {
-        return userContext.isSuperuser? <Link color to={`/themes/${_id}/edit`}>
+        return <Link color to={`/themes/${_id}/view`}>
           {name}
-        </Link>:name
+        </Link>
       },
       sortBy: ({legalName}) => legalName
     },
@@ -81,7 +81,7 @@ export default function Themes() {
     {
       label: ' ',
       body: ({_id}) =>
-        <DropdownMenu urlPrefix={'themes'} objectId={_id} hideViewOption hideDeleteOption
+        <DropdownMenu urlPrefix={'themes'} objectId={_id} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_id)}/>
     }
   ];
@@ -99,7 +99,7 @@ export default function Themes() {
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/Themes/new')}
+            onClick={() => navigate('/themes/new')}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Theme"

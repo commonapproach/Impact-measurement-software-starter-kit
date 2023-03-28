@@ -71,7 +71,7 @@ const routes = (
     {/*theme*/}
     <Route path="/themes" element={<PrivateRoute element={Themes}/>}/>
     <Route path="/themes/new" element={<PrivateRoute element={AddEditTheme}/>}/>
-    <Route path="/themes/:id/edit" element={<PrivateRoute element={AddEditTheme}/>}/>
+    <Route path="/themes/:id/:operationMode" element={<PrivateRoute element={AddEditTheme}/>}/>
     {/*indicators*/}
     <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
     <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>

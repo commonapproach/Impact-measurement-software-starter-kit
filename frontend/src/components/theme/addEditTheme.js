@@ -28,8 +28,8 @@ export default function AddEditTheme() {
   const classes = useStyles();
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
-  const {id} = useParams();
-  const mode = id ? 'edit' : 'new';
+  const {id, operationMode} = useParams();
+  const mode = id ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({
@@ -53,30 +53,26 @@ export default function AddEditTheme() {
   });
 
   useEffect(() => {
-      if(!userContext.isSuperuser){
-        navigate('/organizations');
-        enqueueSnackbar("Superuser only", {variant: 'error'});
-      }
-      if (mode === 'edit' && id) {
-        fetchTheme(id).then(res => {
-          if (res.success) {
-            setForm({
-              name: res.theme.name,
-              description: res.theme.description
-            });
-            setLoading(false);
-          }
-        }).catch(e => {
-          reportErrorToBackend(e)
-          enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-          navigate('/themes')
-        });
-      } else if (mode === 'edit' && !id) {
-        navigate('/organizations');
-        enqueueSnackbar("No ID provided", {variant: 'error'});
-      } else if (mode === 'new') {
-        setLoading(false);
-      }
+    if (mode === 'edit' && id || mode === 'view') {
+      fetchTheme(id).then(res => {
+        if (res.success) {
+          setForm({
+            name: res.theme.name,
+            description: res.theme.description
+          });
+          setLoading(false);
+        }
+      }).catch(e => {
+        reportErrorToBackend(e);
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+        navigate('/themes');
+      });
+    } else if (mode === 'edit' && !id) {
+      navigate('/organizations');
+      enqueueSnackbar("No ID provided", {variant: 'error'});
+    } else if (mode === 'new') {
+      setLoading(false);
+    }
   }, [mode]);
 
   const handleSubmit = () => {
@@ -89,11 +85,11 @@ export default function AddEditTheme() {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
       createTheme(form).then((ret) => {
-        if (ret.success) {
-              setState({loadingButton: false, submitDialog: false,});
-              navigate('/themes');
-              enqueueSnackbar(ret.message || 'Success', {variant: "success"});
-            }
+          if (ret.success) {
+            setState({loadingButton: false, submitDialog: false,});
+            navigate('/themes');
+            enqueueSnackbar(ret.message || 'Success', {variant: "success"});
+          }
         }
       ).catch(e => {
         if (e.json) {
@@ -143,7 +139,7 @@ export default function AddEditTheme() {
         <Typography variant={'h4'}> Theme </Typography>
 
         <GeneralField
-          disabled={!userContext.isSuperuser}
+          disabled={operationMode === 'view'}
           key={'name'}
           label={'Name'}
           value={form.name}
@@ -163,6 +159,7 @@ export default function AddEditTheme() {
         />
 
         <GeneralField
+          disabled={operationMode === 'view'}
           key={'description'}
           label={'Description'}
           value={form.description}
@@ -183,9 +180,10 @@ export default function AddEditTheme() {
           }}
         />
 
-        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-          Submit
-        </Button>
+        {operationMode === 'view' ? <div/> :
+          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+            Submit
+          </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Theme?' :

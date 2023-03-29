@@ -85,16 +85,18 @@ const fetchOutcome = async (req, res) => {
   if (!outcome)
     throw new Server400Error('No such outcome');
   outcome.theme = outcome.theme.split('_')[1];
-  outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
-    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
-  }));
-  outcome.organizations = outcome.forOrganizations.map(organization => {
-    return organization._id;
-  });
+  outcome.organization = outcome.forOrganization.split('_')[1];
+  // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
+  //   return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
+  // }));
+  // outcome.organizations = outcome.forOrganizations.map(organization => {
+  //   return organization._id;
+  // });
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
-  delete outcome.forOrganizations;
+  outcome.indicator = outcome.indicator.split('_')[1]
+  delete outcome.forOrganization;
   return res.status(200).json({success: true, outcome});
 
 };

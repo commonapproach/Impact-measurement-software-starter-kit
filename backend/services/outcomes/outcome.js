@@ -48,6 +48,9 @@ const fetchOutcomes = async (req, res) => {
     }
     if (!organization.hasOutcomes)
       return res.status(200).json({success: true, outcomes: [], editable});
+    for (let outcome of organization.hasOutcomes) {
+      outcome.indicator = (await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]})).name;
+    }
 
     return res.status(200).json({success: true, outcomes: organization.hasOutcomes, editable});
   }

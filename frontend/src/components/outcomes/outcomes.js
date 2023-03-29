@@ -13,7 +13,6 @@ export default function Outcomes() {
   const {enqueueSnackbar} = useSnackbar();
   const {id} = useParams();
 
-  const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
@@ -73,12 +72,12 @@ export default function Outcomes() {
       },
       sortBy: ({name}) => name
     },
-    // {
-    //   label: 'Administrator',
-    //   body: ({administrator}) => {
-    //     return administrator;
-    //   }
-    // },
+    {
+      label: 'Indicator',
+      body: ({indicator}) => {
+        return indicator;
+      }
+    },
     // {
     //   label: 'Last name',
     //   body: ({person}) => {

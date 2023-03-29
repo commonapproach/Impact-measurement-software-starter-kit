@@ -95,7 +95,7 @@ const fetchOutcome = async (req, res) => {
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
-  outcome.indicator = outcome.indicator.split('_')[1]
+  outcome.indicator = outcome.indicator.split('_')[1];
   delete outcome.forOrganization;
   return res.status(200).json({success: true, outcome});
 
@@ -112,14 +112,14 @@ const createOutcomeHandler = async (req, res, next) => {
   }
 };
 
-function cacheOrganization(organization, organizationDict) {
-  if (!organizationDict[organization._id])
-    organizationDict[organization._id] = organization;
+function cacheObject(obj, objDict) {
+  if (!objDict[obj._id])
+    objDict[obj._id] = obj;
 }
 
-function cacheListOfOrganizations(organizations, organizationDict) {
-  organizations.map(organization => {
-    cacheOrganization(organization, organizationDict);
+function cacheListOfObjects(objs, objDict) {
+  objs.map(obj => {
+    cacheObject(obj, objDict);
   });
 }
 
@@ -128,7 +128,7 @@ const updateOutcome = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.theme)
+  if (!form || !form.description || !form.name || !form.organization || !form.theme || !form.indicator)
     throw new Server400Error('Invalid input');
   const outcome = await GDBOutcomeModel.findOne({_id: id});
   if (!outcome)
@@ -143,42 +143,76 @@ const updateOutcome = async (req, res) => {
     outcome.theme = newTheme;
   }
   const organizationDict = {};
+  const indicatorDict = {};
 
   // fetch outcome.forOrganizations from database
-  outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(organizationURI =>
-    GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
-  ));
+  // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(organizationURI =>
+  //   GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
+  // ));
+  outcome.forOrganization = await GDBOrganizationModel.findOne({_id: outcome.forOrganization.split('_')[1]});
+  outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
   // cache outcome.forOrganizations into dict
-  cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
+  // cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
+  cacheObject(outcome.forOrganization, organizationDict);
+  cacheObject(outcome.indicator, indicatorDict);
   // fetch form.organizations from database
-  form.organizations = await Promise.all(form.organizations.map(organizationId => {
-      // if the organization already in the dict, simply get from dict
-      if (organizationDict[organizationId])
-        return organizationDict[organizationId];
-      // otherwise, fetch
-      return GDBOrganizationModel.findOne({_id: organizationId});
-    }
-  ));
+  form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_id: form.organization});
+  form.indicator = indicatorDict[form.indicator] || await GDBIndicatorModel.findOne({_id: form.indicator});
+  // form.organizations = await Promise.all(form.organizations.map(organizationId => {
+  //     // if the organization already in the dict, simply get from dict
+  //     if (organizationDict[organizationId])
+  //       return organizationDict[organizationId];
+  //     // otherwise, fetch
+  //     return GDBOrganizationModel.findOne({_id: organizationId});
+  //   }
+  // ));
 
   // cache organizations which is not in dict
-  cacheListOfOrganizations(form.organizations, organizationDict);
+  cacheObject(form.organization, organizationDict);
+  cacheObject(form.indicator, indicatorDict);
+  // cacheListOfOrganizations(form.organizations, organizationDict);
+
+  if (form.organization._id !== outcome.forOrganization._id) {
+    // remove the outcome from outcome.organization
+    const index = outcome.forOrganization.hasOutcomes.findIndex(outcome => outcome._id === id);
+    outcome.forOrganization.hasOutcomes.splice(index, 1);
+    await outcome.forOrganization.save();
+
+    // add the outcome to form.organization
+    if (!form.organization.hasOutcomes)
+      form.organization.hasOutcomes = [];
+    form.organization.hasOutcomes.push(outcome);
+    await form.organization.save();
+    outcome.forOrganization = form.organization;
+  }
+
+  if (form.indicator._id !== outcome.indicator._id) {
+    const index = outcome.indicator.forOutcomes.findIndex(outcome => outcome._id === id);
+    outcome.indicator.forOutcomes.splice(index, 1);
+    await outcome.indicator.save();
+
+    if (!form.indicator.forOutcomes)
+      form.indicator.forOutcomes = [];
+    form.indicator.forOutcomes.push(outcome);
+    await form.indicator.save();
+    outcome.indicator = form.indicator;
+  }
 
   // remove the outcome from every organizations in outcome.forOrganizations
-  await Promise.all(outcome.forOrganizations.map(organization => {
-    const index = organization.hasOutcomes.findIndex(outcome => outcome._id === id);
-    organization.hasOutcomes.splice(index, 1);
-    return organization.save();
-  }));
+  // await Promise.all(outcome.forOrganizations.map(organization => {
+  //   const index = organization.hasOutcomes.findIndex(outcome => outcome._id === id);
+  //   organization.hasOutcomes.splice(index, 1);
+  //   return organization.save();
+  // }));
 
   // add the outcome to every organizations in form.organizations
-  await Promise.all(form.organizations.map(organization => {
-    if (!organization.hasOutcomes)
-      organization.hasOutcomes = [];
-    organization.hasOutcomes.push(outcome);
-    return organization.save();
-  }));
+  // await Promise.all(form.organizations.map(organization => {
+  //   if (!organization.hasOutcomes)
+  //     organization.hasOutcomes = [];
+  //   organization.hasOutcomes.push(outcome);
+  //   return organization.save();
+  // }));
 
-  outcome.forOrganizations = form.organizations;
   await outcome.save();
   return res.status(200).json({success: true});
 };

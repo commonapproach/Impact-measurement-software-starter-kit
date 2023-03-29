@@ -18,8 +18,8 @@ const fetchOutcomes = async (req, res) => {
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
       const outcomes = await GDBOutcomeModel.find({});
-      outcomes.map(outcome => outcome.editable = true)
-      return res.status(200).json({success: true, outcomes, editable:true});
+      outcomes.map(outcome => outcome.editable = true);
+      return res.status(200).json({success: true, outcomes, editable: true});
     }
     // take all reachable organizations
     const reachableOrganizations = await allReachableOrganizations(userAccount);
@@ -200,30 +200,49 @@ const createOutcome = async (req, res) => {
   if (form?.themeName) { // handle the case when no such indicator name
     const theme = await GDBThemeModel.findOne({name: form.themeName});
     if (!theme)
-      return res.status(200).json({success: false, message: 'Wrong themeName'})
+      return res.status(200).json({success: false, message: 'Wrong themeName'});
     form.theme = theme._id;
   }
-  if (!form || !form.organizations || !form.name || !form.description || !form.theme)
+  if (!form || !form.organization || !form.name || !form.description || !form.theme || !form.indicator)
     throw new Server400Error('Invalid input');
-  form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
-    GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']})
-  ));
+  form.forOrganization = await GDBOrganizationModel.findOne({_id: form.organization}, {populates: ['hasOutcomes']});
+  // form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
+  //   GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']})
+  // ));
 
   // for each organization, does it contain any indicator with same name?
-  let duplicate = false
-  let organizationInProblem
-  form.forOrganizations.map(organization => {
-    if(organization.hasOutcomes){
-      organization.hasOutcomes.map(outcome => {
-        if (outcome.name === form.name) {
-          duplicate = true;
-          organizationInProblem = organization._id;
-        }
-      });
-    }
-  })
+  let duplicate = false;
+  let organizationInProblem;
+  if (form.forOrganization.hasOutcomes) {
+    form.forOrganization.hasOutcomes.map(outcome => {
+      if (outcome.name === form.name) {
+        duplicate = true;
+        organizationInProblem = form.organization._id;
+      }
+    });
+  }
+  // add indicator to the outcome, notice that the indicator must belong to the organization
+  const indicator = await GDBIndicatorModel.findOne({_id: form.indicator}, {populates: ['forOutcomes']});
+  if (!indicator)
+    throw new Server400Error('No such indicator');
+  if (!indicator.forOrganizations.includes(`:organization_${form.organization}`))
+    throw new Server400Error('The indicator is not belong to the organization');
+  form.indicator = indicator;
+  // form.forOrganizations.map(organization => {
+  //   if(organization.hasOutcomes){
+  //     organization.hasOutcomes.map(outcome => {
+  //       if (outcome.name === form.name) {
+  //         duplicate = true;
+  //         organizationInProblem = organization._id;
+  //       }
+  //     });
+  //   }
+  // })
   if (duplicate && organizationInProblem)
-    return res.status(200).json({success: false, message: 'The name of the outcome has been occupied in organization ' + organizationInProblem})
+    return res.status(200).json({
+      success: false,
+      message: 'The name of the outcome has been occupied in organization ' + organizationInProblem
+    });
 
   form.theme = await GDBThemeModel.findOne({_id: form.theme});
   if (!form.theme)
@@ -232,12 +251,22 @@ const createOutcome = async (req, res) => {
   const outcome = GDBOutcomeModel(form);
   await outcome.save();
   // add the outcome to the organizations
-  await Promise.all(outcome.forOrganizations.map(organization => {
-    if (!organization.hasOutcomes)
-      organization.hasOutcomes = [];
-    organization.hasOutcomes.push(outcome);
-    return organization.save();
-  }));
+  if (!outcome.forOrganization.hasOutcomes)
+    outcome.forOrganization.hasOutcomes = [];
+  outcome.forOrganization.hasOutcomes.push(outcome);
+  await outcome.forOrganization.save();
+  // add the outcome to the indicator
+  if (!outcome.indicator.forOutcomes)
+    outcome.indicator.forOutcomes = [];
+  outcome.indicator.forOutcomes.push(outcome);
+  await outcome.indicator.save();
+
+  // await Promise.all(outcome.forOrganizations.map(organization => {
+  //   if (!organization.hasOutcomes)
+  //     organization.hasOutcomes = [];
+  //   organization.hasOutcomes.push(outcome);
+  //   return organization.save();
+  // }));
   const ownership = GDBOwnershipModel({
     resource: outcome,
     owner: userAccount,

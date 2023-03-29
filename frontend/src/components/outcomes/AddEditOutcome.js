@@ -87,7 +87,7 @@ export default function AddEditOutcome() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOutcome({form}, userContext).then((ret) => {
+      createOutcome({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -126,8 +126,8 @@ export default function AddEditOutcome() {
 
     if (!form.description)
       error.description = 'The field cannot be empty'
-    if(form.organizations.length === 0)
-      error.organizations = 'The field cannot be empty'
+    if(!form.organization)
+      error.organization = 'The field cannot be empty'
     setErrors(error);
     return Object.keys(error).length === 0;
   };

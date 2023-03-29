@@ -32,6 +32,7 @@ function LoadingAutoComplete({
       options={Object.keys(options[property])}
       getOptionLabel={(key) => options[property][key]}
       fullWidth
+      disabled={disabled}
       value={state[property]}
       onChange={onChange(property)}
       filterOptions={filterOptions}
@@ -103,7 +104,7 @@ export default function OutcomeField({
         if (success) {
           const inds = {}
           indicators.map(indicator => {
-            inds[indicator.name] = indicator._id;
+            inds[indicator._id] = indicator.name;
           })
           setOptions(ops => ({...ops, indicator: inds}))
         }

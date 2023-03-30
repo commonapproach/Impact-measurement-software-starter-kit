@@ -29,11 +29,13 @@ async function createOrganization(req, res) {
     throw new Server400Error('Wrong information input');
   if (!form.legalName)
     throw new Server400Error('Legal name is requested');
-  if (!form.ID)
+  if (!form.hasIdentifier)
     throw new Server400Error('Organization ID is requested');
-  form.hasId = GDBOrganizationIdModel({
-    hasIdentifier: form.ID,
-  });
+  if (form.organizationNumber){
+    form.hasId = GDBOrganizationIdModel({
+      hasIdentifier: form.organizationNumber,
+    });
+  }
   if (form.issuedBy)
     form.hasId.issuedBy = `:organization_${form.issuedBy}`
   // handle administrators, editors, reporters, researchers
@@ -56,18 +58,21 @@ async function createOrganization(req, res) {
   // }));
 
 
+  let telephone;
+  if(form.areaCode && form.countryCode && form.phoneNumber)
+    telephone = GDBPhoneNumberModel({
+    areaCode: form.areaCode,
+    countryCode: form.countryCode,
+    phoneNumber: form.phoneNumber,
+  })
   const organization = GDBOrganizationModel({
     legalName: form.legalName,
     hasId: form.hasId,
     comment: form.comment,
     email: form.email,
     contactName: form.contactName,
-
-    telephone: GDBPhoneNumberModel({
-      areaCode: form.areaCode,
-      countryCode: form.countryCode,
-      phoneNumber: form.phoneNumber,
-    })
+    hasIdentifier: form.hasIdentifier,
+    telephone: telephone
   });
 
   await organization.save();
@@ -123,8 +128,8 @@ async function fetchOrganization(req, res) {
     });
   }
   const indicators = organization.hasIndicators || [];
-  organization.ID = organization.hasId?.hasIdentifier;
-  organization.issuedBy = organization.hasId?.issuedBy.split('_')[1]
+  organization.organizationNumber = organization.hasId?.hasIdentifier;
+  organization.issuedBy = organization.hasId?.issuedBy?.split('_')[1]
   if (!organization.researchers)
     organization.researchers = [];
   if (!organization.reporters)
@@ -208,7 +213,7 @@ async function updateOrganization(req, res) {
     throw Server400Error('No such organization');
   if (!form.legalName)
     throw Server400Error('Legal name is requested');
-  if (!form.ID)
+  if (!form.hasIdentifier)
     throw Server400Error('ID is requested');
 
   // cache all userAccounts in the organization
@@ -229,9 +234,13 @@ async function updateOrganization(req, res) {
   organization.comment = form.comment;
   organization.contactName = form.contactName;
   organization.email = form.email;
-  organization.telephone.areaCode = form.areaCode;
-  organization.telephone.countryCode = form.countryCode;
-  organization.telephone.phoneNumber = form.phoneNumber;
+  organization.hasIdentifier = form.hasIdentifier;
+  if (form.areaCode && form.countryCode && form.phoneNumber) {
+    organization.telephone.areaCode = form.areaCode;
+    organization.telephone.countryCode = form.countryCode;
+    organization.telephone.phoneNumber = form.phoneNumber;
+  }
+
 
 
   if (userAccountDict[form.administrator]) {
@@ -274,15 +283,15 @@ async function updateOrganization(req, res) {
     updateRoles(organization, form, 'researchers', 'researcherOfs', userAccountDict),
     updateRoles(organization, form, 'editors', 'editorOfs', userAccountDict)
   ]);
-  organization.hasId.hasIdentifier = form.ID;
+  organization.hasId.hasIdentifier = form.organizationNumber;
   if(form.issuedBy)
     organization.hasId.issuedBy = `:organization_${form.issuedBy}`
-  if (organization.hasId.hasIdentifier !== form.ID) {
+  // if (organization.hasId.hasIdentifier !== form.ID) {
     // drop previous one
     // await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
     // and add a new one
     // organization.hasId = GDBOrganizationIdModel({hasIdentifier: form.ID});
-  }
+  // }
 
   // handle outcomes
   // await updateOutcomes(organization, outcomeForm);

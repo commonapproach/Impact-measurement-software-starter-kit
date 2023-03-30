@@ -52,7 +52,7 @@ export default function AddEditOrganization() {
 
   const [form, setForm] = useState({
     legalName: '',
-    ID: '',
+    organizationNumber: '',
     issuedBy: '',
     administrator: '',
     reporters: [],
@@ -62,6 +62,7 @@ export default function AddEditOrganization() {
     contactName: '',
     email: '',
     telephone: '',
+    hasIdentifier: '',
   });
   // const [outcomeForm, setOutcomeForm] = useState([
   // ]);
@@ -81,7 +82,7 @@ export default function AddEditOrganization() {
           objectForm[user._id] = `${user.person.givenName} ${user.person.familyName} ID: ${user._id}`;
         });
         if (success)
-          setOptions(options => ({...options,objectForm}));
+          setOptions(options => ({...options, objectForm}));
       }),
       fetchOrganizations().then(({organizations, success}) => {
         if (success) {
@@ -100,7 +101,7 @@ export default function AddEditOrganization() {
             const {organization} = res;
             setForm({
               legalName: organization.legalName || '',
-              ID: organization.ID || '',
+              organizationNumber: organization.organizationNumber || '',
               issuedBy: organization.issuedBy || '',
               administrator: organization.administrator || '',
               reporters: organization.reporters || [],
@@ -109,13 +110,17 @@ export default function AddEditOrganization() {
               comment: organization.comment || '',
               contactName: organization.contactName || '',
               email: organization.email || '',
-              telephone:`+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}`
+              hasIdentifier: organization.hasIdentifier || '',
+              telephone: organization.telephone?
+                `+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}` :
+                ''
             });
             setLoading(false)
           }
         }).catch(e => {
           if (e.json)
             setErrors(e.json);
+          console.log(e)
           setLoading(false);
           reportErrorToBackend(e);
           enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
@@ -201,9 +206,6 @@ export default function AddEditOrganization() {
     if (!form.legalName) {
       error.legalName = 'The field cannot be empty';
     }
-    // if (!form.ID) {
-    //   error.ID = 'The field cannot be empty';
-    // }
     setErrors(error);
 
     return Object.keys(error).length === 0;
@@ -239,14 +241,14 @@ export default function AddEditOrganization() {
 
         <GeneralField
           disabled={!userContext.isSuperuser}
-          key={'ID'}
+          key={'organizationNumber'}
           label={'Organization Number'}
-          value={form.ID}
+          value={form.organizationNumber}
           required
           sx={{mt: '16px', minWidth: 350}}
-          onChange={e => form.ID = e.target.value}
-          error={!!errors.ID}
-          helperText={errors.ID}
+          onChange={e => form.organizationNumber = e.target.value}
+          error={!!errors.organizationNumber}
+          helperText={errors.organizationNumber}
           // onBlur={() => {
           //   if (form.ID === '') {
           //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
@@ -279,6 +281,26 @@ export default function AddEditOrganization() {
                 ...form, issuedBy: e.target.value
               })
             );
+          }}
+        />
+
+        <GeneralField
+          disabled={!userContext.isSuperuser}
+          key={'hasIdentifier'}
+          label={'ID'}
+          value={form.hasIdentifier}
+          required
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.hasIdentifier = e.target.value}
+          error={!!errors.hasIdentifier}
+          helperText={errors.hasIdentifier}
+          onBlur={() => {
+            if (form.hasIdentifier === '') {
+              setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, hasIdentifier: ''}));
+            }
+
           }}
         />
 
@@ -349,7 +371,7 @@ export default function AddEditOrganization() {
             errors.administrator
           }
           onBlur={() => {
-            if (form.administrator === '') {
+            if (!form.administrator) {
               setErrors(errors => ({...errors, administrator: 'This field cannot be empty'}));
             } else {
               setErrors(errors => ({...errors, administrator: ''}));

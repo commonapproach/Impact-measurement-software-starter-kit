@@ -19,12 +19,13 @@ const GDBOrganizationModel = createGraphDBModel({
   editor: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},
   researcher: {type: [GDBUserAccountModel], internalKey: ':hasResearcher'},
   legalName:{type: String, internalKey:'tove_org:hasLegalName'},
-  hasId: {type: GDBOrganizationIdModel, internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE},
+  hasId: {type: GDBOrganizationIdModel, internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE}, // contains organization number
   hasIndicator: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
   hasOutcome: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
-  email: {type: String, internalKey: ':hasEmail'}
+  email: {type: String, internalKey: ':hasEmail'},
+  hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'} // contains the identifier
 }, {
   rdfTypes: ['cids:Organization'], name: 'organization'
 });

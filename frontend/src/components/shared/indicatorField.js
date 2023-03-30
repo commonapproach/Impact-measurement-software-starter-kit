@@ -104,6 +104,29 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="Identifier"
+                type="text"
+                defaultValue={state.hasIdentifier}
+                onChange={handleChange('hasIdentifier')}
+                disabled={disabled}
+                required={required}
+                error={!!errors.hasIdentifier}
+                helperText={errors.hasIdentifier}
+                onBlur={() => {
+                  if (!state.hasIdentifier) {
+                    setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));
+                  }else {
+                    setErrors(errors => ({...errors, hasIdentifier: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
+
             <Grid item xs={6}>
               <Dropdown
                 label={'Organizations'}

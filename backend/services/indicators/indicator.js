@@ -142,13 +142,14 @@ const updateIndicator = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.unitOfMeasure)
+  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.unitOfMeasure || !form.hasIdentifier)
     throw new Server400Error('Invalid input');
   const indicator = await GDBIndicatorModel.findOne({_id: id}, {populates: ['unitOfMeasure']});
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.name = form.name;
   indicator.description = form.description;
+  indicator.hasIdentifier = form.hasIdentifier;
   indicator.unitOfMeasure.label = form.unitOfMeasure
   const organizationDict = {};
 
@@ -208,7 +209,7 @@ const createIndicator = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
-  if (!form || !form.organizations || !form.name || !form.description || !form.unitOfMeasure)
+  if (!form || !form.organizations || !form.name || !form.description || !form.unitOfMeasure || !form.hasIdentifier)
     throw new Server400Error('Invalid input');
   form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
     GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']})

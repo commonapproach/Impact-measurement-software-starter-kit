@@ -42,6 +42,7 @@ export default function AddEditIndicator() {
 
   const [form, setForm] = useState({
     name: '',
+    hasIdentifier: '',
     description: '',
     unitOfMeasure: '',
     organizations: []
@@ -131,6 +132,8 @@ export default function AddEditIndicator() {
       error.description = 'The field cannot be empty';
     if (form.organizations.length === 0)
       error.organizations = 'The field cannot be empty';
+    if (!form.hasIdentifier)
+      error.hasIdentifier = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };

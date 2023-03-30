@@ -9,7 +9,8 @@ const GDBIndicatorModel = createGraphDBModel({
   forOutcome: {type: [GDBOutcomeModel], internalKey: 'cids:forOutcome'},
   indicatorReport: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'},
   forOrganization: {type: [Types.NamedIndividual], internalKey: 'cids:forOrganization'},
-  unitOfMeasure: {type: GDBUnitOfMeasure, internalKey: 'iso21972:hasUnit'}
+  unitOfMeasure: {type: GDBUnitOfMeasure, internalKey: 'iso21972:hasUnit'},
+  hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'}
 }, {
   rdfTypes: ['cids:Indicator'], name: 'indicator'
 });

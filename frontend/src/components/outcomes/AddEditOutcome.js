@@ -43,7 +43,7 @@ export default function AddEditOutcome() {
     name: '',
     comment: '',
     organization: null,
-    indicator:null,
+    indicators:[],
   });
   const [loading, setLoading] = useState(true);
 
@@ -123,7 +123,8 @@ export default function AddEditOutcome() {
     const error = {};
     if (form.name === '')
       error.name = 'The field cannot be empty';
-
+    if (!form.indicators.length)
+      error.indicators = 'The field cannot be empty';
     if (!form.description)
       error.description = 'The field cannot be empty'
     if(!form.organization)

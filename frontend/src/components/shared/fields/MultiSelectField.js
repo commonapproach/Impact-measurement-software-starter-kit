@@ -4,7 +4,7 @@ import {Help as HelpIcon} from "@mui/icons-material";
 
 export default function Dropdown(props) {
   // options is {labelValue1: label1, labelValue2: label2, ...}
-  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick} = props;
+  const {options, label, value, onChange, helperText, required, error, onBlur, disabled, questionMarkOnClick, minWidth} = props;
 
   const handleChange = useCallback((e, value) => {
     onChange({target: {value}});
@@ -20,14 +20,15 @@ export default function Dropdown(props) {
         getOptionLabel={ labelValue=> options[labelValue]}
         defaultValue={value}
         onBlur={onBlur}
+        fullWidth
         disabled={disabled}
         renderInput={(params) => (
           <TextField
             {...params}
             required={required}
             label={label}
-            sx={{minWidth: 350}}
-            fullWidth={false}
+            sx={{minWidth: minWidth || 350}}
+            fullWidth
             helperText={helperText}
             error={error}
           />

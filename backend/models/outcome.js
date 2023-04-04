@@ -6,7 +6,7 @@ const GDBOutcomeModel = createGraphDBModel({
   description: {type: String, internalKey: 'cids:hasDescription'},
   theme: {type: GDBThemeModel, internalKey: 'cids:forTheme'},
   forOrganization: {type: Types.NamedIndividual, internalKey: 'cids:forOrganization'},
-  indicator: {type: Types.NamedIndividual, internalKey: 'cids:hasIndicator'}
+  indicator: {type: [Types.NamedIndividual], internalKey: 'cids:hasIndicator'}
 }, {
   rdfTypes: ['cids:Outcome'], name: 'outcome'
 });

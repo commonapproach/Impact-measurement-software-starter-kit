@@ -62,7 +62,7 @@ export default function OutcomeField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({theme: {}, indicator: {}});
+  const [options, setOptions] = useState({theme: {}, indicators: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -106,7 +106,7 @@ export default function OutcomeField({
           indicators.map(indicator => {
             inds[indicator._id] = indicator.name;
           })
-          setOptions(ops => ({...ops, indicator: inds}))
+          setOptions(ops => ({...ops, indicators: inds}))
         }
       })
     }
@@ -155,7 +155,7 @@ export default function OutcomeField({
                 }
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6}>
               <LoadingAutoComplete
                 label="Theme"
                 options={options}
@@ -176,7 +176,7 @@ export default function OutcomeField({
                 }
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6}>
               <LoadingAutoComplete
                 key={'organization'}
                 label={"Organization"}
@@ -199,26 +199,50 @@ export default function OutcomeField({
               />
             </Grid>
 
-            <Grid item xs={4}>
-              <LoadingAutoComplete
-                label="Indicator"
-                options={options}
-                property={'indicator'}
-                state={state}
-                onChange={handleChange}
-                error={!!errors.indicator}
-                helperText={errors.indicator}
+            <Grid item xs={12}>
+              <Dropdown
+                label="Indicators"
+                key={'indicators'}
+                options={options.indicators}
+                onChange={e => {
+                  state.indicators = e.target.value;
+                }}
+                // state={state}
+                value={state.indicators}
+                // onChange={handleChange}
+                error={!!errors.indicators}
+                helperText={errors.indicators}
                 required={required}
                 disabled={disabled || !state.organization}
                 onBlur={() => {
-                  if (!state.indicator) {
-                    setErrors(errors => ({...errors, indicator: 'This field cannot be empty'}));
+                  if (!state.indicators) {
+                    setErrors(errors => ({...errors, indicators: 'This field cannot be empty'}));
                   } else {
-                    setErrors(errors => ({...errors, indicator: null}));
+                    setErrors(errors => ({...errors, indicators: null}));
                   }
                 }
                 }
-              />
+                />
+
+              {/*<LoadingAutoComplete*/}
+              {/*  label="Indicators"*/}
+              {/*  options={options}*/}
+              {/*  property={'indicators'}*/}
+              {/*  state={state}*/}
+              {/*  onChange={handleChange}*/}
+              {/*  error={!!errors.indicators}*/}
+              {/*  helperText={errors.indicators}*/}
+              {/*  required={required}*/}
+              {/*  disabled={disabled || !state.organization}*/}
+              {/*  onBlur={() => {*/}
+              {/*    if (!state.indicators) {*/}
+              {/*      setErrors(errors => ({...errors, indicators: 'This field cannot be empty'}));*/}
+              {/*    } else {*/}
+              {/*      setErrors(errors => ({...errors, indicators: null}));*/}
+              {/*    }*/}
+              {/*  }*/}
+              {/*  }*/}
+              {/*/>*/}
             </Grid>
             <Grid item xs={12}>
               <TextField

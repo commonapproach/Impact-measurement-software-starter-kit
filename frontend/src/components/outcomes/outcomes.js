@@ -73,9 +73,9 @@ export default function Outcomes() {
       sortBy: ({name}) => name
     },
     {
-      label: 'Indicator',
-      body: ({indicator}) => {
-        return indicator;
+      label: 'Indicators',
+      body: ({indicators}) => {
+        return indicators.join(", ");
       }
     },
     // {

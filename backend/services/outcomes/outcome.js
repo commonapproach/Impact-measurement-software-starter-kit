@@ -49,7 +49,9 @@ const fetchOutcomes = async (req, res) => {
     if (!organization.hasOutcomes)
       return res.status(200).json({success: true, outcomes: [], editable});
     for (let outcome of organization.hasOutcomes) {
-      outcome.indicator = (await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]})).name;
+      outcome.indicators = (await Promise.all(outcome.indicators.map(indicatorURI =>
+        GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]})
+      ))).map(indicator => indicator.name);
     }
 
     return res.status(200).json({success: true, outcomes: organization.hasOutcomes, editable});
@@ -98,7 +100,8 @@ const fetchOutcome = async (req, res) => {
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
-  outcome.indicator = outcome.indicator.split('_')[1];
+  // outcome.indicator = outcome.indicator.split('_')[1];
+  outcome.indicators = outcome.indicators.map(indicatorURI => indicatorURI.split("_")[1])
   delete outcome.forOrganization;
   return res.status(200).json({success: true, outcome});
 
@@ -131,7 +134,7 @@ const updateOutcome = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || !form.organization || !form.theme || !form.indicator)
+  if (!form || !form.description || !form.name || !form.organization || !form.theme || !form.indicators || !form.indicators.length)
     throw new Server400Error('Invalid input');
   const outcome = await GDBOutcomeModel.findOne({_id: id});
   if (!outcome)
@@ -153,11 +156,15 @@ const updateOutcome = async (req, res) => {
   //   GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
   // ));
   outcome.forOrganization = await GDBOrganizationModel.findOne({_id: outcome.forOrganization.split('_')[1]});
-  outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
+  outcome.indicators = await Promise.all(outcome.indicators.map(indicatorId =>
+    GDBIndicatorModel.findOne({_id: indicatorId})
+  ))
+  // outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
   // cache outcome.forOrganizations into dict
   // cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
   cacheObject(outcome.forOrganization, organizationDict);
-  cacheObject(outcome.indicator, indicatorDict);
+  cacheListOfObjects(outcome.indicators, indicatorDict)
+  // cacheObject(outcome.indicator, indicatorDict);
   // fetch form.organizations from database
   form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_id: form.organization});
   form.indicator = indicatorDict[form.indicator] || await GDBIndicatorModel.findOne({_id: form.indicator});
@@ -242,7 +249,7 @@ const createOutcome = async (req, res) => {
       return res.status(200).json({success: false, message: 'Wrong themeName'});
     form.theme = theme._id;
   }
-  if (!form || !form.organization || !form.name || !form.description || !form.theme || !form.indicator)
+  if (!form || !form.organization || !form.name || !form.description || !form.theme || !form.indicators || !form.indicators.length)
     throw new Server400Error('Invalid input');
   form.forOrganization = await GDBOrganizationModel.findOne({_id: form.organization}, {populates: ['hasOutcomes']});
   // form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
@@ -261,12 +268,23 @@ const createOutcome = async (req, res) => {
     });
   }
   // add indicator to the outcome, notice that the indicator must belong to the organization
-  const indicator = await GDBIndicatorModel.findOne({_id: form.indicator}, {populates: ['forOutcomes']});
-  if (!indicator)
-    throw new Server400Error('No such indicator');
-  if (!indicator.forOrganizations.includes(`:organization_${form.organization}`))
-    throw new Server400Error('The indicator is not belong to the organization');
-  form.indicator = indicator;
+
+  form.indicators = await Promise.all(form.indicators.map(indicatorId =>
+    GDBIndicatorModel.findOne({_id: indicatorId}, {populates: ['forOutcomes']})
+  ));
+  if (form.indicators.includes(undefined) || form.indicators.includes(null))
+    throw new Server400Error('Wrong indicator(s)');
+  form.indicators.map(indicator => {
+    if(!indicator.forOrganizations.includes(`:organization_${form.organization}`))
+      throw new Server400Error('The indicator is not belong to the organization');
+  })
+
+  // const indicator = await GDBIndicatorModel.findOne({_id: form.indicator}, {populates: ['forOutcomes']});
+  // if (!indicator)
+  //   throw new Server400Error('No such indicator');
+  // if (!indicator.forOrganizations.includes(`:organization_${form.organization}`))
+  //   throw new Server400Error('The indicator is not belong to the organization');
+  // form.indicator = indicator;
   // form.forOrganizations.map(organization => {
   //   if(organization.hasOutcomes){
   //     organization.hasOutcomes.map(outcome => {
@@ -294,11 +312,17 @@ const createOutcome = async (req, res) => {
     outcome.forOrganization.hasOutcomes = [];
   outcome.forOrganization.hasOutcomes.push(outcome);
   await outcome.forOrganization.save();
-  // add the outcome to the indicator
-  if (!outcome.indicator.forOutcomes)
-    outcome.indicator.forOutcomes = [];
-  outcome.indicator.forOutcomes.push(outcome);
-  await outcome.indicator.save();
+  // add the outcome to indicators
+  await Promise.all(outcome.indicators.map(indicator => {
+    if (!indicator.forOutcomes)
+      indicator.forOutcomes = [];
+    indicator.forOutcomes.push(outcome);
+    return indicator.save();
+  }))
+  // if (!outcome.indicator.forOutcomes)
+  //   outcome.indicator.forOutcomes = [];
+  // outcome.indicator.forOutcomes.push(outcome);
+  // await outcome.indicator.save();
 
   // await Promise.all(outcome.forOrganizations.map(organization => {
   //   if (!organization.hasOutcomes)

@@ -17,6 +17,7 @@ import FileUploader from "../shared/fields/fileUploader";
 import {createIndicator} from "../../api/indicatorApi";
 import {createIndicatorReport} from "../../api/indicatorReportApi";
 import {createOutcome} from "../../api/outcomeApi";
+import {uploadFile} from "../../api/fileUploadingApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -72,7 +73,7 @@ export default function FileUploadingPage() {
   const [errorMessage, setErrorMessage] = useState({
     title: '',
     message: ''
-  })
+  });
 
 
   useEffect(() => {
@@ -102,77 +103,75 @@ export default function FileUploadingPage() {
     try {
       setState(state => ({...state, loadingButton: true}));
       let responds;
-      if (state.formType === 'Indicator') {
-        responds = await Promise.all(state.fileContent.map(indicator => {
-          const form = {
-            name: indicator.name,
-            organizations: [state.organization],
-            description: indicator.description
-          };
-          return createAPIs[state.formType]({form});
-        }));
-      } else if (state.formType === 'Indicator Report') {
-        console.log(state.fileContent)
-        responds = await Promise.all(state.fileContent.map(indicatorReport => {
-          const form = {
-            name: indicatorReport.name,
-            comment: indicatorReport.comment,
-            indicatorName: indicatorReport.indicatorName,
-            organization: state.organization,
-            numericalValue: indicatorReport.numericalValue,
-            unitOfMeasure: indicatorReport.unitOfMeasure,
-            startTime: indicatorReport.startTime,
-            endTime: indicatorReport.endTime,
-            dateCreated: indicatorReport.dateCreated,
-          };
-          return createAPIs[state.formType]({form});
-        }));
-      } else if (state.formType === 'Outcome') {
-        responds = await Promise.all(state.fileContent.map(outcome => {
-          const form = {
-            name: outcome.name,
-            description: outcome.description,
-            indicatorName: outcome.indicatorName,
-            themeName: outcome.themeName,
-            organization: state.organization,
-          };
-          return createAPIs[state.formType]({form});
-        }));
-      }
+      const respond = await uploadFile(state.fileContent, state.organization)
+      // if (state.formType === 'Indicator') {
+      //   responds = await Promise.all(state.fileContent.map(indicator => {
+      //     const form = {
+      //       name: indicator.name,
+      //       organizations: [state.organization],
+      //       description: indicator.description
+      //     };
+      //     return createAPIs[state.formType]({form});
+      //   }));
+      // } else if (state.formType === 'Indicator Report') {
+      //   console.log(state.fileContent);
+      //   responds = await Promise.all(state.fileContent.map(indicatorReport => {
+      //     const form = {
+      //       name: indicatorReport.name,
+      //       comment: indicatorReport.comment,
+      //       indicatorName: indicatorReport.indicatorName,
+      //       organization: state.organization,
+      //       numericalValue: indicatorReport.numericalValue,
+      //       unitOfMeasure: indicatorReport.unitOfMeasure,
+      //       startTime: indicatorReport.startTime,
+      //       endTime: indicatorReport.endTime,
+      //       dateCreated: indicatorReport.dateCreated,
+      //     };
+      //     return createAPIs[state.formType]({form});
+      //   }));
+      // } else if (state.formType === 'Outcome') {
+      //   responds = await Promise.all(state.fileContent.map(outcome => {
+      //     const form = {
+      //       name: outcome.name,
+      //       description: outcome.description,
+      //       indicatorName: outcome.indicatorName,
+      //       themeName: outcome.themeName,
+      //       organization: state.organization,
+      //     };
+      //     return createAPIs[state.formType]({form});
+      //   }));
+      // }
 
       if (!responds.find(res => !res.success)) {
-        console.log('success')
-        setState(state => ({...state, loadingButton: false, submitDialog: false}))
+        console.log('success');
+        setState(state => ({...state, loadingButton: false, submitDialog: false}));
         navigate('/dashboard');
         enqueueSnackbar(res.message || 'Success', {variant: "success"});
       } else {
-        console.log('fail')
+        console.log('fail');
         let errorMessage = '';
         responds.map(res => {
           if (!res.success) {
-            errorMessage += res.message + '\n'
+            errorMessage += res.message + '\n';
           }
-        })
-        setState(state => ({...state, loadingButton: false, submitDialog: false, errorDialog: true}))
-        setErrorMessage({title: 'These items could not be loaded', message: errorMessage})
+        });
+        setState(state => ({...state, loadingButton: false, submitDialog: false, errorDialog: true}));
+        setErrorMessage({title: 'These items could not be loaded', message: errorMessage});
       }
 
 
     } catch (e) {
-      setState(state => ({...state, loadingButton: false, submitDialog: false}))
-      reportErrorToBackend(e)
+      setState(state => ({...state, loadingButton: false, submitDialog: false}));
+      reportErrorToBackend(e);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     }
   };
 
   const validate = () => {
     const error = {};
-    if (!state.fileType) {
-      error.fileType = 'The field cannot be empty';
-    }
-    if (!state.formType) {
-      error.formType = 'The field cannot be empty';
-    }
+    // if (!state.formType) {
+    //   error.formType = 'The field cannot be empty';
+    // }
     if (!state.organization) {
       error.organization = 'The field cannot be empty';
     }
@@ -216,30 +215,30 @@ export default function FileUploadingPage() {
             );
           }}
         />
-        <SelectField
-          disabled={state.optionDisabled}
-          key={'formType'}
-          label={'Form Type'}
-          value={state.formType}
-          options={options.formTypes}
-          error={!!errors.formType}
-          helperText={
-            errors.formType
-          }
-          onBlur={() => {
-            if (!state.formType) {
-              setErrors(errors => ({...errors, formType: 'The field cannot be empty'}));
-            } else {
-              setErrors(errors => ({...errors, formType: null}));
-            }
-          }}
-          onChange={e => {
-            setState(state => ({
-                ...state, formType: e.target.value
-              })
-            );
-          }}
-        />
+        {/*<SelectField*/}
+        {/*  disabled={state.optionDisabled}*/}
+        {/*  key={'formType'}*/}
+        {/*  label={'Form Type'}*/}
+        {/*  value={state.formType}*/}
+        {/*  options={options.formTypes}*/}
+        {/*  error={!!errors.formType}*/}
+        {/*  helperText={*/}
+        {/*    errors.formType*/}
+        {/*  }*/}
+        {/*  onBlur={() => {*/}
+        {/*    if (!state.formType) {*/}
+        {/*      setErrors(errors => ({...errors, formType: 'The field cannot be empty'}));*/}
+        {/*    } else {*/}
+        {/*      setErrors(errors => ({...errors, formType: null}));*/}
+        {/*    }*/}
+        {/*  }}*/}
+        {/*  onChange={e => {*/}
+        {/*    setState(state => ({*/}
+        {/*        ...state, formType: e.target.value*/}
+        {/*      })*/}
+        {/*    );*/}
+        {/*  }}*/}
+        {/*/>*/}
         <SelectField
           key={'organization'}
           label={'Organization'}
@@ -265,24 +264,34 @@ export default function FileUploadingPage() {
         />
 
         <FileUploader
-          title={state.fileType && state.formType ? `Please upload a ${state.formType} ${state.fileType} file` :
-            'Please choose file and form type'}
-          disabled={!(state.fileType && state.formType)}
-          formType={state.formType}
+          title={state.fileType ? `Please upload a ${state.fileType} file` :
+            'Please choose file'}
+          disabled={!state.fileType}
           onchange={(fileContent) => {
-            if (state.formType === 'Indicator' && state.fileType === 'JSON')
-              setState(state => ({...state, fileContent: fileContent}));
-            if (state.formType === 'Indicator Report' && state.fileType === 'JSON')
-              setState(state => ({...state, fileContent: fileContent}));
-            if (state.formType === 'Outcome' && state.fileType === 'JSON')
-              setState(state => ({...state, fileContent: fileContent}));
+            setState(state => ({...state, fileContent: fileContent}));
+            // fileContent.map(fileContent => {
+              // switch (object['@type']) {
+              //   case 'cids:Theme':
+              //     break;
+              //   case 'cids:Outcome':
+              //     break;
+              //   case 'cids:Indicator':
+              //     break;
+              // }
+            // });
+            // if (state.formType === 'Indicator' && state.fileType === 'JSON')
+            //   setState(state => ({...state, fileContent: fileContent}));
+            // if (state.formType === 'Indicator Report' && state.fileType === 'JSON')
+            //   setState(state => ({...state, fileContent: fileContent}));
+            // if (state.formType === 'Outcome' && state.fileType === 'JSON')
+            //   setState(state => ({...state, fileContent: fileContent}));
             if (fileContent) {
-              setState(state => ({...state, optionDisabled: true}))
+              setState(state => ({...state, optionDisabled: true}));
             }
 
           }}
           whenRemovedFile={() => {
-            setState(state => ({...state, optionDisabled: false}))
+            setState(state => ({...state, optionDisabled: false}));
           }}
           importedError={errors.fileContent}
         />

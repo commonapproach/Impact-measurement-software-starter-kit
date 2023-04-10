@@ -25,7 +25,9 @@ async function hasAccess(req, operationType) {
   switch (operationType) {
     case 'reportFrontendError':
       return true;
-
+    case 'fileUploading':
+      if (userAccount.isSuperuser)
+        return true;
     // users
     case 'inviteNewUser':
       return userAccount.isSuperuser;

@@ -13,5 +13,6 @@ module.exports = {
   userRoute: require('./user'),
   groupsRoute: require('./groups'),
   groupRoute: require('./group'),
-  errorReportRoute: require('./errorReport')
+  errorReportRoute: require('./errorReport'),
+  fileUploadingRoute: require('./fileUploading')
 }

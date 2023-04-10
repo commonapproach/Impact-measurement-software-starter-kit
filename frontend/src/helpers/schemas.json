@@ -1,0 +1,49 @@
+const indicatorSchema = {
+  type: 'object',
+  properties: {
+    '@type': {type: 'string'},
+    "cids:hasName": {type: 'string'},
+    "sch:dateCreated": {type: 'string', "format": "date-time"},
+    "hasOutcome": outcomeSchema
+  }
+};
+
+const themeSchema = {
+  type: 'object',
+  properties: {
+    '@type': {type: 'string'},
+    'tov_org:hasName': {type: 'string'},
+    'cids:hasDescription': {type: 'string'},
+  }
+};
+
+const outcomeSchema = {
+  type: 'object',
+  properties: {
+    '@context': {type: 'object'},
+    '@type': {type: 'string'},
+    'id': {type: 'string'},
+    "cids:hasDescription": {type: 'string'},
+    "cids:hasName": {type: 'string'},
+    "sch:dateCreated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cids:forTheme": themeSchema,
+    "cids:hasIndicator": {
+      anyOf: [
+        {
+          type: 'array',
+          "items": indicatorSchema
+        },
+        indicatorSchema,
+      ],
+
+    }
+
+  },
+  required: ['@type', 'cids:hasDescription', 'cids:hasName', 'sch:dateCreated']
+};
+
+
+module.exports = {outcomeSchema, themeSchema, indicatorSchema};

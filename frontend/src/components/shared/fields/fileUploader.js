@@ -3,8 +3,7 @@ import {Button, Typography} from "@mui/material";
 import {reportErrorToBackend} from "../../../api/errorReportApi";
 
 const Ajv = require("ajv");
-
-export default function FileUploader({title, formType, disabled, onchange, importedError, whenRemovedFile}) {
+export default function FileUploader({title, disabled, onchange, importedError, whenRemovedFile}) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [valid, setValid] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -44,9 +43,16 @@ export default function FileUploader({title, formType, disabled, onchange, impor
         themeName: {type: 'string'}
       },
       required: ['name', 'description', 'themeName']
-    }
+    },
+
   };
 
+  const ajv = new Ajv();
+  // const validators = {
+  //   "cids:Indicator": ajv.compile(schemas.Indicator),
+  //   "cids:Outcome": ajv.compile(schemas.Outcome),
+  //   "cids:IndicatorReport": ajv.compile(schemas["Indicator Report"])
+  // }
 
   const reader = new FileReader();
 
@@ -57,29 +63,41 @@ export default function FileUploader({title, formType, disabled, onchange, impor
     try{
       const fileContents = reader.result;
       const parsed_data = JSON.parse(fileContents);
+      ajv.addSchema(require('../../../helpers/schemas/outcome.json'), 'cids:Outcome')
+      ajv.addSchema(require('../../../helpers/schemas/indicator.json'), 'cids:Indicator')
+      ajv.addSchema(require('../../../helpers/schemas/theme.json'), 'cids:forTheme');
 
-      const ajv = new Ajv();
-      const validator = ajv.compile(schemas[formType]);
+      // console.log(ajv.validate('cids:Outcome',parsed_data))
+      // console.log(ajv.errors)
+
+
+
       if (Array.isArray(parsed_data)) {
         const checkingList = parsed_data.map(object => {
-          if (validator(object)) {
-            onchange(parsed_data);
+          const objectType = object["@type"];
+          console.log(object)
+          if (objectType && ajv.validate(objectType, object)) {
             return true;
           } else {
             return false;
           }
         });
         if (!checkingList.includes(false)) {
+          onchange(parsed_data)
           setValid(true);
         } else {
+          console.log(ajv.errors)
+          console.log(checkingList)
           setValid(false);
         }
       } else {
         setValid(false);
+        console.log('The json file is not a list')
       }
 
       setChecked(true);
     } catch (e) {
+      console.log(e)
       setError(e.message || 'Error occurs')
     }
 
@@ -87,7 +105,6 @@ export default function FileUploader({title, formType, disabled, onchange, impor
 
 
   const handleFileSelect = (event) => {
-    console.log(event)
     setSelectedFile(event.target.files[0]);
     setChecked(false);
     setError(null);
@@ -101,6 +118,7 @@ export default function FileUploader({title, formType, disabled, onchange, impor
   const handleRemoveFile = (event) => {
     setSelectedFile(null)
     document.getElementById('file-input').value = '';
+    setError('')
     whenRemovedFile()
   }
 

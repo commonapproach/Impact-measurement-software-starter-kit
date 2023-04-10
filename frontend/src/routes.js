@@ -86,7 +86,7 @@ const routes = (
     <Route path="/outcome/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
       {/*file uploading page*/}
     <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
-    <Route path="/fileUploading/:orgID/:fileType/:formType" element={<PrivateRoute element={FileUploadingPage}/>}/>
+    <Route path="/fileUploading/:orgID/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
 
 
     <Route path="/organization-indicatorReports" element={<PrivateRoute element={Organization_indicatorReports}/>}/>

@@ -207,6 +207,7 @@ export default function OutcomeField({
                 onChange={e => {
                   state.indicators = e.target.value;
                 }}
+                fullWidth
                 // state={state}
                 value={state.indicators}
                 // onChange={handleChange}

@@ -16,7 +16,7 @@ const {initUserAccounts} = require('../services/userAccount/user');
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
-  errorReportRoute
+  errorReportRoute, fileUploadingRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -67,7 +67,8 @@ app.use('/api/organization', organizationRoute);
 app.use('/api/organizations', organizationsRoute);
 app.use('/api/theme', themeRoute);
 app.use('/api/themes', themesRoute);
-app.use('/api/indicator', indicatorRoute)
+app.use('/api/indicator', indicatorRoute);
+app.use('/api/fileUploading', fileUploadingRoute);
 app.use('/api/indicators', indicatorsRoute);
 app.use('/api/outcome', outcomeRoute);
 app.use('/api/outcomes', outcomesRoute);

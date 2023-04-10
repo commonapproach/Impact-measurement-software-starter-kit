@@ -141,23 +141,29 @@ export default function FileUploadingPage() {
       //     return createAPIs[state.formType]({form});
       //   }));
       // }
-
-      if (!responds.find(res => !res.success)) {
+      if (respond.success) {
         console.log('success');
         setState(state => ({...state, loadingButton: false, submitDialog: false}));
         navigate('/dashboard');
         enqueueSnackbar(res.message || 'Success', {variant: "success"});
-      } else {
-        console.log('fail');
-        let errorMessage = '';
-        responds.map(res => {
-          if (!res.success) {
-            errorMessage += res.message + '\n';
-          }
-        });
-        setState(state => ({...state, loadingButton: false, submitDialog: false, errorDialog: true}));
-        setErrorMessage({title: 'These items could not be loaded', message: errorMessage});
       }
+
+      // if (!responds.find(res => !res.success)) {
+      //   console.log('success');
+      //   setState(state => ({...state, loadingButton: false, submitDialog: false}));
+      //   navigate('/dashboard');
+      //   enqueueSnackbar(res.message || 'Success', {variant: "success"});
+      // } else {
+      //   console.log('fail');
+      //   let errorMessage = '';
+      //   responds.map(res => {
+      //     if (!res.success) {
+      //       errorMessage += res.message + '\n';
+      //     }
+      //   });
+      //   setState(state => ({...state, loadingButton: false, submitDialog: false, errorDialog: true}));
+      //   setErrorMessage({title: 'These items could not be loaded', message: errorMessage});
+      // }
 
 
     } catch (e) {

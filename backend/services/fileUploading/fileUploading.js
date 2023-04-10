@@ -28,28 +28,34 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
       description: object['cids:hasDescription'],
     });
     // build up or modify the theme
-    outcome.theme = await themeBuilder(object['cids:forTheme'], organization, themeDict, indicatorDict);
+    if (object['cids:forTheme']) {
+      outcome.theme = await themeBuilder(object['cids:forTheme'], organization, themeDict, indicatorDict);
+    }
+
     // build up or modify indicator(s)
-    outcome.indicators = [];
-    if (Array.isArray(object['cids:hasIndicator'])) {
-      outcome.indicators = await Promise.all(object['cids:hasIndicator'].map(indicator =>
-        indicatorBuilder(indicator, organization, outcomeDict, themeDict, indicatorDict)));
-      // add outcome to each indicators
-      await Promise.all(outcome.indicators.map(indicator => {
+    if (object['cids:hasIndicator']) {
+      outcome.indicators = [];
+      if (Array.isArray(object['cids:hasIndicator'])) {
+        outcome.indicators = await Promise.all(object['cids:hasIndicator'].map(indicator =>
+          indicatorBuilder(indicator, organization, outcomeDict, themeDict, indicatorDict)));
+        // add outcome to each indicators
+        await Promise.all(outcome.indicators.map(indicator => {
+          if (!indicator.forOutcomes)
+            indicator.forOutcomes = [];
+          indicator.forOutcomes.push(outcome);
+          return indicator.save();
+        }))
+      } else {
+        //add outcome to the indicator
+        const indicator = await indicatorBuilder(object['cids:hasIndicator'], organization, outcomeDict, themeDict, indicatorDict);
         if (!indicator.forOutcomes)
           indicator.forOutcomes = [];
         indicator.forOutcomes.push(outcome);
-        return indicator.save();
-      }))
-    } else {
-      //add outcome to the indicator
-      const indicator = await indicatorBuilder(object['cids:hasIndicator'], organization, outcomeDict, themeDict, indicatorDict);
-      if (!indicator.forOutcomes)
-        indicator.forOutcomes = [];
-      indicator.forOutcomes.push(outcome);
-      await indicator.save();
-      outcome.indicators.push(`:indicator_${indicator._id}`);
+        await indicator.save();
+        outcome.indicators.push(`:indicator_${indicator._id}`);
+      }
     }
+
     // add organization to the outcome
     outcome.forOrganization = `:organization_${organization._id}`;
   } else {
@@ -59,7 +65,8 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
       // modify description
       outcome.description = object['cids:hasDescription'];
       // modify theme
-      outcome.theme = await themeBuilder(object['cids:forTheme'], organization, themeDict, indicatorDict);
+      if (object['cids:forTheme'])
+        outcome.theme = await themeBuilder(object['cids:forTheme'], organization, themeDict, indicatorDict);
       // todo: modify indicators: how to handle list??
     }
   }
@@ -87,7 +94,8 @@ async function themeBuilder(object, organization, outcomeDict, themeDict, indica
   } else {
     // the theme has to be modified
     if (!themeDict[theme._id]) {
-      theme.name = object['tove_org:hasName'];
+      // theme name shouldn't be able to be changed
+      // theme.name = object['tove_org:hasName'];
       theme.description = object['cids:hasDescription'];
     }
   }

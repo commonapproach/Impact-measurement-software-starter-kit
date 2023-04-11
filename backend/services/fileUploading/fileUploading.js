@@ -4,18 +4,21 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBThemeModel} = require("../../models/theme");
 const {Server400Error} = require("../../utils");
 const {GDBIndicatorModel} = require("../../models/indicator");
+const {getRepository} = require("../../loaders/graphDB");
+const {UpdateQueryPayload,} = require('graphdb').query;
+const {QueryContentType} = require('graphdb').http;
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fileUploading'))
-      return await fileUploading(req, res);
+      return await fileUploading(req, res, next);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
   }
 };
 
-async function outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict) {
+async function outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
   if (!object['cids:hasDescription'] || !object['cids:hasName'] || !object['sch:dateCreated'] || !object['cids:forTheme']) {
     throw new Server400Error('invalid input');
   }
@@ -43,15 +46,15 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
           if (!indicator.forOutcomes)
             indicator.forOutcomes = [];
           indicator.forOutcomes.push(outcome);
-          return indicator.save();
-        }))
+          return transSave(trans, indicator);
+        }));
       } else {
         //add outcome to the indicator
         const indicator = await indicatorBuilder(object['cids:hasIndicator'], organization, outcomeDict, themeDict, indicatorDict);
         if (!indicator.forOutcomes)
           indicator.forOutcomes = [];
         indicator.forOutcomes.push(outcome);
-        await indicator.save();
+        await transSave(trans, indicator)
         outcome.indicators.push(`:indicator_${indicator._id}`);
       }
     }
@@ -70,7 +73,7 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
       // todo: modify indicators: how to handle list??
     }
   }
-  await outcome.save();
+  await transSave(trans, outcome);
   outcomeDict[outcome._id] = outcome;
   // add outcome to the organization
   if (!organization.hasOutcomes)
@@ -80,7 +83,7 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
   return outcome;
 }
 
-async function themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict) {
+async function themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
   if (!object['cids:hasDescription'] || !object['tove_org:hasName']) {
     throw new Server400Error('invalid input');
   }
@@ -99,12 +102,12 @@ async function themeBuilder(object, organization, outcomeDict, themeDict, indica
       theme.description = object['cids:hasDescription'];
     }
   }
-  await theme.save();
+  await transSave(trans, theme);
   themeDict[theme._id] = theme;
   return theme;
 }
 
-async function indicatorBuilder(object, organization, outcomeDict, themeDict, indicatorDict) {
+async function indicatorBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
   if (!object['cids:hasName'] || !object['cids:hasDescription']) {
     throw new Server400Error('invalid input');
   }
@@ -128,7 +131,7 @@ async function indicatorBuilder(object, organization, outcomeDict, themeDict, in
     // todo: unit of measure, indicator report, outcome
   }
   indicatorDict[indicator._id] = indicator;
-  await indicator.save();
+  await transSave(trans, indicator);
   if (!organization.hasIndicators)
     organization.hasIndicators = [];
   // todo: maybe have to check if the outcome is in organization already
@@ -136,23 +139,48 @@ async function indicatorBuilder(object, organization, outcomeDict, themeDict, in
   return indicator;
 }
 
-const fileUploading = async (req, res) => {
-  const {objects, organizationId} = req.body;
-  const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
-  const outcomeDict = {};
-  const themeDict = {};
-  const indicatorDict = {};
-  if (!organization)
-    throw new Server400Error('Wrong organization ID');
-  for (let object of objects) {
-    switch (object['@type']) {
-      case 'cids:Outcome':
-        await outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict);
-        break;
+async function transSave(trans, object) {
+  const {query} = await object.getQueries();
+  return await trans.update(new UpdateQueryPayload()
+    .setQuery(query)
+    .setContentType(QueryContentType.SPARQL_UPDATE)
+    // .setInference(true)
+    .setTimeout(5));
+}
+
+const fileUploading = async (req, res, next) => {
+  const repo = await getRepository();
+  const trans = await repo.beginTransaction();
+  try {
+    const {objects, organizationId} = req.body;
+    const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
+
+    const outcomeDict = {};
+    const themeDict = {};
+    const indicatorDict = {};
+    if (!organization)
+      throw new Server400Error('Wrong organization ID');
+    for (let object of objects) {
+      switch (object['@type']) {
+        case 'cids:Outcome':
+          await outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans);
+          break;
+        case 'cids:hasIndicator':
+          await indicatorBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans);
+          break;
+        case 'cids:Theme':
+          await themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans);
+          break;
+
+      }
     }
+    await organization.save();
+    await trans.commit();
+    return res.status(200).json({success: true});
+  } catch (e) {
+    await trans.rollback();
+    next(e)
   }
-  await organization.save();
-  return res.status(200).json({success: true});
 };
 
 module.exports = {fileUploadingHandler};

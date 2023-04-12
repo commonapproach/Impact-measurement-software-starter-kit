@@ -19,7 +19,7 @@ const fileUploadingHandler = async (req, res, next) => {
 };
 
 async function outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
-  if (!object['cids:hasDescription'] || !object['cids:hasName'] || !object['sch:dateCreated'] || !object['cids:forTheme']) {
+  if (!object['cids:hasName'] || !object['sch:dateCreated'] || !object['cids:forTheme']) {
     throw new Server400Error('invalid input');
   }
   // assume that an outcome will uniquely be defined by name
@@ -32,29 +32,31 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
     });
     // build up or modify the theme
     if (object['cids:forTheme']) {
-      outcome.theme = await themeBuilder(object['cids:forTheme'], organization, themeDict, indicatorDict);
+      outcome.theme = await themeBuilder(object['cids:forTheme'], organization,outcomeDict, themeDict, indicatorDict, trans);
     }
+    // give outcome an id
+    await transSave(trans, outcome);
 
     // build up or modify indicator(s)
     if (object['cids:hasIndicator']) {
       outcome.indicators = [];
       if (Array.isArray(object['cids:hasIndicator'])) {
         outcome.indicators = await Promise.all(object['cids:hasIndicator'].map(indicator =>
-          indicatorBuilder(indicator, organization, outcomeDict, themeDict, indicatorDict)));
+          indicatorBuilder(indicator, organization, outcomeDict, themeDict, indicatorDict, trans)));
         // add outcome to each indicators
         await Promise.all(outcome.indicators.map(indicator => {
           if (!indicator.forOutcomes)
             indicator.forOutcomes = [];
-          indicator.forOutcomes.push(outcome);
+          indicator.forOutcomes.push(`:outcome_${outcome._id}`);
           return transSave(trans, indicator);
         }));
       } else {
         //add outcome to the indicator
-        const indicator = await indicatorBuilder(object['cids:hasIndicator'], organization, outcomeDict, themeDict, indicatorDict);
+        const indicator = await indicatorBuilder(object['cids:hasIndicator'], organization, outcomeDict, themeDict, indicatorDict, trans);
         if (!indicator.forOutcomes)
           indicator.forOutcomes = [];
-        indicator.forOutcomes.push(outcome);
-        await transSave(trans, indicator)
+        indicator.forOutcomes.push(`:outcome_${outcome._id}`);
+        await transSave(trans, indicator);
         outcome.indicators.push(`:indicator_${indicator._id}`);
       }
     }
@@ -62,6 +64,7 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
     // add organization to the outcome
     outcome.forOrganization = `:organization_${organization._id}`;
   } else {
+    throw new Server400Error('The outcome is duplicate');
     // modify the outcome if needed
     if (!outcomeDict[outcome._id]) {
       // name uniquely define outcomes so no need to modify
@@ -84,7 +87,7 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
 }
 
 async function themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
-  if (!object['cids:hasDescription'] || !object['tove_org:hasName']) {
+  if (!object['tove_org:hasName']) {
     throw new Server400Error('invalid input');
   }
   let theme = await GDBThemeModel.findOne({name: object['tove_org:hasName']});
@@ -95,6 +98,7 @@ async function themeBuilder(object, organization, outcomeDict, themeDict, indica
       description: object['cids:hasDescription']
     });
   } else {
+    throw new Server400Error('The theme is duplicate');
     // the theme has to be modified
     if (!themeDict[theme._id]) {
       // theme name shouldn't be able to be changed
@@ -108,7 +112,7 @@ async function themeBuilder(object, organization, outcomeDict, themeDict, indica
 }
 
 async function indicatorBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
-  if (!object['cids:hasName'] || !object['cids:hasDescription']) {
+  if (!object['cids:hasName']) {
     throw new Server400Error('invalid input');
   }
   // assume that the indicator uniquely defines an indicator inside an organization
@@ -120,10 +124,13 @@ async function indicatorBuilder(object, organization, outcomeDict, themeDict, in
       description: object['cids:hasDescription'],
     });
     indicator.forOrganizations = [`:organization_${organization._id}`];
-
+    if (object['cids:forOutcome']) {
+      indicator.forOutcome = [await outcomeBuilder(object['cids:forOutcome'], organization, outcomeDict, themeDict, indicatorDict, trans)];
+    }
     // todo: unit of measure, indicator report, outcome
 
   } else {
+    throw new Server400Error('The indicator is duplicate');
     // the indicator has to be modified
     if (!indicatorDict[indicator._id]) {
       indicator.description = object['cids:hasDescription'];
@@ -137,6 +144,10 @@ async function indicatorBuilder(object, organization, outcomeDict, themeDict, in
   // todo: maybe have to check if the outcome is in organization already
   organization.hasIndicators.push(`:indicator_${indicator._id}`);
   return indicator;
+}
+
+async function askForAnId(object) {
+  return await object.getQueries();
 }
 
 async function transSave(trans, object) {
@@ -154,12 +165,12 @@ const fileUploading = async (req, res, next) => {
   try {
     const {objects, organizationId} = req.body;
     const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
-
     const outcomeDict = {};
     const themeDict = {};
     const indicatorDict = {};
     if (!organization)
       throw new Server400Error('Wrong organization ID');
+
     for (let object of objects) {
       switch (object['@type']) {
         case 'cids:Outcome':
@@ -179,7 +190,7 @@ const fileUploading = async (req, res, next) => {
     return res.status(200).json({success: true});
   } catch (e) {
     await trans.rollback();
-    next(e)
+    next(e);
   }
 };
 

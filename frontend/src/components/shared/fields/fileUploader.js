@@ -75,7 +75,6 @@ export default function FileUploader({title, disabled, onchange, importedError, 
       if (Array.isArray(parsed_data)) {
         const checkingList = parsed_data.map(object => {
           const objectType = object["@type"];
-          console.log(object)
           if (objectType && ajv.validate(objectType, object)) {
             return true;
           } else {
@@ -87,7 +86,6 @@ export default function FileUploader({title, disabled, onchange, importedError, 
           setValid(true);
         } else {
           console.log(ajv.errors)
-          console.log(checkingList)
           setValid(false);
         }
       } else {

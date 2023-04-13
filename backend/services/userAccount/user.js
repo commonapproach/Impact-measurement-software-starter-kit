@@ -124,7 +124,7 @@ async function initUserAccounts() {
     }
     const answer2 = await Hashing.hashPassword('MIE');
     const securityQuestion2 = {
-      question: ' What is CSSE\'s home department',
+      question: 'What is CSSE\'s home department',
       hash: answer2.hash,
       salt: answer2.salt
     }

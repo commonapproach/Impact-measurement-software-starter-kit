@@ -3,7 +3,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const errorExplainer = (e) => {
   if (e.code === 'ECONNREFUSED')
-    return 'GraphDB lost connection,  please try again later';
+    return 'Application cannot connect to the database,  please try again later';
 }
 
 /**

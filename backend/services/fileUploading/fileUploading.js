@@ -146,10 +146,6 @@ async function indicatorBuilder(object, organization, outcomeDict, themeDict, in
   return indicator;
 }
 
-async function askForAnId(object) {
-  return await object.getQueries();
-}
-
 async function transSave(trans, object) {
   const {query} = await object.getQueries();
   return await trans.update(new UpdateQueryPayload()

@@ -60,43 +60,40 @@ export default function FileUploader({title, disabled, onchange, importedError, 
   reader.onload = function () {
     // this function will be called when the file has been loaded
     // the contents of the file will be available in the result property of the reader object
-    try{
+    try {
       const fileContents = reader.result;
-      const parsed_data = JSON.parse(fileContents);
-      ajv.addSchema(require('../../../helpers/schemas/outcome.json'), 'cids:Outcome')
-      ajv.addSchema(require('../../../helpers/schemas/indicator.json'), 'cids:Indicator')
+      let parsed_data = JSON.parse(fileContents);
+      ajv.addSchema(require('../../../helpers/schemas/outcome.json'), 'cids:Outcome');
+      ajv.addSchema(require('../../../helpers/schemas/indicator.json'), 'cids:Indicator');
       ajv.addSchema(require('../../../helpers/schemas/theme.json'), 'cids:forTheme');
 
       // console.log(ajv.validate('cids:Outcome',parsed_data))
       // console.log(ajv.errors)
 
+      if (!Array.isArray(parsed_data)) {
+        parsed_data = [parsed_data];
+      }
 
-
-      if (Array.isArray(parsed_data)) {
-        const checkingList = parsed_data.map(object => {
-          const objectType = object["@type"];
-          if (objectType && ajv.validate(objectType, object)) {
-            return true;
-          } else {
-            return false;
-          }
-        });
-        if (!checkingList.includes(false)) {
-          onchange(parsed_data)
-          setValid(true);
+      const checkingList = parsed_data.map(object => {
+        const objectType = object["@type"];
+        if (objectType && ajv.validate(objectType, object)) {
+          return true;
         } else {
-          console.log(ajv.errors)
-          setValid(false);
+          return false;
         }
+      });
+      if (!checkingList.includes(false)) {
+        onchange(parsed_data);
+        setValid(true);
       } else {
+        console.log(ajv.errors);
         setValid(false);
-        console.log('The json file is not a list')
       }
 
       setChecked(true);
     } catch (e) {
-      console.log(e)
-      setError(e.message || 'Error occurs')
+      console.log(e);
+      setError(e.message ? 'Not a valid JSON file: ' + e.message : 'Error occurred when validating the file.');
     }
 
   };
@@ -114,11 +111,11 @@ export default function FileUploader({title, disabled, onchange, importedError, 
   };
 
   const handleRemoveFile = (event) => {
-    setSelectedFile(null)
+    setSelectedFile(null);
     document.getElementById('file-input').value = '';
-    setError('')
-    whenRemovedFile()
-  }
+    setError('');
+    whenRemovedFile();
+  };
 
   // const handleUpload = () => {
   //   // You can perform the upload logic here using the selectedFile
@@ -133,15 +130,18 @@ export default function FileUploader({title, disabled, onchange, importedError, 
   return (
     <div>
       <Typography variant={'h6'}> {title} </Typography>
-      <input type="file" id={'file-input'} onChange={handleFileSelect} style={{color: 'transparent'}} disabled={disabled} accept={'.json'}/>
-      {selectedFile? <div >
+      <input type="file" id={'file-input'} onChange={handleFileSelect} style={{color: 'transparent'}}
+             disabled={disabled} accept={'.json'}/>
+      {selectedFile ? <div>
         <Typography variant={'subtitle2'} style={{display: 'inline-block',}}> {selectedFile?.name} </Typography>
         <button onClick={handleRemoveFile} style={{display: 'inline-block', marginLeft: '10px'}}>
           Remove File
         </button>
-      </div>: <div/>}
-      {error ? <Typography variant={'subtitle1'} color={'red'}> {error} </Typography> : (selectedFile && checked && !valid) ?
-        <Typography variant={'subtitle1'} color={'red'}> {'The file is not valid. Please remove the file.'} </Typography> : ''}
+      </div> : <div/>}
+      {error ?
+        <Typography variant={'subtitle1'} color={'red'}> {error} </Typography> : (selectedFile && checked && !valid) ?
+          <Typography variant={'subtitle1'}
+                      color={'red'}> {'The file is not valid. Please remove the file.'} </Typography> : ''}
 
     </div>
   );

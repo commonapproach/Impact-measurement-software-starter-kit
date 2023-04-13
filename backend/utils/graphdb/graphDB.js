@@ -85,6 +85,7 @@ const GraphDB = {
       });
     } catch (e) {
       console.error(e.message);
+      console.log(e);
       throw new GraphDBError('sendConstructQuery', e);
     }
     console.log(`---------- ${Date.now() - time} ms -----------`);

@@ -1,6 +1,6 @@
 class GraphDBError extends Error {
   constructor(functionName, e) {
-    if (!e.config) {
+    if (!e.config || e.code === 'ECONNREFUSED') {
       return e;
     }
     const query = e.config.data;
@@ -9,7 +9,7 @@ class GraphDBError extends Error {
     //   if (p2) return `${p2}\n\t`;
     //   if (p3) return '\n' + p3.trim().toUpperCase();
     // });
-    const message =
+    let message =
       `GraphDB.${functionName}: ${e.response?.data}\nSPARQL:\n${query}`
     super(message);
   }

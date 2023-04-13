@@ -1,12 +1,18 @@
 const {MDBErrorLoggingModel} = require("../../models/logging/errorLogging");
 const isProduction = process.env.NODE_ENV === 'production';
 
+const errorExplainer = (e) => {
+  if (e.code === 'ECONNREFUSED')
+    return 'GraphDB lost connection,  please try again later';
+}
+
 /**
  * Express error handler has four parameters.
  */
 function errorHandler(err, req, res, next) {
   console.error(err);
-  const {name, message, statusCode, stack, ...others} = err;
+  let {name, message, statusCode, stack, code, ...others} = err;
+  message = errorExplainer({code}) || message;
   const errorLogging = new MDBErrorLoggingModel({
     message: message,
     name: name,

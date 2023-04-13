@@ -128,9 +128,9 @@ async function initUserAccounts() {
       hash: answer2.hash,
       salt: answer2.salt
     }
-    const answer3 = await Hashing.hashPassword('research');
+    const answer3 = await Hashing.hashPassword('Ontario');
     const securityQuestion3 = {
-      question: 'What is CSSE\'s purpose',
+      question: 'Which province is University of Toronto located in',
       hash: answer3.hash,
       salt: answer3.salt
     }

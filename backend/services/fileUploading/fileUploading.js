@@ -107,7 +107,9 @@ async function themeBuilder(object, organization, outcomeDict, themeDict, indica
       theme.description = object['cids:hasDescription'];
     }
   }
+  console.log('before transsave theme')
   await transSave(trans, theme);
+  console.log('after transsave the theme')
   themeDict[theme._id] = theme;
   return theme;
 }

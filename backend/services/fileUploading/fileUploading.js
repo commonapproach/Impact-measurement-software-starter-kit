@@ -151,11 +151,11 @@ async function indicatorBuilder(object, organization, outcomeDict, themeDict, in
 
 async function transSave(trans, object) {
   const {query} = await object.getQueries();
-  console.log('before actaul trans save')
+  console.log('query')
   return await trans.update(new UpdateQueryPayload()
     .setQuery(query)
     .setContentType(QueryContentType.SPARQL_UPDATE)
-    .setInference(true)
+    // .setInference(true)
     .setTimeout(5));
 }
 

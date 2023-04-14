@@ -156,8 +156,8 @@ const updateOutcome = async (req, res) => {
   //   GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
   // ));
   outcome.forOrganization = await GDBOrganizationModel.findOne({_id: outcome.forOrganization.split('_')[1]});
-  outcome.indicators = await Promise.all(outcome.indicators.map(indicatorId =>
-    GDBIndicatorModel.findOne({_id: indicatorId})
+  outcome.indicators = await Promise.all(outcome.indicators.map(indicatorURI =>
+    GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]})
   ))
   // outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
   // cache outcome.forOrganizations into dict
@@ -168,6 +168,10 @@ const updateOutcome = async (req, res) => {
   // fetch form.organizations from database
   form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_id: form.organization});
   form.indicator = indicatorDict[form.indicator] || await GDBIndicatorModel.findOne({_id: form.indicator});
+  form.indicators = await Promise.all(form.indicators.map(indicatorId => {
+    // if indicator already in the dict, simply return it
+    return indicatorDict[indicatorId] || GDBIndicatorModel.findOne({_id: indicatorId});
+  }))
   // form.organizations = await Promise.all(form.organizations.map(organizationId => {
   //     // if the organization already in the dict, simply get from dict
   //     if (organizationDict[organizationId])
@@ -179,7 +183,8 @@ const updateOutcome = async (req, res) => {
 
   // cache organizations which is not in dict
   cacheObject(form.organization, organizationDict);
-  cacheObject(form.indicator, indicatorDict);
+  cacheListOfObjects(form.indicators, indicatorDict)
+  // cacheObject(form.indicator, indicatorDict);
   // cacheListOfOrganizations(form.organizations, organizationDict);
 
   if (form.organization._id !== outcome.forOrganization._id) {
@@ -196,17 +201,34 @@ const updateOutcome = async (req, res) => {
     outcome.forOrganization = form.organization;
   }
 
-  if (form.indicator._id !== outcome.indicator._id) {
-    const index = outcome.indicator.forOutcomes.findIndex(outcome => outcome._id === id);
-    outcome.indicator.forOutcomes.splice(index, 1);
-    await outcome.indicator.save();
+  // if (form.indicator._id !== outcome.indicator._id) {
+  //   const index = outcome.indicator.forOutcomes.findIndex(outcome => outcome._id === id);
+  //   outcome.indicator.forOutcomes.splice(index, 1);
+  //   await outcome.indicator.save();
+  //
+  //   if (!form.indicator.forOutcomes)
+  //     form.indicator.forOutcomes = [];
+  //   form.indicator.forOutcomes.push(outcome);
+  //   await form.indicator.save();
+  //   outcome.indicator = form.indicator;
+  // }
+  // remove the outcome from every indicators in outcome.indicators
+  await Promise.all(outcome.indicators.map(indicator => {
+    const index = indicator.forOutcomes.findIndex(outcome => outcome._id === id);
+    indicator.forOutcomes.splice(index, 1);
+    return indicator.save();
+  }));
 
-    if (!form.indicator.forOutcomes)
-      form.indicator.forOutcomes = [];
-    form.indicator.forOutcomes.push(outcome);
-    await form.indicator.save();
-    outcome.indicator = form.indicator;
-  }
+  // add the outcome to every indicators in form.indicators
+  await Promise.all(form.indicators.map(indicator => {
+    if (!indicator.forOutcomes)
+      indicator.forOutcomes = [];
+    indicator.forOutcomes.push(outcome);
+    return indicator.save();
+  }));
+
+  outcome.indicators = form.indicators
+
 
   // remove the outcome from every organizations in outcome.forOrganizations
   // await Promise.all(outcome.forOrganizations.map(organization => {

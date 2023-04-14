@@ -32,7 +32,8 @@ async function outcomeBuilder(object, organization, outcomeDict, themeDict, indi
     });
     // build up or modify the theme
     if (object['cids:forTheme']) {
-      outcome.theme = await themeBuilder(object['cids:forTheme'], organization,outcomeDict, themeDict, indicatorDict, trans);
+      const theme = (await themeBuilder(object['cids:forTheme'], organization,outcomeDict, themeDict, indicatorDict, trans));
+      outcome.theme = `:theme_${theme._id}`;
     }
     // give outcome an id
     await transSave(trans, outcome);

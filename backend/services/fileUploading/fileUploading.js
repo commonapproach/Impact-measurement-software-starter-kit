@@ -155,7 +155,7 @@ async function transSave(trans, object) {
   return await trans.update(new UpdateQueryPayload()
     .setQuery(query)
     .setContentType(QueryContentType.SPARQL_UPDATE)
-    // .setInference(true)
+    .setInference(true)
     .setTimeout(5));
 }
 

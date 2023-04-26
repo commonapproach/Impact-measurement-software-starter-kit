@@ -104,67 +104,12 @@ export default function FileUploadingPage() {
       setState(state => ({...state, loadingButton: true}));
       let responds;
       const respond = await uploadFile(state.fileContent, state.organization)
-      // if (state.formType === 'Indicator') {
-      //   responds = await Promise.all(state.fileContent.map(indicator => {
-      //     const form = {
-      //       name: indicator.name,
-      //       organizations: [state.organization],
-      //       description: indicator.description
-      //     };
-      //     return createAPIs[state.formType]({form});
-      //   }));
-      // } else if (state.formType === 'Indicator Report') {
-      //   console.log(state.fileContent);
-      //   responds = await Promise.all(state.fileContent.map(indicatorReport => {
-      //     const form = {
-      //       name: indicatorReport.name,
-      //       comment: indicatorReport.comment,
-      //       indicatorName: indicatorReport.indicatorName,
-      //       organization: state.organization,
-      //       numericalValue: indicatorReport.numericalValue,
-      //       unitOfMeasure: indicatorReport.unitOfMeasure,
-      //       startTime: indicatorReport.startTime,
-      //       endTime: indicatorReport.endTime,
-      //       dateCreated: indicatorReport.dateCreated,
-      //     };
-      //     return createAPIs[state.formType]({form});
-      //   }));
-      // } else if (state.formType === 'Outcome') {
-      //   responds = await Promise.all(state.fileContent.map(outcome => {
-      //     const form = {
-      //       name: outcome.name,
-      //       description: outcome.description,
-      //       indicatorName: outcome.indicatorName,
-      //       themeName: outcome.themeName,
-      //       organization: state.organization,
-      //     };
-      //     return createAPIs[state.formType]({form});
-      //   }));
-      // }
       if (respond.success) {
         console.log('success');
         setState(state => ({...state, loadingButton: false, submitDialog: false}));
         navigate('/dashboard');
-        enqueueSnackbar(res.message || 'Success', {variant: "success"});
+        enqueueSnackbar(respond.message || 'Success', {variant: "success"});
       }
-
-      // if (!responds.find(res => !res.success)) {
-      //   console.log('success');
-      //   setState(state => ({...state, loadingButton: false, submitDialog: false}));
-      //   navigate('/dashboard');
-      //   enqueueSnackbar(res.message || 'Success', {variant: "success"});
-      // } else {
-      //   console.log('fail');
-      //   let errorMessage = '';
-      //   responds.map(res => {
-      //     if (!res.success) {
-      //       errorMessage += res.message + '\n';
-      //     }
-      //   });
-      //   setState(state => ({...state, loadingButton: false, submitDialog: false, errorDialog: true}));
-      //   setErrorMessage({title: 'These items could not be loaded', message: errorMessage});
-      // }
-
 
     } catch (e) {
       setState(state => ({...state, loadingButton: false, submitDialog: false}));

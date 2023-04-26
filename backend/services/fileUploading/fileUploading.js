@@ -6,7 +6,7 @@ const {Server400Error} = require("../../utils");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {getRepository} = require("../../loaders/graphDB");
 const {UpdateQueryPayload,} = require('graphdb').query;
-const {QueryContentType} = require('graphdb').http;
+const {QueryContentType, RDFMimeType} = require('graphdb').http;
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -107,9 +107,7 @@ async function themeBuilder(object, organization, outcomeDict, themeDict, indica
       theme.description = object['cids:hasDescription'];
     }
   }
-  console.log('before transsave theme')
   await transSave(trans, theme);
-  console.log('after transsave the theme')
   themeDict[theme._id] = theme;
   return theme;
 }
@@ -151,10 +149,10 @@ async function indicatorBuilder(object, organization, outcomeDict, themeDict, in
 
 async function transSave(trans, object) {
   const {query} = await object.getQueries();
-  console.log(query)
   return await trans.update(new UpdateQueryPayload()
     .setQuery(query)
     .setContentType(QueryContentType.SPARQL_UPDATE)
+    // .setResponseType(RDFMimeType.RDF_XML)
     // .setInference(true)
     .setTimeout(5));
 }
@@ -162,6 +160,7 @@ async function transSave(trans, object) {
 const fileUploading = async (req, res, next) => {
   const repo = await getRepository();
   const trans = await repo.beginTransaction();
+  trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass)
   try {
     const {objects, organizationId} = req.body;
     const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});

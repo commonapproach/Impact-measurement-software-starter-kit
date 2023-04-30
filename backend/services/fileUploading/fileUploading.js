@@ -6,7 +6,7 @@ const {Server400Error} = require("../../utils");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {getRepository} = require("../../loaders/graphDB");
 const {UpdateQueryPayload,} = require('graphdb').query;
-const {QueryContentType, RDFMimeType} = require('graphdb').http;
+const {QueryContentType} = require('graphdb').http;
 
 const fileUploadingHandler = async (req, res, next) => {
   try {

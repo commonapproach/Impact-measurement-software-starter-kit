@@ -9,43 +9,43 @@ export default function FileUploader({title, disabled, onchange, importedError, 
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState(importedError);
 
-  const schemas = {
-    'Indicator': {
-      type: 'object',
-      properties: {
-        name: {type: 'string'},
-        description: {type: 'string'},
-        dateCreated: {type: 'string', format: 'time'},
-      },
-      required: ['name', 'description']
-    },
-    'Indicator Report': {
-      type: 'object',
-      properties: {
-        name: {type: 'string'},
-        comment: {type: 'string'},
-        indicatorName: {type: 'string'},
-        numericalValue: {type: 'number'},
-        unitOfMeasure: {type: 'string'},
-        startTime: {type: 'string', format: 'date-time'},
-        endTime: {type: 'string', format: 'date-time'},
-        dateCreated: {type: 'string', format: 'date-time'},
-      },
-      required: [
-        'name', 'indicatorName', 'numericalValue', 'unitOfMeasure', 'startTime', 'endTime', 'dateCreated'
-      ]
-    },
-    'Outcome': {
-      type: 'object',
-      properties: {
-        name: {type: 'string'},
-        description: {type: 'string'},
-        themeName: {type: 'string'}
-      },
-      required: ['name', 'description', 'themeName']
-    },
-
-  };
+  // const schemas = {
+  //   'Indicator': {
+  //     type: 'object',
+  //     properties: {
+  //       name: {type: 'string'},
+  //       description: {type: 'string'},
+  //       dateCreated: {type: 'string', format: 'time'},
+  //     },
+  //     required: ['name', 'description']
+  //   },
+  //   'Indicator Report': {
+  //     type: 'object',
+  //     properties: {
+  //       name: {type: 'string'},
+  //       comment: {type: 'string'},
+  //       indicatorName: {type: 'string'},
+  //       numericalValue: {type: 'number'},
+  //       unitOfMeasure: {type: 'string'},
+  //       startTime: {type: 'string', format: 'date-time'},
+  //       endTime: {type: 'string', format: 'date-time'},
+  //       dateCreated: {type: 'string', format: 'date-time'},
+  //     },
+  //     required: [
+  //       'name', 'indicatorName', 'numericalValue', 'unitOfMeasure', 'startTime', 'endTime', 'dateCreated'
+  //     ]
+  //   },
+  //   'Outcome': {
+  //     type: 'object',
+  //     properties: {
+  //       name: {type: 'string'},
+  //       description: {type: 'string'},
+  //       themeName: {type: 'string'}
+  //     },
+  //     required: ['name', 'description', 'themeName']
+  //   },
+  //
+  // };
 
   const ajv = new Ajv();
   // const validators = {

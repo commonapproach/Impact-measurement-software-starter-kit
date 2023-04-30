@@ -6,7 +6,7 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createOrganization, fetchOrganization, fetchOrganizations, updateOrganization} from "../../api/organizationApi";
+import {fetchOrganizations} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
@@ -14,9 +14,6 @@ import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import FileUploader from "../shared/fields/fileUploader";
-import {createIndicator} from "../../api/indicatorApi";
-import {createIndicatorReport} from "../../api/indicatorReportApi";
-import {createOutcome} from "../../api/outcomeApi";
 import {uploadFile} from "../../api/fileUploadingApi";
 
 const useStyles = makeStyles(() => ({
@@ -44,12 +41,6 @@ export default function FileUploadingPage() {
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
 
-
-  const createAPIs = {
-    Indicator: createIndicator,
-    'Indicator Report': createIndicatorReport,
-    Outcome: createOutcome
-  };
 
   const [state, setState] = useState({
     loading: true,

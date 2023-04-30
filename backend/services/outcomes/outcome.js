@@ -102,6 +102,7 @@ const fetchOutcome = async (req, res) => {
   // })
   // outcome.indicator = outcome.indicator.split('_')[1];
   outcome.indicators = outcome.indicators.map(indicatorURI => indicatorURI.split("_")[1])
+  outcome.identifier = outcome.hasIdentifier;
   delete outcome.forOrganization;
   return res.status(200).json({success: true, outcome});
 
@@ -134,8 +135,10 @@ const updateOutcome = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || !form.organization || !form.theme || !form.indicators || !form.indicators.length)
+  if (!form || !form.description || !form.name || !form.organization || !form.theme || !form.indicators || !form.indicators.length || !form.identifier)
     throw new Server400Error('Invalid input');
+  if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
+    throw new Server400Error('Duplicated identifier');
   const outcome = await GDBOutcomeModel.findOne({_id: id});
   if (!outcome)
     throw new Server400Error('No such outcome');
@@ -228,7 +231,7 @@ const updateOutcome = async (req, res) => {
   }));
 
   outcome.indicators = form.indicators
-
+  outcome.hasIdentifier = form.identifier;
 
   // remove the outcome from every organizations in outcome.forOrganizations
   // await Promise.all(outcome.forOrganizations.map(organization => {
@@ -271,8 +274,11 @@ const createOutcome = async (req, res) => {
       return res.status(200).json({success: false, message: 'Wrong themeName'});
     form.theme = theme._id;
   }
-  if (!form || !form.organization || !form.name || !form.description || !form.theme || !form.indicators || !form.indicators.length)
+  if (!form || !form.organization || !form.name || !form.description || !form.theme || !form.indicators || !form.indicators.length || !form.identifier)
     throw new Server400Error('Invalid input');
+  if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
+    throw new Server400Error('Duplicated identifier');
+  form.hasIdentifier = form.identifier;
   form.forOrganization = await GDBOrganizationModel.findOne({_id: form.organization}, {populates: ['hasOutcomes']});
   // form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
   //   GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']})

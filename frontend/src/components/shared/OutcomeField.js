@@ -224,6 +224,28 @@ export default function OutcomeField({
                 }
                 }
                 />
+              <Grid item xs={12}>
+                <TextField
+                  sx={{mt: 2}}
+                  fullWidth
+                  label="Identifier"
+                  type="text"
+                  defaultValue={state.identifier}
+                  onChange={handleChange('identifier')}
+                  disabled={disabled}
+                  required={required}
+                  error={!!errors.identifier}
+                  helperText={errors.identifier}
+                  onBlur={() => {
+                    if (!state.identifier) {
+                      setErrors(errors => ({...errors, identifier: 'This field cannot be empty'}));
+                    } else {
+                      setErrors(errors => ({...errors, identifier: null}));
+                    }
+                  }
+                  }
+                />
+              </Grid>
 
               {/*<LoadingAutoComplete*/}
               {/*  label="Indicators"*/}

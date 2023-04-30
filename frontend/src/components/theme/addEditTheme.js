@@ -42,15 +42,16 @@ export default function AddEditTheme() {
 
   const [form, setForm] = useState({
     name: '',
+    identifier: '',
     description: ''
   });
   const [loading, setLoading] = useState(true);
-  const [options, setOptions] = useState({
-    reporters: {},
-    editors: [],
-    researchers: [],
-    administrators: [],
-  });
+  // const [options, setOptions] = useState({
+  //   reporters: {},
+  //   editors: [],
+  //   researchers: [],
+  //   administrators: [],
+  // });
 
   useEffect(() => {
     if (mode === 'edit' && id || mode === 'view') {
@@ -58,7 +59,8 @@ export default function AddEditTheme() {
         if (res.success) {
           setForm({
             name: res.theme.name,
-            description: res.theme.description
+            description: res.theme.description,
+            identifier: res.theme.identifier
           });
           setLoading(false);
         }
@@ -153,6 +155,26 @@ export default function AddEditTheme() {
               setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
             } else {
               setErrors(errors => ({...errors, name: ''}));
+            }
+
+          }}
+        />
+
+        <GeneralField
+          disabled={operationMode === 'view'}
+          key={'identifier'}
+          label={'Identifier'}
+          value={form.identifier}
+          required
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.identifier = e.target.value}
+          error={!!errors.identifier}
+          helperText={errors.identifier}
+          onBlur={() => {
+            if (form.identifier === '') {
+              setErrors(errors => ({...errors, identifier: 'This field cannot be empty'}));
+            } else {
+              setErrors(errors => ({...errors, identifier: ''}));
             }
 
           }}

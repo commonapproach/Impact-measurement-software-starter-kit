@@ -6,7 +6,7 @@ const GDBGroupModel = createGraphDBModel({
   label: {type: String, internalKey: 'rdfs:label'},
   comment: {type: String, internalKey: 'rdfs:comment'},
   administrator: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},
-  organization: {type: [GDBOrganizationModel], internalKey: ':hasOrganization'},
+  organizations: {type: [GDBOrganizationModel], internalKey: ':hasOrganization'},
 }, {
   rdfTypes: [':Group'], name: 'group'
 });

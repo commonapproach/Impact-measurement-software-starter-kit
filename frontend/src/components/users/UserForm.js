@@ -21,8 +21,8 @@ const useStyles = makeStyles(() => ({
 export default function UserForm() {
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id} = useParams();
-  const mode = id == null ? 'new' : 'edit';
+  let {uri} = useParams();
+  const mode = uri == null ? 'new' : 'edit';
   const [state, setState] = useState({
     form: {
       ...defaultUserFields
@@ -33,7 +33,7 @@ export default function UserForm() {
 
   useEffect(() => {
     if (mode === 'edit') {
-      fetchUser(id).then(user => {
+      fetchUser(uri).then(user => {
         setState(state => ({
           ...state,
           form: {

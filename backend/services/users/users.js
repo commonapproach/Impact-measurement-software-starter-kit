@@ -21,6 +21,7 @@ const fetchUsers = async (req, res) => {
 
   } else {
     const users = await GDBUserAccountModel.find({}, {populates: ['person']});
+
     users.map((user) => {
       delete user.hash;
       delete user.salt;

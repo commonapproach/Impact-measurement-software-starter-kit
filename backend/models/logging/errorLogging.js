@@ -10,7 +10,7 @@ const MDBErrorLoggingModel = mongoose.model('Error', new mongoose.Schema({
 }));
 
 const MDBFrontendErrorLoggingModel = mongoose.model('FrontendError', new mongoose.Schema({
-  userId: {type: String, required: true},
+  userURI: {type: String, required: true},
   name: {type: String, required: true},
   message: {type: String, required: true},
   stack: {type: String, required: true},

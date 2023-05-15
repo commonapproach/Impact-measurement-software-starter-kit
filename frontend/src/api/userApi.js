@@ -115,16 +115,16 @@ export async function updatePrimaryEmail(id, email) {
  * @param params
  * @returns {Promise<*>}
  */
-export function updateProfile(id, params) {
-  return postJson('/api/user/profile/' + id + '/', params);
+export function updateProfile(uri, params) {
+  return postJson('/api/user/profile/' + uri + '/', params);
 }
 
-export function updateUser(id, params) {
-  return postJson(`/api/user/updateUser/${id}/`, params)
+export function updateUser(uri, params) {
+  return postJson(`/api/user/updateUser/${uri}/`, params)
 }
 
-export function updateSecurityQuestion(id, params) {
-  return postJson('/api/general/profile/' + id + '/securityQuestions/', params);
+export function updateSecurityQuestion(uri, params) {
+  return postJson('/api/general/profile/' + uri + '/securityQuestions/', params);
 }
 
 /**
@@ -149,11 +149,11 @@ export async function updatePassword(id, params) {
 
 /**
  * This function fetches one single user by id.
- * @param id
+ * @param uri
  * @returns {Promise<any>}
  */
-export function fetchUser(id) {
-  return getJson('/api/user/' + id + '/');
+export function fetchUser(uri) {
+  return getJson('/api/user/' + uri + '/');
 }
 
 /**

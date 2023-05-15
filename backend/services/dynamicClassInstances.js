@@ -1,4 +1,4 @@
-const {GraphDB, SPARQL, Helpers} = require("graphdb-utils");
+const {GraphDB, SPARQL, sortObjectByKey} = require("graphdb-utils");
 
 async function getIndividualsInClass(req, res) {
   const instances = {};
@@ -25,7 +25,7 @@ async function getIndividualsInClass(req, res) {
       instances[s.id] = SPARQL.getPrefixedURI(s.id) || s.id;
     }
   });
-  res.json(Helpers.sortObjectByKey(instances));
+  res.json(sortObjectByKey(instances));
 }
 
 

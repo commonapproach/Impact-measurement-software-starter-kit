@@ -52,8 +52,8 @@ const routes = (
     {/*users*/}
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
-    <Route path="/users/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
-    <Route path="/users/:id" element={<PrivateRoute element={EditUserForm}/>}/>
+    <Route path="/users/:uri/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
+    <Route path="/users/:uri" element={<PrivateRoute element={EditUserForm}/>}/>
 
     {/*organization*/}
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>

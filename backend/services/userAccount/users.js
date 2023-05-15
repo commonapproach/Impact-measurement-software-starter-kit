@@ -161,8 +161,9 @@ const fetchUsers = async (req, res, next) => {
         const rawData = await GDBUserAccountModel.find({}, {populates: ['primaryContact.telephone',]});
         const data = rawData.map((user) => {
             return {
-                email: user.primaryEmail, id: user._id, isSuperuser: user.role === 'admin',
-                primaryContact: user.primaryContact, status: user.status, expirationDate: user.expirationDate
+                email: user.primaryEmail, isSuperuser: user.role === 'admin',
+                primaryContact: user.primaryContact, status: user.status, expirationDate: user.expirationDate,
+                _uri: user._uri
             }
         })
         return res.status(200).json({data, success:true})

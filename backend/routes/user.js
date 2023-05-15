@@ -6,10 +6,10 @@ const {fetchProfileHandler, updateProfileHandler} = require("../services/profile
 const router = express.Router({mergeParams: true});
 
 
-router.get('/:id', fetchUserHandler);
+router.get('/:uri', fetchUserHandler);
 router.post('/invite', inviteNewUserHandler);
-router.post('/updateUser/:id', updateUserHandler)
-router.get('/profile/:id', fetchProfileHandler)
-router.post('/profile/:id', updateProfileHandler)
+router.post('/updateUser/:uri', updateUserHandler)
+router.get('/profile/:uri', fetchProfileHandler)
+router.post('/profile/:uri', updateProfileHandler)
 
 module.exports = router;

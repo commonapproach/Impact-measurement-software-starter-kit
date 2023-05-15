@@ -12,11 +12,11 @@ const frontendErrorReportHandler = async (req, res, next) => {
 }
 
 const frontendErrorReport = async (req, res) => {
-  const userId = req.session._id;
+  const userURI = req.session._uri;
   const e = req.body;
   const frontendErrorReport = new MDBFrontendErrorLoggingModel({
     ...e,
-    userId,
+    userURI,
     date: new Date()
   })
   await frontendErrorReport.save()

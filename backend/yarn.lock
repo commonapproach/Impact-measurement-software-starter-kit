@@ -1464,7 +1464,7 @@ google-libphonenumber@>=3.2.22:
 
 "graphdb-utils@https://github.com/csse-uoft/graphdb-utils.git":
   version "1.0.0"
-  resolved "https://github.com/csse-uoft/graphdb-utils.git#a1fc70dfe351610dfc5f5e0bee17a56a16a40558"
+  resolved "https://github.com/csse-uoft/graphdb-utils.git#1c2aa53417ea56dc8b0c20f4a0b48a3acfcf9481"
   dependencies:
     form-data "^4.0.0"
     graphdb "^3.0.0"

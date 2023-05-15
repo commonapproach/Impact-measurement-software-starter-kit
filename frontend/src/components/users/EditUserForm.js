@@ -33,7 +33,7 @@ const useStyles = makeStyles(() => ({
 export default function EditUserForm() {
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id} = useParams();
+  const {uri} = useParams();
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [user, setUser] = useState({});
@@ -45,7 +45,7 @@ export default function EditUserForm() {
   const userContext = useContext(UserContext);
 
   useEffect(() => {
-    fetchUser(id, userContext).then(res => {
+    fetchUser(uri).then(res => {
       if(res.success) {
         const user = res.user
         // setUser(user);
@@ -59,7 +59,7 @@ export default function EditUserForm() {
       navigate('/dashboard');
       enqueueSnackbar(errors.message || 'Error occurs', {variant: 'error'})
     });
-  }, [id]);
+  }, [uri]);
 
   /**
    * @returns {boolean} true if valid.

@@ -19,7 +19,7 @@ const {
  * @param operationType a string describes the operation
  */
 async function hasAccess(req, operationType) {
-  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   switch (operationType) {
@@ -133,7 +133,7 @@ async function hasAccess(req, operationType) {
 
 
     // users
-    case 'fetchUsers':
+    case 'fetchUsers': // todo
       return true;
 
     // indicators

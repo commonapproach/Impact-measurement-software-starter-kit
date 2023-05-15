@@ -37,8 +37,7 @@ const useStyles = makeStyles(() => ({
 export default function EditProfile() {
   const classes = useStyles();
   const navigate = useNavigate();
-  const {uri} = useParams();
-  const userContext = useContext(UserContext);
+  const uri = encodeURIComponent(useParams().uri);
   const {enqueueSnackbar} = useSnackbar();
   const [messageList, setMessageList] = useState([])
   const [form, setForm] = useState({

@@ -5,6 +5,7 @@ const {SPARQL} = require('graphdb-utils');
 const {validateCredentials, updateUserPassword} = require("../userAccount/user");
 const Hashing = require("../../utils/hashing");
 const {hasAccess} = require("../../helpers/hasAccess");
+const {Server400Error} = require("../../utils");
 
 
 const fetchProfileHandler = async (req, res, next) => {
@@ -29,10 +30,10 @@ const updateProfileHandler = async (req, res, next) => {
 
 const fetchProfile = async (req, res) => {
 
-  const {id} = req.params;
-  if (!id)
-    return res.status(400).json({success: false, message: 'Id is needed'});
-  const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person.phoneNumber', 'person.address']});
+  const {uri} = req.params;
+  if (!uri)
+    return res.status(400).json({success: false, message: 'URI is needed'});
+  const userAccount = await GDBUserAccountModel.findOne({_uri: uri}, {populates: ['person.phoneNumber', 'person.address']});
   if (!userAccount)
     return res.status(400).json({success: false, message: 'No such user'});
   if (!userAccount.person)
@@ -131,9 +132,9 @@ const regularUserUpdatePassword = async (req, res, next) => {
 
 
 const updateProfile = async (req, res) => {
-  const {id} = req.params;
+  const {uri} = req.params;
   const {gender, altEmail, address, countryCode, areaCode, phoneNumber,} = req.body;
-  const userAccount = await GDBUserAccountModel.findOne({_id: id}, {populates: ['person.address', 'person.phoneNumber']});
+  const userAccount = await GDBUserAccountModel.findOne({_uri: uri}, {populates: ['person.address', 'person.phoneNumber']});
 
   // remove the user from all previous associated organizations
   // if (userAccount.associatedOrganizations){
@@ -146,6 +147,8 @@ const updateProfile = async (req, res) => {
   // add the user to all associated organizations
 
   // store current associated organizations
+  if (!userAccount)
+    throw new Server400Error("No such user");
 
   const person = userAccount.person;
   if (gender && Validator.gender(gender))

@@ -23,9 +23,8 @@ export default function Users() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchUsers().then(data => {
-      // console.log(data)
-      setState(state => ({...state, loading: false, data: data.data}));
+    fetchUsers().then(({data, success}) => {
+      setState(state => ({...state, loading: false, data: data}));
     }).catch(e => {
       reportErrorToBackend(e)
       setState(state => ({...state, loading: false}));
@@ -125,9 +124,10 @@ export default function Users() {
     },
     {
       label: ' ',
-      body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'users'} objectUri={_uri} hideDeleteOption hideViewOption
-                      handleDelete={() => showDeleteDialog(_uri)}/>
+      body: ({_uri}) => {
+        return <DropdownMenu urlPrefix={'users'} objectUri={encodeURIComponent(_uri)} hideDeleteOption hideViewOption
+                      handleDelete={() => showDeleteDialog(_uri)}/>;
+      }
     }
   ];
 

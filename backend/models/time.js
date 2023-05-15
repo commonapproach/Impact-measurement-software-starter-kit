@@ -1,4 +1,4 @@
-const {createGraphDBModel, Types} = require("../utils/graphdb");
+const {createGraphDBModel, Types} = require("graphdb-utils");
 
 const GDBInstant = createGraphDBModel({
   date: {type: Date, internalKey: 'time:inXSDDate'}

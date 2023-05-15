@@ -3,13 +3,14 @@ const {RepositoryClientConfig, RDFRepositoryClient, RepositoryConfig, Repository
 const {UpdateQueryPayload} = require('graphdb').query;
 const {SparqlJsonResultParser, JsonLDParser} = require('graphdb').parser;
 const {RDFMimeType, QueryContentType} = require('graphdb').http;
-const {graphdb} = require('../config');
+const {graphdb, mongodb} = require('../config');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 const {sleep} = require('../utils');
 const {namespaces} = require('./namespaces');
 const {configParams} = require("./graphdbParameter");
+const {GraphDB, initGraphDB, MongoDBIdGenerator, importRepositorySnapshot} = require("graphdb-utils");
 
 let dbClient, repository;
 
@@ -55,15 +56,15 @@ async function loadInitialData(file, overwrite = !!process.env.test) {
   });
 }
 
-async function importRepositorySnapshot(url) {
-  const response = await fetch(url);
-
-  return new Promise((resolve, reject) => {
-    repository.upload(response.body, RDFMimeType.BINARY_RDF, null, null)
-      .then(resolve)
-      .catch(reason => reject(reason));
-  });
-}
+// async function importRepositorySnapshot(url) {
+//   const response = await fetch(url);
+//
+//   return new Promise((resolve, reject) => {
+//     repository.upload(response.body, RDFMimeType.BINARY_RDF, null, null)
+//       .then(resolve)
+//       .catch(reason => reject(reason));
+//   });
+// }
 
 async function cleanup() {
   const sendQuery = async query => {
@@ -83,42 +84,53 @@ async function cleanup() {
 }
 
 async function load() {
+  const idGenerator = new MongoDBIdGenerator(mongodb.addr);
   const DBName = process.env.test ? "PathfinderTest" : "Pathfinder"
 
-  const serverConfig = new ServerClientConfig(graphdb.addr, 0, {
-    'Accept': RDFMimeType.SPARQL_RESULTS_JSON
+  const result = await initGraphDB({
+    idGenerator,
+    address: graphdb.addr || "http://192.168.50.111:7200",
+    namespaces,
+    repositoryName: DBName,
+    username: graphdb.username,
+    password: graphdb.password
   });
+  repository = result.repository;
 
-  if (graphdb.username) {
-    serverConfig.useGdbTokenAuthentication(graphdb.username, graphdb.password);
-  }
-
-  dbClient = new GraphDBServerClient(serverConfig);
-  const ids = await dbClient.getRepositoryIDs();
-  if (!ids.includes(DBName)) {
-    await createRepository(dbClient, DBName);
-    console.log(`Repository \`${DBName}\` created.`)
-  }
-  const readTimeout = 30000;
-  const writeTimeout = 30000;
-
-  const config = new RepositoryClientConfig(graphdb.addr)
-    .setEndpoints([`${graphdb.addr}/repositories/${DBName}`])
-    .setHeaders({
-      'Accept': RDFMimeType.SPARQL_RESULTS_JSON
-    })
-    .setReadTimeout(readTimeout)
-    .setWriteTimeout(writeTimeout);
-
-  if (graphdb.username) {
-    config.useGdbTokenAuthentication(graphdb.username, graphdb.password);
-  }
-
-  repository = new RDFRepositoryClient(config);
+  // const serverConfig = new ServerClientConfig(graphdb.addr, 0, {
+  //   'Accept': RDFMimeType.SPARQL_RESULTS_JSON
+  // });
+  //
+  // if (graphdb.username) {
+  //   serverConfig.useGdbTokenAuthentication(graphdb.username, graphdb.password);
+  // }
+  //
+  // dbClient = new GraphDBServerClient(serverConfig);
+  // const ids = await dbClient.getRepositoryIDs();
+  // if (!ids.includes(DBName)) {
+  //   await createRepository(dbClient, DBName);
+  //   console.log(`Repository \`${DBName}\` created.`)
+  // }
+  // const readTimeout = 30000;
+  // const writeTimeout = 30000;
+  //
+  // const config = new RepositoryClientConfig(graphdb.addr)
+  //   .setEndpoints([`${graphdb.addr}/repositories/${DBName}`])
+  //   .setHeaders({
+  //     'Accept': RDFMimeType.SPARQL_RESULTS_JSON
+  //   })
+  //   .setReadTimeout(readTimeout)
+  //   .setWriteTimeout(writeTimeout);
+  //
+  // if (graphdb.username) {
+  //   config.useGdbTokenAuthentication(graphdb.username, graphdb.password);
+  // }
+  //
+  // repository = new RDFRepositoryClient(config);
 
   // using https://github.com/rubensworks/sparqljson-parse.js
-  repository.registerParser(new SparqlJsonResultParser());
-  repository.registerParser(new JsonLDParser());
+  // repository.registerParser(new SparqlJsonResultParser());
+  // repository.registerParser(new JsonLDParser());
 
   console.log(`GraphDB ${DBName} connected.`);
 
@@ -129,13 +141,13 @@ async function load() {
   await importRepositorySnapshot('https://github.com/csse-uoft/compass-ontology/releases/download/latest/compass-ontology+dependencies.brf');
 
   // Namespaces, this could be used within the query without specifying it in the prefixes
-  const tasks = []
-  for (const [prefix, uri] of Object.entries(namespaces)) {
-    if (prefix === '') continue;
-    // console.log(prefix, uri)
-    tasks.push(repository.saveNamespace(prefix, uri));
-  }
-  await Promise.all(tasks)
+  // const tasks = []
+  // for (const [prefix, uri] of Object.entries(namespaces)) {
+  //   if (prefix === '') continue;
+  //   // console.log(prefix, uri)
+  //   tasks.push(repository.saveNamespace(prefix, uri));
+  // }
+  // await Promise.all(tasks)
 
   console.log('GraphDB loaded.');
 }

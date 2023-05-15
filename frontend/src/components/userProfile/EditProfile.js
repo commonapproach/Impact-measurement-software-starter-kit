@@ -37,7 +37,7 @@ const useStyles = makeStyles(() => ({
 export default function EditProfile() {
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id} = useParams();
+  const {uri} = useParams();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
   const [messageList, setMessageList] = useState([])
@@ -62,7 +62,7 @@ export default function EditProfile() {
 
 
   useEffect(() => {
-    Promise.all([getProfile(id), fetchUser(id)]).then(([profileRes, userRes]) => {
+    Promise.all([getProfile(uri), fetchUser(uri)]).then(([profileRes, userRes]) => {
       if (profileRes.success && userRes.success) {
         const person = profileRes.person;
         if (person.phoneNumber)
@@ -83,13 +83,13 @@ export default function EditProfile() {
       navigate('/dashboard');
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
-  }, [id]);
+  }, [uri]);
 
   useEffect(() => {
     fetchOrganizations().then(({success, organizations}) => {
       if (success) {
         const options = {};
-        organizations.map(organization => options[organization._id] = organization.legalName);
+        organizations.map(organization => options[organization._uri] = organization.legalName);
         setOptionOrganizations(options);
       }
     }).catch((e) => {
@@ -132,7 +132,7 @@ export default function EditProfile() {
   // cancel change button handler
   const handleDialogCancel = () => {
     setDialogQuitEdit(false);
-    navigate('/users/' + id + '/edit');
+    navigate('/users/' + uri + '/edit');
   };
 
   const handleMessageListCancel = () => {
@@ -172,7 +172,7 @@ export default function EditProfile() {
 
       setLoadingButton(true);
 
-      const {success, messageList} = (await updateUser(id, userForm));
+      const {success, messageList} = (await updateUser(uri, userForm));
 
       if (!success && messageList) {
         setLoadingButton(false);
@@ -181,7 +181,7 @@ export default function EditProfile() {
 
       }
 
-      const profileSuccess = (await updateProfile(id, updateForm)).success;
+      const profileSuccess = (await updateProfile(uri, updateForm)).success;
       if (profileSuccess && success) {
 
         setLoadingButton(false);

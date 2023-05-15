@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
-export default function DeleteModal({show, onHide, title, objectId, ...props}) { // cannot use keyword "delete"
+export default function DeleteModal({show, onHide, title, objectUri, ...props}) { // cannot use keyword "delete"
   const [form, setForm] = useState({reason: ''});
 
   return (
@@ -16,7 +16,7 @@ export default function DeleteModal({show, onHide, title, objectId, ...props}) {
                    onChange={e => setForm({reason: e.target.value})} fullWidth/>
       </DialogContent>
       <DialogActions>
-        <Button color="secondary" onClick={() => props.delete(objectId, form)}>Confirm</Button>
+        <Button color="secondary" onClick={() => props.delete(objectUri, form)}>Confirm</Button>
         <Button onClick={onHide}>Close</Button>
       </DialogActions>
     </Dialog>

@@ -48,7 +48,7 @@ export default function UserInvite() {
     fetchOrganizations(userContext).then(({success, organizations}) => {
       if (success) {
         const options = {};
-        organizations.map(organization => options[organization._id] = organization.legalName);
+        organizations.map(organization => options[organization._uri] = organization.legalName);
         setOptionOrganizations(options);
       }
     }).catch((e) => {

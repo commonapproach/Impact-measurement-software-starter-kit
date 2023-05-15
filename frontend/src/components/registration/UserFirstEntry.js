@@ -38,7 +38,7 @@ export default function UserFirstEntry() {
     submitDialog: false,
     loading: true,
     email: '',
-    id:'',
+    uri:'',
     failMessage:'',
     loadingButton: false
   });
@@ -49,7 +49,7 @@ export default function UserFirstEntry() {
 
   useEffect(()=> {
     verifyFirstEntryUser({token}).then(res => {
-      setState(state => ({...state, email: res.email, id: res.userId, loading: false}))
+      setState(state => ({...state, email: res.email, uri: res.userUri, loading: false}))
     }).catch(e => {
       setState(state => ({...state, loading: false, errors: e.json}))
       navigate('/login')
@@ -122,7 +122,7 @@ export default function UserFirstEntry() {
       const securityQuestions = [state.form.securityQuestion1, state.form.securityQuestion2, state.form.securityQuestion3,
         state.form.securityQuestionAnswer1, state.form.securityQuestionAnswer2, state.form.securityQuestionAnswer3]
       setState(state => ({...state, loadingButton: true, }))
-      const {success, message} = await firstEntryUpdate({email: state.email, userId: state.id, newPassword: state.form.password,
+      const {success, message} = await firstEntryUpdate({email: state.email, userUri: state.uri, newPassword: state.form.password,
         securityQuestions: securityQuestions})
       if(success){
         setState(state => ({...state, loadingButton: false, submitDialog: false}));

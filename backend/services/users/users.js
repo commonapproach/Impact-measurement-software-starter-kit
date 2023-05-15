@@ -1,7 +1,5 @@
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {userType2UserTypeURI} = require("../../helpers/dicts");
-const {GraphDB} = require('../../utils/graphdb');
-const {SPARQL} = require('../../utils/graphdb/helpers');
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");

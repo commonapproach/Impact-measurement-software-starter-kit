@@ -170,7 +170,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
             <TextField
               sx={{mt: 2}}
               fullWidth
-              label="NumericalValue"
+              label="Numerical Value"
               type="text"
               defaultValue={state.numericalValue}
               onChange={handleChange('numericalValue')}

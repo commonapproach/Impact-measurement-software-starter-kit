@@ -1,5 +1,4 @@
-const {findUserAccountByEmail, updateUserAccount, validateCredentials, updateUserPassword,
-    findUserAccountById, isEmailExists
+const {findUserAccountByEmail, updateUserAccount, validateCredentials, updateUserPassword, isEmailExists
 } = require("./user");
 const {sendVerificationMail, sendResetPasswordEmail, sendUpdatePrimaryEmail} = require("../../utils");
 const {sign} = require("jsonwebtoken");

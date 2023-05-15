@@ -121,6 +121,7 @@ export default function FileUploadingPage() {
       error.fileContent = 'The field cannot be empty';
     }
     setErrors(error);
+    console.log(error)
     return Object.keys(error).length === 0;
   };
 

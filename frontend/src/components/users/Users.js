@@ -16,7 +16,7 @@ export default function Users() {
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
@@ -34,17 +34,17 @@ export default function Users() {
     });
   }, [trigger]);
 
-  const showDeleteDialog = (id) => {
+  const showDeleteDialog = (uri) => {
     setState(state => ({
-      ...state, selectedId: id, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete user ' + id + ' ?'
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete user ' + uri + ' ?'
     }));
   };
 
-  const handleDelete = async (id, form) => {
+  const handleDelete = async (uri, form) => {
 
 
-    deleteUser(id).then(({success, message}) => {
+    deleteUser(uri).then(({success, message}) => {
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -65,8 +65,8 @@ export default function Users() {
   const columns = [
     {
       label: 'Username/Email',
-      body: ({_id, email}) => {
-        return <Link color to={`/users/${_id}/edit`}>
+      body: ({_uri, email}) => {
+        return <Link color to={`/users/${_uri}/edit`}>
           {email}
         </Link>;
       },
@@ -125,9 +125,9 @@ export default function Users() {
     },
     {
       label: ' ',
-      body: ({_id}) =>
-        <DropdownMenu urlPrefix={'users'} objectId={_id} hideDeleteOption hideViewOption
-                      handleDelete={() => showDeleteDialog(_id)}/>
+      body: ({_uri}) =>
+        <DropdownMenu urlPrefix={'users'} objectUri={_uri} hideDeleteOption hideViewOption
+                      handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
@@ -140,7 +140,7 @@ export default function Users() {
         title={"Users"}
         data={state.data}
         columns={columns}
-        idField="id"
+        uriField="uri"
         customToolbar={
           <Chip
             onClick={() => navigate('/users/invite')}
@@ -152,7 +152,7 @@ export default function Users() {
 
       />
       <DeleteModal
-        objectId={state.selectedId}
+        objectUri={state.selectedUri}
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}

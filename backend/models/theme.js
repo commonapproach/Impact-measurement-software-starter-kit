@@ -1,4 +1,4 @@
-const {createGraphDBModel, Types} = require("../utils/graphdb");
+const {createGraphDBModel, Types} = require("graphdb-utils");
 
 const GDBThemeModel = createGraphDBModel({
   name: {type: String, internalKey: 'tove_org:hasName'},

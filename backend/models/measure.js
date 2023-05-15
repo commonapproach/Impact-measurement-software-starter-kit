@@ -1,4 +1,4 @@
-const {createGraphDBModel, Types} = require("../utils/graphdb");
+const {createGraphDBModel, Types} = require("graphdb-utils");
 
 const GDBUnitOfMeasure = createGraphDBModel({
   label: {type: String, internalKey: 'rdfs:label'},

@@ -9,7 +9,7 @@ const createTheme = async (req, res) => {
     if (await GDBThemeModel.findOne({hasIdentifier: form.identifier}))
       return res.status(400).json({success: false, message: 'Duplicated Identifier'})
   form.hasIdentifier = form.identifier;
-    const theme = GDBThemeModel(form);
+    const theme = GDBThemeModel(form,);
     await theme.save();
     return res.status(200).json({success: true, message: 'Successfully created the theme'});
 

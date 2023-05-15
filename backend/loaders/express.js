@@ -20,7 +20,7 @@ const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRout
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
-const { MDBApiModel} = require("../models/logging/api");
+const {MDBApiModel} = require("../models/logging/api");
 
 const app = express();
 

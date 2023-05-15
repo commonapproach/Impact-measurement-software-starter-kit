@@ -1,6 +1,5 @@
 const {GDBGroupModel} = require("../models/group");
-const {GraphDB} = require("../utils/graphdb");
-const {SPARQL} = require('../utils/graphdb/helpers');
+const {GraphDB, SPARQL} = require("graphdb-utils");
 const {GDBOrganizationModel} = require("../models/organization");
 
 /**

@@ -1,7 +1,7 @@
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {genderOptions} = require("../../helpers/dicts");
 const {Validator} = require("../../helpers/validator");
-const {SPARQL} = require('../../utils/graphdb/helpers');
+const {SPARQL} = require('graphdb-utils');
 const {validateCredentials, updateUserPassword} = require("../userAccount/user");
 const Hashing = require("../../utils/hashing");
 const {hasAccess} = require("../../helpers/hasAccess");

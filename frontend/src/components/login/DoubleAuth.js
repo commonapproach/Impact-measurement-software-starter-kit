@@ -76,7 +76,7 @@ export default function DoubleAuth() {
 
         if (matched) {
           userContext.updateUser({
-            id: userAccount._id,
+            uri: userAccount._uri,
             email: userAccount.email,
             givenName: userAccount.person?.givenName,
             familyName: userAccount.person?.familyName,
@@ -154,7 +154,7 @@ export default function DoubleAuth() {
         {/*             open={state.successDialog}/>*/}
       </Container>);
   } else {
-    // the user wasted all 3 chances, the user should remove id from req but haven't implemented TODO
+    // the user wasted all 3 chances, the user's uri should be removed from req but haven't implemented TODO
     return (
       <AlertDialog dialogContentText={'You have missed all 3 chances'}
                    dialogTitle={'Sorry'}

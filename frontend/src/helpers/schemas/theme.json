@@ -5,6 +5,7 @@
   "properties": {
     "@type": {"type": "string"},
     "tov_org:hasName": {"type": "string"},
-    "cids:hasDescription": {"type": "string"}
+    "cids:hasDescription": {"type": "string"},
+    "tove_org:hasIdentifier": {"type": "string"}
   }
 }

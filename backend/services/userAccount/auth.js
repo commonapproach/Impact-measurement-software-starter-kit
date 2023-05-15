@@ -1,4 +1,4 @@
-const {validateCredentials, findUserAccountById, findUserAccountByEmail} = require('./user');
+const {validateCredentials, findUserAccountByEmail} = require('./user');
 const Hashing = require("../../utils/hashing");
 const {userTypeURI2UserType} = require("../../helpers/dicts")
 const {GDBUserAccountModel} = require("../../models/userAccount");
@@ -16,7 +16,7 @@ const login = async (req, res, next) => {
     if (!validated) {
       return res.status(400).json({success: false, message: 'Username or password is incorrect.'});
     } else {
-      req.session._id = userAccount._id;
+      req.session._uri = userAccount._uri;
 
       return res.json({
         success: true
@@ -51,20 +51,23 @@ const getSecurityQuestionsByEmail = async (req, res, next) => {
 }
 
 const getUserSecurityQuestions = async (req, res, next) => {
-  const id = req.session._id;
-  if (!id) {
+  const uri = req.session._uri;
+  if (!uri) {
     return res.status(400).json({
       success: false,
       message: 'Please correctly input the email and password first before moving on.'
     });
   }
   try {
-    const userAccount = await findUserAccountById(id);
+    const userAccount = await GDBUserAccountModel.findOne({_uri: uri});
     await userAccount.populate('securityQuestions');
     if (!userAccount) {
       return res.status(400).json({success: false, message: 'No such user'});
     }
-    const securityQuestions = [userAccount.securityQuestions[0].question, userAccount.securityQuestions[1].question, userAccount.securityQuestions[2].question];
+    const securityQuestions = [
+      userAccount.securityQuestions[0].question,
+      userAccount.securityQuestions[1].question,
+      userAccount.securityQuestions[2].question];
     return res.status(200).json({
       success: true,
       message: 'Success',
@@ -77,18 +80,15 @@ const getUserSecurityQuestions = async (req, res, next) => {
 };
 
 const checkUserSecurityQuestion = async (req, res, next) => {
-  const {question, answer} = req.body;
-
-  const id = req.session._id;
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      message: 'Please correctly input the email and password first before moving on.'
-    });
-  }
-
   try {
-    const userAccount = await GDBUserAccountModel.findById(id);
+    const {question, answer} = req.body;
+    if (!req.session._uri) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please correctly input the email and password first before moving on.'
+      });
+    }
+    const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
     await userAccount.populate('securityQuestions', 'person');
     for (let i in userAccount.securityQuestions) {
       let securityQuestion = userAccount.securityQuestions[i];

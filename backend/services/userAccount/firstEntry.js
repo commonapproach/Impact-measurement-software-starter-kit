@@ -22,7 +22,7 @@ const verifyUser = async (req, res, next) => {
     if (userAccount.securityQuestions) {
       return res.status(400).json({success: false, message: "The user is verified already"});
     }
-    return res.status(200).json({success: true, message: 'success', email: userAccount.email, userId: userAccount._id});
+    return res.status(200).json({success: true, message: 'success', email: userAccount.email, userUri: userAccount._uri});
   } catch (e) {
     if (e instanceof JsonWebTokenError && e.message === 'invalid token' || e instanceof SyntaxError)
       return res.status(400).json({success: false, message: 'Invalid request.'});

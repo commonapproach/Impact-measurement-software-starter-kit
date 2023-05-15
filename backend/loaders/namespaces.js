@@ -29,4 +29,14 @@ const namespaces = {
   'iso21972': 'http://ontology.eil.utoronto.ca/ISO21972/iso21972#',
 }
 
-module.exports = {namespaces}
+function swap(nameSpaces){
+  const ret = {};
+  for(const key in nameSpaces){
+    ret[nameSpaces[key]] = key;
+  }
+  return ret;
+}
+
+const reverseNameSpaces = swap(namespaces)
+
+module.exports = {namespaces, reverseNameSpaces}

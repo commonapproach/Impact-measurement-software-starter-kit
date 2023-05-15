@@ -1,4 +1,4 @@
-const {createGraphDBModel, Types, DeleteType} = require("../utils/graphdb");
+const {createGraphDBModel, Types, DeleteType} = require("graphdb-utils");
 const {GDBUserAccountModel} = require("./userAccount");
 const {GDBIndicatorModel} = require("./indicator");
 const {GDBOutcomeModel} = require("./outcome");

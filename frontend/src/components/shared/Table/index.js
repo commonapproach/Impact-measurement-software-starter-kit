@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 export function EnhancedTable({data, title, columns, height, ...props}) {
   const {
     rowsPerPageOptions = [10, 25, 100],
-    idField = '_id',
+    uriField = '_uri',
     defaultOrderBy = columns[0].sortBy || columns[0].body,
     extraData = {},
     rowStyle,
@@ -91,18 +91,18 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      setSelected(data.map(item => item[idField]));
+      setSelected(data.map(item => item[uriField]));
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
+  const handleClick = (event, uri) => {
+    const selectedIndex = selected.indexOf(uri);
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
+      newSelected = newSelected.concat(selected, uri);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -137,14 +137,14 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
       onChangeRowsPerPage(rowsPerPage)
   };
 
-  const isSelected = (id) => selected.indexOf(id) !== -1;
+  const isSelected = (uri) => selected.indexOf(uri) !== -1;
 
   const handleDelete = async () => {
     // TODO: Show delete progressively.
     if (onDelete) {
       await onDelete(selected);
-      for (const id of selected) {
-        data.splice(data.findIndex(item => item._id === id), 1);
+      for (const uri of selected) {
+        data.splice(data.findIndex(item => item._uri === uri), 1);
       }
       setSelected([]);
     }
@@ -183,8 +183,8 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
             {stableSort(data, getComparator(order, orderBy, extraData))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
-                const id = row[idField];
-                const isItemSelected = isSelected(id);
+                const uri = row[uriField];
+                const isItemSelected = isSelected(uri);
                 return (
                   <TableRow
                     className={classes.tableRow}
@@ -192,14 +192,14 @@ export function EnhancedTable({data, title, columns, height, ...props}) {
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={id}
+                    key={uri}
                     selected={isItemSelected}
                     style={rowStyle && rowStyle(row)}
                   >
                     <TableCell padding="checkbox" key={0}>
                       <Checkbox
                         color="primary"
-                        onClick={(event) => handleClick(event, id)}
+                        onClick={(event) => handleClick(event, uri)}
                         checked={isItemSelected}
                       />
                     </TableCell>

@@ -85,12 +85,6 @@ async function updateUserAccount(email, updatedData) {
 }
 
 
-async function findUserAccountById(id) {
-  return await GDBUserAccountModel.findOne(
-    {_id: id},
-    {populates: ['primaryContact.telephone', 'organization']}
-  );
-}
 
 
 
@@ -118,19 +112,19 @@ async function initUserAccounts() {
 
     const answer1 = await Hashing.hashPassword('UofT');
     const securityQuestion1 = {
-      question: 'What university is CSSE associated with',
+      question: 'What university is CSSE associated with?',
       hash: answer1.hash,
       salt: answer1.salt
     }
     const answer2 = await Hashing.hashPassword('MIE');
     const securityQuestion2 = {
-      question: 'What is CSSE\'s home department',
+      question: 'What is CSSE\'s home department?',
       hash: answer2.hash,
       salt: answer2.salt
     }
     const answer3 = await Hashing.hashPassword('Ontario');
     const securityQuestion3 = {
-      question: 'Which province is University of Toronto located in',
+      question: 'Which province is University of Toronto located in?',
       hash: answer3.hash,
       salt: answer3.salt
     }
@@ -163,5 +157,5 @@ async function initUserAccounts() {
 
 
 module.exports = {
-  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword, findUserAccountById
+  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword,
 };

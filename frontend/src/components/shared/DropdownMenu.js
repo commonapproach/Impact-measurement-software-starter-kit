@@ -5,7 +5,7 @@ import { MoreVert as MoreVertIcon, Edit, Delete, OpenInBrowser } from '@mui/icon
 
 const ITEM_HEIGHT = 48;
 
-export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideViewOption, hideDeleteOption, hideEditOption, indicatorsOption}) {
+export default function DropdownMenu({urlPrefix, objectUri, handleDelete, hideViewOption, hideDeleteOption, hideEditOption, indicatorsOption}) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -44,7 +44,7 @@ export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideVie
         }}
       >
         {!hideViewOption &&
-        <MenuItem onClick={handleLink(`/${urlPrefix}/${objectId}/view`)}>
+        <MenuItem onClick={handleLink(`/${urlPrefix}/${objectUri}/view`)}>
           <ListItemIcon>
             <OpenInBrowser fontSize="small" color="primary"/>
           </ListItemIcon>
@@ -54,7 +54,7 @@ export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideVie
         }
 
         {!hideEditOption?
-          <MenuItem onClick={handleLink(`/${urlPrefix}/${objectId}/edit`)}>
+          <MenuItem onClick={handleLink(`/${urlPrefix}/${objectUri}/edit`)}>
           <ListItemIcon>
             <Edit fontSize="small" color="primary"/>
           </ListItemIcon>
@@ -73,7 +73,7 @@ export default function DropdownMenu({urlPrefix, objectId, handleDelete, hideVie
         {!hideDeleteOption?
           <MenuItem onClick={() => {
           handleClose();
-          handleDelete(objectId);
+          handleDelete(objectUri);
         }}>
           <ListItemIcon>
             <Delete fontSize="small" color="secondary"/>

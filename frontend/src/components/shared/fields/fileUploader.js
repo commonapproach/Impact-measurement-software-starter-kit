@@ -63,34 +63,38 @@ export default function FileUploader({title, disabled, onchange, importedError, 
     try {
       const fileContents = reader.result;
       let parsed_data = JSON.parse(fileContents);
-      ajv.addSchema(require('../../../helpers/schemas/outcome.json'), 'cids:Outcome');
-      ajv.addSchema(require('../../../helpers/schemas/indicator.json'), 'cids:Indicator');
-      ajv.addSchema(require('../../../helpers/schemas/theme.json'), 'cids:forTheme');
+      onchange(parsed_data);
+      // expand(parsed_data).then(expanded => {
+      //   console.log(expanded)
+      // })
+      // ajv.addSchema(require('../../../helpers/schemas/outcome.json'), 'cids:Outcome');
+      // ajv.addSchema(require('../../../helpers/schemas/indicator.json'), 'cids:Indicator');
+      // ajv.addSchema(require('../../../helpers/schemas/theme.json'), 'cids:forTheme');
 
       // console.log(ajv.validate('cids:Outcome',parsed_data))
       // console.log(ajv.errors)
 
-      if (!Array.isArray(parsed_data)) {
-        parsed_data = [parsed_data];
-      }
-
-      const checkingList = parsed_data.map(object => {
-        const objectType = object["@type"];
-        if (objectType && ajv.validate(objectType, object)) {
-          return true;
-        } else {
-          return false;
-        }
-      });
-      if (!checkingList.includes(false)) {
-        onchange(parsed_data);
-        setValid(true);
-      } else {
-        console.log(ajv.errors);
-        setValid(false);
-      }
-
-      setChecked(true);
+    //   if (!Array.isArray(parsed_data)) {
+    //     parsed_data = [parsed_data];
+    //   }
+    //
+    //   const checkingList = parsed_data.map(object => {
+    //     const objectType = object["@type"];
+    //     if (objectType && ajv.validate(objectType, object)) {
+    //       return true;
+    //     } else {
+    //       return false;
+    //     }
+    //   });
+    //   if (!checkingList.includes(false)) {
+    //     onchange(parsed_data);
+    //     setValid(true);
+    //   } else {
+    //     console.log(ajv.errors);
+    //     setValid(false);
+    //   }
+    //
+    //   setChecked(true);
     } catch (e) {
       console.log(e);
       setError(e.message ? 'Not a valid JSON file: ' + e.message : 'Error occurred when validating the file.');

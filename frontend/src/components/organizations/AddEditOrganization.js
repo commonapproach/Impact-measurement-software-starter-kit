@@ -13,6 +13,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -37,8 +38,8 @@ export default function AddEditOrganization() {
   const classes = useStyles();
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
-  const {id} = useParams();
-  const mode = id ? 'edit' : 'new';
+  const {uri} = useParams();
+  const mode = uri ? 'edit' : 'new';
   const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({
@@ -63,6 +64,7 @@ export default function AddEditOrganization() {
     email: '',
     telephone: '',
     hasIdentifier: '',
+    uri: ''
   });
   // const [outcomeForm, setOutcomeForm] = useState([
   // ]);
@@ -76,10 +78,10 @@ export default function AddEditOrganization() {
   useEffect(() => {
 
     Promise.all([
-      fetchUsers(id).then(({data, success}) => {
+      fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
         const objectForm = {};
         data.map(user => {
-          objectForm[user._id] = `${user.person.givenName} ${user.person.familyName} ID: ${user._id}`;
+          objectForm[user._uri] = `${user.person.givenName} ${user.person.familyName} URI: ${user._uri}`;
         });
         if (success)
           setOptions(options => ({...options, objectForm}));
@@ -88,15 +90,15 @@ export default function AddEditOrganization() {
         if (success) {
           const orgDict = {};
           organizations.map(org => {
-            if (org._id !== id)
-              orgDict[org._id] = org.legalName;
+            if (org._uri !== uri)
+              orgDict[org._uri] = org.legalName;
           });
           setOptions(options => ({...options, issuedBy: orgDict}))
         }
       }),
     ]).then(() => {
-      if (mode === 'edit' && id) {
-        fetchOrganization(id).then(res => {
+      if (mode === 'edit' && uri) {
+        fetchOrganization(encodeURIComponent(uri)).then(res => {
           if (res.success) {
             const {organization} = res;
             setForm({
@@ -113,7 +115,8 @@ export default function AddEditOrganization() {
               hasIdentifier: organization.hasIdentifier || '',
               telephone: organization.telephone?
                 `+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}` :
-                ''
+                '',
+              uri: organization._uri || ''
             });
             setLoading(false)
           }
@@ -125,13 +128,14 @@ export default function AddEditOrganization() {
           reportErrorToBackend(e);
           enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
         });
-      } else if (mode === 'edit' && !id) {
+      } else if (mode === 'edit' && !uri) {
         navigate('/organizations');
-        enqueueSnackbar("No ID provided", {variant: 'error'});
+        enqueueSnackbar("No URI provided", {variant: 'error'});
       } else {
         setLoading(false)
       }
     }).catch(e => {
+      console.log(e)
       if (e.json)
         setErrors(e.json);
       reportErrorToBackend(e);
@@ -182,7 +186,7 @@ export default function AddEditOrganization() {
           form.telephone.split('(')[1].split(') ')[1].split('-')[0] +
           form.telephone.split('(')[1].split(') ')[1].split('-')[1]);
       }
-      updateOrganization(id, {form},).then((res) => {
+      updateOrganization(encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organizations');
@@ -234,6 +238,26 @@ export default function AddEditOrganization() {
               setErrors(errors => ({...errors, legalName: 'This field cannot be empty'}));
             } else {
               setErrors(errors => ({...errors, legalName: ''}));
+            }
+
+          }}
+        />
+
+        <GeneralField
+          disabled={mode === 'edit'}
+          key={'uri'}
+          label={'URI'}
+          value={form.uri}
+          required
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.uri = e.target.value}
+          error={!!errors.uri}
+          helperText={errors.uri}
+          onBlur={() => {
+            if (form.uri !== '' && !isValidURL(form.uri)){
+              setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
+            } else {
+              setErrors(errors => ({...errors, uri: ''}));
             }
 
           }}

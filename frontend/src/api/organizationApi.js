@@ -4,8 +4,8 @@ export async function fetchOrganizations() {
   return getJson('/api/organizations');
 }
 
-export async function fetchOrganization(orgId, userContext) {
-  return getJson('/api/organization/' + orgId);
+export async function fetchOrganization(orgUri,) {
+  return getJson('/api/organization/' + orgUri);
 }
 
 export async function createOrganization(params) {

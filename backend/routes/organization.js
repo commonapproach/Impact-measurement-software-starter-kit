@@ -7,8 +7,8 @@ const {
 const router = express.Router({mergeParams: true});
 
 router.post('/', createOrganizationHandler)
-router.get('/:id', fetchOrganizationHandler)
-router.put('/:id', updateOrganizationHandler)
+router.get('/:uri', fetchOrganizationHandler)
+router.put('/:uri', updateOrganizationHandler)
 // router.delete('/:id', superuserDeleteOrganization)
 
 module.exports = router;

@@ -11,6 +11,14 @@ export function emailValidation(email) {
     }
 }
 
+export function isValidURL(url) {
+  // Regular expression pattern for URL validation
+  var urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
+
+  // Test the input string against the pattern
+  return urlPattern.test(url);
+}
+
 // export function postalCodeValidation(postalCode) {
 //   if (postalCode === '') {
 //     return null

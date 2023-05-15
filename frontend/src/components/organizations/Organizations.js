@@ -83,10 +83,10 @@ export default function Organizations() {
 
     {
       label: ' ',
-      body: ({_id, editable}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectId={_id} hideViewOption hideDeleteOption
+      body: ({_uri, editable}) =>
+        <DropdownMenu urlPrefix={'organizations'} objectUri={encodeURIComponent(_uri)} hideViewOption hideDeleteOption
                       hideEditOption={!editable}
-                      handleDelete={() => showDeleteDialog(_id)}/>
+                      handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 

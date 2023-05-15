@@ -73,7 +73,7 @@ async function createOrganization(req, res) {
     contactName: form.contactName,
     hasIdentifier: form.hasIdentifier,
     telephone: telephone
-  });
+  }, form.uri?{uri:form.uri}:null);
 
   await organization.save();
 
@@ -115,10 +115,10 @@ async function createOrganizationHandler(req, res, next) {
 }
 
 async function fetchOrganization(req, res) {
-  const {id} = req.params;
-  if (!id)
+  const {uri} = req.params;
+  if (!uri)
     throw new Server400Error('Organization ID is needed');
-  const organization = await GDBOrganizationModel.findOne({_id: id}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'telephone']});
+  const organization = await GDBOrganizationModel.findOne({_uri: uri}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'telephone']});
   if (!organization)
     throw new Server400Error('No such organization');
   const outcomes = organization.hasOutcomes || [];

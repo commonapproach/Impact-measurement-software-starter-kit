@@ -78,14 +78,6 @@ export default function AddEditOrganization() {
   useEffect(() => {
 
     Promise.all([
-      fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
-        const objectForm = {};
-        data.map(user => {
-          objectForm[user._uri] = `${user.person.givenName} ${user.person.familyName} URI: ${user._uri}`;
-        });
-        if (success)
-          setOptions(options => ({...options, objectForm}));
-      }),
       fetchOrganizations().then(({organizations, success}) => {
         if (success) {
           const orgDict = {};
@@ -98,36 +90,46 @@ export default function AddEditOrganization() {
       }),
     ]).then(() => {
       if (mode === 'edit' && uri) {
-        fetchOrganization(encodeURIComponent(uri)).then(res => {
-          if (res.success) {
-            const {organization} = res;
-            setForm({
-              legalName: organization.legalName || '',
-              organizationNumber: organization.organizationNumber || '',
-              issuedBy: organization.issuedBy || '',
-              administrator: organization.administrator || '',
-              reporters: organization.reporters || [],
-              editors: organization.editors || [],
-              researchers: organization.researchers || [],
-              comment: organization.comment || '',
-              contactName: organization.contactName || '',
-              email: organization.email || '',
-              hasIdentifier: organization.hasIdentifier || '',
-              telephone: organization.telephone?
-                `+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}` :
-                '',
-              uri: organization._uri || ''
+        Promise.all([
+          fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
+            const objectForm = {};
+            data.map(user => {
+              objectForm[user._uri] = `${user.person.givenName} ${user.person.familyName} URI: ${user._uri}`;
             });
-            setLoading(false)
-          }
-        }).catch(e => {
-          if (e.json)
-            setErrors(e.json);
-          console.log(e)
-          setLoading(false);
-          reportErrorToBackend(e);
-          enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
-        });
+            if (success)
+              setOptions(options => ({...options, objectForm}));
+          }),
+          fetchOrganization(encodeURIComponent(uri)).then(res => {
+            if (res.success) {
+              const {organization} = res;
+              setForm({
+                legalName: organization.legalName || '',
+                organizationNumber: organization.organizationNumber || '',
+                issuedBy: organization.issuedBy || '',
+                administrator: organization.administrator || '',
+                reporters: organization.reporters || [],
+                editors: organization.editors || [],
+                researchers: organization.researchers || [],
+                comment: organization.comment || '',
+                contactName: organization.contactName || '',
+                email: organization.email || '',
+                hasIdentifier: organization.hasIdentifier || '',
+                telephone: organization.telephone?
+                  `+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}` :
+                  '',
+                uri: organization._uri || ''
+              });
+              setLoading(false)
+            }
+          }).catch(e => {
+            if (e.json)
+              setErrors(e.json);
+            console.log(e)
+            setLoading(false);
+            reportErrorToBackend(e);
+            enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+          })
+        ]);
       } else if (mode === 'edit' && !uri) {
         navigate('/organizations');
         enqueueSnackbar("No URI provided", {variant: 'error'});
@@ -248,7 +250,6 @@ export default function AddEditOrganization() {
           key={'uri'}
           label={'URI'}
           value={form.uri}
-          required
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.uri = e.target.value}
           error={!!errors.uri}

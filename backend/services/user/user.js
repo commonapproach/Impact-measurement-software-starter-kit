@@ -51,25 +51,23 @@ const updateUser = async (req, res) => {
   const messageList = [];
   if(associatedOrganizations) {
     // find out organizations were removed
-    const removedOrganizationURIs = findOutObjectBeenRemoved(user.associatedOrganizations, associatedOrganizations.map(orgID => {
-      return `:organization_${orgID}`;
-    }));
+    const removedOrganizationURIs = findOutObjectBeenRemoved(user.associatedOrganizations, associatedOrganizations);
     // check the if the user serves as any role in these organizations
     removedOrganizationURIs.map(organizationURI => {
-      const orgID = organizationURI.split('_')[1];
-      if (organizationBelongsToUser(user, organizationURI.split('_')[1], 'editorOfs')) {
+      // const orgID = organizationURI.split('_')[1];
+      if (organizationBelongsToUser(user, organizationURI, 'editorOfs')) {
         // if the user serves as a role in the organization
         messageList.push(`The user is served as an editor in ${organizationURI}`);
       }
-      if (organizationBelongsToUser(user, organizationURI.split('_')[1], 'reporterOfs')) {
+      if (organizationBelongsToUser(user, organizationURI, 'reporterOfs')) {
         // if the user serves as a role in the organization
         messageList.push(`The user is served as an reporter in ${organizationURI}`);
       }
-      if (organizationBelongsToUser(user, organizationURI.split('_')[1], 'researcherOfs')) {
+      if (organizationBelongsToUser(user, organizationURI, 'researcherOfs')) {
         // if the user serves as a role in the organization
         messageList.push(`The user is served as an researcher in ${organizationURI}`);
       }
-      if (organizationBelongsToUser(user, organizationURI.split('_')[1], 'administratorOfs')) {
+      if (organizationBelongsToUser(user, organizationURI, 'administratorOfs')) {
         // if the user serves as a role in the organization
         messageList.push(`The user is served as an administrator in ${organizationURI}`);
       }
@@ -79,31 +77,27 @@ const updateUser = async (req, res) => {
     }
     // after checking, start to remove the user from organizations
     const removedOrganizations = await Promise.all(removedOrganizationURIs.map(organizationURI => {
-      return GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]});
+      return GDBOrganizationModel.findOne({_uri: organizationURI});
     }));
     await Promise.all(removedOrganizations.map(organization => {
-      const index = organization.hasUsers.indexOf(`:userAccount_${id}`);
+      const index = organization.hasUsers.indexOf(uri);
       organization.hasUsers.splice(index, 1);
       // save the removed organizations directly
       return organization.save();
     }));
 
-    const addedOrganizationURIs = findOutObjectbeenAdded(user.associatedOrganizations, associatedOrganizations.map(orgID => {
-      return `:organization_${orgID}`;
-    }));
+    const addedOrganizationURIs = findOutObjectbeenAdded(user.associatedOrganizations, associatedOrganizations);
     const addedOrganizations = await Promise.all(addedOrganizationURIs.map(organizationURI => {
-      return GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]});
+      return GDBOrganizationModel.findOne({_uri: organizationURI});
     }));
     await Promise.all(addedOrganizations.map(organization => {
       if (!organization.hasUsers)
         organization.hasUsers = [];
-      organization.hasUsers.push(`:userAccount_${id}`)
+      organization.hasUsers.push(uri)
       // save the removed organizations directly
       return organization.save();
     }));
-    user.associatedOrganizations = associatedOrganizations.map(orgID => {
-      return `:organization_${orgID}`;
-    })
+    user.associatedOrganizations = associatedOrganizations
   }
 
   await user.save();

@@ -40,9 +40,9 @@ const fetchProfile = async (req, res) => {
     return res.status(400).json({success: false});
   delete userAccount.person.email;
   if (userAccount.person.address) {
-    userAccount.person.address.streetDirection = SPARQL.getFullURI(userAccount.person.address.streetDirection);
-    userAccount.person.address.streetType = SPARQL.getFullURI(userAccount.person.address.streetType);
-    userAccount.person.address.state = SPARQL.getFullURI(userAccount.person.address.state);
+    userAccount.person.address.streetDirection = userAccount.person.address.streetDirection;
+    userAccount.person.address.streetType = userAccount.person.address.streetType;
+    userAccount.person.address.state = userAccount.person.address.state;
   }
 
   return res.status(200).json({success: true, person: userAccount.person});

@@ -59,31 +59,6 @@ export default function EditProfile() {
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
   const [optionOrganizations, setOptionOrganizations] = useState({});
 
-
-  useEffect(() => {
-    Promise.all([getProfile(uri), fetchUser(uri)]).then(([profileRes, userRes]) => {
-      if (profileRes.success && userRes.success) {
-        const person = profileRes.person;
-        if (person.phoneNumber)
-          person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
-
-        setForm({
-          ...form, ...person,
-          isSuperuser: userRes.user.isSuperuser,
-          associatedOrganizations: userRes.user.associatedOrganizations?.map(organizationURI => {
-            return organizationURI.split('_')[1];
-          })
-        });
-        setLoading(false);
-      }
-    }).catch(e => {
-      console.log(e)
-      reportErrorToBackend(e);
-      navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
-    });
-  }, [uri]);
-
   useEffect(() => {
     fetchOrganizations().then(({success, organizations}) => {
       if (success) {
@@ -97,6 +72,30 @@ export default function EditProfile() {
       enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
     });
   }, []);
+
+
+  useEffect(() => {
+    Promise.all([getProfile(uri), fetchUser(uri)]).then(([profileRes, userRes]) => {
+      if (profileRes.success && userRes.success) {
+        const person = profileRes.person;
+        if (person.phoneNumber)
+          person.phoneNumber = `+${person.phoneNumber.countryCode} (${String(person.phoneNumber.phoneNumber).slice(0, 3)}) ${String(person.phoneNumber.phoneNumber).slice(3, 6)}-${String(person.phoneNumber.phoneNumber).slice(6, 10)}`;
+
+        setForm({
+          ...form, ...person,
+          isSuperuser: userRes.user.isSuperuser,
+          associatedOrganizations: userRes.user.associatedOrganizations || []
+        });
+        setLoading(false);
+      }
+    }).catch(e => {
+      console.log(e)
+      reportErrorToBackend(e);
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
+    });
+  }, [uri]);
+
 
   /**
    * This is frontend validation for any new input information.

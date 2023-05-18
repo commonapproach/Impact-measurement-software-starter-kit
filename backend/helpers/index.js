@@ -69,12 +69,12 @@ function URI2Id(uri) {
  * @param organizationId organization's id
  * @param role role of the user, ex. 'administratorOfs'
  */
-function organizationBelongsToUser(userAccount, organizationId, role) {
+function organizationBelongsToUser(userAccount, organizationURI, role) {
   if(!userAccount[role]){
     return false
   }
-  const checkerList = userAccount[role].filter(organizationURL =>
-    organizationURL.split('_')[1] === organizationId
+  const checkerList = userAccount[role].filter(organizationUri =>
+    organizationURI === organizationUri
   );
   return checkerList.length > 0;
 }
@@ -85,7 +85,7 @@ function organizationBelongsToUser(userAccount, organizationId, role) {
  * @param organizationId the _id of the organization
  * @returns {Promise<boolean>}
  */
-async function organizationBelongsToGroupAdmin(userAccount, organizationId) {
+async function organizationBelongsToGroupAdmin(userAccount, organizationUri) {
   // fetch all groups belong to the user
   const groups = await Promise.all(userAccount.groupAdminOfs.map(groupURI => {
       return GDBGroupModel.findOne({_id: groupURI.split('_')[1]}, {populates: ['organizations']});
@@ -93,7 +93,7 @@ async function organizationBelongsToGroupAdmin(userAccount, organizationId) {
   ));
   // check does there any group contain the organization with organizationId
   const checker = groups.filter(group => {
-    return group.organizations.includes(`:organization_${organizationId}`);
+    return group.organizations.includes(organizationUri);
   });
   if (checker.length > 0)
     return true;

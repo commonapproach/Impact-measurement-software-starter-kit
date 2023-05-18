@@ -13,6 +13,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import {useSnackbar} from 'notistack';
 import GeneralField from "../shared/fields/GeneralField";
 import {fetchOrganizations} from "../../api/organizationApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 
 const useStyles = makeStyles(() => ({
@@ -28,7 +29,6 @@ const useStyles = makeStyles(() => ({
 export default function UserInvite() {
   const classes = useStyles();
   const navigate = useNavigate();
-  const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
   const [state, setState] = useState({
     form: {
@@ -36,6 +36,7 @@ export default function UserInvite() {
       firstName: '',
       lastName: '',
       middleName: '',
+      uri: '',
       associatedOrganizations: []
     },
     errors: {},
@@ -45,7 +46,7 @@ export default function UserInvite() {
   const [optionOrganizations, setOptionOrganizations] = useState({});
 
   useEffect(() => {
-    fetchOrganizations(userContext).then(({success, organizations}) => {
+    fetchOrganizations().then(({success, organizations}) => {
       if (success) {
         const options = {};
         organizations.map(organization => options[organization._uri] = organization.legalName);
@@ -70,6 +71,8 @@ export default function UserInvite() {
       errors.lastName = 'This field is required';
     if (!state.form.associatedOrganizations.length)
       errors.associatedOrganizations = 'This field is required';
+    if (!isValidURL(state.form.uri))
+      errors.uri = 'Not a valid URI'
 
 
 
@@ -132,6 +135,24 @@ export default function UserInvite() {
         }}
         error={!!state.errors.email}
         helperText={state.errors.email}
+      />
+
+      <GeneralField
+        key={'uri'}
+        label={'URI'}
+        value={state.form.uri}
+        sx={{mt: '16px', minWidth: 350}}
+        onChange={e => state.form.uri = e.target.value}
+        error={!!state.errors.uri}
+        helperText={state.errors.uri}
+        onBlur={() => {
+          if (state.form.uri !== '' && !isValidURL(state.form.uri)){
+            setState(state => ({...state, errors: {...state.errors, uri: 'Please input an valid URI'}}));
+          } else {
+            setState(state => ({...state, errors: {...state.errors, uri: ''}}));
+          }
+
+        }}
       />
       <GeneralField
         key={'firstName'}

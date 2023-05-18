@@ -17,13 +17,13 @@ const GDBUserAccountModel = createGraphDBModel({
   salt: {type: String, internalKey: ':hasSalt'},
   person: {type: GDBPersonModel, internalKey: 'cids:forPerson', onDelete: DeleteType.CASCADE},
   // userType:{type: [Types.NamedIndividual], internalKey: ':userType'},
-  associatedOrganization: {type: [Types.NamedIndividual], internalKey: ':associatedOrganization'},
+  associatedOrganizations: {type: [Types.NamedIndividual], internalKey: ':associatedOrganization'},
   isSuperuser: {type: Boolean, internalKey: ':isSuperuser'},
-  editorOf: {type: [Types.NamedIndividual], internalKey: ':editorOf'},
-  reporterOf: {type: [Types.NamedIndividual], internalKey: ':reporterOf'},
-  administratorOf: {type: [Types.NamedIndividual], internalKey: ':administratorOf'},
-  groupAdminOf: {type: [Types.NamedIndividual], internalKey: ':groupAdministratorOf'},
-  researcherOf: {type: [Types.NamedIndividual], internalKey: ':researcherOf'},
+  editorOfs: {type: [Types.NamedIndividual], internalKey: ':editorOf'},
+  reporterOfs: {type: [Types.NamedIndividual], internalKey: ':reporterOf'},
+  administratorOfs: {type: [Types.NamedIndividual], internalKey: ':administratorOf'},
+  groupAdminOfs: {type: [Types.NamedIndividual], internalKey: ':groupAdministratorOf'},
+  researcherOfs: {type: [Types.NamedIndividual], internalKey: ':researcherOf'},
   // Exact 3 questions, the answer should be case-insensitive.
   securityQuestions: {type: [GDBSecurityQuestion], internalKey: ':hasSecurityQuestion', onDelete: DeleteType.CASCADE}
 

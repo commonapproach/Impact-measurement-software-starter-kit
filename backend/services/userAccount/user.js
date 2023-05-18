@@ -134,11 +134,11 @@ async function initUserAccounts() {
       email: 'superuser@pathfinder.ca',
       // userTypes: [':superuser'],
       isSuperuser: true,
-      editorOf: [],
-      reporterOf: [],
-      administratorOf: [],
-      groupAdminOf: [],
-      researcherOf: [],
+      editorOfs: [],
+      reporterOfs: [],
+      administratorOfs: [],
+      groupAdminOfs: [],
+      researcherOfs: [],
       securityQuestions: [
         securityQuestion1, securityQuestion2, securityQuestion3
       ],

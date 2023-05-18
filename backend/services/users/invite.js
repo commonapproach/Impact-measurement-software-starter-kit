@@ -18,7 +18,7 @@ const inviteNewUserHandler = async (req, res, next) => {
 
 const inviteNewUser = async (req, res) => {
 
-  let {email, firstName, lastName, middleName, associatedOrganizations} = req.body.form;
+  let {email, firstName, lastName, middleName, associatedOrganizations, uri} = req.body.form;
   if (!email)
     return res.status(400).json({success: false, message: 'Email is required to invite new user.'});
   if (!firstName || !lastName)
@@ -41,11 +41,11 @@ const inviteNewUser = async (req, res) => {
     const userAccount = GDBUserAccountModel({
       email,
       isSuperuser: false,
-      associatedOrganizations: associatedOrganizations.map(organizationID => `:organization_${organizationID}`)
-    });
-    associatedOrganizations = await Promise.all(associatedOrganizations.map(organizationId => {
-      return GDBOrganizationModel.findOne({_id: organizationId});
-    }));
+      associatedOrganizations: associatedOrganizations // contains organization URIs
+    }, uri?{uri}:null);
+    associatedOrganizations = await Promise.all(associatedOrganizations.map(
+      organizationURI => GDBOrganizationModel.findOne({_uri: organizationURI})
+    )); // fetch organizations from the databse
     userAccount.person = {givenName: firstName, familyName: lastName, middleName};
     // send email
     const token = sign({

@@ -63,7 +63,6 @@ export default function AddEditOrganization() {
     contactName: '',
     email: '',
     telephone: '',
-    hasIdentifier: '',
     uri: ''
   });
   // const [outcomeForm, setOutcomeForm] = useState([
@@ -113,7 +112,6 @@ export default function AddEditOrganization() {
                 comment: organization.comment || '',
                 contactName: organization.contactName || '',
                 email: organization.email || '',
-                hasIdentifier: organization.hasIdentifier || '',
                 telephone: organization.telephone?
                   `+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}` :
                   '',
@@ -309,25 +307,25 @@ export default function AddEditOrganization() {
           }}
         />
 
-        <GeneralField
-          disabled={!userContext.isSuperuser}
-          key={'hasIdentifier'}
-          label={'ID'}
-          value={form.hasIdentifier}
-          required
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={e => form.hasIdentifier = e.target.value}
-          error={!!errors.hasIdentifier}
-          helperText={errors.hasIdentifier}
-          onBlur={() => {
-            if (form.hasIdentifier === '') {
-              setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));
-            } else {
-              setErrors(errors => ({...errors, hasIdentifier: ''}));
-            }
+        {/*<GeneralField*/}
+        {/*  disabled={!userContext.isSuperuser}*/}
+        {/*  key={'hasIdentifier'}*/}
+        {/*  label={'ID'}*/}
+        {/*  value={form.hasIdentifier}*/}
+        {/*  required*/}
+        {/*  sx={{mt: '16px', minWidth: 350}}*/}
+        {/*  onChange={e => form.hasIdentifier = e.target.value}*/}
+        {/*  error={!!errors.hasIdentifier}*/}
+        {/*  helperText={errors.hasIdentifier}*/}
+        {/*  onBlur={() => {*/}
+        {/*    if (form.hasIdentifier === '') {*/}
+        {/*      setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));*/}
+        {/*    } else {*/}
+        {/*      setErrors(errors => ({...errors, hasIdentifier: ''}));*/}
+        {/*    }*/}
 
-          }}
-        />
+        {/*  }}*/}
+        {/*/>*/}
 
         <GeneralField
           disabled={!userContext.isSuperuser}

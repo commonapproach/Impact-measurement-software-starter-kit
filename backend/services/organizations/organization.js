@@ -29,15 +29,15 @@ async function createOrganization(req, res) {
     throw new Server400Error('Wrong information input');
   if (!form.legalName)
     throw new Server400Error('Legal name is requested');
-  if (!form.hasIdentifier)
-    throw new Server400Error('Organization ID is requested');
+  // if (!form.hasIdentifier)
+  //   throw new Server400Error('Organization ID is requested');
   if (form.organizationNumber){
     form.hasId = GDBOrganizationIdModel({
       hasIdentifier: form.organizationNumber,
     });
   }
   if (form.issuedBy)
-    form.hasId.issuedBy = `:organization_${form.issuedBy}`
+    form.hasId.issuedBy = form.issuedBy
   // handle administrators, editors, reporters, researchers
 
   // firstly replace ids to the actual userAccount object
@@ -71,7 +71,6 @@ async function createOrganization(req, res) {
     comment: form.comment,
     email: form.email,
     contactName: form.contactName,
-    hasIdentifier: form.hasIdentifier,
     telephone: telephone
   }, form.uri?{uri:form.uri}:null);
 
@@ -117,30 +116,30 @@ async function createOrganizationHandler(req, res, next) {
 async function fetchOrganization(req, res) {
   const {uri} = req.params;
   if (!uri)
-    throw new Server400Error('Organization ID is needed');
+    throw new Server400Error('Organization uri is needed');
   const organization = await GDBOrganizationModel.findOne({_uri: uri}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'telephone']});
   if (!organization)
     throw new Server400Error('No such organization');
   const outcomes = organization.hasOutcomes || [];
-  if (outcomes.length > 0) {
-    outcomes.map(outcome => {
-      outcome.theme = outcome.theme.split('_')[1];
-    });
-  }
+  // if (outcomes.length > 0) {
+  //   outcomes.map(outcome => {
+  //     outcome.theme = outcome.theme.split('_')[1];
+  //   });
+  // }
   const indicators = organization.hasIndicators || [];
   organization.organizationNumber = organization.hasId?.hasIdentifier;
-  organization.issuedBy = organization.hasId?.issuedBy?.split('_')[1]
+  organization.issuedBy = organization.hasId?.issuedBy
   if (!organization.researchers)
     organization.researchers = [];
   if (!organization.reporters)
     organization.reporters = [];
   if (!organization.editors)
     organization.editors = [];
-  if (organization.administrator)
-    organization.administrator = organization.administrator.split('_')[1];
-  organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1]);
-  organization.editors = organization.editors.map(editor => editor.split('_')[1]);
-  organization.reporters = organization.reporters.map(reporter => reporter.split('_')[1]);
+  // if (organization.administrator)
+  //   organization.administrator = organization.administrator;
+  // organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1]);
+  // organization.editors = organization.editors.map(editor => editor.split('_')[1]);
+  // organization.reporters = organization.reporters.map(reporter => reporter.split('_')[1]);
   delete organization.hasOutcomes;
   delete organization.hasId;
   delete organization.hasIndicators;
@@ -186,8 +185,8 @@ async function updateOrganizationHandler(req, res, next) {
 }
 
 function cacheUser(userAccount, userAccountDict) {
-  if (!userAccountDict[userAccount._id])
-    userAccountDict[userAccount._id] = userAccount;
+  if (!userAccountDict[userAccount._uri])
+    userAccountDict[userAccount._uri] = userAccount;
 }
 
 function cacheListOfUsers(users, userAccountDict) {
@@ -198,23 +197,25 @@ function cacheListOfUsers(users, userAccountDict) {
 
 async function updateOrganization(req, res) {
 
-  const {id} = req.params;
+  const {uri} = req.params;
   const {form} = req.body;
   const userAccountDict = {};
-  if (!id)
+  if (!uri)
     throw Server400Error('Id is needed');
   if (!form)
     throw Server400Error('Form and outcomeForm are needed');
+  if(!form.administrator)
+    throw Server400Error('Form must contain the administrator');
 
-  const organization = await GDBOrganizationModel.findOne({_id: id},
+  const organization = await GDBOrganizationModel.findOne({_uri: uri},
     {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors', 'telephone']});
 
   if (!organization)
     throw Server400Error('No such organization');
   if (!form.legalName)
     throw Server400Error('Legal name is requested');
-  if (!form.hasIdentifier)
-    throw Server400Error('ID is requested');
+  // if (!form.hasIdentifier)
+  //   throw Server400Error('ID is requested');
 
   // cache all userAccounts in the organization
   if (organization.administrator)
@@ -234,7 +235,7 @@ async function updateOrganization(req, res) {
   organization.comment = form.comment;
   organization.contactName = form.contactName;
   organization.email = form.email;
-  organization.hasIdentifier = form.hasIdentifier;
+  // organization.hasIdentifier = form.hasIdentifier;
   if (form.areaCode && form.countryCode && form.phoneNumber) {
     organization.telephone.areaCode = form.areaCode;
     organization.telephone.countryCode = form.countryCode;
@@ -246,7 +247,7 @@ async function updateOrganization(req, res) {
   if (userAccountDict[form.administrator]) {
     form.administrator = userAccountDict[form.administrator];
   } else {
-    form.administrator = await GDBUserAccountModel.findOne({_id: form.administrator});
+    form.administrator = await GDBUserAccountModel.findOne({_uri: form.administrator});
     cacheUser(form.administrator, userAccountDict);
   }
 
@@ -254,7 +255,7 @@ async function updateOrganization(req, res) {
     throw Server400Error('Invalid administrator');
 
   // update organizationAdmin if needed
-  if (organization.administrator?._id !== form.administrator._id) {
+  if (organization.administrator?._uri !== form.administrator._uri) {
     if (!organization.administrator) {
       // then there is no organization administrator yet, add it
       organization.administrator = form.administrator;
@@ -283,9 +284,15 @@ async function updateOrganization(req, res) {
     updateRoles(organization, form, 'researchers', 'researcherOfs', userAccountDict),
     updateRoles(organization, form, 'editors', 'editorOfs', userAccountDict)
   ]);
-  organization.hasId.hasIdentifier = form.organizationNumber;
-  if(form.issuedBy)
-    organization.hasId.issuedBy = `:organization_${form.issuedBy}`
+  if (form.organizationNumber && form.issuedBy) {
+    if (!organization.hasId)
+      organization.hasId = {}
+    organization.hasId.issuedBy = form.issuedBy;
+    organization.hasId.hasIdentifier = form.organizationNumber;
+  }
+  // organization.hasId.hasIdentifier = form.organizationNumber;
+  // if(form.issuedBy)
+  //   organization.hasId.issuedBy = `:organization_${form.issuedBy}`
   // if (organization.hasId.hasIdentifier !== form.ID) {
     // drop previous one
     // await GDBOrganizationIdModel.findOneAndDelete({_id: organization.hasId._id});
@@ -310,17 +317,17 @@ async function updateRoles(organization, form, organizationProperty, userAccount
   if (!organization[organizationProperty])
     organization[organizationProperty] = [];
   await Promise.all(organization[organizationProperty].map(userAccount => {
-    const index = userAccount[userAccountProperty].findIndex(org => org.split('_')[1] === organization._id);
+    const index = userAccount[userAccountProperty].findIndex(org => org === organization._uri);
     userAccount[userAccountProperty].splice(index, 1);
     return userAccount.save();
   }));
   // add the organization to every new reporters' property
   if (form[organizationProperty].length > 0) {
-    form[organizationProperty] = await Promise.all(form[organizationProperty].map(userAccountId => {
-        if (userAccountDict[userAccountId]) {
-          return userAccountDict[userAccountId];
+    form[organizationProperty] = await Promise.all(form[organizationProperty].map(userAccountUri => {
+        if (userAccountDict[userAccountUri]) {
+          return userAccountDict[userAccountUri];
         } else {
-          return GDBUserAccountModel.findOne({_id: userAccountId});
+          return GDBUserAccountModel.findOne({_uri: userAccountUri});
         }
       }
     ));
@@ -468,7 +475,6 @@ async function superuserDeleteOrganization(req, res, next) {
 }
 
 module.exports = {
-  adminUpdateOrganization,
   updateOrganizationHandler,
   fetchOrganizationHandler,
   createOrganizationHandler

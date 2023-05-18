@@ -14,7 +14,7 @@ const GDBOrganizationIdModel = createGraphDBModel({
 const GDBOrganizationModel = createGraphDBModel({
   comment: {type: String, internalKey: 'rdfs:comment'},
   hasUsers: {type: [GDBUserAccountModel], internalKey: ':hasUser'},
-  administrators: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},
+  administrator: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},
   reporters: {type: [GDBUserAccountModel], internalKey: ':hasReporter'},
   editors: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},
   researchers: {type: [GDBUserAccountModel], internalKey: ':hasResearcher'},
@@ -25,7 +25,6 @@ const GDBOrganizationModel = createGraphDBModel({
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
   email: {type: String, internalKey: ':hasEmail'},
-  hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'} // contains the identifier
 }, {
   rdfTypes: ['cids:Organization'], name: 'organization'
 });

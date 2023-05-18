@@ -170,13 +170,12 @@ export default function EditProfile() {
 
       setLoadingButton(true);
 
-      const {success, messageList} = (await updateUser(uri, userForm));
+      const {success, messageList} = await updateUser(uri, userForm);
 
       if (!success && messageList) {
         setLoadingButton(false);
         setDialogSubmit(false);
         setMessageList(messageList);
-
       }
 
       const profileSuccess = (await updateProfile(uri, updateForm)).success;
@@ -184,7 +183,7 @@ export default function EditProfile() {
 
         setLoadingButton(false);
         setDialogSubmit(false);
-        navigate('/users');
+        navigate(-1);
         enqueueSnackbar('Success', {variant: 'success'});
       }
     } catch (e) {

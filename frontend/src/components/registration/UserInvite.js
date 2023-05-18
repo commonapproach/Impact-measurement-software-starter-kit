@@ -71,7 +71,7 @@ export default function UserInvite() {
       errors.lastName = 'This field is required';
     if (!state.form.associatedOrganizations.length)
       errors.associatedOrganizations = 'This field is required';
-    if (!isValidURL(state.form.uri))
+    if (state.form.uri && !isValidURL(state.form.uri))
       errors.uri = 'Not a valid URI'
 
 

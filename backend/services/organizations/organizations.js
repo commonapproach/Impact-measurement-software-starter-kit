@@ -14,7 +14,7 @@ const fetchOrganizationsHandler = async (req, res, next) => {
 };
 
 const fetchOrganizations = async (req, res) => {
-  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   // let organizations = [];
 
   // if the user is the superuser, return all organizations to him
@@ -22,7 +22,7 @@ const fetchOrganizations = async (req, res) => {
     const organizations = await GDBOrganizationModel.find({}, {populates: ['administrator.person']});
     organizations.map(organization => {
       if(organization.administrator) {
-        organization.administrator = `${organization.administrator._id}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
+        organization.administrator = `${organization.administrator._uri}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
       } else {
         // organization may doesn't have admin
         organization.administrator = ''
@@ -35,9 +35,9 @@ const fetchOrganizations = async (req, res) => {
   const organizations = await allReachableOrganizations(userAccount);
   organizations.map(organization => {
     // if the organization is administrated by the user, set it as editable
-    if(organization.administrator._id === userAccount._id)
+    if(organization.administrator._uri === userAccount._uri)
       organization.editable = true;
-    organization.administrator = `${organization.administrator._id}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
+    organization.administrator = `${organization.administrator._uri}: ${organization.administrator.person.givenName} ${organization.administrator.person.familyName}`
   })
 
   return res.status(200).json({success: true, organizations: organizations});

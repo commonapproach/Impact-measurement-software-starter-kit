@@ -13,7 +13,7 @@ const GDBOrganizationIdModel = createGraphDBModel({
 
 const GDBOrganizationModel = createGraphDBModel({
   comment: {type: String, internalKey: 'rdfs:comment'},
-  hasUser: {type: [GDBUserAccountModel], internalKey: ':hasUser'},
+  hasUsers: {type: [GDBUserAccountModel], internalKey: ':hasUser'},
   administrators: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},
   reporters: {type: [GDBUserAccountModel], internalKey: ':hasReporter'},
   editors: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},

@@ -14,6 +14,7 @@ import SelectField from "../shared/fields/SelectField";
 import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -31,8 +32,8 @@ export default function AddEditGroup() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id} = useParams();
-  const mode = id ? 'edit' : 'new';
+  const {uri} = useParams();
+  const mode = uri ? 'edit' : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -49,6 +50,7 @@ export default function AddEditGroup() {
     administrator: '',
     organizations: [],
     comment: '',
+    uri: '',
   });
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState({
@@ -65,7 +67,7 @@ export default function AddEditGroup() {
       fetchOrganizations()
         .then(({organizations}) => {
         organizations.map(organization => {
-          options.organizations[organization._id] = organization.legalName;
+          options.organizations[organization._uri] = organization.legalName;
         })
       }).catch(e => {
         if (e.json)
@@ -76,7 +78,7 @@ export default function AddEditGroup() {
       }),
       fetchUsers().then(({data}) => {
         data.map((user) => {
-          options.administrators[user._id] = `${user.person.familyName} ${user.person.givenName} ID: ${user._id}`;
+          options.administrators[user._uri] = `${user.person.familyName} ${user.person.givenName} URI: ${user._uri}`;
         })
       }).catch(e => {
         if (e.json)
@@ -86,15 +88,16 @@ export default function AddEditGroup() {
         enqueueSnackbar(e.json?.message || "Error occurs when fetching users", {variant: 'error'});
       }),
     ]).then(() => {
-      if (mode === 'edit' && id) {
-        fetchGroup(id,).then(res => {
+      if (mode === 'edit' && uri) {
+        fetchGroup(encodeURIComponent(uri)).then(res => {
           if (res.success) {
             const group = res.group;
             setForm({
               label: group.label || '',
               administrator: group.administrator || '',
               comment: group.comment || '',
-              organizations: group.organizations || []
+              organizations: group.organizations || [],
+              uri: group._uri || ''
             });
             setLoading(false);
           }
@@ -105,9 +108,9 @@ export default function AddEditGroup() {
           setLoading(false);
           enqueueSnackbar(e.json?.message || "Error occurs when fetching group", {variant: 'error'});
         });
-      } else if (mode === 'edit' && !id) {
+      } else if (mode === 'edit' && !uri) {
         navigate('/groups');
-        enqueueSnackbar("No ID provided", {variant: 'error'});
+        enqueueSnackbar("No URI provided", {variant: 'error'});
       } else if (mode === 'new') {
         setLoading(false);
       }
@@ -147,7 +150,7 @@ export default function AddEditGroup() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateGroup(id, form).then((res) => {
+      updateGroup(encodeURIComponent(uri), form).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/groups');
@@ -201,7 +204,23 @@ export default function AddEditGroup() {
             } else {
               setErrors(errors => ({...errors, label: ''}));
             }
-
+          }}
+        />
+        <GeneralField
+          key={'uri'}
+          label={'URI'}
+          value={form.uri}
+          disabled={mode !== 'new'}
+          sx={{mt: '16px', minWidth: 350}}
+          onChange={e => form.uri = e.target.value}
+          error={!!errors.uri}
+          helperText={errors.uri}
+          onBlur={() => {
+            if (!isValidURL(form.uri)) {
+              setErrors(errors => ({...errors, uri: 'Invalid URI'}));
+            } else {
+              setErrors(errors => ({...errors, uri: ''}));
+            }
           }}
         />
           <SelectField

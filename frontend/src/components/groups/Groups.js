@@ -105,9 +105,9 @@ export default function Groups() {
     // },
     {
       label: ' ',
-      body: ({_id}) =>
-        <DropdownMenu urlPrefix={'groups'} objectId={_id} hideDeleteOption
-                      hideViewOption handleDelete={() => showDeleteDialog(_id)}/>
+      body: ({_uri}) =>
+        <DropdownMenu urlPrefix={'groups'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+                      hideViewOption handleDelete={() => showDeleteDialog(encodeURIComponent(_uri))}/>
     }
   ];
 

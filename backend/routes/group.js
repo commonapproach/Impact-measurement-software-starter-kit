@@ -7,8 +7,8 @@ const {
 const router = express.Router({mergeParams: true});
 
 router.post('/', createGroupHandler);
-router.get('/:id/', fetchGroupHandler);
-router.put('/:id/', updateGroupHandler);
-router.delete('/:id', superuserDeleteGroup);
+router.get('/:uri/', fetchGroupHandler);
+router.put('/:uri/', updateGroupHandler);
+router.delete('/:uri', superuserDeleteGroup);
 
 module.exports = router;

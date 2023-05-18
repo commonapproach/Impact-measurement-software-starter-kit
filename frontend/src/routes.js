@@ -62,7 +62,7 @@ const routes = (
     {/*Groups*/}
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
     <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>
-    <Route path="/groups/:id/edit" element={<PrivateRoute element={AddEditGroup}/>}/>
+    <Route path="/groups/:uri/edit" element={<PrivateRoute element={AddEditGroup}/>}/>
     {/*profile*/}
     <Route path="/profile/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
     <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>

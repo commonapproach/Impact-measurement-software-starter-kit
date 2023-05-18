@@ -235,7 +235,6 @@ const fileUploading = async (req, res, next) => {
       "forDomain": {"@type": "http://ontology.eil.utoronto.ca/cids/cids#Domain"},
       "dateCreated": {"type": "Date"}
     };
-    const a = await frame(expandedObjects, frm)
     const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
     const objectDict = {};
     const outcomeDict = {};

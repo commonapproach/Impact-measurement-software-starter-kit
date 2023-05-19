@@ -216,7 +216,7 @@ export default function AddEditGroup() {
           error={!!errors.uri}
           helperText={errors.uri}
           onBlur={() => {
-            if (!isValidURL(form.uri)) {
+            if (form.uri && !isValidURL(form.uri)) {
               setErrors(errors => ({...errors, uri: 'Invalid URI'}));
             } else {
               setErrors(errors => ({...errors, uri: ''}));

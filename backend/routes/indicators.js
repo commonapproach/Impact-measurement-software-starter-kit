@@ -6,7 +6,7 @@ const {fetchIndicatorsHandler} = require("../services/indicators/indicator");
 const router = express.Router();
 
 router.get('/', fetchIndicatorsHandler);
-router.get('/:organizationId', fetchIndicatorsHandler);
+router.get('/:organizationUri', fetchIndicatorsHandler);
 
 
 

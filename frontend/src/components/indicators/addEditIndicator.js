@@ -27,8 +27,8 @@ export default function AddEditIndicator() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id, orgId, operationMode} = useParams();
-  const mode = id ? operationMode : 'new';
+  const {uri, orgUri, operationMode} = useParams();
+  const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -45,6 +45,7 @@ export default function AddEditIndicator() {
     hasIdentifier: '',
     description: '',
     unitOfMeasure: '',
+    uri: '',
     organizations: []
   });
   const [loading, setLoading] = useState(true);

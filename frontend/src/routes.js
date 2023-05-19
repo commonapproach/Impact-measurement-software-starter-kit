@@ -64,20 +64,20 @@ const routes = (
     <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>
     <Route path="/groups/:uri/edit" element={<PrivateRoute element={AddEditGroup}/>}/>
     {/*profile*/}
-    <Route path="/profile/:id/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
-    <Route path="/profile/:id" element={<PrivateRoute element={UserProfile}/>}/>
-    <Route path="/profile/reset-password/:id" element={<PrivateRoute element={ResetPassword}/>}/>
+    <Route path="/profile/:uri/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
+    <Route path="/profile/:uri" element={<PrivateRoute element={UserProfile}/>}/>
+    <Route path="/profile/reset-password/:uri" element={<PrivateRoute element={ResetPassword}/>}/>
     <Route path="/profile/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
     {/*theme*/}
     <Route path="/themes" element={<PrivateRoute element={Themes}/>}/>
     <Route path="/themes/new" element={<PrivateRoute element={AddEditTheme}/>}/>
-    <Route path="/themes/:id/:operationMode" element={<PrivateRoute element={AddEditTheme}/>}/>
+    <Route path="/themes/:uri/:operationMode" element={<PrivateRoute element={AddEditTheme}/>}/>
     {/*indicators*/}
     <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
-    <Route path="/indicators/:id" element={<PrivateRoute element={Indicators}/>}/>
-    <Route path="/indicator/:orgId/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path="/indicators/:uri" element={<PrivateRoute element={Indicators}/>}/>
+    <Route path="/indicator/:orgUri/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
     <Route path="/indicator/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
-    <Route path="/indicator/:id/:operationMode" element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path="/indicator/:uri/:operationMode" element={<PrivateRoute element={AddEditIndicator}/>}/>
     {/*outcomes*/}
     <Route path="/organization-outcomes" element={<PrivateRoute element={Organization_outcomes}/>}/>
     <Route path="/outcomes/:id" element={<PrivateRoute element={Outcomes}/>}/>

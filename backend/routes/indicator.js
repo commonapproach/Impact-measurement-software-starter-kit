@@ -5,9 +5,9 @@ const {fetchIndicatorHandler, createIndicatorHandler, updateIndicatorHandler} = 
 
 const router = express.Router();
 
-router.get('/:id', fetchIndicatorHandler);
+router.get('/:uri', fetchIndicatorHandler);
 router.post('/', createIndicatorHandler)
-router.put('/:id', updateIndicatorHandler)
+router.put('/:uri', updateIndicatorHandler)
 
 
 module.exports = router;

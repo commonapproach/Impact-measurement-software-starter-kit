@@ -62,8 +62,8 @@ export default function Organization_indicators() {
   const columns = [
     {
       label: 'Legal Name',
-      body: ({_id, legalName}) => {
-        return <Link color to={`/indicators/${_id}`}>
+      body: ({_uri, legalName}) => {
+        return <Link color to={`/indicators/${encodeURIComponent(_uri)}`}>
           {legalName}
         </Link>;
       },

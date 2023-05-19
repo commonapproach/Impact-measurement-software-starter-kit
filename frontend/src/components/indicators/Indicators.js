@@ -12,7 +12,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 export default function Indicators() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
-  const {id} = useParams();
+  const {uri} = useParams();
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
@@ -25,7 +25,7 @@ export default function Indicators() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicators(id).then(res => {
+    fetchIndicators(encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.indicators}));
     }).catch(e => {
@@ -65,10 +65,10 @@ export default function Indicators() {
   const columns = [
     {
       label: 'Name',
-      body: ({_id, name, editable}) => {
+      body: ({_uri, name, editable}) => {
         console.log(editable)
         return editable?
-          <Link color to={`/indicator/${_id}/view`}>
+          <Link color to={`/indicator/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>:
           name
@@ -84,10 +84,10 @@ export default function Indicators() {
 
     {
       label: ' ',
-      body: ({_id}) =>
-        <DropdownMenu urlPrefix={'indicator'} objectId={_id} hideDeleteOption
+      body: ({_uri}) =>
+        <DropdownMenu urlPrefix={'indicator'} objectUri={_uri} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser && !userContext.editorOf.length}
-                      handleDelete={() => showDeleteDialog(_id)}/>
+                      handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
@@ -100,11 +100,11 @@ export default function Indicators() {
         title={"Indicators"}
         data={state.data}
         columns={columns}
-        idField="id"
+        uriField="uri"
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
-            onClick={() => navigate(`/indicator/${id}/new`)}
+            onClick={() => navigate(`/indicator/${encodeURIComponent(uri)}/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Indicator"

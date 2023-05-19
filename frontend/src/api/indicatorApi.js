@@ -1,17 +1,17 @@
 import {getJson, postJson, putJson} from "./index";
 
-export async function fetchIndicators(organizationId) {
-  return getJson('/api/indicators/' + organizationId + '/');
+export async function fetchIndicators(organizationUri) {
+  return getJson('/api/indicators/' + organizationUri + '/');
 }
 
-export async function fetchIndicator(id) {
-  return getJson('/api/indicator/' + id);
+export async function fetchIndicator(uri) {
+  return getJson('/api/indicator/' + uri);
 }
 
 export async function createIndicator(params) {
   return postJson(`/api/indicator/`, params);
 }
 
-export async function updateIndicator(params, id) {
-  return putJson(`/api/indicator/${id}`, params);
+export async function updateIndicator(params, uri) {
+  return putJson(`/api/indicator/${uri}`, params);
 }

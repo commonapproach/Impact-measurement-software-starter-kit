@@ -21,7 +21,7 @@ function addObjectToList(list, object) {
   } else {
     // the object is a Graphdb object
     const result = list.filter(previousObject => {
-      return previousObject._id === object._id;
+      return previousObject._uri === object._uri;
     });
     if (result.length === 0) {
       list.push(object);
@@ -219,7 +219,7 @@ async function allReachableOrganizations(userAccount) {
   if (userAccount.groupAdminOfs?.length) {
     // add all organization is his group in to the list
     // fetch all groups belongs to him
-    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}}, {populates: ['organizations.administrator.person']});
+    const groups = await GDBGroupModel.find({administrator: {_uri: userAccount._uri}}, {populates: ['organizations.administrator.person']});
     groups.map(group => {
       group.organizations.map(organization => {
         // fetch all reachable organizations and add them in

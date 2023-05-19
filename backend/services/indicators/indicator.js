@@ -42,24 +42,24 @@ const fetchIndicators = async (req, res) => {
     });
     // replace indicatorURIs to actual indicator objects
     const indicators = await Promise.all(indicatorURIs.map(indicatorURI => {
-      return GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]}, {populates: ['unitOfMeasure']});
+      return GDBIndicatorModel.findOne({_uri: indicatorURI}, {populates: ['unitOfMeasure']});
     }));
     // for all indicators, if its id in editableIndicatorIDs, then it is editable
     indicators.map(indicator => {
-      if(editableIndicatorIDs.includes(indicator._id))
+      if(editableIndicatorURIs.includes(indicator._uri))
         indicator.editable = true;
     })
     return res.status(200).json({success: true, indicators});
   } else {
-    // the organizationId is given, return all indicators belongs to the organization
-    const organization = await GDBOrganizationModel.findOne({_id: organizationId},
+    // the organizationUri is given, return all indicators belongs to the organization
+    const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
       {populates: ['hasIndicators.unitOfMeasure']});
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.hasIndicators)
       return res.status(200).json({success: true, indicators: []});
     let editable;
-    if(userAccount.isSuperuser || organization.editors.includes(`:userAccount_${userAccount._id}`)) {
+    if(userAccount.isSuperuser || organization.editors.includes(userAccount._uri)) {
       editable = true
       organization.hasIndicators.map(indicator => {
         indicator.editable = true;
@@ -94,18 +94,18 @@ const fetchIndicatorHandler = async (req, res, next) => {
 };
 
 const fetchIndicator = async (req, res) => {
-  const {id} = req.params;
-  if (!id)
+  const {uri} = req.params;
+  if (!uri)
     throw new Server400Error('Id is not given');
-  const indicator = await GDBIndicatorModel.findOne({_id: id}, {populates: ['unitOfMeasure']});
+  const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure']});
   indicator.unitOfMeasure = indicator.unitOfMeasure.label;
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(orgURI => {
-    return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
+    return GDBOrganizationModel.findOne({_uri: orgURI});
   }));
   indicator.organizations = indicator.forOrganizations.map(organization => {
-    return organization._id;
+    return organization._uri;
   });
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
@@ -142,14 +142,13 @@ const updateIndicator = async (req, res) => {
   const {id} = req.params;
   if (!id)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.unitOfMeasure || !form.hasIdentifier)
+  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.unitOfMeasure)
     throw new Server400Error('Invalid input');
   const indicator = await GDBIndicatorModel.findOne({_id: id}, {populates: ['unitOfMeasure']});
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.name = form.name;
   indicator.description = form.description;
-  indicator.hasIdentifier = form.hasIdentifier;
   indicator.unitOfMeasure.label = form.unitOfMeasure
   const organizationDict = {};
 
@@ -209,7 +208,7 @@ const createIndicator = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
-  if (!form || !form.organizations || !form.name || !form.description || !form.unitOfMeasure || !form.hasIdentifier)
+  if (!form || !form.organizations || !form.name || !form.description || !form.unitOfMeasure)
     throw new Server400Error('Invalid input');
   form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
     GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']})

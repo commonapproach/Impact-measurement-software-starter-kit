@@ -56,8 +56,8 @@ export default function IndicatorField({defaultValue, required, onChange, label,
         const options ={};
         organizations.map(organization => {
           // felt out the organization this user serves as the editor
-          if(userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
-            options[organization._id] = organization.legalName;
+          if(userContext.isSuperuser || organization.editors?.includes(userContext.uri))
+            options[organization._uri] = organization.legalName;
         })
         setOptions(options)
       }
@@ -104,28 +104,28 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                sx={{mt: 2}}
-                fullWidth
-                label="Identifier"
-                type="text"
-                defaultValue={state.hasIdentifier}
-                onChange={handleChange('hasIdentifier')}
-                disabled={disabled}
-                required={required}
-                error={!!errors.hasIdentifier}
-                helperText={errors.hasIdentifier}
-                onBlur={() => {
-                  if (!state.hasIdentifier) {
-                    setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));
-                  }else {
-                    setErrors(errors => ({...errors, hasIdentifier: null}));
-                  }
-                }
-                }
-              />
-            </Grid>
+            {/*<Grid item xs={12}>*/}
+            {/*  <TextField*/}
+            {/*    sx={{mt: 2}}*/}
+            {/*    fullWidth*/}
+            {/*    label="Identifier"*/}
+            {/*    type="text"*/}
+            {/*    defaultValue={state.hasIdentifier}*/}
+            {/*    onChange={handleChange('hasIdentifier')}*/}
+            {/*    disabled={disabled}*/}
+            {/*    required={required}*/}
+            {/*    error={!!errors.hasIdentifier}*/}
+            {/*    helperText={errors.hasIdentifier}*/}
+            {/*    onBlur={() => {*/}
+            {/*      if (!state.hasIdentifier) {*/}
+            {/*        setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));*/}
+            {/*      }else {*/}
+            {/*        setErrors(errors => ({...errors, hasIdentifier: null}));*/}
+            {/*      }*/}
+            {/*    }*/}
+            {/*    }*/}
+            {/*  />*/}
+            {/*</Grid>*/}
 
             <Grid item xs={6}>
               <Dropdown

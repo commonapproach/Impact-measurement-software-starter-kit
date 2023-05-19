@@ -42,7 +42,7 @@ export default function AddEditIndicator() {
 
   const [form, setForm] = useState({
     name: '',
-    hasIdentifier: '',
+    // hasIdentifier: '',
     description: '',
     unitOfMeasure: '',
     uri: '',
@@ -51,8 +51,8 @@ export default function AddEditIndicator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if ((mode === 'edit' && id) || (mode === 'view' && id)) {
-      fetchIndicator(id).then(({success, indicator}) => {
+    if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
+      fetchIndicator(encodeURIComponent(uri)).then(({success, indicator}) => {
         if (success) {
           setForm(indicator);
           setLoading(false);
@@ -64,22 +64,22 @@ export default function AddEditIndicator() {
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if (mode === 'edit' && (!id || !orgId)) {
+    } else if (mode === 'edit' && (!uri || !orgUri)) {
       navigate('/organization-indicators');
       enqueueSnackbar("No ID or orgId provided", {variant: 'error'});
-    } else if (mode === 'new' && !orgId) {
+    } else if (mode === 'new' && !orgUri) {
       setLoading(false);
       // navigate('/organization-indicators');
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    } else if (mode === 'new' && orgId) {
-      setForm(form => ({...form, organizations: [orgId]}));
+    } else if (mode === 'new' && orgUri) {
+      setForm(form => ({...form, organizations: [orgUri]}));
       setLoading(false);
     } else {
       navigate('/organization-indicators');
       enqueueSnackbar('Wrong auth', {variant: 'error'});
     }
 
-  }, [mode, id]);
+  }, [mode, uri]);
 
   const handleSubmit = () => {
     if (validate()) {
@@ -105,8 +105,8 @@ export default function AddEditIndicator() {
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
-    } else if (mode === 'edit' && id) {
-      updateIndicator({form}, id).then((res) => {
+    } else if (mode === 'edit' && uri) {
+      updateIndicator({form}, encodeURIComponent(uri)).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/organization-indicators');
@@ -133,8 +133,8 @@ export default function AddEditIndicator() {
       error.description = 'The field cannot be empty';
     if (form.organizations.length === 0)
       error.organizations = 'The field cannot be empty';
-    if (!form.hasIdentifier)
-      error.hasIdentifier = 'The field cannot be empty';
+    // if (!form.hasIdentifier)
+    //   error.hasIdentifier = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -148,7 +148,7 @@ export default function AddEditIndicator() {
         <Typography variant={'h4'}> Indicator </Typography>
         <IndicatorField
           disabled={mode === 'view'}
-          disabledOrganization={!!orgId}
+          disabledOrganization={!!orgUri}
           defaultValue={form}
           required
           onChange={(state) => {

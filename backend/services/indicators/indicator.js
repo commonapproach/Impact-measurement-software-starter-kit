@@ -210,8 +210,8 @@ const createIndicator = async (req, res) => {
   const {form} = req.body;
   if (!form || !form.organizations || !form.name || !form.description || !form.unitOfMeasure)
     throw new Server400Error('Invalid input');
-  form.forOrganizations = await Promise.all(form.organizations.map(organizationId =>
-    GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasIndicators']})
+  form.forOrganizations = await Promise.all(form.organizations.map(organizationUri =>
+    GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasIndicators']})
   ));
   // for each organization, does it contain any indicator with same name?
   let duplicate = false
@@ -232,7 +232,13 @@ const createIndicator = async (req, res) => {
   form.unitOfMeasure = GDBUnitOfMeasure({
     label: form.unitOfMeasure
   })
-  const indicator = GDBIndicatorModel(form);
+  const indicator = GDBIndicatorModel({
+    name: form.name,
+    description: form.description,
+    forOrganizations: form.forOrganizations,
+    unitOfMeasure: form.unitOfMeasure
+  });
+
   await indicator.save();
   // add the indicator to the organizations
   await Promise.all(indicator.forOrganizations.map(organization => {
@@ -241,12 +247,12 @@ const createIndicator = async (req, res) => {
     organization.hasIndicators.push(indicator);
     return organization.save();
   }));
-  const ownership = GDBOwnershipModel({
-    resource: indicator,
-    owner: userAccount,
-    dateOfCreated: new Date(),
-  });
-  await ownership.save();
+  // const ownership = GDBOwnershipModel({
+  //   resource: indicator,
+  //   owner: userAccount,
+  //   dateOfCreated: new Date(),
+  // });
+  // await ownership.save();
   return res.status(200).json({success: true});
 };
 

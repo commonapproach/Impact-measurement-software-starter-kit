@@ -66,7 +66,7 @@ export default function Indicators() {
     {
       label: 'Name',
       body: ({_uri, name, editable}) => {
-        console.log(editable)
+        // console.log(editable)
         return editable?
           <Link color to={`/indicator/${encodeURIComponent(_uri)}/view`}>
           {name}
@@ -85,7 +85,7 @@ export default function Indicators() {
     {
       label: ' ',
       body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'indicator'} objectUri={_uri} hideDeleteOption
+        <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
                       hideEditOption={!userContext.isSuperuser && !userContext.editorOf.length}
                       handleDelete={() => showDeleteDialog(_uri)}/>
     }

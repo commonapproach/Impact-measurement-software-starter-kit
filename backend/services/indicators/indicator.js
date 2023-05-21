@@ -127,8 +127,8 @@ const createIndicatorHandler = async (req, res, next) => {
 };
 
 function cacheOrganization(organization, organizationDict) {
-  if (!organizationDict[organization._id])
-    organizationDict[organization._id] = organization;
+  if (!organizationDict[organization._uri])
+    organizationDict[organization._uri] = organization;
 }
 
 function cacheListOfOrganizations(organizations, organizationDict) {
@@ -139,12 +139,12 @@ function cacheListOfOrganizations(organizations, organizationDict) {
 
 const updateIndicator = async (req, res) => {
   const {form} = req.body;
-  const {id} = req.params;
-  if (!id)
-    throw new Server400Error('Id is needed');
+  const {uri} = req.params;
+  if (!uri)
+    throw new Server400Error('Uri is needed');
   if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.unitOfMeasure)
     throw new Server400Error('Invalid input');
-  const indicator = await GDBIndicatorModel.findOne({_id: id}, {populates: ['unitOfMeasure']});
+  const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure']});
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.name = form.name;
@@ -155,17 +155,17 @@ const updateIndicator = async (req, res) => {
 
   // fetch indicator.forOrganizations from database
   indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(organizationURI =>
-    GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
+    GDBOrganizationModel.findOne({_uri: organizationURI})
   ));
   // cache indicator.forOrganizations into dict
   cacheListOfOrganizations(indicator.forOrganizations, organizationDict);
   // fetch form.organizations from database
-  form.organizations = await Promise.all(form.organizations.map(organizationId => {
+  form.organizations = await Promise.all(form.organizations.map(organizationUri => {
       // if the organization already in the dict, simply get from dict
-      if (organizationDict[organizationId])
-        return organizationDict[organizationId];
+      if (organizationDict[organizationUri])
+        return organizationDict[organizationUri];
       // otherwise, fetch
-      return GDBOrganizationModel.findOne({_id: organizationId});
+      return GDBOrganizationModel.findOne({_uri: organizationUri});
     }
   ));
   // cache organizations which is not in dict
@@ -174,7 +174,7 @@ const updateIndicator = async (req, res) => {
 
   // remove the indicator from every organizations in indicator.forOrganizations
   await Promise.all(indicator.forOrganizations.map(organization => {
-    const index = organization.hasIndicators.findIndex(indicator => indicator._id === id);
+    const index = organization.hasIndicators.findIndex(indicator => indicator._uri === uri);
     organization.hasIndicators.splice(index, 1);
     return organization.save();
   }));

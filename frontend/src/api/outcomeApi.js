@@ -1,17 +1,17 @@
 import {getJson, postJson, putJson} from "./index";
 
-export async function fetchOutcomes(organizationId,) {
-  return getJson('/api/outcomes/' + organizationId + '/');
+export async function fetchOutcomes(organizationUri) {
+  return getJson('/api/outcomes/' + organizationUri + '/');
 }
 
-export async function fetchOutcome(id) {
-  return getJson('/api/outcome/' + id);
+export async function fetchOutcome(uri) {
+  return getJson('/api/outcome/' + uri);
 }
 
 export async function createOutcome(params) {
   return postJson(`/api/outcome/`, params);
 }
 
-export async function updateOutcome(params, id) {
-  return putJson(`/api/outcome/${id}`, params);
+export async function updateOutcome(params, uri) {
+  return putJson(`/api/outcome/${uri}`, params);
 }

@@ -9,6 +9,7 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
 import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -26,8 +27,9 @@ export default function AddEditOutcome() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id, orgId, operationMode} = useParams();
-  const mode = id? operationMode : 'new';
+  const {uri, orgUri
+    , operationMode} = useParams();
+  const mode = uri? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -44,14 +46,16 @@ export default function AddEditOutcome() {
     comment: '',
     organization: null,
     indicators:[],
-    identifier: ''
+    uri: ''
+    // identifier: ''
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if((mode === 'edit' && id) || (mode === 'view' && id)){
-      fetchOutcome(id).then(({success, outcome}) => {
+    if((mode === 'edit' && uri) || (mode === 'view' && uri)){
+      fetchOutcome(encodeURIComponent(uri)).then(({success, outcome}) => {
         if(success){
+          outcome.uri = outcome._uri;
           setForm(outcome);
           setLoading(false)
         }
@@ -61,22 +65,22 @@ export default function AddEditOutcome() {
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if(mode === 'edit' && (!id || !orgId) ) {
+    } else if(mode === 'edit' && (!uri || !orgUri) ) {
       navigate(-1);
-      enqueueSnackbar("No ID or orgId provided", {variant: 'error'});
-    } else if (mode === 'new' && !orgId){
+      enqueueSnackbar("No URI or orgUri provided", {variant: 'error'});
+    } else if (mode === 'new' && !orgUri){
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new' && orgId) {
-      setForm(form => ({...form, organizations: [orgId]}))
+    }else if (mode === 'new' && orgUri) {
+      setForm(form => ({...form, organizations: [orgUri]}))
       setLoading(false);
     } else {
       navigate(-1);
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }
 
-  }, [mode, id]);
+  }, [mode, uri]);
 
   const handleSubmit = () => {
     if (validate()) {
@@ -102,8 +106,8 @@ export default function AddEditOutcome() {
         enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
-    } else if (mode === 'edit' && id) {
-      updateOutcome({form}, id).then((res) => {
+    } else if (mode === 'edit' && uri) {
+      updateOutcome({form}, uri).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -130,8 +134,10 @@ export default function AddEditOutcome() {
       error.description = 'The field cannot be empty'
     if(!form.organization)
       error.organization = 'The field cannot be empty'
-    if(!form.identifier)
-      error.identifier = 'The field cannot be empty'
+    if(form.uri && !isValidURL(form.uri))
+      error.uri = 'Not a valid URI';
+    // if(!form.identifier)
+    //   error.identifier = 'The field cannot be empty'
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -145,7 +151,8 @@ export default function AddEditOutcome() {
         <Typography variant={'h4'}> Outcome </Typography>
         <OutcomeField
           disabled={mode === 'view'}
-          disabledOrganization={!!orgId}
+          disabledOrganization={!!orgUri}
+          disableURI={mode !== 'new'}
           defaultValue={form}
           required
           onChange={(state) => {

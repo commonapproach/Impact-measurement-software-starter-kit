@@ -11,12 +11,12 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 export default function Outcomes() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
-  const {id} = useParams();
+  const {uri} = useParams();
 
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
     editable: false,
@@ -24,7 +24,7 @@ export default function Outcomes() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOutcomes(id).then(res => {
+    fetchOutcomes(encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.outcomes, editable: res.editable}));
     }).catch(e => {
@@ -65,8 +65,8 @@ export default function Outcomes() {
   const columns = [
     {
       label: 'Name',
-      body: ({_id, name, editable}) => {
-        return editable? <Link color to={`/outcome/${_id}/view`}>
+      body: ({_uri, name, editable}) => {
+        return editable? <Link color to={`/outcome/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>:name
       },
@@ -97,9 +97,9 @@ export default function Outcomes() {
 
     {
       label: ' ',
-      body: ({_id, editable}) =>
-        <DropdownMenu urlPrefix={'outcome'} objectId={_id} hideEditOption={!editable} hideDeleteOption
-                      handleDelete={() => showDeleteDialog(_id)}/>
+      body: ({_uri, editable}) =>
+        <DropdownMenu urlPrefix={'outcome'} objectUri={encodeURIComponent(_uri)} hideEditOption={!editable} hideDeleteOption
+                      handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
@@ -112,11 +112,11 @@ export default function Outcomes() {
         title={"Outcomes"}
         data={state.data}
         columns={columns}
-        idField="id"
+        UriField="uri"
         customToolbar={
           <Chip
             disabled={!state.editable}
-            onClick={() => navigate(`/outcome/${id}/new`)}
+            onClick={() => navigate(`/outcome/${encodeURIComponent(uri)}/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Outcome"

@@ -6,6 +6,7 @@ import {fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchIndicators} from "../../api/indicatorApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 
 const filterOptions = createFilterOptions({
@@ -56,6 +57,7 @@ export default function OutcomeField({
                                        required,
                                        onChange,
                                        label,
+                                       disableURI,
                                        disabled,
                                        importErrors,
                                      }) {
@@ -79,7 +81,7 @@ export default function OutcomeField({
           if (res.success)
             res.themes.map(
               theme => {
-                options.theme[theme._id] = theme.name;
+                options.theme[theme._uri] = theme.name;
               }
             );
         }),
@@ -88,8 +90,8 @@ export default function OutcomeField({
           const options = {};
           organizations.map(organization => {
             // only organization which the user serves as an editor should be able to add
-            if (userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
-              options[organization._id] = organization.legalName;
+            if (userContext.isSuperuser || organization.editors?.includes(userContext.uri))
+              options[organization._uri] = organization.legalName;
           });
           setOptions(op => ({...op, organization: options}));
         }
@@ -100,15 +102,15 @@ export default function OutcomeField({
 
   useEffect(() => {
     if (state.organization) {
-      fetchIndicators(state.organization).then(({success, indicators}) => {
+      fetchIndicators(encodeURIComponent(state.organization)).then(({success, indicators}) => {
         if (success) {
-          const inds = {}
+          const inds = {};
           indicators.map(indicator => {
-            inds[indicator._id] = indicator.name;
-          })
-          setOptions(ops => ({...ops, indicators: inds}))
+            inds[indicator._uri] = indicator.name;
+          });
+          setOptions(ops => ({...ops, indicators: inds}));
         }
-      })
+      });
     }
   }, [state.organization]);
 
@@ -223,24 +225,24 @@ export default function OutcomeField({
                   }
                 }
                 }
-                />
+              />
               <Grid item xs={12}>
                 <TextField
                   sx={{mt: 2}}
                   fullWidth
-                  label="Identifier"
+                  label="URI"
                   type="text"
-                  defaultValue={state.identifier}
-                  onChange={handleChange('identifier')}
-                  disabled={disabled}
+                  defaultValue={state.uri}
+                  onChange={handleChange('uri')}
+                  disabled={disabled || disableURI}
                   required={required}
-                  error={!!errors.identifier}
-                  helperText={errors.identifier}
+                  error={!!errors.uri}
+                  helperText={errors.uri}
                   onBlur={() => {
-                    if (!state.identifier) {
-                      setErrors(errors => ({...errors, identifier: 'This field cannot be empty'}));
+                    if (state.uri && !isValidURL(state.uri)) {
+                      setErrors(errors => ({...errors, uri: 'Please input a valid URI'}));
                     } else {
-                      setErrors(errors => ({...errors, identifier: null}));
+                      setErrors(errors => ({...errors, uri: null}));
                     }
                   }
                   }

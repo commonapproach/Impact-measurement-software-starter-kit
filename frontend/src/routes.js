@@ -80,10 +80,10 @@ const routes = (
     <Route path="/indicator/:uri/:operationMode" element={<PrivateRoute element={AddEditIndicator}/>}/>
     {/*outcomes*/}
     <Route path="/organization-outcomes" element={<PrivateRoute element={Organization_outcomes}/>}/>
-    <Route path="/outcomes/:id" element={<PrivateRoute element={Outcomes}/>}/>
-    <Route path="/outcome/:orgId/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path="/outcomes/:uri" element={<PrivateRoute element={Outcomes}/>}/>
+    <Route path="/outcome/:orgUri/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
-    <Route path="/outcome/:id/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path="/outcome/:uri/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
       {/*file uploading page*/}
     <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
     <Route path="/fileUploading/:orgID/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>

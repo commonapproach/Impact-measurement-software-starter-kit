@@ -64,8 +64,8 @@ export default function Organization_outcomes() {
   const columns = [
     {
       label: 'Legal Name',
-      body: ({_id, legalName}) => {
-        return <Link color to={`/outcomes/${_id}`}>
+      body: ({_uri, legalName}) => {
+        return <Link color to={`/outcomes/${encodeURIComponent(_uri)}`}>
           {legalName}
         </Link>
       },

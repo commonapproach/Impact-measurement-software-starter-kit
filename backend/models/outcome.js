@@ -7,7 +7,7 @@ const GDBOutcomeModel = createGraphDBModel({
   theme: {type: GDBThemeModel, internalKey: 'cids:forTheme'},
   forOrganization: {type: Types.NamedIndividual, internalKey: 'cids:forOrganization'},
   indicators: {type: [Types.NamedIndividual], internalKey: 'cids:hasIndicator'},
-  hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'}
+  // hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'}
 }, {
   rdfTypes: ['cids:Outcome'], name: 'outcome'
 });

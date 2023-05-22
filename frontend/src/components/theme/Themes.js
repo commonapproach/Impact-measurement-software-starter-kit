@@ -16,7 +16,7 @@ export default function Themes() {
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
@@ -33,16 +33,16 @@ export default function Themes() {
     });
   }, [trigger]);
 
-  const showDeleteDialog = (id) => {
+  const showDeleteDialog = (uri) => {
     setState(state => ({
-      ...state, selectedId: id, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete theme ' + id + ' ?'
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete theme ' + uri + ' ?'
     }));
   };
 
-  const handleDelete = async (id, form) => {
+  const handleDelete = async (uri, form) => {
 
-    deleteTheme(id).then(({success, message})=>{
+    deleteTheme(uri).then(({success, message})=>{
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -64,8 +64,8 @@ export default function Themes() {
   const columns = [
     {
       label: 'Name',
-      body: ({_id, name}) => {
-        return <Link color to={`/themes/${_id}/view`}>
+      body: ({_uri, name}) => {
+        return <Link color to={`/themes/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>
       },
@@ -80,9 +80,9 @@ export default function Themes() {
 
     {
       label: ' ',
-      body: ({_id}) =>
-        <DropdownMenu urlPrefix={'themes'} objectId={_id} hideDeleteOption
-                      hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_id)}/>
+      body: ({_uri}) =>
+        <DropdownMenu urlPrefix={'themes'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+                      hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
@@ -95,7 +95,7 @@ export default function Themes() {
         title={"Themes"}
         data={state.data}
         columns={columns}
-        idField="id"
+        uriField="uriField"
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
@@ -108,7 +108,7 @@ export default function Themes() {
 
       />
       <DeleteModal
-        objectId={state.selectedId}
+        objectUri={state.selectedUri}
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}

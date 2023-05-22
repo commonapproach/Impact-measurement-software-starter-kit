@@ -10,6 +10,7 @@ import {createTheme, fetchTheme, updateTheme} from "../../api/themeApi";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -28,8 +29,8 @@ export default function AddEditTheme() {
   const classes = useStyles();
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
-  const {id, operationMode} = useParams();
-  const mode = id ? operationMode : 'new';
+  const {uri, operationMode} = useParams();
+  const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({
@@ -42,7 +43,7 @@ export default function AddEditTheme() {
 
   const [form, setForm] = useState({
     name: '',
-    identifier: '',
+    uri: '',
     description: ''
   });
   const [loading, setLoading] = useState(true);
@@ -54,13 +55,13 @@ export default function AddEditTheme() {
   // });
 
   useEffect(() => {
-    if (mode === 'edit' && id || mode === 'view') {
-      fetchTheme(id).then(res => {
+    if (mode === 'edit' && uri || mode === 'view') {
+      fetchTheme(encodeURIComponent(uri)).then(res => {
         if (res.success) {
           setForm({
             name: res.theme.name,
             description: res.theme.description,
-            identifier: res.theme.identifier
+            uri: res.theme._uri
           });
           setLoading(false);
         }
@@ -69,9 +70,9 @@ export default function AddEditTheme() {
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
         navigate('/themes');
       });
-    } else if (mode === 'edit' && !id) {
+    } else if (mode === 'edit' && !uri) {
       navigate('/organizations');
-      enqueueSnackbar("No ID provided", {variant: 'error'});
+      enqueueSnackbar("No URI provided", {variant: 'error'});
     } else if (mode === 'new') {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ export default function AddEditTheme() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateTheme(id, form).then((res) => {
+      updateTheme(encodeURIComponent(uri), form).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/themes');
@@ -161,20 +162,20 @@ export default function AddEditTheme() {
         />
 
         <GeneralField
-          disabled={operationMode === 'view'}
-          key={'identifier'}
-          label={'Identifier'}
-          value={form.identifier}
+          disabled={mode !== 'new'}
+          key={'uri'}
+          label={'URI'}
+          value={form.uri}
           required
           sx={{mt: '16px', minWidth: 350}}
-          onChange={e => form.identifier = e.target.value}
-          error={!!errors.identifier}
-          helperText={errors.identifier}
+          onChange={e => form.uri = e.target.value}
+          error={!!errors.uri}
+          helperText={errors.uri}
           onBlur={() => {
-            if (form.identifier === '') {
-              setErrors(errors => ({...errors, identifier: 'This field cannot be empty'}));
+            if (form.uri && !isValidURL(form.uri)) {
+              setErrors(errors => ({...errors, uri: 'Please input a valid URI'}));
             } else {
-              setErrors(errors => ({...errors, identifier: ''}));
+              setErrors(errors => ({...errors, uri: ''}));
             }
 
           }}

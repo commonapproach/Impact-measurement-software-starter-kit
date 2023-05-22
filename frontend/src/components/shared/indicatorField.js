@@ -4,6 +4,7 @@ import {createFilterOptions} from '@mui/material/Autocomplete';
 import Dropdown from "./fields/MultiSelectField";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 
 // const filterOptions = createFilterOptions({
@@ -104,28 +105,28 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
-            {/*<Grid item xs={12}>*/}
-            {/*  <TextField*/}
-            {/*    sx={{mt: 2}}*/}
-            {/*    fullWidth*/}
-            {/*    label="Identifier"*/}
-            {/*    type="text"*/}
-            {/*    defaultValue={state.hasIdentifier}*/}
-            {/*    onChange={handleChange('hasIdentifier')}*/}
-            {/*    disabled={disabled}*/}
-            {/*    required={required}*/}
-            {/*    error={!!errors.hasIdentifier}*/}
-            {/*    helperText={errors.hasIdentifier}*/}
-            {/*    onBlur={() => {*/}
-            {/*      if (!state.hasIdentifier) {*/}
-            {/*        setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));*/}
-            {/*      }else {*/}
-            {/*        setErrors(errors => ({...errors, hasIdentifier: null}));*/}
-            {/*      }*/}
-            {/*    }*/}
-            {/*    }*/}
-            {/*  />*/}
-            {/*</Grid>*/}
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="URI"
+                type="text"
+                defaultValue={state.uri}
+                onChange={handleChange('uri')}
+                disabled={disabled}
+                required={required}
+                error={!!errors.uri}
+                helperText={errors.uri}
+                onBlur={() => {
+                  if (state.uri && !isValidURL(state.uri)) {
+                    setErrors(errors => ({...errors, uri: 'Invalid URI'}));
+                  }else {
+                    setErrors(errors => ({...errors, uri: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
 
             <Grid item xs={6}>
               <Dropdown

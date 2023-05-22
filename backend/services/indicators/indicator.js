@@ -237,7 +237,7 @@ const createIndicator = async (req, res) => {
     description: form.description,
     forOrganizations: form.forOrganizations,
     unitOfMeasure: form.unitOfMeasure
-  });
+  }, form.uri?{uri: form.uri}:null);
 
   await indicator.save();
   // add the indicator to the organizations

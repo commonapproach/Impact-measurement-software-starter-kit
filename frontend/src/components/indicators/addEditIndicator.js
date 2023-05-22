@@ -54,6 +54,7 @@ export default function AddEditIndicator() {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
       fetchIndicator(encodeURIComponent(uri)).then(({success, indicator}) => {
         if (success) {
+          indicator.uri = indicator._uri;
           setForm(indicator);
           setLoading(false);
         }
@@ -148,6 +149,7 @@ export default function AddEditIndicator() {
         <Typography variant={'h4'}> Indicator </Typography>
         <IndicatorField
           disabled={mode === 'view'}
+          disabledURI={mode !== 'new'}
           disabledOrganization={!!orgUri}
           defaultValue={form}
           required

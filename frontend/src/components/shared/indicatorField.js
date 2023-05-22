@@ -38,7 +38,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 //   );
 // }
 
-export default function IndicatorField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization}) {
+export default function IndicatorField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, disabledURI}) {
 
   const [state, setState] = useState(defaultValue || {});
   const [options, setOptions] = useState({})
@@ -113,7 +113,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 type="text"
                 defaultValue={state.uri}
                 onChange={handleChange('uri')}
-                disabled={disabled}
+                disabled={disabled || disabledURI}
                 required={required}
                 error={!!errors.uri}
                 helperText={errors.uri}

@@ -90,10 +90,10 @@ const routes = (
 
 
     <Route path="/organization-indicatorReports" element={<PrivateRoute element={Organization_indicatorReports}/>}/>
-    <Route path="/indicatorReports/:id" element={<PrivateRoute element={IndicatorReports}/>}/>
+    <Route path="/indicatorReports/:uri" element={<PrivateRoute element={IndicatorReports}/>}/>
     <Route path="/indicatorReport/new" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
-    <Route path="/indicatorReport/:orgId/new" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
-    <Route path="/indicatorReport/:id/:operationMode" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
+    <Route path="/indicatorReport/:orgUri/new" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
+    <Route path="/indicatorReport/:uri/:operationMode" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
 
 
     <Route path="/email-confirm" element={<EmailConfirm/>}/>

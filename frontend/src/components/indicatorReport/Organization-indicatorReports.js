@@ -15,7 +15,7 @@ export default function Organization_indicatorReports() {
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
   });
@@ -32,16 +32,16 @@ export default function Organization_indicatorReports() {
     });
   }, [trigger]);
 
-  const showDeleteDialog = (id) => {
+  const showDeleteDialog = (uri) => {
     setState(state => ({
-      ...state, selectedId: id, showDeleteDialog: true,
-      deleteDialogTitle: 'Delete organization ' + id + ' ?'
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete organization ' + uri + ' ?'
     }));
   };
 
-  const handleDelete = async (id, form) => {
+  const handleDelete = async (uri, form) => {
 
-    deleteOrganization(id).then(({success, message})=>{
+    deleteOrganization(encodeURIComponent(uri)).then(({success, message})=>{
       if (success) {
         setState(state => ({
           ...state, showDeleteDialog: false,
@@ -62,8 +62,8 @@ export default function Organization_indicatorReports() {
   const columns = [
     {
       label: 'Legal Name',
-      body: ({_id, legalName}) => {
-        return <Link color to={`/indicatorReports/${_id}`}>
+      body: ({_uri, legalName}) => {
+        return <Link color to={`/indicatorReports/${encodeURIComponent(_uri)}`}>
           {legalName}
         </Link>
       },
@@ -110,7 +110,7 @@ export default function Organization_indicatorReports() {
         title={"Organizations"}
         data={state.data}
         columns={columns}
-        idField="id"
+        uriField="uri"
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser && !userContext.editorOf.length}
@@ -123,7 +123,7 @@ export default function Organization_indicatorReports() {
 
       />
       <DeleteModal
-        objectId={state.selectedId}
+        objectUri={state.selectedUri}
         title={state.deleteDialogTitle}
         show={state.showDeleteDialog}
         onHide={() => setState(state => ({...state, showDeleteDialog: false}))}

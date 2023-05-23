@@ -7,6 +7,7 @@ import {useSnackbar} from "notistack";
 import {fetchIndicators} from "../../api/indicatorApi";
 import GeneralField from "./fields/GeneralField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 
 const filterOptions = createFilterOptions({
@@ -51,7 +52,7 @@ function LoadingAutoComplete({
   );
 }
 
-export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization}) {
+export default function IndicatorReportField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, uriDiasbled}) {
 
   const [state, setState] = useState(
     defaultValue ||
@@ -73,23 +74,23 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
         const options = {};
         organizations.map(organization => {
           // only organization which the user serves as an editor should be able to add
-          if(userContext.isSuperuser || organization.editors?.includes(`:userAccount_${userContext.id}`))
-            options[organization._id] = organization.legalName;
+          if(userContext.isSuperuser || organization.editors?.includes(userContext.uri))
+            options[organization._uri] = organization.legalName;
         });
         setOptions(op => ({...op, organization: options}));
         return options;
       }
     }).then((organizations) => {
-        Promise.all(Object.keys(organizations).map(organizationId => {
-          return fetchIndicators(organizationId, userContext).then(({success, indicators}) => {
+        Promise.all(Object.keys(organizations).map(organizationUri => {
+          return fetchIndicators(encodeURIComponent(organizationUri), userContext).then(({success, indicators}) => {
             if (success) {
               const options = {};
               indicators.map(indicator => {
-                options[indicator._id] = indicator.name;
+                options[indicator._uri] = indicator.name;
               });
               setOptions(op => ({
                   ...op,
-                  [`organization_${organizationId}`]: options
+                  [organizationUri]: options
                 })
               );
             }
@@ -166,6 +167,30 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               />
             </Grid>
 
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="URI"
+                type="text"
+                defaultValue={state.uri}
+                onChange={handleChange('uri')}
+                disabled={disabled || uriDiasbled}
+                required={required}
+                error={!!errors.uri}
+                helperText={errors.uri}
+                onBlur={() => {
+                  if (state.uri && !isValidURL(state.uri)) {
+                    setErrors(errors => ({...errors, uri: 'Invalid URI'}));
+                  } else {
+                    setErrors(errors => ({...errors, uri: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
+
+
             <Grid item xs={4}>
             <TextField
               sx={{mt: 2}}
@@ -236,7 +261,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               <LoadingAutoComplete
                 label="Indicator"
                 disabled={disabled || !state.organization}
-                options={state.organization? options[`organization_${state.organization}`]: []}
+                options={state.organization? options[state.organization]: []}
                 state={state.organization? state.indicator: null}
                 onChange={handleChange('indicator')}
                 error={!!errors.indicator}

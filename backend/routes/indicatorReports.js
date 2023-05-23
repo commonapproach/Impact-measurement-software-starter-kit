@@ -6,7 +6,7 @@ const {
 
 const router = express.Router();
 
-router.get('/:orgId', fetchIndicatorReportsHandler);
+router.get('/:orgUri', fetchIndicatorReportsHandler);
 
 
 module.exports = router;

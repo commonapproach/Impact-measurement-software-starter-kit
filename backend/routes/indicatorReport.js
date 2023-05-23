@@ -6,10 +6,10 @@ const {createIndicatorReportHandler, fetchIndicatorReportHandler, updateIndicato
 
 const router = express.Router();
 
-router.get('/:id', fetchIndicatorReportHandler);
+router.get('/:uri', fetchIndicatorReportHandler);
 router.post('/', createIndicatorReportHandler);
-router.put('/:id', updateIndicatorReportHandler);
-router.get('/:orgId', fetchIndicatorReportsHandler)
+router.put('/:uri', updateIndicatorReportHandler);
+router.get('/:orgUri', fetchIndicatorReportsHandler)
 
 
 module.exports = router;

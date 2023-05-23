@@ -12,13 +12,13 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 export default function IndicatorReports() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
-  const {id} = useParams();
+  const {uri} = useParams();
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
     data: [],
-    selectedId: null,
+    selectedUri: null,
     deleteDialogTitle: '',
     showDeleteDialog: false,
     editable: false
@@ -26,7 +26,7 @@ export default function IndicatorReports() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchIndicatorReports(id).then(res => {
+    fetchIndicatorReports(encodeURIComponent(uri)).then(res => {
       if(res.success)
         setState(state => ({...state, loading: false, data: res.indicatorReports, editable: res.editable}));
     }).catch(e => {
@@ -67,8 +67,8 @@ export default function IndicatorReports() {
   const columns = [
     {
       label: 'Name',
-      body: ({_id, name}) => {
-        return state.editable?<Link color to={`/indicatorReport/${_id}/view`}>
+      body: ({_uri, name}) => {
+        return state.editable?<Link color to={`/indicatorReport/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>:name
       },
@@ -101,9 +101,9 @@ export default function IndicatorReports() {
 
     {
       label: ' ',
-      body: ({_id}) =>
-        <DropdownMenu urlPrefix={'indicatorReport'} objectId={_id} hideEditOption={!state.editable} hideDeleteOption
-                      handleDelete={() => showDeleteDialog(_id)}/>
+      body: ({_uri}) =>
+        <DropdownMenu urlPrefix={'indicatorReport'} objectUri={encodeURIComponent(_uri)} hideEditOption={!state.editable} hideDeleteOption
+                      handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
@@ -116,11 +116,11 @@ export default function IndicatorReports() {
         title={"Indicator Reports"}
         data={state.data}
         columns={columns}
-        idField="id"
+        uriField="uri"
         customToolbar={
           <Chip
             disabled={!state.editable}
-            onClick={() => navigate(`/indicatorReport/${id}/new`)}
+            onClick={() => navigate(`/indicatorReport/${encodeURIComponent(uri)}/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new IndicatorReports"

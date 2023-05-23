@@ -10,6 +10,7 @@ import {UserContext} from "../../context";
 import IndicatorReportField from "../shared/IndicatorReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {isValidURL} from "../../helpers/validation_helpers";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,8 +28,8 @@ export default function AddEditIndicatorReport() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id, orgId, operationMode} = useParams();
-  const mode = id ? operationMode : 'new';
+  const {uri, orgUri, operationMode} = useParams();
+  const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -49,13 +50,14 @@ export default function AddEditIndicatorReport() {
     // unitOfMeasure: '',
     startTime: '',
     endTime: '',
-    dateCreated: ''
+    dateCreated: '',
+    uri: ''
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if ((mode === 'edit' && id) || (mode === 'view' && id)) {
-      fetchIndicatorReport(id, userContext).then(({success, indicatorReport}) => {
+    if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
+      fetchIndicatorReport(encodeURIComponent(uri), userContext).then(({success, indicatorReport}) => {
         if (success) {
           setForm(indicatorReport);
           setLoading(false);
@@ -68,22 +70,22 @@ export default function AddEditIndicatorReport() {
         navigate(-1);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
-    } else if (mode === 'edit' && (!id || !orgId)) {
+    } else if (mode === 'edit' && (!uri || !orgUri)) {
       navigate(-1);
-      enqueueSnackbar("No ID or orgId provided", {variant: 'error'});
-    } else if (mode === 'new' && !orgId) {
+      enqueueSnackbar("No URI or orgUri provided", {variant: 'error'});
+    } else if (mode === 'new' && !orgUri) {
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    } else if (mode === 'new' && orgId) {
-      setForm(form => ({...form, organization: orgId}));
+    } else if (mode === 'new' && orgUri) {
+      setForm(form => ({...form, organization: orgUri}));
       setLoading(false);
     } else {
       navigate(-1);
       enqueueSnackbar('Wrong auth', {variant: 'error'});
     }
 
-  }, [mode, id]);
+  }, [mode, uri]);
 
   const handleSubmit = () => {
     if (validate()) {
@@ -110,8 +112,8 @@ export default function AddEditIndicatorReport() {
         enqueueSnackbar(e.json?.message || 'Error occurs when creating indicator report', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
-    } else if (mode === 'edit' && id) {
-      updateIndicatorReport(id,{form}).then((res) => {
+    } else if (mode === 'edit' && uri) {
+      updateIndicatorReport(encodeURIComponent(uri),{form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
@@ -143,6 +145,8 @@ export default function AddEditIndicatorReport() {
       error.startTime = 'The field cannot be empty';
     if (!form.endTime)
       error.endTime = 'The field cannot be empty';
+    if (form.uri && !isValidURL(form.uri))
+      error.uri = 'The field cannot be empty'
     if (!!form.startTime && !!form.endTime && form.startTime > form.endTime){
       error.startTime = 'The date must be earlier than the end date'
       error.endTime = 'The date must be later than the start date';
@@ -169,12 +173,13 @@ export default function AddEditIndicatorReport() {
         <Typography variant={'h4'}> Indicator Report </Typography>
         <IndicatorReportField
           disabled={mode === 'view'}
-          disabledOrganization={!!orgId}
+          disabledOrganization={!!orgUri}
           defaultValue={form}
           required
           onChange={(state) => {
             setForm(form => ({...form, ...state}));
           }}
+          uriDiasbled={mode !== 'new'}
           importErrors={errors}
         />
 

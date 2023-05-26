@@ -48,7 +48,7 @@ export default function FileUploadingPage() {
     loadingButton: false,
     fileType: useParams().fileType,
     formType: useParams().formType,
-    organization: useParams().orgID,
+    organization: useParams().orgUri,
     fileContent: null,
     errorDialog: false,
     optionDisabled: false,
@@ -71,7 +71,7 @@ export default function FileUploadingPage() {
     fetchOrganizations().then(res => {
       if (res.success)
         res.organizations.map(organization => {
-          options.organizations[organization._id] = organization.legalName;
+          options.organizations[organization._uri] = organization.legalName;
         });
       setState(state => ({...state, loading: false}));
     }).catch(e => {

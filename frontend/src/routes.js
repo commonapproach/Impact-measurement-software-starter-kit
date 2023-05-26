@@ -86,7 +86,7 @@ const routes = (
     <Route path="/outcome/:uri/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
       {/*file uploading page*/}
     <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
-    <Route path="/fileUploading/:orgID/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
+    <Route path="/fileUploading/:orgUri/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
 
 
     <Route path="/organization-indicatorReports" element={<PrivateRoute element={Organization_indicatorReports}/>}/>
@@ -110,16 +110,6 @@ const routes = (
 
     <Route path="/users/:id" element={<SuperUserRoute element={User}/>}/>
 
-    {/*<Route path="/admin-logs" element={<SuperUserRoute element={AdminLogs}/>}/>*/}
-
-
-    {/*<Route path="/providers/:id/rate" element={<PrivateRoute element={ProviderRatingForm}/>}/>*/}
-    {/*<Route path="/providers/new/add-service" element={<PrivateRoute element={AddServicePrompt}/>}/>*/}
-    {/*<Route path="/providers/:formType/new" element={<PrivateRoute element={ProviderForm}/>}/>*/}
-    {/*<Route path="/providers/:formType/:id" element={<PrivateRoute element={VisualizeServiceProvider}/>}/>*/}
-    {/*<Route path="/providers/:formType/:id/edit/" element={<PrivateRoute element={ProviderForm}/>}/>*/}
-    {/*<Route path="/providers/:id" element={<PrivateRoute element={ProviderProfile}/>}/>*/}
-    {/*<Route path="/providers" element={<PrivateRoute element={Providers}/>}/>*/}
 
     {/*<Route path="/services/:id/edit" element={<PrivateRoute element={ServiceForm}/>}/>*/}
     {/*<Route path="/services/new" element={<PrivateRoute element={ServiceForm}/>}/>*/}

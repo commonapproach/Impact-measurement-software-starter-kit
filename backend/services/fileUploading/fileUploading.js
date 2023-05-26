@@ -20,175 +20,91 @@ const fileUploadingHandler = async (req, res, next) => {
   }
 };
 
-async function outcomeBuilder(trans, object, organization, outcomeDict, themeDict) {
+async function outcomeBuilder(trans, object, organization, outcomeDict, indicatorDict) {
   const outcome = outcomeDict[object['@id']];
-  if (!object['http://ontology.eil.utoronto.ca/cids/cids#forTheme]'].length)
-    throw new Server400Error(`${object['@id']}: invalid input`);
   // add the organization to it, and add it to the organization
   if (!outcome.forOrganizations)
     outcome.forOrganizations = [];
-  outcome.forOrganizations.push(`:organization_${organization._id}`);
+  outcome.forOrganizations.push(organization._uri);
   if (!organization.hasOutcomes)
     organization.hasOutcomes = [];
-  organization.hasOutcomes.push(`:outcome_${outcome._id}`);
-  // add theme
-  const theme = themeDict[object['http://ontology.eil.utoronto.ca/cids/cids#forTheme']['@value']] || '';// todo: might need to check databse
-  outcome.theme = `:theme_${theme._id}`;
-  // add indicator
+  organization.hasOutcomes.push(outcome._uri);
+  // add theme to indicator
+  if (!object['http://ontology.eil.utoronto.ca/cids/cids#forTheme'])
+    throw new Server400Error(`${object['@id']}: outcome need to contain theme`)
+  outcome.theme = object['http://ontology.eil.utoronto.ca/cids/cids#forTheme'][0]['@value'];
+  // add indicator to outcome, adding outcome to indicator when treating indicators
+
   if (object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator']) {
     if (!outcome.indicators) {
       outcome.indicators = [];
     }
-    // todo: add outcome to indicator and add indicator to outcome
+    outcome.indicators.push(
+      object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']
+    )
+
+    // const indicator = indicatorDict[object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']]
+    //   || await GDBIndicatorModel.findOne({_uri: object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']})
+    // if (!indicator.forOutcomes)
+    //   indicator.forOutcomes = []
+    // indicator.forOutcomes.push(outcome._uri);
+    // transSave(trans, indicator);
   }
   await transSave(trans, outcome);
-
 }
 
-// async function outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
-//   if (!object['cids:hasName'] || !object['sch:dateCreated'] || !object['cids:forTheme']) {
+
+// async function themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
+//   if (!object['tove_org:hasName']) {
 //     throw new Server400Error('invalid input');
 //   }
-//   // assume that an outcome will uniquely be defined by name
-//   let outcome = organization.hasOutcomes?.find(outcome => outcome.name === object['cids:hasName']);
-//   if (!outcome) {
-//     // create the outcome
-//     outcome = GDBOutcomeModel({
-//       name: object['cids:hasName'],
-//       description: object['cids:hasDescription'],
+//   let theme = await GDBThemeModel.findOne({name: object['tove_org:hasName']});
+//   if (!theme) {
+//     // the theme has to be created
+//     theme = GDBThemeModel({
+//       name: object['tove_org:hasName'],
+//       description: object['cids:hasDescription']
 //     });
-//     // build up or modify the theme
-//     if (object['cids:forTheme']) {
-//       const theme = (await themeBuilder(object['cids:forTheme'], organization,outcomeDict, themeDict, indicatorDict, trans));
-//       outcome.theme = `:theme_${theme._id}`;
-//     }
-//     // give outcome an id
-//     await transSave(trans, outcome);
-//
-//     // build up or modify indicator(s)
-//     if (object['cids:hasIndicator']) {
-//       outcome.indicators = [];
-//       if (Array.isArray(object['cids:hasIndicator'])) {
-//         outcome.indicators = await Promise.all(object['cids:hasIndicator'].map(indicator =>
-//           indicatorBuilder(indicator, organization, outcomeDict, themeDict, indicatorDict, trans)));
-//         // add outcome to each indicators
-//         await Promise.all(outcome.indicators.map(indicator => {
-//           if (!indicator.forOutcomes)
-//             indicator.forOutcomes = [];
-//           indicator.forOutcomes.push(`:outcome_${outcome._id}`);
-//           return transSave(trans, indicator);
-//         }));
-//       } else {
-//         //add outcome to the indicator
-//         const indicator = await indicatorBuilder(object['cids:hasIndicator'], organization, outcomeDict, themeDict, indicatorDict, trans);
-//         if (!indicator.forOutcomes)
-//           indicator.forOutcomes = [];
-//         indicator.forOutcomes.push(`:outcome_${outcome._id}`);
-//         await transSave(trans, indicator);
-//         outcome.indicators.push(`:indicator_${indicator._id}`);
-//       }
-//     }
-//
-//     // add organization to the outcome
-//     outcome.forOrganization = `:organization_${organization._id}`;
 //   } else {
-//     throw new Server400Error('The outcome is duplicate');
-//     // modify the outcome if needed
-//     if (!outcomeDict[outcome._id]) {
-//       // name uniquely define outcomes so no need to modify
-//       // modify description
-//       outcome.description = object['cids:hasDescription'];
-//       // modify theme
-//       if (object['cids:forTheme'])
-//         outcome.theme = await themeBuilder(object['cids:forTheme'], organization, themeDict, indicatorDict);
-//       // todo: modify indicators: how to handle list??
+//     throw new Server400Error('The theme is duplicate');
+//     // the theme has to be modified
+//     if (!themeDict[theme._id]) {
+//       // theme name shouldn't be able to be changed
+//       // theme.name = object['tove_org:hasName'];
+//       theme.description = object['cids:hasDescription'];
 //     }
 //   }
-//   await transSave(trans, outcome);
-//   outcomeDict[outcome._id] = outcome;
-//   // add outcome to the organization
-//   if (!organization.hasOutcomes)
-//     organization.hasOutcomes = [];
-//   // todo: maybe have to check if the outcome is in organization already
-//   organization.hasOutcomes.push(`:outcome_${outcome._id}`);
-//   return outcome;
+//   await transSave(trans, theme);
+//   themeDict[theme._id] = theme;
+//   return theme;
 // }
 
-async function themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
-  if (!object['tove_org:hasName']) {
-    throw new Server400Error('invalid input');
-  }
-  let theme = await GDBThemeModel.findOne({name: object['tove_org:hasName']});
-  if (!theme) {
-    // the theme has to be created
-    theme = GDBThemeModel({
-      name: object['tove_org:hasName'],
-      description: object['cids:hasDescription']
-    });
-  } else {
-    throw new Server400Error('The theme is duplicate');
-    // the theme has to be modified
-    if (!themeDict[theme._id]) {
-      // theme name shouldn't be able to be changed
-      // theme.name = object['tove_org:hasName'];
-      theme.description = object['cids:hasDescription'];
-    }
-  }
-  await transSave(trans, theme);
-  themeDict[theme._id] = theme;
-  return theme;
-}
-
-// async function indicatorBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
-//   if (!object['cids:hasName']) {
-//     throw new Server400Error('invalid input');
-//   }
-//   // assume that the indicator uniquely defines an indicator inside an organization
-//   let indicator = organization.hasIndicators?.find(indicator => indicator.name === object['cids:hasName']);
-//   if (!indicator) {
-//     // an indicator has to be created
-//     indicator = GDBIndicatorModel({
-//       name: object['cids:hasName'],
-//       description: object['cids:hasDescription'],
-//     });
-//     indicator.forOrganizations = [`:organization_${organization._id}`];
-//     if (object['cids:forOutcome']) {
-//       indicator.forOutcome = [await outcomeBuilder(object['cids:forOutcome'], organization, outcomeDict, themeDict, indicatorDict, trans)];
-//     }
-//     // todo: unit of measure, indicator report, outcome
-//
-//   } else {
-//     throw new Server400Error('The indicator is duplicate');
-//     // the indicator has to be modified
-//     if (!indicatorDict[indicator._id]) {
-//       indicator.description = object['cids:hasDescription'];
-//     }
-//     // todo: unit of measure, indicator report, outcome
-//   }
-//   indicatorDict[indicator._id] = indicator;
-//   await transSave(trans, indicator);
-//   if (!organization.hasIndicators)
-//     organization.hasIndicators = [];
-//   // todo: maybe have to check if the outcome is in organization already
-//   organization.hasIndicators.push(`:indicator_${indicator._id}`);
-//   return indicator;
-// }
 
 async function indicatorBuilder(trans,object, organization, indicatorDict) {
   const indicator = indicatorDict[object['@id']];
   // add the organization to it, and add it to the organization
   if (!indicator.forOrganizations)
     indicator.forOrganizations = [];
-  indicator.forOrganizations.push(`:organization_${organization._id}`);
+  indicator.forOrganizations.push(organization._uri);
   if (!organization.hasIndicators)
     organization.hasIndicators = [];
-  organization.hasIndicators.push(`:outcome_${indicator._id}`);
+  organization.hasIndicators.push(indicator._uri);
   // add outcome
   if (object['http://ontology.eil.utoronto.ca/cids/cids#forOutcome']) {
     if (!indicator.forOutcomes) {
       indicator.forOutcomes = [];
     }
-    // todo: add outcome to indicator and add indicator to outcome
+    indicator.forOutcomes.push(object['http://ontology.eil.utoronto.ca/cids/cids#forOutcome'][0]['@value'])
+  }
+  // add indicator report
+  if (object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport']) {
+    if (!indicator.indicatorReports)
+      indicator.indicatorReports = [];
+    object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport'].map(indicatorReport => {
+      indicator.indicatorReports.push(
+        indicatorReport['@value']
+      )
+    })
   }
   // todo: add indicator report
   await transSave(trans, indicator);
@@ -197,15 +113,17 @@ async function indicatorBuilder(trans,object, organization, indicatorDict) {
 async function indicatorReportBuilder(trans, object, organization, indicatorReportDict, indicatorDict) {
   const indicatorReport = indicatorReportDict[object['@id']];
   // add the organization to it
-  indicatorReport.forOrganization = `:organization_${organization._id}`;
+  indicatorReport.forOrganization = organization._uri;
   // add indicator
+  indicatorReport.forIndicator = object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value']
   const indicator = indicatorDict[object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value']] || '' // todo: may need to fetch indicator from database
-  if (object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator']) {
-    indicatorReport.forIndicator = `:indicator_${indicator._id}`;
-    if(!indicator.indicatorReports)
-      indicator.indicatorReports = [];
-    indicator.indicatorReports.push(`:indicatorReport_${indicatorReport._id}`);
-  }
+  // if (object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator']) {
+  //   indicatorReport.forIndicator = `:indicator_${indicator._id}`;
+  //   if(!indicator.indicatorReports)
+  //     indicator.indicatorReports = [];
+  //   indicator.indicatorReports.push(`:indicatorReport_${indicatorReport._id}`);
+  // }
+  // todo: add hasTime and hasValue
 
   await transSave(trans, indicatorReport);
 }
@@ -227,14 +145,14 @@ const fileUploading = async (req, res, next) => {
   try {
     const {objects, organizationId} = req.body;
     const expandedObjects = await expand(objects);
-    const frm = {
-      "@context": "http://ontology.eil.utoronto.ca/cids/contexts/cidsContext.json",
-      "@type": "cids:Outcome",
-      "hasName": {},
-      "hasDescription": {"@type": "Text"},
-      "forDomain": {"@type": "http://ontology.eil.utoronto.ca/cids/cids#Domain"},
-      "dateCreated": {"type": "Date"}
-    };
+    // const frm = {
+    //   "@context": "http://ontology.eil.utoronto.ca/cids/contexts/cidsContext.json",
+    //   "@type": "cids:Outcome",
+    //   "hasName": {},
+    //   "hasDescription": {"@type": "Text"},
+    //   "forDomain": {"@type": "http://ontology.eil.utoronto.ca/cids/cids#Domain"},
+    //   "dateCreated": {"type": "Date"}
+    // };
     const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
     const objectDict = {};
     const outcomeDict = {};
@@ -249,13 +167,15 @@ const fileUploading = async (req, res, next) => {
       objectDict[object['@id']] = object;
       // assign the object an id and store them into specific dict
       if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Outcome')) {
-        if (!object['http://ontology.eil.utoronto.ca/cids/cids#hasName'].length ||
-          !object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'].length)
+        if (!object['http://ontology.eil.utoronto.ca/cids/cids#hasName'] ||
+          !object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription']
+          // || !object['http://schema.org/dateCreated']
+        )
           throw new Server400Error(`${object['@id']}: invalid input`);
         const outcome = GDBOutcomeModel({
-          name: object['http://ontology.eil.utoronto.ca/cids/cids#hasName']['@value'],
-          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription']['@value']
-        });
+          name: object['http://ontology.eil.utoronto.ca/cids/cids#hasName'][0]['@value'],
+          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'][0]['@value'],
+        }, {uri: object['@id']});
         await transSave(trans, outcome);
         outcomeDict[object['@id']] = outcome;
       } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Indicator')) {
@@ -264,18 +184,35 @@ const fileUploading = async (req, res, next) => {
           throw new Server400Error(`${object['@id']}: invalid input`);
         const indicator = GDBIndicatorModel({
           name: object['http://ontology.eil.utoronto.ca/cids/cids#hasName']['@value'],
-          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription']['@value']
-        });
+          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription']['@value'],
+          // todo: add unit of measure
+          // unitOfMeasure: {
+          //
+          // }
+        }, {uri: object['@id']});
         await transSave(trans, indicator);
         indicatorDict[object['@id']] = indicator;
       } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#IndicatorReport')) {
-        if (!object['http://ontology.eil.utoronto.ca/tove/organization#hasName'].length)
+        if (!object['http://ontology.eil.utoronto.ca/tove/organization#hasName'] || !object['http://schema.org/dateCreated'] ||
+        !object['http://ontology.eil.utoronto.ca/cids/cids#hasComment'])
           throw new Server400Error(`${object['@id']}: invalid input`);
         const indicatorReport = GDBIndicatorReportModel({
-          name: object['http://ontology.eil.utoronto.ca/tove/organization#hasName']['@value']
-        });
+          name: object['http://ontology.eil.utoronto.ca/tove/organization#hasName'][0]['@value'],
+          dateCreated: object['http://schema.org/dateCreated'][0]['@value'],
+          comment: object['http://ontology.eil.utoronto.ca/cids/cids#hasComment'][0]['@value']
+        }, {uri: object['@id']});
         await transSave(trans, indicatorReport);
         indicatorReportDict[object['@id']] = indicatorReport;
+      } else if(object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Theme')) {
+        if (!object['http://ontology.eil.utoronto.ca/tove/organization#hasName'] ||
+          !object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'])
+          throw new Server400Error(`${object['@id']}: invalid input`);
+        const theme = GDBThemeModel({
+          name: object['http://ontology.eil.utoronto.ca/tove/organization#hasName'][0]['@value'],
+          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'][0]['@value']
+        }, {uri: object['@id']})
+        await transSave(trans, theme);
+        themeDict[object['@id']] = theme;
       }
     }
 
@@ -286,8 +223,8 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Indicator')) {
         await indicatorBuilder(trans, object, organization, indicatorDict)
       } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#IndicatorReport')) {
-        await indicatorReportBuilder(trans, object, organization, indicatorReportDict, indicatorDict)
-      }
+        await indicatorReportBuilder(trans, object, organization, indicatorReportDict)
+      } // todo: add time interval... etc
       // switch (object['@type'][0]) {
       //   case 'cids:Outcome':
       //     await outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans);

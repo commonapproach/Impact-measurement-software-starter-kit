@@ -1,6 +1,7 @@
 const {GDBGroupModel} = require("../../models/group");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBUserAccountModel} = require("../../models/userAccount");
+const {GDBOrganizationModel} = require("../../models/organization");
 
 
 const fetchGroupsHandler = async (req, res, next) => {
@@ -15,21 +16,26 @@ const fetchGroupsHandler = async (req, res, next) => {
 
 const fetchGroups = async (req, res) => {
 
-  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   if (userAccount.isSuperuser) {
     const groups = await GDBGroupModel.find({}, {populates: ['administrator.person']});
     groups.map(group => {
-      group.administrator = `${group.administrator._id}: ${group.administrator.person.givenName} ${group.administrator.person.familyName}`
+      group.administrator = `${group.administrator._uri}: ${group.administrator.person.givenName} ${group.administrator.person.familyName}`
     })
     return res.status(200).json({success: true, groups});
   }
   if (userAccount.groupAdminOfs) {
-    const groups = await GDBGroupModel.find({administrator: {_id: userAccount._id}}, {populates: ['administrator.person']});
+    const groups = await GDBGroupModel.find({administrator: {_uri: userAccount._uri}}, {populates: ['administrator.person']});
     groups.map(group => {
-      group.administrator = `${group.administrator._id}: ${group.administrator.person.givenName} ${group.administrator.person.familyName}`
+      group.administrator = `${group.administrator._uri}: ${group.administrator.person.givenName} ${group.administrator.person.familyName}`
     })
     return res.status(200).json({success: true, groups});
   }
+
+  // todo: for regular users
+  const associatedOrganizations = userAccount.associatedOrganizations;
+
+
 
 };
 

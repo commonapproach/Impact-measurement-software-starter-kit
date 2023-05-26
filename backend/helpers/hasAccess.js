@@ -88,10 +88,11 @@ async function hasAccess(req, operationType) {
 
     // groups
     case 'fetchGroups':
-      if (userAccount.isSuperuser)
-        return true;
-      if (userAccount.groupAdminOfs)
-        return true;
+      // if (userAccount.isSuperuser)
+      //   return true;
+      // if (userAccount.groupAdminOfs)
+      //   return true;
+      return true; // give every users access
       break;
     case 'createGroup':
       if (userAccount.isSuperuser)

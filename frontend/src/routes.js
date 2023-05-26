@@ -39,6 +39,8 @@ import AddEditIndicatorReport from "./components/indicatorReport/AddEditIndicato
 import Organization_indicatorReports from "./components/indicatorReport/Organization-indicatorReports";
 import IndicatorReports from "./components/indicatorReport/indicatorReports";
 import FileUploadingPage from "./components/uploadingPages/uploadingPage";
+import ReportTypesPage from "./components/ReportGenerate/ReportTypesPage";
+import GroupMembers from "./components/ReportGenerate/GroupMembers";
 
 const routes = (
   <Routes>
@@ -84,7 +86,7 @@ const routes = (
     <Route path="/outcome/:orgUri/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/:uri/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
-      {/*file uploading page*/}
+    {/*file uploading page*/}
     <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
     <Route path="/fileUploading/:orgUri/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
 
@@ -109,6 +111,9 @@ const routes = (
     <Route path="/users/new" element={<SuperUserRoute element={UserForm}/>}/>
 
     <Route path="/users/:id" element={<SuperUserRoute element={User}/>}/>
+
+    <Route path={"/reportGenerate"} element={<PrivateRoute element={ReportTypesPage}/>}/>
+    <Route path={"/reportGenerate/groupMembers"} element={<PrivateRoute element={GroupMembers}/>}/>
 
 
     {/*<Route path="/services/:id/edit" element={<PrivateRoute element={ServiceForm}/>}/>*/}

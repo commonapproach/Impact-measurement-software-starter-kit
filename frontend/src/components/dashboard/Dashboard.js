@@ -2,14 +2,13 @@ import React, {useContext} from 'react';
 import {Link} from '../shared';
 
 import {Container, Button, Typography} from "@mui/material";
-import {Edit, Create, People, ViewHeadline as Log, CheckCircleOutline as Criteria, FileUpload} from "@mui/icons-material";
+import {Edit, Create, People, ViewHeadline as Log, CheckCircleOutline as Criteria, FileUpload, Download} from "@mui/icons-material";
 import {UserContext} from "../../context";
 import {NavButton} from "./NavButton";
 
 
 function Dashboard() {
   const userContext = useContext(UserContext);
-  console.log(userContext)
 
   // if (userContext.userTypes.includes('superuser'))
   //   return <DashboardForSuperUser/>;
@@ -56,7 +55,7 @@ function Dashboard() {
       <NavButton to={'/fileUploading'} icon={<FileUpload/>} key={'fileUploading'} disabled
                  text="File Upload"/>
 
-      <NavButton to={'/reportGenerate'} icon={<FileUpload/>} key={'reportGenerate'}
+      <NavButton to={'/reportGenerate'} icon={<Download/>} key={'reportGenerate'}
                  text="Report Generate"/>
 
 

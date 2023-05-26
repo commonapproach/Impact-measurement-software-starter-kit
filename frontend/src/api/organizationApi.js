@@ -4,6 +4,10 @@ export async function fetchOrganizations() {
   return getJson('/api/organizations');
 }
 
+export async function fetchOrganizationsBasedOnGroup(groupUri) {
+  return getJson('/api/organizations/' + groupUri);
+}
+
 export async function fetchOrganization(orgUri,) {
   return getJson('/api/organization/' + orgUri);
 }

@@ -201,19 +201,19 @@ async function updateOrganization(req, res) {
   const {form} = req.body;
   const userAccountDict = {};
   if (!uri)
-    throw Server400Error('Id is needed');
+    throw new Server400Error('Id is needed');
   if (!form)
-    throw Server400Error('Form and outcomeForm are needed');
+    throw new Server400Error('Form and outcomeForm are needed');
   if(!form.administrator)
-    throw Server400Error('Form must contain the administrator');
+    throw new Server400Error('Form must contain the administrator');
 
   const organization = await GDBOrganizationModel.findOne({_uri: uri},
     {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'administrator', 'reporters', 'researchers', 'editors', 'telephone']});
 
   if (!organization)
-    throw Server400Error('No such organization');
+    throw new Server400Error('No such organization');
   if (!form.legalName)
-    throw Server400Error('Legal name is requested');
+    throw new Server400Error('Legal name is requested');
   // if (!form.hasIdentifier)
   //   throw Server400Error('ID is requested');
 

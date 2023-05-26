@@ -6,7 +6,13 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createOrganization, fetchOrganization, fetchOrganizations, updateOrganization} from "../../api/organizationApi";
+import {
+  createOrganization,
+  fetchOrganization,
+  fetchOrganizations,
+  fetchOrganizationsBasedOnGroup,
+  updateOrganization
+} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
@@ -15,6 +21,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
+import {Undo} from "@mui/icons-material";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -40,7 +47,7 @@ export default function GroupMembers() {
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
-  const mode = ''
+  const mode = '';
 
   const [state, setState] = useState({
     submitDialog: false,
@@ -53,20 +60,32 @@ export default function GroupMembers() {
 
   const [groups, setGroups] = useState({});
   const [selectedGroup, setSelectedGroup] = useState('');
+  const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchGroups().then(res => {
       if (res.success) {
-        const groups = {}
+        const groups = {};
         res.groups.map(group => {
           groups[group._uri] = group.label;
-        })
-        setGroups(groups)
-        setLoading(false)
+        });
+        setGroups(groups);
+        setLoading(false);
       }
-    })
-  }, [])
+    });
+  }, []);
+
+  useEffect(() => {
+    if (selectedGroup) {
+      fetchOrganizationsBasedOnGroup(encodeURIComponent(selectedGroup)).then(({organizations, success}) => {
+        if (success) {
+          setOrganizations(organizations);
+        }
+      });
+
+    }
+  }, [selectedGroup]);
 
 
   // useEffect(() => {
@@ -169,27 +188,7 @@ export default function GroupMembers() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Group Members</Typography>
-
-
-        {/*<GeneralField*/}
-        {/*  disabled={!userContext.isSuperuser}*/}
-        {/*  key={'organizationNumber'}*/}
-        {/*  label={'Organization Number'}*/}
-        {/*  value={form.organizationNumber}*/}
-        {/*  required*/}
-        {/*  sx={{mt: '16px', minWidth: 350}}*/}
-        {/*  onChange={e => form.organizationNumber = e.target.value}*/}
-        {/*  error={!!errors.organizationNumber}*/}
-        {/*  helperText={errors.organizationNumber}*/}
-        {/*  // onBlur={() => {*/}
-        {/*  //   if (form.ID === '') {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));*/}
-        {/*  //   } else {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: ''}));*/}
-        {/*  //   }*/}
-        {/*  // }}*/}
-        {/*/>*/}
+        <Typography variant={'h4'}> Group Members </Typography>
 
 
         <SelectField
@@ -207,127 +206,60 @@ export default function GroupMembers() {
             );
           }}
         />
+        {organizations.length ? organizations.map((organization, index) => {
+          return (
+            <Paper sx={{p: 2}} variant={'outlined'}>
+              <Typography variant={'h6'}> {`Organization ${organization.legalName}`}  </Typography>
+              <GeneralField
+                disabled
+                key={`${organization._uri} name`}
+                label={`Legal Name`}
+                value={organization.legalName}
+              />
+              {
+                organization.contactName ?
+                  <GeneralField
+                    disabled
+                    key={`${organization._uri} contact name`}
+                    label={`Contact Name`}
+                    value={organization.contactName}
+                  /> : null
+              }
 
-        {/*<GeneralField*/}
-        {/*  disabled={!userContext.isSuperuser}*/}
-        {/*  key={'hasIdentifier'}*/}
-        {/*  label={'ID'}*/}
-        {/*  value={form.hasIdentifier}*/}
-        {/*  required*/}
-        {/*  sx={{mt: '16px', minWidth: 350}}*/}
-        {/*  onChange={e => form.hasIdentifier = e.target.value}*/}
-        {/*  error={!!errors.hasIdentifier}*/}
-        {/*  helperText={errors.hasIdentifier}*/}
-        {/*  onBlur={() => {*/}
-        {/*    if (form.hasIdentifier === '') {*/}
-        {/*      setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));*/}
-        {/*    } else {*/}
-        {/*      setErrors(errors => ({...errors, hasIdentifier: ''}));*/}
-        {/*    }*/}
+            </Paper>
 
-        {/*  }}*/}
-        {/*/>*/}
-
-        {/*<GeneralField*/}
-        {/*  disabled={!userContext.isSuperuser}*/}
-        {/*  key={'telephone'}*/}
-        {/*  label={'Telephone'}*/}
-        {/*  type={'phoneNumber'}*/}
-        {/*  value={form.telephone}*/}
-        {/*  sx={{mt: '16px', minWidth: 350}}*/}
-        {/*  onChange={e => form.telephone = e.target.value}*/}
-        {/*  error={!!errors.telephone}*/}
-        {/*  helperText={errors.telephone}*/}
-        {/*  // onBlur={() => {*/}
-        {/*  //   if (form.ID === '') {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));*/}
-        {/*  //   } else {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: ''}));*/}
-        {/*  //   }*/}
-        {/*  // }}*/}
-        {/*/>*/}
-
-        {/*<GeneralField*/}
-        {/*  disabled={!userContext.isSuperuser}*/}
-        {/*  key={'email'}*/}
-        {/*  label={'Contact Email'}*/}
-        {/*  value={form.email}*/}
-        {/*  sx={{mt: '16px', minWidth: 350}}*/}
-        {/*  onChange={e => form.email = e.target.value}*/}
-        {/*  error={!!errors.email}*/}
-        {/*  helperText={errors.email}*/}
-        {/*  // onBlur={() => {*/}
-        {/*  //   if (form.ID === '') {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));*/}
-        {/*  //   } else {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: ''}));*/}
-        {/*  //   }*/}
-        {/*  // }}*/}
-        {/*/>*/}
-
-        {/*<GeneralField*/}
-        {/*  disabled={!userContext.isSuperuser}*/}
-        {/*  key={'contactName'}*/}
-        {/*  label={'Contact Name'}*/}
-        {/*  value={form.contactName}*/}
-        {/*  required*/}
-        {/*  sx={{mt: '16px', minWidth: 350}}*/}
-        {/*  onChange={e => form.contactName = e.target.value}*/}
-        {/*  error={!!errors.contactName}*/}
-        {/*  helperText={errors.contactName}*/}
-        {/*  // onBlur={() => {*/}
-        {/*  //   if (form.ID === '') {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));*/}
-        {/*  //   } else {*/}
-        {/*  //     setErrors(errors => ({...errors, ID: ''}));*/}
-        {/*  //   }*/}
-        {/*  // }}*/}
-        {/*/>*/}
-
-        {/*<SelectField*/}
-        {/*  disabled={mode === 'new' || !userContext.isSuperuser}*/}
-        {/*  key={'administrator'}*/}
-        {/*  label={'Organization Administrator'}*/}
-        {/*  value={form.administrator}*/}
-        {/*  options={options.objectForm}*/}
-        {/*  error={!!errors.administrator}*/}
-        {/*  helperText={*/}
-        {/*    errors.administrator*/}
-        {/*  }*/}
-        {/*  onBlur={() => {*/}
-        {/*    if (!form.administrator) {*/}
-        {/*      setErrors(errors => ({...errors, administrator: 'This field cannot be empty'}));*/}
-        {/*    } else {*/}
-        {/*      setErrors(errors => ({...errors, administrator: ''}));*/}
-        {/*    }*/}
-
-        {/*  }}*/}
-        {/*  onChange={e => {*/}
-        {/*    setForm(form => ({*/}
-        {/*        ...form, administrator: e.target.value*/}
-        {/*      })*/}
-        {/*    );*/}
-        {/*  }}*/}
-        {/*/>*/}
+          );
+        }) : null}
 
 
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                       'Are you sure you want to update this Organization?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm()} children="confirm" autoFocus/>]}
-                     open={state.submitDialog}/>
+        {/*<AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}*/}
+        {/*             dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :*/}
+        {/*               'Are you sure you want to update this Organization?'}*/}
+        {/*             buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}*/}
+        {/*                               key={'cancel'}>{'cancel'}</Button>,*/}
+        {/*               <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}*/}
+        {/*                              key={'confirm'}*/}
+        {/*                              onClick={handleConfirm()} children="confirm" autoFocus/>]}*/}
+        {/*             open={state.submitDialog}/>*/}
       </Paper>
 
 
-      {/*<Paper sx={{p: 2}} variant={'outlined'}>*/}
-      {/*  <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>*/}
-      {/*    Submit*/}
-      {/*  </Button>*/}
-      {/*</Paper>*/}
+      {organizations.length ?
+        <Paper sx={{p: 1}}>
+          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
+          }}>
+            Generate Json File
+          </Button>
+        </Paper> :
+        null}
+
+      <Paper sx={{p: 1}} >
+        <Button variant="contained" color="primary" className={classes.button} onClick={() => {
+          navigate('/reportGenerate');
+        }} startIcon={<Undo />}>
+          Back
+        </Button>
+      </Paper>
 
     </Container>
   );

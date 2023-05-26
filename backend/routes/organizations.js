@@ -3,6 +3,7 @@ const {fetchOrganizationsHandler} = require("../services/organizations/organizat
 
 const router = express.Router({mergeParams: true});
 
+router.get('/:groupUri', fetchOrganizationsHandler);
 router.get('/', fetchOrganizationsHandler);
 
 module.exports = router;

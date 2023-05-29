@@ -65,6 +65,10 @@ const createIndicatorReport = async (req, res) => {
 
 
   await indicatorReport.save();
+  if(!indicator.indicatorReports)
+    indicator.indicatorReports = []
+  indicator.indicatorReports.push(indicatorReport);
+  await indicator.save();
   // const ownership = GDBOwnershipModel({
   //   resource: indicatorReport,
   //   owner: userAccount,
@@ -143,8 +147,18 @@ const updateIndicatorReport = async (req, res) => {
     const indicator = await GDBIndicatorModel.findOne({_uri: form.indicator}, {populates: ['unitOfMeasure']});
     if (!indicator)
       throw new Server400Error('No such indicator');
+    // todo: romove the indicator report from previous indicator and add the indicator report to new indicator
+    indicatorReport.forIndicator = await GDBIndicatorModel.findOne({_uri: indicatorReport.forIndicator});
+    const index = indicatorReport.forIndicator.indicatorReports.indexOf(uri);
+    indicatorReport.forIndicator.indicatorReports.splice(index, 1);
+    if (!indicator.indicatorReports)
+      indicator.indicatorReports = []
+    indicator.indicatorReports.push(uri);
+    await indicatorReport.forIndicator.save();
+    await indicator.save();
     indicatorReport.forIndicator = indicator;
     indicatorReport.value.unitOfMeasure = indicator.unitOfMeasure
+
   }
 
   if (form.startTime > form.endTime)

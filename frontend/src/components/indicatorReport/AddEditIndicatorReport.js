@@ -117,7 +117,7 @@ export default function AddEditIndicatorReport() {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/indicatorReports/${form.organization}`);
+          navigate(`/indicatorReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {

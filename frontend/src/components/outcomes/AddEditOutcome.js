@@ -107,7 +107,7 @@ export default function AddEditOutcome() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateOutcome({form}, uri).then((res) => {
+      updateOutcome({form}, encodeURIComponent(uri)).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);

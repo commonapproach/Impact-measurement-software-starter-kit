@@ -85,7 +85,7 @@ const fetchOutcomeHandler = async (req, res, next) => {
 const fetchOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
-    throw new Server400Error('Id is not given');
+    throw new Server400Error('URI is not given');
   const outcome = await GDBOutcomeModel.findOne({_uri: uri});
   if (!outcome)
     throw new Server400Error('No such outcome');
@@ -131,21 +131,21 @@ function cacheListOfObjects(objs, objDict) {
 
 const updateOutcome = async (req, res) => {
   const {form} = req.body;
-  const {id} = req.params;
-  if (!id)
+  const {uri} = req.params;
+  if (!uri)
     throw new Server400Error('Id is needed');
   if (!form || !form.description || !form.name || !form.organization || !form.theme || !form.indicators || !form.indicators.length)
     throw new Server400Error('Invalid input');
   // if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
   //   throw new Server400Error('Duplicated identifier');
-  const outcome = await GDBOutcomeModel.findOne({_id: id});
+  const outcome = await GDBOutcomeModel.findOne({_uri: uri});
   if (!outcome)
     throw new Server400Error('No such outcome');
   outcome.name = form.name;
   outcome.description = form.description;
-  if (outcome.theme.split('_')[1] !== form.theme) {
+  if (outcome.theme !== form.theme) {
     // theme have to be updated
-    const newTheme = await GDBThemeModel.findOne({_id: form.theme});
+    const newTheme = await GDBThemeModel.findOne({_uri: form.theme});
     if (!newTheme)
       throw new Server400Error('No such theme');
     outcome.theme = newTheme;
@@ -157,9 +157,9 @@ const updateOutcome = async (req, res) => {
   // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(organizationURI =>
   //   GDBOrganizationModel.findOne({_id: organizationURI.split('_')[1]})
   // ));
-  outcome.forOrganization = await GDBOrganizationModel.findOne({_id: outcome.forOrganization.split('_')[1]});
+  outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization});
   outcome.indicators = await Promise.all(outcome.indicators.map(indicatorURI =>
-    GDBIndicatorModel.findOne({_id: indicatorURI.split('_')[1]})
+    GDBIndicatorModel.findOne({_uri: indicatorURI})
   ))
   // outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
   // cache outcome.forOrganizations into dict
@@ -168,11 +168,11 @@ const updateOutcome = async (req, res) => {
   cacheListOfObjects(outcome.indicators, indicatorDict)
   // cacheObject(outcome.indicator, indicatorDict);
   // fetch form.organizations from database
-  form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_id: form.organization});
-  form.indicator = indicatorDict[form.indicator] || await GDBIndicatorModel.findOne({_id: form.indicator});
-  form.indicators = await Promise.all(form.indicators.map(indicatorId => {
+  form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_uri: form.organization});
+  form.indicator = indicatorDict[form.indicator] || await GDBIndicatorModel.findOne({_uri: form.indicator});
+  form.indicators = await Promise.all(form.indicators.map(indicatorUri => {
     // if indicator already in the dict, simply return it
-    return indicatorDict[indicatorId] || GDBIndicatorModel.findOne({_id: indicatorId});
+    return indicatorDict[indicatorUri] || GDBIndicatorModel.findOne({_uri: indicatorUri});
   }))
   // form.organizations = await Promise.all(form.organizations.map(organizationId => {
   //     // if the organization already in the dict, simply get from dict
@@ -189,9 +189,9 @@ const updateOutcome = async (req, res) => {
   // cacheObject(form.indicator, indicatorDict);
   // cacheListOfOrganizations(form.organizations, organizationDict);
 
-  if (form.organization._id !== outcome.forOrganization._id) {
+  if (form.organization._uri !== outcome.forOrganization._uri) {
     // remove the outcome from outcome.organization
-    const index = outcome.forOrganization.hasOutcomes.findIndex(outcome => outcome._id === id);
+    const index = outcome.forOrganization.hasOutcomes.findIndex(outcome => outcome._uri === uri);
     outcome.forOrganization.hasOutcomes.splice(index, 1);
     await outcome.forOrganization.save();
 
@@ -216,7 +216,7 @@ const updateOutcome = async (req, res) => {
   // }
   // remove the outcome from every indicators in outcome.indicators
   await Promise.all(outcome.indicators.map(indicator => {
-    const index = indicator.forOutcomes.findIndex(outcome => outcome._id === id);
+    const index = indicator.forOutcomes.findIndex(outcome => outcome._uri === uri);
     indicator.forOutcomes.splice(index, 1);
     return indicator.save();
   }));

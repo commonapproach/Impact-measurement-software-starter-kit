@@ -5,9 +5,9 @@ const {createOutcomeHandler, fetchOutcomeHandler, updateOutcomeHandler} = requir
 
 const router = express.Router();
 
-router.get('/:id', fetchOutcomeHandler);
+router.get('/:uri', fetchOutcomeHandler);
 router.post('/', createOutcomeHandler);
-router.put('/:id', updateOutcomeHandler);
+router.put('/:uri', updateOutcomeHandler);
 
 
 module.exports = router;

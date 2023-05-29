@@ -19,10 +19,9 @@ function ReportTypes() {
         <NavButton to={`/reportGenerate/groupMembers`} icon={<People/>} key={'Group Members'} buttonHeight={50} buttonWidth={150} textSize={"small"}
                    text="Group Members"/>
 
-      {/*{userContext.isSuperuser || userContext.groupAdminOf.length || userContext.administratorOf.length?*/}
-      {/*  <NavButton to={`/organizations`} icon={<People/>} key={'Indicator Reports'} buttonHeight={50} buttonWidth={150}  textSize={"small"}*/}
-      {/*             text="Indicator Reports"/>:*/}
-      {/*  null}*/}
+
+        <NavButton to={`/reportGenerate/indicatorReports`} icon={<Edit/>} key={'Indicator Reports'} buttonHeight={50} buttonWidth={150}  textSize={"small"}
+                   text="Indicator Reports"/>
 
       {/*{userContext.isSuperuser?*/}
       {/*  <NavButton to={`/users`} icon={<People/>} key={'Outcomes Reports'} buttonHeight={50} buttonWidth={150}  textSize={"small"}*/}

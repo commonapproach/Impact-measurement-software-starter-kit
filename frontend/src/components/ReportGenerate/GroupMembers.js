@@ -110,22 +110,14 @@ export default function GroupMembers() {
         {organizations.length ? organizations.map((organization, index) => {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
-              <Typography variant={'h6'}> {`Organization ${organization.legalName}`}  </Typography>
-              <GeneralField
-                disabled
-                key={`${organization._uri} name`}
-                label={`Legal Name`}
-                value={organization.legalName}
-              />
-              {
-                organization.contactName ?
-                  <GeneralField
-                    disabled
-                    key={`${organization._uri} contact name`}
-                    label={`Contact Name`}
-                    value={organization.contactName}
-                  /> : null
-              }
+              <Typography variant={'h6'}> {`Organization: ${organization.legalName}`}  </Typography>
+
+              <Typography variant={'body1'}> {'Legal Name: '}<Link to={`/organizations/${encodeURIComponent(organization._uri)}/edit`} color={'blue'}>{organization.legalName}</Link> </Typography>
+              {organization.contactName ?
+                <Typography variant={'body1'}> {`Contact Name: ${organization.contactName}`} </Typography> : null}
+              {organization.email ?
+                <Typography variant={'body1'}> {`Contact Name: ${organization.email}`} </Typography> : null}
+
 
             </Paper>
 

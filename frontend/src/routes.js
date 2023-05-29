@@ -41,6 +41,7 @@ import IndicatorReports from "./components/indicatorReport/indicatorReports";
 import FileUploadingPage from "./components/uploadingPages/uploadingPage";
 import ReportTypesPage from "./components/ReportGenerate/ReportTypesPage";
 import GroupMembers from "./components/ReportGenerate/GroupMembers";
+import IndicatorReports_ReportGenerate from "./components/ReportGenerate/IndicatorReports";
 
 const routes = (
   <Routes>
@@ -114,6 +115,8 @@ const routes = (
 
     <Route path={"/reportGenerate"} element={<PrivateRoute element={ReportTypesPage}/>}/>
     <Route path={"/reportGenerate/groupMembers"} element={<PrivateRoute element={GroupMembers}/>}/>
+    <Route path={"/reportGenerate/indicatorReports"}
+           element={<PrivateRoute element={IndicatorReports_ReportGenerate}/>}/>
 
 
     {/*<Route path="/services/:id/edit" element={<PrivateRoute element={ServiceForm}/>}/>*/}

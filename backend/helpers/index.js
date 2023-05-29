@@ -82,13 +82,13 @@ function organizationBelongsToUser(userAccount, organizationURI, role) {
 /**
  * check weather an organization with organizationid belongs to any group owned by the group admin
  * @param userAccount groupAdmin's account
- * @param organizationId the _id of the organization
+ * @param organizationUri the _uri of the organization
  * @returns {Promise<boolean>}
  */
 async function organizationBelongsToGroupAdmin(userAccount, organizationUri) {
   // fetch all groups belong to the user
   const groups = await Promise.all(userAccount.groupAdminOfs.map(groupURI => {
-      return GDBGroupModel.findOne({_id: groupURI.split('_')[1]}, {populates: ['organizations']});
+      return GDBGroupModel.findOne({_uri: groupURI}, {populates: ['organizations']});
     }
   ));
   // check does there any group contain the organization with organizationId

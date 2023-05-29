@@ -174,7 +174,7 @@ const updateIndicator = async (req, res) => {
 
   // remove the indicator from every organizations in indicator.forOrganizations
   await Promise.all(indicator.forOrganizations.map(organization => {
-    const index = organization.hasIndicators.findIndex(indicator => indicator._uri === uri);
+    const index = organization.hasIndicators.indexOf(uri);
     organization.hasIndicators.splice(index, 1);
     return organization.save();
   }));

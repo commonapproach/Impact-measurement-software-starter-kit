@@ -9,7 +9,7 @@ export async function getJson(url) {
     method: 'GET',
     credentials: 'include'
   });
-  if (response.status == 403) {
+  if (response.status === 403) {
     // session expired
     const e = new Error();
     e.json = await response.json();

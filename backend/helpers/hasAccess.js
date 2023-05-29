@@ -143,10 +143,10 @@ async function hasAccess(req, operationType) {
         return true;
       if (userAccount.groupAdminOfs) {
         // pass if the organization belongs to the group administrated by the groupAdmin
-        const {organizationId} = req.params;
-        if (!organizationId)
+        const {organizationUri} = req.params;
+        if (!organizationUri)
           throw new Server400Error('organizationId is needed');
-        if (await organizationBelongsToGroupAdmin(userAccount, organizationId))
+        if (await organizationBelongsToGroupAdmin(userAccount, organizationUri))
           return true;
       }
       // fetch all groups belong to the user

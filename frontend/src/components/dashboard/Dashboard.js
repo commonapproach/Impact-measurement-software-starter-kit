@@ -56,7 +56,7 @@ function Dashboard() {
                  text="File Upload"/>
 
       <NavButton to={'/reportGenerate'} icon={<Download/>} key={'reportGenerate'}
-                 text="Report Generate"/>
+                 text="Reports"/>
 
 
 

@@ -51,7 +51,7 @@ const inviteNewUser = async (req, res) => {
     const token = sign({
       email
     }, jwtConfig.secret, jwtConfig.options);
-    await sendVerificationMail(email, token);
+    // await sendVerificationMail(email, token); // todo: switch back later
     await userAccount.save();
     await Promise.all(associatedOrganizations.map(organization => {
       if (!organization.hasUsers)
@@ -72,7 +72,7 @@ const inviteNewUser = async (req, res) => {
     const token = sign({
       email
     }, jwtConfig.secret, jwtConfig.options);
-    await sendVerificationMail(email, token);
+    // await sendVerificationMail(email, token); todo: this must be switch back later
     await userAccount.save();
     return res.status(201).json({success: true, message: 'The user have been invited again.'});
   }

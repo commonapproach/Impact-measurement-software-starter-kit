@@ -176,6 +176,7 @@ const updateIndicator = async (req, res) => {
   await Promise.all(indicator.forOrganizations.map(organization => {
     const index = organization.hasIndicators.indexOf(uri);
     organization.hasIndicators.splice(index, 1);
+    organization.markModified('hasIndicators')
     return organization.save();
   }));
 

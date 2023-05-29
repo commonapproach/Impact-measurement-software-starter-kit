@@ -1,7 +1,7 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
 export async function fetchOrganizations() {
-  return getJson('/api/organizations');
+  return getJson('/api/organizations/');
 }
 
 export async function fetchOrganizationsBasedOnGroup(groupUri) {

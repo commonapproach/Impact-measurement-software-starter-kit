@@ -38,7 +38,7 @@ const fetchOutcomes = async (req, res) => {
     return res.status(200).json({success: true, outcomes});
   } else {
     // the organizationId is given, return all outcomes belongs to the organization
-    const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
+    const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes.indicators']});
     if (!organization)
       throw new Server400Error('No such organization');
     let editable;
@@ -48,11 +48,13 @@ const fetchOutcomes = async (req, res) => {
     }
     if (!organization.hasOutcomes)
       return res.status(200).json({success: true, outcomes: [], editable});
-    for (let outcome of organization.hasOutcomes) {
-      outcome.indicators = (await Promise.all(outcome.indicators.map(indicatorURI =>
-        GDBIndicatorModel.findOne({_uri: indicatorURI})
-      ))).map(indicator => indicator.name);
-    }
+
+    // for (let outcome of organization.hasOutcomes) {
+    //   await outcome.populate('indicators')
+    //   // outcome.indicators = (await Promise.all(outcome.indicators.map(indicatorURI =>
+    //   //   GDBIndicatorModel.findOne({_uri: indicatorURI})
+    //   // ))).map(indicator => indicator.name);
+    // }
 
     return res.status(200).json({success: true, outcomes: organization.hasOutcomes, editable});
   }

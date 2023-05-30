@@ -20,6 +20,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
 import {Undo} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
+import {fetchOutcomes} from "../../api/outcomeApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -39,7 +40,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-export default function IndicatorReports_ReportGenerate() {
+export default function OutcomeReports() {
 
   const classes = useStyles();
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ export default function IndicatorReports_ReportGenerate() {
   // const [selectedGroup, setSelectedGroup] = useState('');
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
-  const [indicators, setIndicators] = useState([]);
+  const [outcomes, setOutcomes] = useState([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -78,25 +79,26 @@ export default function IndicatorReports_ReportGenerate() {
   // }, []);
 
   useEffect(() => {
-      fetchOrganizations().then(({organizations, success}) => {
-        if (success) {
-          const organizationsOps = {};
-          organizations.map(organization => {
-            organizationsOps[organization._uri] = organization.legalName;
-          });
-          setOrganizations(organizationsOps);
-          setLoading(false);
-        }
-      });
+    fetchOrganizations().then(({organizations, success}) => {
+      if (success) {
+        const organizationsOps = {};
+        organizations.map(organization => {
+          organizationsOps[organization._uri] = organization.legalName;
+        });
+        setOrganizations(organizationsOps);
+        setLoading(false);
+      }
+    });
 
 
   }, []);
 
   useEffect(() => {
     if (selectedOrganization) {
-      fetchIndicators(encodeURIComponent(selectedOrganization)).then(({success, indicators}) => {
+      fetchOutcomes(encodeURIComponent(selectedOrganization)).then(({success, outcomes}) => {
         if (success) {
-          setIndicators(indicators);
+          console.log(outcomes)
+          setOutcomes(outcomes);
         }
       });
     }
@@ -108,25 +110,8 @@ export default function IndicatorReports_ReportGenerate() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Indicators </Typography>
+        <Typography variant={'h4'}> Outcomes </Typography>
 
-
-        {/*<SelectField*/}
-        {/*  key={'group'}*/}
-        {/*  label={'Group'}*/}
-        {/*  value={selectedGroup}*/}
-        {/*  options={groups}*/}
-        {/*  error={!!errors.group}*/}
-        {/*  helperText={*/}
-        {/*    errors.group*/}
-        {/*  }*/}
-        {/*  onChange={e => {*/}
-        {/*    setSelectedGroup(*/}
-        {/*      e.target.value*/}
-        {/*    );*/}
-        {/*    setSelectedOrganization('');*/}
-        {/*  }}*/}
-        {/*/>*/}
         <SelectField
           key={'organization'}
           label={'Organization'}
@@ -142,36 +127,22 @@ export default function IndicatorReports_ReportGenerate() {
             );
           }}
         />
-        {indicators.length ? indicators.map((indicator, index) => {
-          console.log(indicator)
+        {outcomes.length ? outcomes.map((outcome, index) => {
+          console.log(outcome.indicators)
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
-              <Typography variant={'h6'}> {`Indicator: ${indicator.name}`}  </Typography>
-               <Typography variant={'body1'}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-              <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
-
-              {indicator.indicatorReports?
-                <Paper elevation={0}>
-                  <Typography variant={'subtitle2'}> {`Indicator Reports:`}  </Typography>
-                  {indicator.indicatorReports.map(indicatorReport => {
+              <Typography variant={'h6'}> {`Outcome: ${outcome.name}`}  </Typography>
+              <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>
+              {outcome.indicators?
+                <Paper>
+                <Typography variant={'subtitle2'}> {`Indicators:`}  </Typography>
+                  {outcome.indicators.map(indicator => {
                     return (
                       <Paper elevation={0}>
-                        <Typography variant={'body2'}> {`Indicator Report: `} <Link
-                          to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`}
-                          color={'blue'}>{indicatorReport}</Link> </Typography>
-                      </Paper>);
+                        <Typography variant={'body2'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
+                      </Paper>)
                   })}
-                </Paper> : null
-                  }
-
-              {/*{indicator.indicatorReports? */}
-              {/*  indicator.indicatorReports.map(indicatorReport => {*/}
-              {/*  return (*/}
-              {/*    <Paper elevation={0}>*/}
-              {/*    <Typography variant={'subtitle2'}> {`Indicator Reports:`}  </Typography>*/}
-              {/*    <Typography variant={'body2'}> {`Indicator Report: `} <Link to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`} color={'blue'}>{indicatorReport}</Link> </Typography>*/}
-              {/*    </Paper>)*/}
-              {/*}) : null}*/}
+                </Paper> : null}
 
 
             </Paper>
@@ -192,7 +163,7 @@ export default function IndicatorReports_ReportGenerate() {
       </Paper>
 
 
-      {indicators.length ?
+      {outcomes.length ?
         <Paper sx={{p: 1}}>
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
           }}>

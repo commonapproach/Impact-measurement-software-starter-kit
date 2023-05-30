@@ -149,6 +149,13 @@ export default function IndicatorReports_ReportGenerate() {
               <Typography variant={'h6'}> {`Indicator: ${indicator.name}`}  </Typography>
                <Typography variant={'body1'}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
               <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+              {indicator.indicatorReports? indicator.indicatorReports.map(indicatorReport => {
+                return (
+                  <Paper elevation={0}>
+                  <Typography variant={'subtitle2'}> {`Indicator Reports:`}  </Typography>
+                  <Typography variant={'body2'}> {`Indicator Report: `} <Link to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`} color={'blue'}>{indicatorReport}</Link> </Typography>
+                  </Paper>)
+              }) : null}
 
 
             </Paper>
@@ -169,7 +176,7 @@ export default function IndicatorReports_ReportGenerate() {
       </Paper>
 
 
-      {organizations.length ?
+      {indicators.length ?
         <Paper sx={{p: 1}}>
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
           }}>

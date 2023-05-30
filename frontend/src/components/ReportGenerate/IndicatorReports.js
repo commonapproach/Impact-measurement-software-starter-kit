@@ -145,6 +145,7 @@ export default function IndicatorReports_ReportGenerate() {
         {indicators.length ? indicators.map((indicator, index) => {
           console.log(indicator)
           return (
+
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'h6'}> {`Indicator: ${indicator.name}`}  </Typography>
                <Typography variant={'body1'}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
@@ -156,9 +157,9 @@ export default function IndicatorReports_ReportGenerate() {
                   {indicator.indicatorReports.map(indicatorReport => {
                     return (
                       <Paper elevation={0}>
-                        <Typography variant={'body2'}> {`Indicator Report: `} <Link
-                          to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`}
-                          color={'blue'}>{indicatorReport}</Link> </Typography>
+                        <Typography variant={'body2'}> {`Indicator Report Name: `} <Link
+                          to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
+                          color={'blue'}>{indicatorReport.name}</Link> </Typography>
                       </Paper>);
                   })}
                 </Paper> : null
@@ -196,7 +197,7 @@ export default function IndicatorReports_ReportGenerate() {
         <Paper sx={{p: 1}}>
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
           }}>
-            Generate Json File
+            Generate PDF File
           </Button>
         </Paper> :
         null}

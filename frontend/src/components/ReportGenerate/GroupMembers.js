@@ -116,7 +116,7 @@ export default function GroupMembers() {
               {organization.contactName ?
                 <Typography variant={'body1'}> {`Contact Name: ${organization.contactName}`} </Typography> : null}
               {organization.email ?
-                <Typography variant={'body1'}> {`Contact Name: ${organization.email}`} </Typography> : null}
+                <Typography variant={'body1'}> {`Contact Email: ${organization.email}`} </Typography> : null}
 
 
             </Paper>
@@ -141,7 +141,7 @@ export default function GroupMembers() {
         <Paper sx={{p: 1}}>
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
           }}>
-            Generate Json File
+            Generate PDF File
           </Button>
         </Paper> :
         null}

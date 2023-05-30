@@ -75,7 +75,9 @@ export default function Outcomes() {
     {
       label: 'Indicators',
       body: ({indicators}) => {
-        return indicators.join(", ");
+        return indicators.map(indicator => indicator.name).join(', ')
+        // console.log(indicators)
+        // return indicators.join(", ");
       }
     },
     // {

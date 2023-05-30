@@ -97,7 +97,6 @@ export default function OutcomeReports() {
     if (selectedOrganization) {
       fetchOutcomes(encodeURIComponent(selectedOrganization)).then(({success, outcomes}) => {
         if (success) {
-          console.log(outcomes)
           setOutcomes(outcomes);
         }
       });
@@ -128,7 +127,6 @@ export default function OutcomeReports() {
           }}
         />
         {outcomes.length ? outcomes.map((outcome, index) => {
-          console.log(outcome.indicators)
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'subtitle1'}> {`Outcome: ${outcome.name}`}  </Typography>
@@ -141,6 +139,19 @@ export default function OutcomeReports() {
                       <Paper elevation={0}>
                         <Typography variant={'body2'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
                         <Typography variant={'body2'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+                        <Paper elevation={0} sx={{p:1}}>
+                          {indicator.indicatorReports?
+                            <Paper elevation={0}>
+                              <Typography variant={'body2'}> {`Indicator Reports`} </Typography>
+                              {indicator.indicatorReports.map(indicatorReport =>
+                                <Typography variant={'body2'}> {`Indicator Report: `}<Link
+                                  to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
+                                  color={'blue'}>{indicatorReport.name}</Link> </Typography>
+                              )}
+                            </Paper>
+                            :null
+                          }
+                        </Paper>
                       </Paper>)
                   })}
                 </Paper> : null}

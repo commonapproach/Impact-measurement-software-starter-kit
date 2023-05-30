@@ -126,6 +126,7 @@ export default function AddEditOutcome() {
 
   const validate = () => {
     const error = {};
+    console.log(form)
     if (form.name === '')
       error.name = 'The field cannot be empty';
     if (!form.indicators.length)

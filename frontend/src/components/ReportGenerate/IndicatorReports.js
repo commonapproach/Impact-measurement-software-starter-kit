@@ -20,6 +20,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
 import {Undo} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
+import {jsPDF} from "jspdf";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -43,39 +44,43 @@ export default function IndicatorReports_ReportGenerate() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const userContext = useContext(UserContext);
-  const {enqueueSnackbar} = useSnackbar();
-  const mode = '';
-
-  const [state, setState] = useState({
-    submitDialog: false,
-    loadingButton: false,
-  });
-  const [errors, setErrors] = useState(
-    {}
-  );
 
 
-  // const [groups, setGroups] = useState({});
-  // const [selectedGroup, setSelectedGroup] = useState('');
+
+  const generatePDFFile = () => {
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'a5',
+      putOnlyUsedFonts:true
+    });
+    let x = 20
+    let y = 20
+    pdf.text("Indicator Reports", x, y);
+    pdf.setFontSize(5);
+    y += 20;
+
+    indicators.map(indicator => {
+      pdf.text(`Indicator Name: ${indicator.name}`, x, y)
+      y += 3;
+      pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
+      y += 3;
+      indicator.indicatorReports.map(indicatorReport => {
+        pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
+        y += 3
+      })
+    })
+    pdf.save('indicator report.pdf');
+
+  }
+
+
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [indicators, setIndicators] = useState([]);
   const [loading, setLoading] = useState(true);
 
 
-  // useEffect(() => {
-  //   fetchGroups().then(res => {
-  //     if (res.success) {
-  //       const groups = {};
-  //       res.groups.map(group => {
-  //         groups[group._uri] = group.label;
-  //       });
-  //       setGroups(groups);
-  //       setLoading(false);
-  //     }
-  //   });
-  // }, []);
 
   useEffect(() => {
       fetchOrganizations().then(({organizations, success}) => {
@@ -110,32 +115,11 @@ export default function IndicatorReports_ReportGenerate() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Indicators </Typography>
 
-
-        {/*<SelectField*/}
-        {/*  key={'group'}*/}
-        {/*  label={'Group'}*/}
-        {/*  value={selectedGroup}*/}
-        {/*  options={groups}*/}
-        {/*  error={!!errors.group}*/}
-        {/*  helperText={*/}
-        {/*    errors.group*/}
-        {/*  }*/}
-        {/*  onChange={e => {*/}
-        {/*    setSelectedGroup(*/}
-        {/*      e.target.value*/}
-        {/*    );*/}
-        {/*    setSelectedOrganization('');*/}
-        {/*  }}*/}
-        {/*/>*/}
         <SelectField
           key={'organization'}
           label={'Organization'}
           value={selectedOrganization}
           options={organizations}
-          // error={!!errors.group}
-          // helperText={
-          //   errors.group
-          // }
           onChange={e => {
             setSelectedOrganization(
               e.target.value
@@ -143,7 +127,6 @@ export default function IndicatorReports_ReportGenerate() {
           }}
         />
         {indicators.length ? indicators.map((indicator, index) => {
-          console.log(indicator)
           return (
 
             <Paper sx={{p: 2}} variant={'outlined'}>
@@ -164,14 +147,6 @@ export default function IndicatorReports_ReportGenerate() {
                 </Paper> : null
                   }
 
-              {/*{indicator.indicatorReports? */}
-              {/*  indicator.indicatorReports.map(indicatorReport => {*/}
-              {/*  return (*/}
-              {/*    <Paper elevation={0}>*/}
-              {/*    <Typography variant={'subtitle2'}> {`Indicator Reports:`}  </Typography>*/}
-              {/*    <Typography variant={'body2'}> {`Indicator Report: `} <Link to={`/indicatorReport/${encodeURIComponent(indicatorReport)}/view`} color={'blue'}>{indicatorReport}</Link> </Typography>*/}
-              {/*    </Paper>)*/}
-              {/*}) : null}*/}
 
 
             </Paper>
@@ -179,23 +154,12 @@ export default function IndicatorReports_ReportGenerate() {
           );
         }) : null}
 
-
-        {/*<AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}*/}
-        {/*             dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :*/}
-        {/*               'Are you sure you want to update this Organization?'}*/}
-        {/*             buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}*/}
-        {/*                               key={'cancel'}>{'cancel'}</Button>,*/}
-        {/*               <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}*/}
-        {/*                              key={'confirm'}*/}
-        {/*                              onClick={handleConfirm()} children="confirm" autoFocus/>]}*/}
-        {/*             open={state.submitDialog}/>*/}
       </Paper>
 
 
       {indicators.length ?
         <Paper sx={{p: 1}}>
-          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          }}>
+          <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>
             Generate PDF File
           </Button>
         </Paper> :

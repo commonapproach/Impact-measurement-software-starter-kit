@@ -42,17 +42,6 @@ export default function GroupMembers() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const userContext = useContext(UserContext);
-  const {enqueueSnackbar} = useSnackbar();
-  const mode = '';
-
-  const [state, setState] = useState({
-    submitDialog: false,
-    loadingButton: false,
-  });
-  const [errors, setErrors] = useState(
-    {}
-  );
 
 
   const [groups, setGroups] = useState({});
@@ -71,20 +60,20 @@ export default function GroupMembers() {
     let y = 20
     pdf.text("Group Members", x, y);
     pdf.setFontSize(5);
-    y += 5;
+    y += 10;
     organizations.map((organization, index) => {
       pdf.text(`Legal Name: ${organization.legalName}`, x, y);
-      y += 5;
+      y += 3;
       if (organization.contactName){
         pdf.text(`Contact Name: ${organization.contactName}`, x, y)
-        y += 5
+        y += 3
       }
       if (organization.email) {
         pdf.text(`Contact Email: ${organization.email}`, x, y)
-        y += 5
+        y += 3
       }
     })
-    pdf.save('groupMember.pdf');
+    pdf.save('group member.pdf');
   }
   useEffect(() => {
     fetchGroups().then(res => {
@@ -124,10 +113,6 @@ export default function GroupMembers() {
           label={'Group'}
           value={selectedGroup}
           options={groups}
-          error={!!errors.group}
-          helperText={
-            errors.group
-          }
           onChange={e => {
             setSelectedGroup(
               e.target.value
@@ -151,16 +136,6 @@ export default function GroupMembers() {
           );
         }) : null}
 
-
-        {/*<AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}*/}
-        {/*             dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :*/}
-        {/*               'Are you sure you want to update this Organization?'}*/}
-        {/*             buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}*/}
-        {/*                               key={'cancel'}>{'cancel'}</Button>,*/}
-        {/*               <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}*/}
-        {/*                              key={'confirm'}*/}
-        {/*                              onClick={handleConfirm()} children="confirm" autoFocus/>]}*/}
-        {/*             open={state.submitDialog}/>*/}
       </Paper>
 
 

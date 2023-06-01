@@ -4,8 +4,8 @@ export async function createTheme(params) {
   return postJson('/api/theme/', params);
 }
 
-export async function fetchThemes(params) {
-  return getJson('/api/themes/', params);
+export async function fetchThemes() {
+  return getJson('/api/themes/');
 }
 
 export async function fetchTheme(id) {

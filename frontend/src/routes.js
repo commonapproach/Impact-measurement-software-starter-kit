@@ -43,6 +43,7 @@ import ReportTypesPage from "./components/ReportGenerate/ReportTypesPage";
 import GroupMembers from "./components/ReportGenerate/GroupMembers";
 import IndicatorReports_ReportGenerate from "./components/ReportGenerate/IndicatorReports";
 import OutcomeReports from "./components/ReportGenerate/OutcomeReports";
+import ThemeReports from "./components/ReportGenerate/ThemeReport";
 
 const routes = (
   <Routes>
@@ -114,11 +115,13 @@ const routes = (
 
     <Route path="/users/:id" element={<SuperUserRoute element={User}/>}/>
 
+    {/*reportGenerate*/}
     <Route path={"/reportGenerate"} element={<PrivateRoute element={ReportTypesPage}/>}/>
     <Route path={"/reportGenerate/groupMembers"} element={<PrivateRoute element={GroupMembers}/>}/>
     <Route path={"/reportGenerate/indicatorReports"}
            element={<PrivateRoute element={IndicatorReports_ReportGenerate}/>}/>
     <Route path={"/reportGenerate/outcomeReports"} element={<PrivateRoute element={OutcomeReports}/>}/>
+      <Route path={"/reportGenerate/themeReports"} element={<PrivateRoute element={ThemeReports}/>}/>
 
 
     {/*<Route path="/services/:id/edit" element={<PrivateRoute element={ServiceForm}/>}/>*/}

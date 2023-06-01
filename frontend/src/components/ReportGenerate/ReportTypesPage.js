@@ -27,8 +27,8 @@ function ReportTypes() {
         <NavButton to={`/reportGenerate/outcomeReports`} icon={<Edit/>} key={'Outcome Reports'} buttonHeight={50} buttonWidth={150}  textSize={"small"}
                    text="Outcome Reports"/>
 
-      {/*<NavButton to={'/organization-indicators'} icon={<Edit/>} key={'Theme Reports'} buttonHeight={50}*/}
-      {/*           buttonWidth={150}  textSize={"small"} text="Theme Reports"/>*/}
+      <NavButton to={'/reportGenerate/themeReports'} icon={<Edit/>} key={'Theme Reports'} buttonHeight={50}
+                 buttonWidth={150}  textSize={"small"} text="Theme Reports"/>
 
       {/*<NavButton to={'/organization-outcomes'} icon={<Edit/>} key={'organization-outcomes'} buttonHeight={50}*/}
       {/*           buttonWidth={150}  textSize={"small"}  text="Theme Report"/>*/}
@@ -36,11 +36,9 @@ function ReportTypes() {
       {/*<NavButton to={'/organization-indicatorReports'} icon={<Edit/>} key={'indicatorReports'} buttonHeight={50}*/}
       {/*           buttonWidth={150}  textSize={"small"} text="Manage Indicator Reports"/>*/}
 
-      <NavButton to={'/dashboard'} icon={<Undo/>} key={'themes'} buttonHeight={50} buttonWidth={150} textSize={"small"}
+      <NavButton to={'/dashboard'} icon={<Undo/>} key={'back'} buttonHeight={50} buttonWidth={150} textSize={"small"}
                  text="Back" />
 
-      {/*<NavButton to={'/fileUploading'} icon={<FileUpload/>} key={'fileUploading'} disabled buttonHeight={50}*/}
-      {/*           buttonWidth={150}  textSize={"small"}  text="File Upload"/>*/}
 
 
 

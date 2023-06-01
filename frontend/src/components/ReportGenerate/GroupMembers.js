@@ -18,6 +18,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
 import {Undo} from "@mui/icons-material";
+import { jsPDF } from "jspdf"
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -59,6 +60,32 @@ export default function GroupMembers() {
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const generatePDFFile = () => {
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'a5',
+      putOnlyUsedFonts:true
+    });
+    let x = 20
+    let y = 20
+    pdf.text("Group Members", x, y);
+    pdf.setFontSize(5);
+    y += 5;
+    organizations.map((organization, index) => {
+      pdf.text(`Legal Name: ${organization.legalName}`, x, y);
+      y += 5;
+      if (organization.contactName){
+        pdf.text(`Contact Name: ${organization.contactName}`, x, y)
+        y += 5
+      }
+      if (organization.email) {
+        pdf.text(`Contact Email: ${organization.email}`, x, y)
+        y += 5
+      }
+    })
+    pdf.save('groupMember.pdf');
+  }
   useEffect(() => {
     fetchGroups().then(res => {
       if (res.success) {
@@ -139,8 +166,7 @@ export default function GroupMembers() {
 
       {organizations.length ?
         <Paper sx={{p: 1}}>
-          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          }}>
+          <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>
             Generate PDF File
           </Button>
         </Paper> :

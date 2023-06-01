@@ -10,6 +10,7 @@
     "@mui/styles": "^5.8.0",
     "@mui/x-date-pickers": "^5.0.0-alpha.3",
     "date-fns": "^2.23.0",
+    "jspdf": "^2.5.1",
     "lodash": "^4.17.20",
     "material-ui-phone-number": "^3.0.0",
     "notistack": "^2.0.5",

@@ -138,16 +138,16 @@ export default function IndicatorReports_ReportGenerate() {
               <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
 
               {indicator.indicatorReports?
-                <Paper elevation={0} sx={{p:1}}>
-                  <Typography variant={'subtitle2'}> {`Indicator Reports:`}  </Typography>
-                  {indicator.indicatorReports.map(indicatorReport => {
+
+
+                  (indicator.indicatorReports.map(indicatorReport => {
                     return (
-                        <Typography variant={'body2'}> {`Indicator Report Name: `} <Link
+                        <Typography variant={'body1'} sx={{pl:2}}> {`Indicator Report Name: `} <Link
                           to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
                           color={'blue'}>{indicatorReport.name}</Link> </Typography>
                       );
-                  })}
-                </Paper> : null
+                  }))
+                 : null
                   }
 
 

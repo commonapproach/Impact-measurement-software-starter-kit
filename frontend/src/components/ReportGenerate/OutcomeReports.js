@@ -129,29 +129,25 @@ export default function OutcomeReports() {
         {outcomes.length ? outcomes.map((outcome, index) => {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
-              <Typography variant={'subtitle1'}> {`Outcome: ${outcome.name}`}  </Typography>
+              {/*<Typography variant={'body1'}> {`Outcome: ${outcome.name}`}  </Typography>*/}
               <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>
               {outcome.indicators?
-                <Paper elevation={0} sx={{p: 1}}>
-                <Typography variant={'subtitle2'}> {`Indicators:`}  </Typography>
+                <Paper elevation={0}>
+                {/*<Typography variant={'body1'}> {`Indicators:`}  </Typography>*/}
                   {outcome.indicators.map(indicator => {
                     return (
-                      <Paper elevation={0}>
-                        <Typography variant={'body2'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-                        <Typography variant={'body2'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
-                        <Paper elevation={0} sx={{p:1}}>
+                      <Paper elevation={0} sx={{pl: 1}}>
+                        <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
+                        <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+
                           {indicator.indicatorReports?
-                            <Paper elevation={0}>
-                              <Typography variant={'body2'}> {`Indicator Reports`} </Typography>
-                              {indicator.indicatorReports.map(indicatorReport =>
-                                <Typography variant={'body2'}> {`Indicator Report: `}<Link
+                              (indicator.indicatorReports.map(indicatorReport =>
+                                <Typography variant={'body1'} sx={{pl: 1}}> {`Indicator Report: `}<Link
                                   to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
                                   color={'blue'}>{indicatorReport.name}</Link> </Typography>
-                              )}
-                            </Paper>
+                              ))
                             :null
                           }
-                        </Paper>
                       </Paper>)
                   })}
                 </Paper> : null}

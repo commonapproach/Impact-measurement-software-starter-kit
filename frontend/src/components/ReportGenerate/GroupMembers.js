@@ -58,10 +58,11 @@ export default function GroupMembers() {
     });
     let x = 20
     let y = 20
-    pdf.text("Group Members", x, y);
+    pdf.text("Group Members Report", x, y);
     pdf.setFontSize(5);
     y += 10;
     organizations.map((organization, index) => {
+      y += 3
       pdf.text(`Legal Name: ${organization.legalName}`, x, y);
       y += 3;
       if (organization.contactName){
@@ -72,6 +73,7 @@ export default function GroupMembers() {
         pdf.text(`Contact Email: ${organization.email}`, x, y)
         y += 3
       }
+
     })
     pdf.save('group member.pdf');
   }

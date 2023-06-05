@@ -60,14 +60,14 @@ export default function IndicatorReports_ReportGenerate() {
     pdf.setFontSize(5);
     y += 10;
 
-    indicators.map(indicator => {
+    indicators?.map(indicator => {
       x = 23;
       y += 3
       pdf.text(`Indicator Name: ${indicator.name}`, x, y)
       y += 3;
       pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
       y += 3;
-      indicator.indicatorReports.map(indicatorReport => {
+      indicator.indicatorReports?.map(indicatorReport => {
         x = 26
         pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
         y += 3

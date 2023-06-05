@@ -61,7 +61,7 @@ export default function GroupMembers() {
     pdf.text("Group Members Report", x, y);
     pdf.setFontSize(5);
     y += 10;
-    organizations.map((organization, index) => {
+    organizations?.map((organization, index) => {
       y += 3
       pdf.text(`Legal Name: ${organization.legalName}`, x, y);
       y += 3;

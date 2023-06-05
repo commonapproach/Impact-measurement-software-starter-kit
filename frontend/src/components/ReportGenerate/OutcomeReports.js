@@ -21,6 +21,7 @@ import {fetchGroups} from "../../api/groupApi";
 import {Undo} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {fetchOutcomes} from "../../api/outcomeApi";
+import {jsPDF} from "jspdf";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -44,39 +45,46 @@ export default function OutcomeReports() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const userContext = useContext(UserContext);
-  const {enqueueSnackbar} = useSnackbar();
-  const mode = '';
 
-  const [state, setState] = useState({
-    submitDialog: false,
-    loadingButton: false,
-  });
-  const [errors, setErrors] = useState(
-    {}
-  );
-
-
-  // const [groups, setGroups] = useState({});
-  // const [selectedGroup, setSelectedGroup] = useState('');
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [outcomes, setOutcomes] = useState([]);
   const [loading, setLoading] = useState(true);
 
 
-  // useEffect(() => {
-  //   fetchGroups().then(res => {
-  //     if (res.success) {
-  //       const groups = {};
-  //       res.groups.map(group => {
-  //         groups[group._uri] = group.label;
-  //       });
-  //       setGroups(groups);
-  //       setLoading(false);
-  //     }
-  //   });
-  // }, []);
+  const generatePDFFile = () => {
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'a5',
+      putOnlyUsedFonts:true
+    });
+    let x = 20
+    let y = 20
+    pdf.text("Outcome Reports", x, y);
+    pdf.setFontSize(5);
+    y += 10;
+    outcomes.map((outcome) => {
+      x = 23;
+      y += 3
+      pdf.text(`Outcome Name: ${outcome.name}`, x, y);
+      y += 3;
+      outcome.indicators?.map(indicator => {
+        x = 26;
+        y += 3;
+        pdf.text(`Indicator Name: ${indicator.name}`, x, y);
+        y += 3;
+        pdf.text(`Unit Of Measure: ${indicator.unitOfMeasure.label}`, x, y);
+        y += 3;
+        indicator.indicatorReports?.map(indicatorReport => {
+          x = 29;
+          pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
+          y += 3;
+        })
+      })
+    })
+    pdf.save('outcome report.pdf');
+  }
 
   useEffect(() => {
     fetchOrganizations().then(({organizations, success}) => {
@@ -116,10 +124,6 @@ export default function OutcomeReports() {
           label={'Organization'}
           value={selectedOrganization}
           options={organizations}
-          // error={!!errors.group}
-          // helperText={
-          //   errors.group
-          // }
           onChange={e => {
             setSelectedOrganization(
               e.target.value
@@ -173,8 +177,7 @@ export default function OutcomeReports() {
 
       {outcomes.length ?
         <Paper sx={{p: 1}}>
-          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          }}>
+          <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>
             Generate PDF File
           </Button>
         </Paper> :

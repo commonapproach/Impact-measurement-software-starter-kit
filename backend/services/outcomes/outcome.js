@@ -74,6 +74,16 @@ const fetchOutcomesHandler = async (req, res, next) => {
   }
 };
 
+const fetchOutcomesThroughThemeHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchOutcomesThroughTheme'))
+      return await fetchOutcomesThroughTheme(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
 const fetchOutcomeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchOutcome'))
@@ -83,6 +93,17 @@ const fetchOutcomeHandler = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
+};
+
+const fetchOutcomesThroughTheme = async (req, res) => {
+  const {themeUri} = req.params;
+  if (!themeUri)
+    throw new Server400Error('Theme URI is not given')
+  const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
+  const reachableOrganizations = (await allReachableOrganizations(userAccount)).map(organization => organization._uri);
+  const outcomes = await GDBOutcomeModel.find({theme: themeUri, forOrganization: {$in: reachableOrganizations}},
+    {populates: ['indicators']});
+  return res.status(200).json({success: true, outcomes})
 };
 
 const fetchOutcome = async (req, res) => {
@@ -163,12 +184,12 @@ const updateOutcome = async (req, res) => {
   outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization});
   outcome.indicators = await Promise.all(outcome.indicators.map(indicatorURI =>
     GDBIndicatorModel.findOne({_uri: indicatorURI})
-  ))
+  ));
   // outcome.indicator = await GDBIndicatorModel.findOne({_id: outcome.indicator.split('_')[1]});
   // cache outcome.forOrganizations into dict
   // cacheListOfOrganizations(outcome.forOrganizations, organizationDict);
   cacheObject(outcome.forOrganization, organizationDict);
-  cacheListOfObjects(outcome.indicators, indicatorDict)
+  cacheListOfObjects(outcome.indicators, indicatorDict);
   // cacheObject(outcome.indicator, indicatorDict);
   // fetch form.organizations from database
   form.organization = organizationDict[form.organization] || await GDBOrganizationModel.findOne({_uri: form.organization});
@@ -176,7 +197,7 @@ const updateOutcome = async (req, res) => {
   form.indicators = await Promise.all(form.indicators.map(indicatorUri => {
     // if indicator already in the dict, simply return it
     return indicatorDict[indicatorUri] || GDBIndicatorModel.findOne({_uri: indicatorUri});
-  }))
+  }));
   // form.organizations = await Promise.all(form.organizations.map(organizationId => {
   //     // if the organization already in the dict, simply get from dict
   //     if (organizationDict[organizationId])
@@ -188,7 +209,7 @@ const updateOutcome = async (req, res) => {
 
   // cache organizations which is not in dict
   cacheObject(form.organization, organizationDict);
-  cacheListOfObjects(form.indicators, indicatorDict)
+  cacheListOfObjects(form.indicators, indicatorDict);
   // cacheObject(form.indicator, indicatorDict);
   // cacheListOfOrganizations(form.organizations, organizationDict);
 
@@ -232,7 +253,7 @@ const updateOutcome = async (req, res) => {
     return indicator.save();
   }));
 
-  outcome.indicators = form.indicators
+  outcome.indicators = form.indicators;
   // outcome.hasIdentifier = form.identifier;
 
   // remove the outcome from every organizations in outcome.forOrganizations
@@ -305,9 +326,9 @@ const createOutcome = async (req, res) => {
   if (form.indicators.includes(undefined) || form.indicators.includes(null))
     throw new Server400Error('Wrong indicator(s)');
   form.indicators.map(indicator => {
-    if(!indicator.forOrganizations.includes(form.forOrganization._uri))
+    if (!indicator.forOrganizations.includes(form.forOrganization._uri))
       throw new Server400Error('The indicator is not belong to the organization');
-  })
+  });
 
   // const indicator = await GDBIndicatorModel.findOne({_id: form.indicator}, {populates: ['forOutcomes']});
   // if (!indicator)
@@ -354,7 +375,7 @@ const createOutcome = async (req, res) => {
       indicator.forOutcomes = [];
     indicator.forOutcomes.push(outcome);
     return indicator.save();
-  }))
+  }));
   // if (!outcome.indicator.forOutcomes)
   //   outcome.indicator.forOutcomes = [];
   // outcome.indicator.forOutcomes.push(outcome);
@@ -376,4 +397,10 @@ const createOutcome = async (req, res) => {
 };
 
 
-module.exports = {updateOutcomeHandler, createOutcomeHandler, fetchOutcomesHandler, fetchOutcomeHandler};
+module.exports = {
+  updateOutcomeHandler,
+  createOutcomeHandler,
+  fetchOutcomesHandler,
+  fetchOutcomeHandler,
+  fetchOutcomesThroughThemeHandler
+};

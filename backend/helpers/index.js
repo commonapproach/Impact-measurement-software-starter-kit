@@ -66,7 +66,7 @@ function URI2Id(uri) {
 /**
  * the function checks weather the user is serving for the organization as a specific role
  * @param userAccount user's userAccount
- * @param organizationId organization's id
+ * @param organizationURI organization's URI
  * @param role role of the user, ex. 'administratorOfs'
  */
 function organizationBelongsToUser(userAccount, organizationURI, role) {
@@ -214,7 +214,8 @@ async function isReachableBy(resource, userAccount, role) {
 }
 
 async function allReachableOrganizations(userAccount) {
-
+  if (userAccount.isSuperuser)
+    return await GDBOrganizationModel.find({})
   let organizations = [];
   if (userAccount.groupAdminOfs?.length) {
     // add all organization is his group in to the list

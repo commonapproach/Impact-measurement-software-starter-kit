@@ -149,18 +149,6 @@ async function hasAccess(req, operationType) {
         if (await organizationBelongsToGroupAdmin(userAccount, organizationUri))
           return true;
       }
-      // fetch all groups belong to the user
-      //   const groups = await Promise.all(userAccount.groupAdminOfs.map(groupURI => {
-      //       return GDBGroupModel.findOne({_id: groupURI.split('_')[1]}, {populates: ['organizations']});
-      //     }
-      //   ));
-      //   // check does there any group contain the organization with organizationId
-      //   const checker = groups.filter(group => {
-      //     return group.organizations.includes(`:organization_${organizationId}`);
-      //   });
-      //   if (checker.length > 0)
-      //     return true;
-      // }
       if (userAccount.administratorOfs) {
         // pass if the organization belongs to the userAccount
         const {organizationId} = req.params;
@@ -376,6 +364,9 @@ async function hasAccess(req, operationType) {
           return true;
       }
       break;
+    case 'fetchOutcomesThroughTheme':
+      return true
+      break;
     case 'createOutcome':
       if (userAccount.isSuperuser)
         return true;
@@ -393,8 +384,6 @@ async function hasAccess(req, operationType) {
         if (!checkerList.includes(false))
           return true;
       }
-
-
       break;
     case 'fetchOutcome':
       if (userAccount.isSuperuser)

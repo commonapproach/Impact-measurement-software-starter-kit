@@ -123,54 +123,6 @@ const routes = (
     <Route path={"/reportGenerate/outcomeReports"} element={<PrivateRoute element={OutcomeReports}/>}/>
       <Route path={"/reportGenerate/themeReports"} element={<PrivateRoute element={ThemeReports}/>}/>
 
-
-    {/*<Route path="/services/:id/edit" element={<PrivateRoute element={ServiceForm}/>}/>*/}
-    {/*<Route path="/services/new" element={<PrivateRoute element={ServiceForm}/>}/>*/}
-    {/*<Route path="/services/:id" element={<PrivateRoute element={VisualizeService}/>}/>*/}
-    {/*<Route path="/services" element={<PrivateRoute element={Services}/>}/>*/}
-
-    {/*<Route path="/serviceOccurrences" element={<PrivateRoute element={ServiceOccurrences}/>}/>*/}
-    {/*<Route path="/serviceOccurrence/new" element={<PrivateRoute element={ServiceOccurrenceForm}/>}/>*/}
-    {/*<Route path="/serviceOccurrence/:id/edit" element={<PrivateRoute element={ServiceOccurrenceForm}/>}/>*/}
-
-    {/*<Route path="/referrals" element={<PrivateRoute element={Referrals}/>}/>*/}
-
-    {/*<Route path="/appointments/:id/edit" element={<PrivateRoute element={AppointmentForm}/>}/>*/}
-    {/*<Route path="/appointments/:id" element={<PrivateRoute element={VisualizeAppointment}/>}/>*/}
-    {/*<Route path="/appointments/new" element={<PrivateRoute element={AppointmentForm}/>}/>*/}
-    {/*<Route path="/appointments" element={<PrivateRoute element={Appointments}/>}/>*/}
-
-    {/*<Route path="/eligibility-criteria" element={<PrivateRoute element={Eligibilities}/>}/>*/}
-
-    {/*<Route path="/characteristics" element={<AdminRoute element={Characteristics}/>}/>*/}
-    {/*/!*this for edit*!/*/}
-    {/*<Route path={'/characteristic/:id/:option'} element={<AdminRoute element={AddEditCharacteristic}/>}/>*/}
-    {/*/!*this for add  *!/*/}
-    {/*<Route path={'/characteristic/:option'} element={<AdminRoute element={AddEditCharacteristic}/>}/>*/}
-
-    {/*<Route path={'/question/:id/:option'} element={<AdminRoute element={AddEditQuestion}/>}/>*/}
-    {/*<Route path={'/question/:option'} element={<AdminRoute element={AddEditQuestion}/>}/>*/}
-    {/*<Route path={'/questions'} element={<AdminRoute element={Questions}/>}/>*/}
-
-    {/*<Route path={'/need/:id/:option'} element={<AdminRoute element={AddEditNeed}/>}/>*/}
-    {/*<Route path={'/need/:option'} element={<AdminRoute element={AddEditNeed}/>}/>*/}
-    {/*<Route path={'/needs'} element={<AdminRoute element={Needs}/>}/>*/}
-
-    {/*<Route path={'/needSatisfier/:id/:option'} element={<AdminRoute element={AddEditNeedSatisfier}/>}/>*/}
-    {/*<Route path={'/needSatisfier/:option'} element={<AdminRoute element={AddEditNeedSatisfier}/>}/>*/}
-    {/*<Route path={'/needSatisfiers'} element={<AdminRoute element={NeedSatisfiers}/>}/>*/}
-
-
-    {/*<Route path="/settings/manage-fields" element={<AdminRoute element={ManageFields}/>}/>*/}
-
-    {/*<Route exact path="/settings/manage-forms/" element={<AdminRoute element={ManageForms}/>}/>*/}
-    {/*<Route exact path="/settings/manage-forms/:formType" element={<AdminRoute element={ManageForms}/>}/>*/}
-
-    {/*/!*:formType could be `client`, 'organization', ...*!/*/}
-    {/*/!*:method could be `edit` or `new`*!/*/}
-    {/*<Route exact path="/settings/forms/" element={<AdminRoute element={ManageFormFields}/>}/>*/}
-    {/*<Route exact path="/settings/forms/:formType/:method" element={<AdminRoute element={ManageFormFields}/>}/>*/}
-    {/*<Route exact path="/settings/forms/:formType/:method/:formId" element={<AdminRoute element={ManageFormFields}/>}/>*/}
   </Routes>
 );
 

@@ -4,6 +4,10 @@ export async function fetchOutcomes(organizationUri) {
   return getJson('/api/outcomes/' + organizationUri + '/');
 }
 
+export async function fetchOutcomesThroughTheme(themeUri) {
+  return getJson(`/api/outcomes/theme/${themeUri}/`)
+}
+
 export async function fetchOutcome(uri) {
   return getJson('/api/outcome/' + uri);
 }

@@ -1,5 +1,5 @@
 const express = require('express');
-const {fetchOutcomesHandler} = require("../services/outcomes/outcome");
+const {fetchOutcomesHandler, fetchOutcomesThroughThemeHandler} = require("../services/outcomes/outcome");
 
 
 
@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', fetchOutcomesHandler);
 router.get('/:organizationUri', fetchOutcomesHandler);
+router.get('/theme/:themeUri', fetchOutcomesThroughThemeHandler)
 
 
 

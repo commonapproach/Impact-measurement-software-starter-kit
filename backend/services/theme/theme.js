@@ -2,7 +2,6 @@ const {GDBThemeModel} = require("../../models/theme");
 const {hasAccess} = require("../../helpers/hasAccess");
 
 const createTheme = async (req, res) => {
-
     const form = req.body;
     if (!form.name || !form.description)
       return res.status(400).json({success: false, message: 'Name and description are needed'});
@@ -15,7 +14,6 @@ const createTheme = async (req, res) => {
     }, form.uri?{uri: form.uri}:null);
     await theme.save();
     return res.status(200).json({success: true, message: 'Successfully created the theme'});
-
 };
 
 const fetchTheme = async (req, res) => {

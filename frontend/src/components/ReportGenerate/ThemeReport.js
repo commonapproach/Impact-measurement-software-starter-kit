@@ -20,7 +20,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
 import {Undo} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
-import {fetchOutcomes} from "../../api/outcomeApi";
+import {fetchOutcomes, fetchOutcomesThroughTheme} from "../../api/outcomeApi";
 import {fetchThemes} from "../../api/themeApi";
 
 const useStyles = makeStyles(() => ({
@@ -61,10 +61,9 @@ export default function ThemeReports() {
   // const [groups, setGroups] = useState({});
   // const [selectedGroup, setSelectedGroup] = useState('');
   const [organizations, setOrganizations] = useState({});
-  const [selectedOrganization, setSelectedOrganization] = useState('');
-  const [outcomes, setOutcomes] = useState([]);
-  const [themes, setThemes] = useState([]);
-  const [outcomesCorepondingThemes, setOutcomesCorespondingThemes] = useState([])
+  const [themes, setThemes] = useState({});
+  const [selectedTheme, setSelectedTheme] = useState('');
+  const [outcomes, setOutcomes] = useState([])
   const [loading, setLoading] = useState(true);
 
 
@@ -81,45 +80,31 @@ export default function ThemeReports() {
   //   });
   // }, []);
 
-  useEffect(() => {
-    fetchOrganizations().then(({organizations, success}) => {
-      if (success) {
-        const organizationsOps = {};
-        organizations.map(organization => {
-          organizationsOps[organization._uri] = organization.legalName;
-        });
-        setOrganizations(organizationsOps);
-        setLoading(false);
-      }
-    });
-
-  }, []);
 
   useEffect(() => {
-    if (selectedOrganization) {
-      fetchOutcomes(encodeURIComponent(selectedOrganization)).then(({success, outcomes}) => {
+    if (selectedTheme) {
+      fetchOutcomesThroughTheme(encodeURIComponent(selectedTheme)).then(({success, outcomes}) => {
         if (success) {
-          const outcomeOps = {}
-          outcomes.map(outcome => {
-            outcomeOps[outcome._uri] = outcome.name
-          })
-          setOutcomes(outcomes);
+          setOutcomes(outcomes)
         }
       });
     }
-  }, [selectedOrganization]);
+  }, [selectedTheme]);
 
 
   useEffect(() => {
-    if (outcomes.length) {
-      fetchThemes( outcomes).then(({success, themes, outcomes}) => {
+      fetchThemes().then(({success, themes}) => {
         if (success) {
-          setThemes(themes)
-          setOutcomesCorespondingThemes(outcomes)
+          console.log(themes);
+          const themeOps = {};
+          themes.map(theme => {
+            themeOps[theme._uri] = theme.name
+          })
+          setThemes(themeOps);
+          setLoading(false);
         }
       })
-    }
-  }, [outcomes])
+  }, []);
 
   if (loading)
     return <Loading/>;
@@ -127,81 +112,61 @@ export default function ThemeReports() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Outcomes </Typography>
+        <Typography variant={'h4'}> Themes </Typography>
 
         <SelectField
-          key={'organization'}
-          label={'Organization'}
-          value={selectedOrganization}
-          options={organizations}
-          // error={!!errors.group}
-          // helperText={
-          //   errors.group
-          // }
+          key={'theme'}
+          label={'Theme'}
+          value={selectedTheme}
+          options={themes}
           onChange={e => {
-            setSelectedOrganization(
+            setSelectedTheme(
               e.target.value
             );
           }}
         />
-        {themes.length? themes.map((theme, index) => {
+
+        {outcomes.length ? outcomes.map((outcome, index) => {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
-              <Typography variant={'subtitle1'}> {`Theme: ${theme.name}`}  </Typography>
-              <Typography variant={'body1'}> {`Theme Name: `}<Link to={`/theme/${encodeURIComponent(theme._uri)}/view`} color={'blue'}>{theme.name}</Link> </Typography>
-              <Typography variant={'body1'}> {`Outcome Name: `}<Link to={`/outcome/${encodeURIComponent(outcomesCorepondingThemes[index]._uri)}/view`} color={'blue'}>{outcomesCorepondingThemes[index].name}</Link> </Typography>
-          </Paper>)
+              <Typography variant={'subtitle1'}> {`Theme: ${selectedTheme.name}`}  </Typography>
+              <Typography variant={'subtitle1'}> {`Outcome: ${outcome.name}`}  </Typography>
+              <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>
+              {/*{outcome.indicators?*/}
+              {/*  <Paper elevation={0} sx={{p: 1}}>*/}
+              {/*    <Typography variant={'subtitle1'}> {`Indicators:`}  </Typography>*/}
+              {/*    {outcome.indicators.map(indicator => {*/}
+              {/*      return (*/}
+              {/*        <Paper elevation={0}>*/}
+              {/*          <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>*/}
+              {/*          <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>*/}
+              {/*          <Paper elevation={0} sx={{p:1}}>*/}
+              {/*            {indicator.indicatorReports?*/}
+              {/*              <Paper elevation={0}>*/}
+              {/*                <Typography variant={'body2'}> {`Indicator Reports`} </Typography>*/}
+              {/*                {indicator.indicatorReports.map(indicatorReport =>*/}
+              {/*                  <Typography variant={'body2'}> {`Indicator Report: `}<Link*/}
+              {/*                    to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}*/}
+              {/*                    color={'blue'}>{indicatorReport.name}</Link> </Typography>*/}
+              {/*                )}*/}
+              {/*              </Paper>*/}
+              {/*              :null*/}
+              {/*            }*/}
+              {/*          </Paper>*/}
+              {/*        </Paper>)*/}
+              {/*    })}*/}
+              {/*  </Paper> : null}*/}
+
+
+            </Paper>
+
+          );
         }) : null}
-        {/*{outcomes.length ? outcomes.map((outcome, index) => {*/}
-        {/*  return (*/}
-        {/*    <Paper sx={{p: 2}} variant={'outlined'}>*/}
-        {/*      <Typography variant={'subtitle1'}> {`Outcome: ${outcome.name}`}  </Typography>*/}
-        {/*      <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>*/}
-        {/*      {outcome.indicators?*/}
-        {/*        <Paper elevation={0} sx={{p: 1}}>*/}
-        {/*          <Typography variant={'subtitle2'}> {`Indicators:`}  </Typography>*/}
-        {/*          {outcome.indicators.map(indicator => {*/}
-        {/*            return (*/}
-        {/*              <Paper elevation={0}>*/}
-        {/*                <Typography variant={'body2'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>*/}
-        {/*                <Typography variant={'body2'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>*/}
-        {/*                <Paper elevation={0} sx={{p:1}}>*/}
-        {/*                  {indicator.indicatorReports?*/}
-        {/*                    <Paper elevation={0}>*/}
-        {/*                      <Typography variant={'body2'}> {`Indicator Reports`} </Typography>*/}
-        {/*                      {indicator.indicatorReports.map(indicatorReport =>*/}
-        {/*                        <Typography variant={'body2'}> {`Indicator Report: `}<Link*/}
-        {/*                          to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}*/}
-        {/*                          color={'blue'}>{indicatorReport.name}</Link> </Typography>*/}
-        {/*                      )}*/}
-        {/*                    </Paper>*/}
-        {/*                    :null*/}
-        {/*                  }*/}
-        {/*                </Paper>*/}
-        {/*              </Paper>)*/}
-        {/*          })}*/}
-        {/*        </Paper> : null}*/}
 
-
-        {/*    </Paper>*/}
-
-        {/*  );*/}
-        {/*}) : null}*/}
-
-
-        {/*<AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}*/}
-        {/*             dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :*/}
-        {/*               'Are you sure you want to update this Organization?'}*/}
-        {/*             buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}*/}
-        {/*                               key={'cancel'}>{'cancel'}</Button>,*/}
-        {/*               <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}*/}
-        {/*                              key={'confirm'}*/}
-        {/*                              onClick={handleConfirm()} children="confirm" autoFocus/>]}*/}
-        {/*             open={state.submitDialog}/>*/}
       </Paper>
 
 
-      {outcomes.length ?
+      {themes.length ?
         <Paper sx={{p: 1}}>
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
           }}>

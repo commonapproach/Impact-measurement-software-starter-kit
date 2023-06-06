@@ -3,19 +3,8 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBOutcomeModel} = require("../../models/outcome");
 
 const fetchThemes = async (req, res) => {
-  const {outcomeUris} = req.body;
-  if (outcomeUris) {
-    const outcomes = await GDBOutcomeModel.find({_uri: {$in: outcomeUris}}, {populates: ['theme']})
-    const themes = {}
-    outcomes.map(outcome => {
-      themes[outcome._uri] = outcome.theme
-    })
-    return res.status(200).json({success: true, themes, outcomes});
-  } else {
     const themes = await GDBThemeModel.find({});
     return res.status(200).json({success: true, themes});
-  }
-
 };
 
 const fetchThemesHandler = async (req, res, next) => {

@@ -102,7 +102,7 @@ const fetchOutcomesThroughTheme = async (req, res) => {
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   const reachableOrganizations = (await allReachableOrganizations(userAccount)).map(organization => organization._uri);
   const outcomes = await GDBOutcomeModel.find({theme: themeUri, forOrganization: {$in: reachableOrganizations}},
-    {populates: ['indicators']});
+    {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports']});
   return res.status(200).json({success: true, outcomes})
 };
 

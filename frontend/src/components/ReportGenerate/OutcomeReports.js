@@ -68,7 +68,7 @@ export default function OutcomeReports() {
       x = 23;
       y += 3
       pdf.text(`Outcome Name: ${outcome.name}`, x, y);
-      y += 3;
+      // y += 3;
       outcome.indicators?.map(indicator => {
         x = 26;
         y += 3;

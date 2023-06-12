@@ -1,5 +1,5 @@
 const {GraphDBServerClient, ServerClientConfig} = require('graphdb').server;
-const {RepositoryClientConfig, RDFRepositoryClient, RepositoryConfig, RepositoryType} = require('graphdb').repository;
+const {RepositoryConfig} = require('graphdb').repository;
 const {UpdateQueryPayload} = require('graphdb').query;
 const {SparqlJsonResultParser, JsonLDParser} = require('graphdb').parser;
 const {RDFMimeType, QueryContentType} = require('graphdb').http;

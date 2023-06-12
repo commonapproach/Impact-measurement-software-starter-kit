@@ -9,7 +9,7 @@ async function getIndividualsInClass(req, res) {
     where { 
         ?s a <${SPARQL.getFullURI(req.params.class)}>, owl:NamedIndividual.
         OPTIONAL {?s rdfs:label ?label .}
-        OPTIONAL {?s :hasOrganization [tove_org:hasName ?name] .} # For Service Provider: organization
+        OPTIONAL {?s :hasOrganization [cids:hasName ?name] .} # For Service Provider: organization
         OPTIONAL {?s :hasVolunteer [foaf:familyName ?lastName] .} # For Service Provider: volunteer 
         OPTIONAL {?s foaf:familyName ?familyName. ?s foaf:givenName ?givenName. } # For Person/Client
         OPTIONAL {?s :hasType ?type . } # for needSatisfier

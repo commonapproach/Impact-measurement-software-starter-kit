@@ -4,7 +4,7 @@ const {GDBMeasureModel} = require("./measure");
 const {GDBOwnershipModel} = require("./ownership");
 
 const GDBIndicatorReportModel = createGraphDBModel({
-  name: {type: String, internalKey: 'tove_org:hasName'},
+  name: {type: String, internalKey: 'cids:hasName'},
   comment: {type: String, internalKey: 'cids:hasComment'},
   forOrganization: {type: Types.NamedIndividual, internalKey: 'cids:forOrganization'},
   forIndicator: {type: Types.NamedIndividual, internalKey: 'cids:forIndicator'},

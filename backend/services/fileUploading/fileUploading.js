@@ -9,6 +9,8 @@ const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
 const {expand, frame} = require('jsonld');
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
+const {GDBUnitOfMeasure} = require("../../models/measure");
+const {getFullURI, getPrefixedURI,} = require('graphdb-utils').SPARQL;
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -18,6 +20,10 @@ const fileUploadingHandler = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
+};
+
+const getValue = (object, graphdbModel, property) => {
+  return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
 };
 
 async function outcomeBuilder(trans, object, organization, outcomeDict, indicatorDict) {
@@ -31,7 +37,7 @@ async function outcomeBuilder(trans, object, organization, outcomeDict, indicato
   organization.hasOutcomes.push(outcome._uri);
   // add theme to indicator
   if (!object['http://ontology.eil.utoronto.ca/cids/cids#forTheme'])
-    throw new Server400Error(`${object['@id']}: outcome need to contain theme`)
+    throw new Server400Error(`${object['@id']}: outcome need to contain theme`);
   outcome.theme = object['http://ontology.eil.utoronto.ca/cids/cids#forTheme'][0]['@value'];
   // add indicator to outcome, adding outcome to indicator when treating indicators
 
@@ -41,7 +47,7 @@ async function outcomeBuilder(trans, object, organization, outcomeDict, indicato
     }
     outcome.indicators.push(
       object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']
-    )
+    );
 
     // const indicator = indicatorDict[object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']]
     //   || await GDBIndicatorModel.findOne({_uri: object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']})
@@ -80,7 +86,7 @@ async function outcomeBuilder(trans, object, organization, outcomeDict, indicato
 // }
 
 
-async function indicatorBuilder(trans,object, organization, indicatorDict) {
+async function indicatorBuilder(trans, object, organization, indicatorDict) {
   const indicator = indicatorDict[object['@id']];
   // add the organization to it, and add it to the organization
   if (!indicator.forOrganizations)
@@ -94,7 +100,7 @@ async function indicatorBuilder(trans,object, organization, indicatorDict) {
     if (!indicator.forOutcomes) {
       indicator.forOutcomes = [];
     }
-    indicator.forOutcomes.push(object['http://ontology.eil.utoronto.ca/cids/cids#forOutcome'][0]['@value'])
+    indicator.forOutcomes.push(object['http://ontology.eil.utoronto.ca/cids/cids#forOutcome'][0]['@value']);
   }
   // add indicator report
   if (object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport']) {
@@ -103,8 +109,8 @@ async function indicatorBuilder(trans,object, organization, indicatorDict) {
     object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport'].map(indicatorReport => {
       indicator.indicatorReports.push(
         indicatorReport['@value']
-      )
-    })
+      );
+    });
   }
   // todo: add indicator report
   await transSave(trans, indicator);
@@ -115,8 +121,8 @@ async function indicatorReportBuilder(trans, object, organization, indicatorRepo
   // add the organization to it
   indicatorReport.forOrganization = organization._uri;
   // add indicator
-  indicatorReport.forIndicator = object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value']
-  const indicator = indicatorDict[object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value']] || '' // todo: may need to fetch indicator from database
+  indicatorReport.forIndicator = object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value'];
+  const indicator = indicatorDict[object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value']] || ''; // todo: may need to fetch indicator from database
   // if (object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator']) {
   //   indicatorReport.forIndicator = `:indicator_${indicator._id}`;
   //   if(!indicator.indicatorReports)
@@ -143,17 +149,10 @@ const fileUploading = async (req, res, next) => {
   const trans = await repo.beginTransaction();
   trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass);
   try {
-    const {objects, organizationId} = req.body;
+    const {objects, organizationUri} = req.body;
     const expandedObjects = await expand(objects);
-    // const frm = {
-    //   "@context": "http://ontology.eil.utoronto.ca/cids/contexts/cidsContext.json",
-    //   "@type": "cids:Outcome",
-    //   "hasName": {},
-    //   "hasDescription": {"@type": "Text"},
-    //   "forDomain": {"@type": "http://ontology.eil.utoronto.ca/cids/cids#Domain"},
-    //   "dateCreated": {"type": "Date"}
-    // };
-    const organization = await GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']});
+
+    const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
     const objectDict = {};
     const outcomeDict = {};
     const themeDict = {};
@@ -161,58 +160,61 @@ const fileUploading = async (req, res, next) => {
     const indicatorReportDict = {};
     if (!organization)
       throw new Server400Error('Wrong organization ID');
-
     for (let object of expandedObjects) {
       // store the raw object into objectDict
-      objectDict[object['@id']] = object;
+      const uri = object['@id'];
+      objectDict[uri] = object;
       // assign the object an id and store them into specific dict
-      if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Outcome')) {
-        if (!object['http://ontology.eil.utoronto.ca/cids/cids#hasName'] ||
-          !object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription']
-          // || !object['http://schema.org/dateCreated']
+      if (object['@type'].includes(getFullURI('cids:Outcome'))) {
+        if (!object[getFullURI(GDBOutcomeModel.schema.name.internalKey)] ||
+          !object[getFullURI(GDBOutcomeModel.schema.description.internalKey)]
         )
           throw new Server400Error(`${object['@id']}: invalid input`);
         const outcome = GDBOutcomeModel({
-          name: object['http://ontology.eil.utoronto.ca/cids/cids#hasName'][0]['@value'],
-          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'][0]['@value'],
-        }, {uri: object['@id']});
+          name: getValue(object, GDBOutcomeModel, 'name'),
+          description: getValue(object, GDBOutcomeModel, 'description'),
+        }, {uri: uri});
         await transSave(trans, outcome);
-        outcomeDict[object['@id']] = outcome;
-      } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Indicator')) {
-        if (!object['http://ontology.eil.utoronto.ca/cids/cids#hasName'].length ||
-          !object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'].length)
-          throw new Server400Error(`${object['@id']}: invalid input`);
+        outcomeDict[uri] = outcome;
+      } else if (object['@type'].includes(getFullURI('cids:Indicator'))) {
+        if (!object[getFullURI(GDBIndicatorModel.schema.name.internalKey)] ||
+          !object[getFullURI(GDBIndicatorModel.schema.description.internalKey)] ||
+          !object[getFullURI(GDBIndicatorModel.schema.unitOfMeasure.internalKey)])
+
+          throw new Server400Error(`${uri}: invalid input`);
         const indicator = GDBIndicatorModel({
-          name: object['http://ontology.eil.utoronto.ca/cids/cids#hasName']['@value'],
-          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription']['@value'],
-          // todo: add unit of measure
-          // unitOfMeasure: {
-          //
-          // }
-        }, {uri: object['@id']});
+          name: getValue(object, GDBIndicatorModel, 'name'),
+          description: getValue(object, GDBIndicatorModel, 'description'),
+          unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
+            {
+              label: getValue(object[getFullURI(GDBIndicatorModel.schema['unitOfMeasure'].internalKey)][0],
+                GDBUnitOfMeasure, 'label'
+                )
+            }
+        }, {uri: uri});
         await transSave(trans, indicator);
-        indicatorDict[object['@id']] = indicator;
-      } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#IndicatorReport')) {
-        if (!object['http://ontology.eil.utoronto.ca/tove/organization#hasName'] || !object['http://schema.org/dateCreated'] ||
-        !object['http://ontology.eil.utoronto.ca/cids/cids#hasComment'])
-          throw new Server400Error(`${object['@id']}: invalid input`);
+        indicatorDict[uri] = indicator;
+      } else if (object['@type'].includes(getFullURI('cids:IndicatorReport'))) {
+        if (!object[getFullURI(GDBIndicatorReportModel.schema.name.internalKey)] || !object[getFullURI(GDBIndicatorReportModel.schema.dateCreated.internalKey)] ||
+          !object[getFullURI(GDBIndicatorReportModel.schema.comment.internalKey)])
+          throw new Server400Error(`${uri}: invalid input`);
         const indicatorReport = GDBIndicatorReportModel({
-          name: object['http://ontology.eil.utoronto.ca/tove/organization#hasName'][0]['@value'],
-          dateCreated: object['http://schema.org/dateCreated'][0]['@value'],
-          comment: object['http://ontology.eil.utoronto.ca/cids/cids#hasComment'][0]['@value']
-        }, {uri: object['@id']});
+          name: getValue(object, GDBIndicatorReportModel, 'name'),
+          dateCreated: new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated')),
+          comment: getValue(object, GDBIndicatorReportModel, 'comment')
+        }, {uri: uri});
         await transSave(trans, indicatorReport);
-        indicatorReportDict[object['@id']] = indicatorReport;
-      } else if(object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Theme')) {
-        if (!object['http://ontology.eil.utoronto.ca/tove/organization#hasName'] ||
-          !object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'])
+        indicatorReportDict[uri] = indicatorReport;
+      } else if (object['@type'].includes(getFullURI('cids:Theme'))) {
+        if (!object[getFullURI(GDBThemeModel.schema.name.internalKey)] ||
+          !object[getFullURI(GDBThemeModel.schema.description.internalKey)])
           throw new Server400Error(`${object['@id']}: invalid input`);
         const theme = GDBThemeModel({
-          name: object['http://ontology.eil.utoronto.ca/tove/organization#hasName'][0]['@value'],
-          description: object['http://ontology.eil.utoronto.ca/cids/cids#hasDescription'][0]['@value']
-        }, {uri: object['@id']})
+          name: getValue(object, GDBThemeModel, 'name'),
+          description: getValue(object, GDBThemeModel, 'description')
+        }, {uri: uri});
         await transSave(trans, theme);
-        themeDict[object['@id']] = theme;
+        themeDict[uri] = theme;
       }
     }
 
@@ -221,9 +223,9 @@ const fileUploading = async (req, res, next) => {
       if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Outcome')) {
         await outcomeBuilder(trans, object, organization, outcomeDict);
       } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Indicator')) {
-        await indicatorBuilder(trans, object, organization, indicatorDict)
+        await indicatorBuilder(trans, object, organization, indicatorDict);
       } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#IndicatorReport')) {
-        await indicatorReportBuilder(trans, object, organization, indicatorReportDict)
+        await indicatorReportBuilder(trans, object, organization, indicatorReportDict);
       } // todo: add time interval... etc
       // switch (object['@type'][0]) {
       //   case 'cids:Outcome':

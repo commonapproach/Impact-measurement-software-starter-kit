@@ -53,25 +53,30 @@ export default function GroupMembers() {
     const pdf = new jsPDF({
       orientation: 'p',
       unit: 'mm',
-      format: 'a5',
+      format: 'b5',
       putOnlyUsedFonts:true
     });
     let x = 20
     let y = 20
+    pdf.setFontSize(20);
     pdf.text("Group Members Report", x, y);
-    pdf.setFontSize(5);
+    pdf.setFontSize(10);
+    y += 6;
+    pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
     y += 10;
+    pdf.text(`Group Name: ${groups[selectedGroup]}`, x, y);
+    y += 6;
     organizations?.map((organization, index) => {
-      y += 3
+      y += 6
       pdf.text(`Legal Name: ${organization.legalName}`, x, y);
-      y += 3;
+      y += 6;
       if (organization.contactName){
         pdf.text(`Contact Name: ${organization.contactName}`, x, y)
-        y += 3
+        y += 6
       }
       if (organization.email) {
         pdf.text(`Contact Email: ${organization.email}`, x, y)
-        y += 3
+        y += 6
       }
 
     })

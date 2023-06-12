@@ -56,21 +56,23 @@ export default function IndicatorReports_ReportGenerate() {
     });
     let x = 20
     let y = 20
+    pdf.setFontSize(20);
     pdf.text("Indicator Reports", x, y);
-    pdf.setFontSize(5);
+    y += 6;
+    pdf.setFontSize(10);
+    pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
     y += 10;
-
     indicators?.map(indicator => {
       x = 23;
-      y += 3
+      y += 6
       pdf.text(`Indicator Name: ${indicator.name}`, x, y)
-      y += 3;
+      y += 6;
       pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
-      y += 3;
+      y += 6;
       indicator.indicatorReports?.map(indicatorReport => {
         x = 26
         pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
-        y += 3
+        y += 6
       })
     })
     pdf.save('indicator report.pdf');

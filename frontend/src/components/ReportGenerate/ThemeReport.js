@@ -79,7 +79,7 @@ export default function ThemeReports() {
         })
       })
     })
-    pdf.save('outcome report.pdf');
+    pdf.save('theme report.pdf');
   }
 
 

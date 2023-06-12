@@ -61,25 +61,28 @@ export default function OutcomeReports() {
     });
     let x = 20
     let y = 20
+    pdf.setFontSize(20);
     pdf.text("Outcome Reports", x, y);
-    pdf.setFontSize(5);
+    y += 6;
+    pdf.setFontSize(10);
+    pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
     y += 10;
     outcomes.map((outcome) => {
       x = 23;
-      y += 3
+      y += 6
       pdf.text(`Outcome Name: ${outcome.name}`, x, y);
       // y += 3;
       outcome.indicators?.map(indicator => {
         x = 26;
-        y += 3;
+        y += 6;
         pdf.text(`Indicator Name: ${indicator.name}`, x, y);
-        y += 3;
+        y += 6;
         pdf.text(`Unit Of Measure: ${indicator.unitOfMeasure.label}`, x, y);
-        y += 3;
+        y += 6;
         indicator.indicatorReports?.map(indicatorReport => {
           x = 29;
           pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
-          y += 3;
+          y += 6;
         })
       })
     })

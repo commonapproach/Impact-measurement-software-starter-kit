@@ -52,35 +52,42 @@ const getFullPropertyURI = (graphdbModel, propertyName) => {
   return getFullURI(graphdbModel.schema[propertyName].internalKey)
 }
 
-async function outcomeBuilder(trans, object, organization, outcomeDict, indicatorDict) {
-  const outcome = outcomeDict[object['@id']];
+async function outcomeBuilder(trans, object, organization, outcomeDict, objectDict) {
+  const uri = object['@id'];
+  const outcome = outcomeDict[uri];
+
   // add the organization to it, and add it to the organization
-  if (!outcome.forOrganizations)
-    outcome.forOrganizations = [];
-  outcome.forOrganizations.push(organization._uri);
+  outcome.forOrganization = organization._uri
   if (!organization.hasOutcomes)
     organization.hasOutcomes = [];
   organization.hasOutcomes.push(outcome._uri);
-  // add theme to indicator
-  if (!object['http://ontology.eil.utoronto.ca/cids/cids#forTheme'])
-    throw new Server400Error(`${object['@id']}: outcome need to contain theme`);
-  outcome.theme = object['http://ontology.eil.utoronto.ca/cids/cids#forTheme'][0]['@value'];
-  // add indicator to outcome, adding outcome to indicator when treating indicators
 
-  if (object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator']) {
-    if (!outcome.indicators) {
-      outcome.indicators = [];
-    }
-    outcome.indicators.push(
-      object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']
-    );
+  // add theme to outcome
+  if (!object[getFullPropertyURI(GDBOutcomeModel, 'theme')])
+    throw new Server400Error(`${uri}: outcome need to contain a Theme`);
+  outcome.theme = getValue(object, GDBOutcomeModel, 'theme');
 
-    // const indicator = indicatorDict[object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']]
-    //   || await GDBIndicatorModel.findOne({_uri: object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicator'][0]['@value']})
-    // if (!indicator.forOutcomes)
-    //   indicator.forOutcomes = []
-    // indicator.forOutcomes.push(outcome._uri);
-    // transSave(trans, indicator);
+  // add indicator to outcome
+  if (!object[getFullPropertyURI(GDBOutcomeModel, 'indicators')])
+    throw new Server400Error(`${uri}: outcome need to contain at least an Indicator`);
+  if (!outcome.indicators)
+    outcome.indicators = []
+  for (const indicatorURI of getListOfValue(object, GDBOutcomeModel, 'indicators')) {
+    outcome.indicators.push(indicatorURI);
+    // add outcome to indicator
+    if (!objectDict[indicatorURI]) {
+      //in this case, the indicator is not in the file, get the indicator from database and add the outcome to it
+      const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
+      if (!indicator)
+        throw new Server400Error(`Wrong input value: Indicator ${indicatorURI} doesn't exit on both the file and the database`);
+      //check if the indicator belongs to the organization
+      if (!indicator.forOrganizations.includes(organization._uri))
+        throw new Server400Error(`Wrong input value: Outcome ${indicatorURI} doesn't belong to this organization`);
+      if (!indicator.forOutcomes)
+        indicator.forOutcomes = [];
+      indicator.forOutcomes.push(uri);
+      await transSave(trans, indicator);
+    } // if the indicator is in the file, don't have to worry about adding the outcome to the indicator
   }
   await transSave(trans, outcome);
 }
@@ -137,7 +144,7 @@ async function indicatorBuilder(trans, object, organization, indicatorDict, obje
         const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
         if (!outcome)
           throw new Server400Error(`Wrong input value: Outcome ${outcomeURI} doesn't exit on both the file and the database`);
-        // todo: check if the outcome belongs to the organization
+        // check if the outcome belongs to the organization
         if (outcome.forOrganization !== organization._uri)
           throw new Server400Error(`Wrong input value: Outcome ${outcomeURI} doesn't belong to this organization`);
         if (!outcome.indicators)
@@ -155,11 +162,6 @@ async function indicatorBuilder(trans, object, organization, indicatorDict, obje
     getListOfValue(object, GDBIndicatorModel, 'indicatorReports').map(indicatorReportURI => {
       indicator.indicatorReports.push(indicatorReportURI)
     })
-    // object[getFullPropertyURI(GDBIndicatorModel, 'indicatorReports')].map(indicatorReport => {
-    //   indicator.indicatorReports.push(
-    //     indicatorReport['@value']
-    //   );
-    // });
   }
   await transSave(trans, indicator);
 }
@@ -269,17 +271,18 @@ const fileUploading = async (req, res, next) => {
 
     for (let object of expandedObjects) {
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
-        await outcomeBuilder(trans, object, organization, outcomeDict);
+        await outcomeBuilder(trans, object, organization, outcomeDict, objectDict);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
         await indicatorBuilder(trans, object, organization, indicatorDict, objectDict);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
-        await indicatorReportBuilder(trans, object, organization, indicatorReportDict);
+        await indicatorReportBuilder(trans, object, organization, indicatorReportDict, objectDict);
         // todo: add time interval... etc
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
 
       }
     }
-    await organization.save();
+    await transSave(trans, organization);
+    // await organization.save();
     await trans.commit();
     return res.status(200).json({success: true});
   } catch (e) {

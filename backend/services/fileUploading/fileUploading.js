@@ -26,6 +26,10 @@ const getValue = (object, graphdbModel, property) => {
   return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
 };
 
+const getFullTypeURI = (graphdbModel) => {
+  return getFullURI(graphdbModel.schemaOptions.rdfTypes[1]);
+}
+
 async function outcomeBuilder(trans, object, organization, outcomeDict, indicatorDict) {
   const outcome = outcomeDict[object['@id']];
   // add the organization to it, and add it to the organization
@@ -87,7 +91,8 @@ async function outcomeBuilder(trans, object, organization, outcomeDict, indicato
 
 
 async function indicatorBuilder(trans, object, organization, indicatorDict) {
-  const indicator = indicatorDict[object['@id']];
+  const uri = object['@id']
+  const indicator = indicatorDict[uri];
   // add the organization to it, and add it to the organization
   if (!indicator.forOrganizations)
     indicator.forOrganizations = [];
@@ -165,7 +170,7 @@ const fileUploading = async (req, res, next) => {
       const uri = object['@id'];
       objectDict[uri] = object;
       // assign the object an id and store them into specific dict
-      if (object['@type'].includes(getFullURI('cids:Outcome'))) {
+      if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) { //todo: here don't have to be hardcoded
         if (!object[getFullURI(GDBOutcomeModel.schema.name.internalKey)] ||
           !object[getFullURI(GDBOutcomeModel.schema.description.internalKey)]
         )
@@ -176,7 +181,7 @@ const fileUploading = async (req, res, next) => {
         }, {uri: uri});
         await transSave(trans, outcome);
         outcomeDict[uri] = outcome;
-      } else if (object['@type'].includes(getFullURI('cids:Indicator'))) {
+      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
         if (!object[getFullURI(GDBIndicatorModel.schema.name.internalKey)] ||
           !object[getFullURI(GDBIndicatorModel.schema.description.internalKey)] ||
           !object[getFullURI(GDBIndicatorModel.schema.unitOfMeasure.internalKey)])
@@ -194,7 +199,7 @@ const fileUploading = async (req, res, next) => {
         }, {uri: uri});
         await transSave(trans, indicator);
         indicatorDict[uri] = indicator;
-      } else if (object['@type'].includes(getFullURI('cids:IndicatorReport'))) {
+      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         if (!object[getFullURI(GDBIndicatorReportModel.schema.name.internalKey)] || !object[getFullURI(GDBIndicatorReportModel.schema.dateCreated.internalKey)] ||
           !object[getFullURI(GDBIndicatorReportModel.schema.comment.internalKey)])
           throw new Server400Error(`${uri}: invalid input`);
@@ -205,7 +210,7 @@ const fileUploading = async (req, res, next) => {
         }, {uri: uri});
         await transSave(trans, indicatorReport);
         indicatorReportDict[uri] = indicatorReport;
-      } else if (object['@type'].includes(getFullURI('cids:Theme'))) {
+      } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
         if (!object[getFullURI(GDBThemeModel.schema.name.internalKey)] ||
           !object[getFullURI(GDBThemeModel.schema.description.internalKey)])
           throw new Server400Error(`${object['@id']}: invalid input`);
@@ -220,25 +225,16 @@ const fileUploading = async (req, res, next) => {
 
 
     for (let object of expandedObjects) {
-      if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Outcome')) {
+      if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
         await outcomeBuilder(trans, object, organization, outcomeDict);
-      } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#Indicator')) {
+      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
         await indicatorBuilder(trans, object, organization, indicatorDict);
-      } else if (object['@type'].includes('http://ontology.eil.utoronto.ca/cids/cids#IndicatorReport')) {
+      } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         await indicatorReportBuilder(trans, object, organization, indicatorReportDict);
-      } // todo: add time interval... etc
-      // switch (object['@type'][0]) {
-      //   case 'cids:Outcome':
-      //     await outcomeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans);
-      //     break;
-      //   case 'cids:hasIndicator':
-      //     await indicatorBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans);
-      //     break;
-      //   case 'cids:Theme':
-      //     await themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans);
-      //     break;
-      //
-      // }
+        // todo: add time interval... etc
+      } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
+
+      }
     }
     await organization.save();
     await trans.commit();

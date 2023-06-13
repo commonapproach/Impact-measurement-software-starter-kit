@@ -22,9 +22,27 @@ const fileUploadingHandler = async (req, res, next) => {
   }
 };
 
+/**
+ * return the first URI belongs to the object[property]
+ * @param object
+ * @param graphdbModel
+ * @param property
+ * @returns {*}
+ */
 const getValue = (object, graphdbModel, property) => {
   return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
 };
+
+/**
+ * return list of object URI
+ * @param object
+ * @param graphdbModel
+ * @param property
+ * @returns {*}
+ */
+const getListOfValue = (object, graphdbModel, property) => {
+  return object[getFullURI(graphdbModel.schema[property].internalKey)].map(obj => obj['@value'])
+}
 
 const getFullTypeURI = (graphdbModel) => {
   return getFullURI(graphdbModel.schemaOptions.rdfTypes[1]);
@@ -94,9 +112,10 @@ async function outcomeBuilder(trans, object, organization, outcomeDict, indicato
 // }
 
 
-async function indicatorBuilder(trans, object, organization, indicatorDict) {
+async function indicatorBuilder(trans, object, organization, indicatorDict, objectDict) {
   const uri = object['@id']
   const indicator = indicatorDict[uri];
+
   // add the organization to it, and add it to the organization
   if (!indicator.forOrganizations)
     indicator.forOrganizations = [];
@@ -104,24 +123,44 @@ async function indicatorBuilder(trans, object, organization, indicatorDict) {
   if (!organization.hasIndicators)
     organization.hasIndicators = [];
   organization.hasIndicators.push(indicator._uri);
-  // add outcome
-  if (object['http://ontology.eil.utoronto.ca/cids/cids#forOutcome']) {
+
+  // add outcomes
+  if (object[getFullPropertyURI(GDBIndicatorModel, 'forOutcomes')]) {
     if (!indicator.forOutcomes) {
       indicator.forOutcomes = [];
     }
-    indicator.forOutcomes.push(object['http://ontology.eil.utoronto.ca/cids/cids#forOutcome'][0]['@value']);
+    for (const outcomeURI of getListOfValue(object, GDBIndicatorModel, 'forOutcomes')) {
+      indicator.forOutcomes.push(outcomeURI);
+
+      if (!objectDict[outcomeURI]) {
+        //in this case, the outcome is not in the file, get the outcome from database and add indicator to it
+        const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
+        if (!outcome)
+          throw new Server400Error(`Wrong input value: Outcome ${outcomeURI} doesn't exit on both the file and the database`);
+        // todo: check if the outcome belongs to the organization
+        if (outcome.forOrganization !== organization._uri)
+          throw new Server400Error(`Wrong input value: Outcome ${outcomeURI} doesn't belong to this organization`);
+        if (!outcome.indicators)
+          outcome.indicators = [];
+        outcome.indicators.push(uri);
+        await transSave(trans, outcome);
+      } // if the outcome is in the file, don't have to worry about adding the indicator to the outcome
+    }
   }
+
   // add indicator report
-  if (object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport']) {
+  if (object[getFullPropertyURI(GDBIndicatorModel, 'indicatorReports')]) {
     if (!indicator.indicatorReports)
       indicator.indicatorReports = [];
-    object['http://ontology.eil.utoronto.ca/cids/cids#hasIndicatorReport'].map(indicatorReport => {
-      indicator.indicatorReports.push(
-        indicatorReport['@value']
-      );
-    });
+    getListOfValue(object, GDBIndicatorModel, 'indicatorReports').map(indicatorReportURI => {
+      indicator.indicatorReports.push(indicatorReportURI)
+    })
+    // object[getFullPropertyURI(GDBIndicatorModel, 'indicatorReports')].map(indicatorReport => {
+    //   indicator.indicatorReports.push(
+    //     indicatorReport['@value']
+    //   );
+    // });
   }
-  // todo: add indicator report
   await transSave(trans, indicator);
 }
 
@@ -196,7 +235,7 @@ const fileUploading = async (req, res, next) => {
           description: getValue(object, GDBIndicatorModel, 'description'),
           unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
             {
-              label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'label')][0],
+              label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0],
                 GDBUnitOfMeasure, 'label'
                 )
             }
@@ -232,7 +271,7 @@ const fileUploading = async (req, res, next) => {
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
         await outcomeBuilder(trans, object, organization, outcomeDict);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
-        await indicatorBuilder(trans, object, organization, indicatorDict);
+        await indicatorBuilder(trans, object, organization, indicatorDict, objectDict);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         await indicatorReportBuilder(trans, object, organization, indicatorReportDict);
         // todo: add time interval... etc

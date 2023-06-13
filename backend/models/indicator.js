@@ -8,7 +8,7 @@ const GDBIndicatorModel = createGraphDBModel({
   description: {type: String, internalKey: 'cids:hasDescription'},
   forOutcomes: {type: [GDBOutcomeModel], internalKey: 'cids:forOutcome'},
   indicatorReports: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'},
-  forOrganizations: {type: [Types.NamedIndividual], internalKey: 'cids:forOrganization'},
+  forOrganizations: {type: [() => require('./organization').GDBOrganizationModel], internalKey: 'cids:forOrganization'},
   unitOfMeasure: {type: GDBUnitOfMeasure, internalKey: 'iso21972:unit_of_measure'},
 }, {
   rdfTypes: ['cids:Indicator'], name: 'indicator'

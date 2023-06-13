@@ -30,6 +30,10 @@ const getFullTypeURI = (graphdbModel) => {
   return getFullURI(graphdbModel.schemaOptions.rdfTypes[1]);
 }
 
+const getFullPropertyURI = (graphdbModel, propertyName) => {
+  return getFullURI(graphdbModel.schema[propertyName].internalKey)
+}
+
 async function outcomeBuilder(trans, object, organization, outcomeDict, indicatorDict) {
   const outcome = outcomeDict[object['@id']];
   // add the organization to it, and add it to the organization
@@ -171,8 +175,8 @@ const fileUploading = async (req, res, next) => {
       objectDict[uri] = object;
       // assign the object an id and store them into specific dict
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) { //todo: here don't have to be hardcoded
-        if (!object[getFullURI(GDBOutcomeModel.schema.name.internalKey)] ||
-          !object[getFullURI(GDBOutcomeModel.schema.description.internalKey)]
+        if (!object[getFullPropertyURI(GDBOutcomeModel, 'name')] ||
+          !object[getFullPropertyURI(GDBOutcomeModel, 'description')]
         )
           throw new Server400Error(`${object['@id']}: invalid input`);
         const outcome = GDBOutcomeModel({
@@ -182,9 +186,9 @@ const fileUploading = async (req, res, next) => {
         await transSave(trans, outcome);
         outcomeDict[uri] = outcome;
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
-        if (!object[getFullURI(GDBIndicatorModel.schema.name.internalKey)] ||
-          !object[getFullURI(GDBIndicatorModel.schema.description.internalKey)] ||
-          !object[getFullURI(GDBIndicatorModel.schema.unitOfMeasure.internalKey)])
+        if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')] ||
+          !object[getFullPropertyURI(GDBIndicatorModel, 'description')] ||
+          !object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')])
 
           throw new Server400Error(`${uri}: invalid input`);
         const indicator = GDBIndicatorModel({
@@ -192,7 +196,7 @@ const fileUploading = async (req, res, next) => {
           description: getValue(object, GDBIndicatorModel, 'description'),
           unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
             {
-              label: getValue(object[getFullURI(GDBIndicatorModel.schema['unitOfMeasure'].internalKey)][0],
+              label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'label')][0],
                 GDBUnitOfMeasure, 'label'
                 )
             }
@@ -200,8 +204,8 @@ const fileUploading = async (req, res, next) => {
         await transSave(trans, indicator);
         indicatorDict[uri] = indicator;
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
-        if (!object[getFullURI(GDBIndicatorReportModel.schema.name.internalKey)] || !object[getFullURI(GDBIndicatorReportModel.schema.dateCreated.internalKey)] ||
-          !object[getFullURI(GDBIndicatorReportModel.schema.comment.internalKey)])
+        if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'name')] || !object[getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated')] ||
+          !object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')])
           throw new Server400Error(`${uri}: invalid input`);
         const indicatorReport = GDBIndicatorReportModel({
           name: getValue(object, GDBIndicatorReportModel, 'name'),
@@ -211,8 +215,8 @@ const fileUploading = async (req, res, next) => {
         await transSave(trans, indicatorReport);
         indicatorReportDict[uri] = indicatorReport;
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
-        if (!object[getFullURI(GDBThemeModel.schema.name.internalKey)] ||
-          !object[getFullURI(GDBThemeModel.schema.description.internalKey)])
+        if (!object[getFullPropertyURI(GDBThemeModel, 'name')] ||
+          !object[getFullPropertyURI(GDBThemeModel, 'description')])
           throw new Server400Error(`${object['@id']}: invalid input`);
         const theme = GDBThemeModel({
           name: getValue(object, GDBThemeModel, 'name'),

@@ -15,5 +15,5 @@ const GDBIndicatorModel = createGraphDBModel({
 });
 
 module.exports = {
-  GDBIndicatorModel
+  GDBIndicatorModel, GDBUnitOfMeasure
 }

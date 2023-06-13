@@ -52,6 +52,10 @@ const getFullPropertyURI = (graphdbModel, propertyName) => {
   return getFullURI(graphdbModel.schema[propertyName].internalKey)
 }
 
+const getFullObjectURI = (object) => {
+  return  object[ "@id"]
+}
+
 async function outcomeBuilder(trans, object, organization, outcomeDict, objectDict) {
   const uri = object['@id'];
   const outcome = outcomeDict[uri];
@@ -148,20 +152,30 @@ async function indicatorBuilder(trans, object, organization, indicatorDict, obje
   await transSave(trans, indicator);
 }
 
-async function indicatorReportBuilder(trans, object, organization, indicatorReportDict, indicatorDict) {
-  const indicatorReport = indicatorReportDict[object['@id']];
+async function indicatorReportBuilder(trans, object, organization, indicatorReportDict, objectDict) {
+  const uri = object['@id']
+  const indicatorReport = indicatorReportDict[uri];
   // add the organization to it
   indicatorReport.forOrganization = organization._uri;
-  // add indicator
-  indicatorReport.forIndicator = object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value'];
-  const indicator = indicatorDict[object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator'][0]['@value']] || ''; // todo: may need to fetch indicator from database
-  // if (object['http://ontology.eil.utoronto.ca/cids/cids#forIndicator']) {
-  //   indicatorReport.forIndicator = `:indicator_${indicator._id}`;
-  //   if(!indicator.indicatorReports)
-  //     indicator.indicatorReports = [];
-  //   indicator.indicatorReports.push(`:indicatorReport_${indicatorReport._id}`);
-  // }
-  // todo: add hasTime and hasValue
+
+  // add indicator to the indicatorReport
+  const indicatorURI = getValue(object, GDBIndicatorReportModel, 'forIndicator')
+  indicatorReport.forIndicator = indicatorURI;
+
+  // add the indicatorReport to indicator if needed
+  if (!objectDict[indicatorURI]) {
+    // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
+    const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
+    if (!indicator)
+      throw new Server400Error(`Wrong input value: Indicator ${indicatorURI} doesn't exit on both the file and the database`);
+    if (!indicator.forOrganizations.includes(organization._uri))
+      throw new Server400Error(`Wrong input value: Indicator ${indicatorURI} doesn't belong to this organization`);
+    if (!indicator.indicatorReports) {
+      indicator.indicatorReports = []
+    }
+    indicator.indicatorReports.push(indicatorReport);
+    await transSave(trans, indicator)
+  }
 
   await transSave(trans, indicatorReport);
 }
@@ -218,11 +232,13 @@ const fileUploading = async (req, res, next) => {
           name: getValue(object, GDBIndicatorModel, 'name'),
           description: getValue(object, GDBIndicatorModel, 'description'),
           unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
-            {
+            GDBUnitOfMeasure({
               label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0],
                 GDBUnitOfMeasure, 'label'
-                )
-            }
+              )
+            },
+              {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0])})
+
         }, {uri: uri});
         await transSave(trans, indicator);
         indicatorDict[uri] = indicator;
@@ -233,7 +249,7 @@ const fileUploading = async (req, res, next) => {
         const indicatorReport = GDBIndicatorReportModel({
           name: getValue(object, GDBIndicatorReportModel, 'name'),
           dateCreated: new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated')),
-          comment: getValue(object, GDBIndicatorReportModel, 'comment')
+          comment: getValue(object, GDBIndicatorReportModel, 'comment'),
         }, {uri: uri});
         await transSave(trans, indicatorReport);
         indicatorReportDict[uri] = indicatorReport;

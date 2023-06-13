@@ -93,30 +93,12 @@ async function outcomeBuilder(trans, object, organization, outcomeDict, objectDi
 }
 
 
-// async function themeBuilder(object, organization, outcomeDict, themeDict, indicatorDict, trans) {
-//   if (!object['tove_org:hasName']) {
-//     throw new Server400Error('invalid input');
-//   }
-//   let theme = await GDBThemeModel.findOne({name: object['tove_org:hasName']});
-//   if (!theme) {
-//     // the theme has to be created
-//     theme = GDBThemeModel({
-//       name: object['tove_org:hasName'],
-//       description: object['cids:hasDescription']
-//     });
-//   } else {
-//     throw new Server400Error('The theme is duplicate');
-//     // the theme has to be modified
-//     if (!themeDict[theme._id]) {
-//       // theme name shouldn't be able to be changed
-//       // theme.name = object['tove_org:hasName'];
-//       theme.description = object['cids:hasDescription'];
-//     }
-//   }
-//   await transSave(trans, theme);
-//   themeDict[theme._id] = theme;
-//   return theme;
-// }
+async function themeBuilder(trans, object, organization, themeDict, objectDict) {
+  const uri = object['@id'];
+  const theme = themeDict[uri];
+  await transSave(trans, theme);
+  return theme;
+}
 
 
 async function indicatorBuilder(trans, object, organization, indicatorDict, objectDict) {
@@ -278,7 +260,7 @@ const fileUploading = async (req, res, next) => {
         await indicatorReportBuilder(trans, object, organization, indicatorReportDict, objectDict);
         // todo: add time interval... etc
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
-
+        await themeBuilder(trans, object, organization, themeDict);
       }
     }
     await transSave(trans, organization);

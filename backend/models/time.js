@@ -16,5 +16,5 @@ const GDBDateTimeIntervalModel = createGraphDBModel({
 
 
 module.exports = {
-  GDBDateTimeIntervalModel
+  GDBDateTimeIntervalModel, GDBInstant
 }

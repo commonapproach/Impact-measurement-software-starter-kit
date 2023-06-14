@@ -7,8 +7,7 @@ const GDBUnitOfMeasure = createGraphDBModel({
 })
 
 const GDBMeasureModel = createGraphDBModel({
-  numericalValue: {type: String, internalKey: 'iso21972:numerical_value'},
-  unitOfMeasure: {type: GDBUnitOfMeasure, internalKey: 'iso21972:hasUnit'}
+  numericalValue: {type: String, internalKey: 'iso21972:numerical_value'}
 }, {
   rdfTypes: ['iso21972:Measure'], name: 'measure'
 });

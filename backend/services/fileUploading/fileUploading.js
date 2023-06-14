@@ -9,7 +9,8 @@ const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
 const {expand, frame} = require('jsonld');
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
-const {GDBUnitOfMeasure} = require("../../models/measure");
+const {GDBUnitOfMeasure, GDBMeasureModel} = require("../../models/measure");
+const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {getFullURI, getPrefixedURI,} = require('graphdb-utils').SPARQL;
 
 const fileUploadingHandler = async (req, res, next) => {
@@ -41,27 +42,28 @@ const getValue = (object, graphdbModel, property) => {
  * @returns {*}
  */
 const getListOfValue = (object, graphdbModel, property) => {
-  return object[getFullURI(graphdbModel.schema[property].internalKey)].map(obj => obj['@value'])
-}
+  return object[getFullURI(graphdbModel.schema[property].internalKey)].map(obj => obj['@value']);
+};
 
 const getFullTypeURI = (graphdbModel) => {
   return getFullURI(graphdbModel.schemaOptions.rdfTypes[1]);
-}
+};
 
 const getFullPropertyURI = (graphdbModel, propertyName) => {
-  return getFullURI(graphdbModel.schema[propertyName].internalKey)
-}
+  return getFullURI(graphdbModel.schema[propertyName].internalKey);
+};
 
 const getFullObjectURI = (object) => {
-  return  object[ "@id"]
-}
+  return object["@id"];
+};
+
 
 async function outcomeBuilder(trans, object, organization, outcomeDict, objectDict) {
   const uri = object['@id'];
   const outcome = outcomeDict[uri];
 
   // add the organization to it, and add it to the organization
-  outcome.forOrganization = organization._uri
+  outcome.forOrganization = organization._uri;
   if (!organization.hasOutcomes)
     organization.hasOutcomes = [];
   organization.hasOutcomes.push(outcome._uri);
@@ -75,7 +77,7 @@ async function outcomeBuilder(trans, object, organization, outcomeDict, objectDi
   if (!object[getFullPropertyURI(GDBOutcomeModel, 'indicators')])
     throw new Server400Error(`${uri}: outcome need to contain at least an Indicator`);
   if (!outcome.indicators)
-    outcome.indicators = []
+    outcome.indicators = [];
   for (const indicatorURI of getListOfValue(object, GDBOutcomeModel, 'indicators')) {
     outcome.indicators.push(indicatorURI);
     // add outcome to indicator
@@ -101,12 +103,11 @@ async function themeBuilder(trans, object, organization, themeDict, objectDict) 
   const uri = object['@id'];
   const theme = themeDict[uri];
   await transSave(trans, theme);
-  return theme;
 }
 
 
 async function indicatorBuilder(trans, object, organization, indicatorDict, objectDict) {
-  const uri = object['@id']
+  const uri = object['@id'];
   const indicator = indicatorDict[uri];
 
   // add the organization to it, and add it to the organization
@@ -146,20 +147,20 @@ async function indicatorBuilder(trans, object, organization, indicatorDict, obje
     if (!indicator.indicatorReports)
       indicator.indicatorReports = [];
     getListOfValue(object, GDBIndicatorModel, 'indicatorReports').map(indicatorReportURI => {
-      indicator.indicatorReports.push(indicatorReportURI)
-    })
+      indicator.indicatorReports.push(indicatorReportURI);
+    });
   }
   await transSave(trans, indicator);
 }
 
 async function indicatorReportBuilder(trans, object, organization, indicatorReportDict, objectDict) {
-  const uri = object['@id']
+  const uri = object['@id'];
   const indicatorReport = indicatorReportDict[uri];
   // add the organization to it
   indicatorReport.forOrganization = organization._uri;
 
   // add indicator to the indicatorReport
-  const indicatorURI = getValue(object, GDBIndicatorReportModel, 'forIndicator')
+  const indicatorURI = getValue(object, GDBIndicatorReportModel, 'forIndicator');
   indicatorReport.forIndicator = indicatorURI;
 
   // add the indicatorReport to indicator if needed
@@ -171,10 +172,10 @@ async function indicatorReportBuilder(trans, object, organization, indicatorRepo
     if (!indicator.forOrganizations.includes(organization._uri))
       throw new Server400Error(`Wrong input value: Indicator ${indicatorURI} doesn't belong to this organization`);
     if (!indicator.indicatorReports) {
-      indicator.indicatorReports = []
+      indicator.indicatorReports = [];
     }
     indicator.indicatorReports.push(indicatorReport);
-    await transSave(trans, indicator)
+    await transSave(trans, indicator);
   }
 
   await transSave(trans, indicatorReport);
@@ -226,17 +227,16 @@ const fileUploading = async (req, res, next) => {
         if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')] ||
           !object[getFullPropertyURI(GDBIndicatorModel, 'description')] ||
           !object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')])
-
           throw new Server400Error(`${uri}: invalid input`);
         const indicator = GDBIndicatorModel({
           name: getValue(object, GDBIndicatorModel, 'name'),
           description: getValue(object, GDBIndicatorModel, 'description'),
           unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
             GDBUnitOfMeasure({
-              label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0],
-                GDBUnitOfMeasure, 'label'
-              )
-            },
+                label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0],
+                  GDBUnitOfMeasure, 'label'
+                )
+              },
               {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0])})
 
         }, {uri: uri});
@@ -250,6 +250,42 @@ const fileUploading = async (req, res, next) => {
           name: getValue(object, GDBIndicatorReportModel, 'name'),
           dateCreated: new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated')),
           comment: getValue(object, GDBIndicatorReportModel, 'comment'),
+
+
+          value: getValue(object, GDBIndicatorReportModel, 'value') ||
+            GDBMeasureModel({
+                numericalValue: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0],
+                  GDBMeasureModel, 'numericalValue'
+                ),
+              // todo: how to handle unitOfMeasure?
+              },
+              {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0])}),
+
+          hasTime: getValue(object, GDBIndicatorReportModel, 'hasTime') ||
+            GDBDateTimeIntervalModel({
+
+              hasBeginning: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
+                GDBDateTimeIntervalModel, 'hasBeginning') ||
+                GDBInstant({
+                  date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+                    [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+                }, {uri: getFullObjectURI(
+                  object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+                    [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+                  )}),
+
+              hasEnd: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
+                  GDBDateTimeIntervalModel, 'hasEnd') ||
+                GDBInstant({
+                  date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+                    [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+                }, {uri: getFullObjectURI(
+                    object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+                      [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+                  )})
+            }, {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')])})
+
+
         }, {uri: uri});
         await transSave(trans, indicatorReport);
         indicatorReportDict[uri] = indicatorReport;
@@ -263,6 +299,39 @@ const fileUploading = async (req, res, next) => {
         }, {uri: uri});
         await transSave(trans, theme);
         themeDict[uri] = theme;
+      }  else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
+        if (!object[getFullPropertyURI(GDBUnitOfMeasure, 'label')])
+          throw new Server400Error(`${object['@id']}: invalid input`);
+        const unitOfMeasure = GDBUnitOfMeasure({
+          label: getValue(object, GDBUnitOfMeasure, 'label')
+        }, {uri: uri})
+        await transSave(trans, unitOfMeasure);
+      } else if (object['@type'].includes(getFullTypeURI(GDBMeasureModel))) {
+        if (!object[getFullPropertyURI(GDBMeasureModel, 'numericalValue')])
+          throw new Server400Error(`${object['@id']}: invalid input`);
+        const measure = GDBMeasureModel({
+          numericalValue: getValue(object, GDBMeasureModel, 'numericalValue')
+        }, {uri: uri})
+        await transSave(trans, measure);
+      } else if (object['@type'].includes(getFullTypeURI(GDBDateTimeIntervalModel))) {
+        if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')] ||
+          !object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')])
+          throw new Server400Error(`${object['@id']}: invalid input`);
+        const dateTimeInterval = GDBDateTimeIntervalModel({
+          hasBeginning: getValue(object, GDBDateTimeIntervalModel, 'hasBeginning') ||
+            GDBInstant({
+              date: new Date (getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0],
+                GDBInstant, 'date')
+                )
+            }),
+          hasEnd: getValue(object, GDBDateTimeIntervalModel, 'hasEnd') ||
+            GDBInstant({
+              date: new Date (getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0],
+                GDBInstant, 'date')
+              )
+            })
+        }, {uri:uri});
+        await transSave(trans, dateTimeInterval);
       }
     }
 
@@ -274,7 +343,6 @@ const fileUploading = async (req, res, next) => {
         await indicatorBuilder(trans, object, organization, indicatorDict, objectDict);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         await indicatorReportBuilder(trans, object, organization, indicatorReportDict, objectDict);
-        // todo: add time interval... etc
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
         await themeBuilder(trans, object, organization, themeDict);
       }

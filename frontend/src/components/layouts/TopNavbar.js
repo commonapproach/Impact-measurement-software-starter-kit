@@ -17,7 +17,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import OutputIcon from '@mui/icons-material/Output'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import SummarizeIcon from '@mui/icons-material/Summarize';
-import {Domain, Edit, FileUpload, People} from "@mui/icons-material";
+import {Domain, Download, Edit, FileUpload, People} from "@mui/icons-material";
 
 const ITEM_HEIGHT = 48;
 
@@ -150,6 +150,13 @@ function TopNavBar() {
                   <FileUpload fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
                 <Typography variant="inherit">File Uploading</Typography>
+              </MenuItem>
+
+              <MenuItem onClick={handleLink(`/reportGenerate`)}>
+                <ListItemIcon>
+                  <Download fontSize="medium" sx={{color: 'black'}}/>
+                </ListItemIcon>
+                <Typography variant="inherit">Reports</Typography>
               </MenuItem>
 
 

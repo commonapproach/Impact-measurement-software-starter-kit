@@ -3,9 +3,6 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import GeneralField from "../shared/fields/GeneralField";
-import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
 import {
   fetchOrganizationsBasedOnGroup,
 } from "../../api/organizationApi";
@@ -17,7 +14,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
-import {Undo} from "@mui/icons-material";
+import {PictureAsPdf, Undo} from "@mui/icons-material";
 import { jsPDF } from "jspdf"
 
 const useStyles = makeStyles(() => ({
@@ -103,6 +100,8 @@ export default function GroupMembers() {
         }
       });
 
+    } else {
+      setOrganizations([])
     }
   }, [selectedGroup]);
 
@@ -111,15 +110,27 @@ export default function GroupMembers() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      <Paper sx={{p: 2}} variant={'outlined'} sx={{position: 'relative'}}>
         <Typography variant={'h4'}> Group Members </Typography>
 
-
+        <Button variant="outlined"  sx={{position: 'absolute', right:0, marginTop:1.5, backgroundColor:'#dda0dd', color:'white'}} onClick={() => {
+          navigate('/reportGenerate');
+        }} startIcon={<Undo />}>
+          Back
+        </Button>
+        {organizations.length ?
+          <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
+                  onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
+            Generate PDF File
+          </Button>
+          :
+          null}
         <SelectField
           key={'group'}
           label={'Group'}
           value={selectedGroup}
           options={groups}
+          defaultOptionTitle={'Select a group'}
           onChange={e => {
             setSelectedGroup(
               e.target.value
@@ -131,11 +142,11 @@ export default function GroupMembers() {
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'h6'}> {`Organization: ${organization.legalName}`}  </Typography>
 
-              <Typography variant={'body1'}> {'Legal Name: '}<Link to={`/organizations/${encodeURIComponent(organization._uri)}/edit`} color={'blue'}>{organization.legalName}</Link> </Typography>
+              <Typography sx={{marginLeft: 2}} variant={'body1'}> {'Legal Name: '}<Link to={`/organizations/${encodeURIComponent(organization._uri)}/edit`} color>{organization.legalName}</Link> </Typography>
               {organization.contactName ?
-                <Typography variant={'body1'}> {`Contact Name: ${organization.contactName}`} </Typography> : null}
+                <Typography sx={{marginLeft: 2}} variant={'body1'}> {`Contact Name: ${organization.contactName}`} </Typography> : null}
               {organization.email ?
-                <Typography variant={'body1'}> {`Contact Email: ${organization.email}`} </Typography> : null}
+                <Typography sx={{marginLeft: 2}} variant={'body1'}> {`Contact Email: ${organization.email}`} </Typography> : null}
 
 
             </Paper>
@@ -145,22 +156,6 @@ export default function GroupMembers() {
 
       </Paper>
 
-
-      {organizations.length ?
-        <Paper sx={{p: 1}}>
-          <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>
-            Generate PDF File
-          </Button>
-        </Paper> :
-        null}
-
-      <Paper sx={{p: 1}} >
-        <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          navigate('/reportGenerate');
-        }} startIcon={<Undo />}>
-          Back
-        </Button>
-      </Paper>
 
     </Container>
   );

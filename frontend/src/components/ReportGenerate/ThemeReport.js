@@ -6,7 +6,7 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
-import {Undo} from "@mui/icons-material";
+import {PictureAsPdf, Undo} from "@mui/icons-material";
 import {fetchOutcomesThroughTheme} from "../../api/outcomeApi";
 import {fetchThemes} from "../../api/themeApi";
 import {jsPDF} from "jspdf";
@@ -43,7 +43,7 @@ export default function ThemeReports() {
   const [loading, setLoading] = useState(true);
 
 
-  const pdfGenerator = () => {
+  const generatePDFFile = () => {
     const pdf = new jsPDF({
       orientation: 'p',
       unit: 'mm',
@@ -115,8 +115,20 @@ export default function ThemeReports() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      <Paper sx={{p: 2}} variant={'outlined'} sx={{position: 'relative'}}>
         <Typography variant={'h4'}> Themes </Typography>
+        <Button variant="outlined"  sx={{position: 'absolute', right:0, marginTop:1.5, backgroundColor:'#dda0dd', color:'white'}} onClick={() => {
+          navigate('/reportGenerate');
+        }} startIcon={<Undo />}>
+          Back
+        </Button>
+        {!!selectedTheme ?
+          <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
+                  onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
+            Generate PDF File
+          </Button>
+          :
+          null}
 
         <SelectField
           key={'theme'}
@@ -160,21 +172,21 @@ export default function ThemeReports() {
       </Paper>
 
 
-      {!!selectedTheme ?
-        <Paper sx={{p: 1}}>
-          <Button variant="contained" color="primary" className={classes.button} onClick={pdfGenerator}>
-            Generate PDF File
-          </Button>
-        </Paper> :
-        null}
+      {/*{!!selectedTheme ?*/}
+      {/*  <Paper sx={{p: 1}}>*/}
+      {/*    <Button variant="contained" color="primary" className={classes.button} onClick={pdfGenerator}>*/}
+      {/*      Generate PDF File*/}
+      {/*    </Button>*/}
+      {/*  </Paper> :*/}
+      {/*  null}*/}
 
-      <Paper sx={{p: 1}}>
-        <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          navigate('/reportGenerate');
-        }} startIcon={<Undo/>}>
-          Back
-        </Button>
-      </Paper>
+      {/*<Paper sx={{p: 1}}>*/}
+      {/*  <Button variant="contained" color="primary" className={classes.button} onClick={() => {*/}
+      {/*    navigate('/reportGenerate');*/}
+      {/*  }} startIcon={<Undo/>}>*/}
+      {/*    Back*/}
+      {/*  </Button>*/}
+      {/*</Paper>*/}
 
     </Container>
   );

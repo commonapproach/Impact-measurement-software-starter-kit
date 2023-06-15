@@ -3,22 +3,11 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import GeneralField from "../shared/fields/GeneralField";
-import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
 import {
   fetchOrganizations,
-  fetchOrganizationsBasedOnGroup,
 } from "../../api/organizationApi";
-import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
-import {UserContext} from "../../context";
-import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchGroups} from "../../api/groupApi";
-import {Undo} from "@mui/icons-material";
+import {Undo, PictureAsPdf} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {jsPDF} from "jspdf";
 
@@ -109,6 +98,8 @@ export default function IndicatorReports_ReportGenerate() {
           setIndicators(indicators);
         }
       });
+    } else {
+      setIndicators([])
     }
   }, [selectedOrganization]);
 
@@ -117,14 +108,28 @@ export default function IndicatorReports_ReportGenerate() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      <Paper sx={{p: 2}} variant={'outlined'} sx={{position: 'relative'}}>
         <Typography variant={'h4'}> Indicators </Typography>
+
+        <Button variant="outlined"  sx={{position: 'absolute', right:0, marginTop:1.5, backgroundColor:'#dda0dd', color:'white'}} onClick={() => {
+          navigate('/reportGenerate');
+        }} startIcon={<Undo />}>
+          Back
+        </Button>
+        {indicators.length ?
+            <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
+                    onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
+              Generate PDF File
+            </Button>
+          :
+          null}
 
         <SelectField
           key={'organization'}
           label={'Organization'}
           value={selectedOrganization}
           options={organizations}
+          defaultOptionTitle={'Select an organization'}
           onChange={e => {
             setSelectedOrganization(
               e.target.value
@@ -136,24 +141,19 @@ export default function IndicatorReports_ReportGenerate() {
 
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'h6'}> {`Indicator: ${indicator.name}`}  </Typography>
-               <Typography variant={'body1'}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-              <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+               <Typography variant={'body1'} sx={{marginLeft:2}}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
+              <Typography variant={'body1'} sx={{marginLeft:2}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
 
               {indicator.indicatorReports?
-
-
                   (indicator.indicatorReports.map(indicatorReport => {
                     return (
-                        <Typography variant={'body1'} sx={{pl:2}}> {`Indicator Report Name: `} <Link
+                        <Typography variant={'body1'} sx={{marginLeft:4}}> {`Indicator Report Name: `} <Link
                           to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
                           color={'blue'}>{indicatorReport.name}</Link> </Typography>
                       );
                   }))
                  : null
                   }
-
-
-
             </Paper>
 
           );
@@ -162,21 +162,22 @@ export default function IndicatorReports_ReportGenerate() {
       </Paper>
 
 
-      {indicators.length ?
-        <Paper sx={{p: 1}}>
-          <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>
-            Generate PDF File
-          </Button>
-        </Paper> :
-        null}
+      {/*{indicators.length ?*/}
+      {/*  <Paper sx={{p: 1}} elevation={0}>*/}
+      {/*    <Button variant="contained" color="primary" className={classes.button}*/}
+      {/*            onClick={generatePDFFile} startIcon={<PictureAsPdf />}>*/}
+      {/*      Generate PDF File*/}
+      {/*    </Button>*/}
+      {/*  </Paper> :*/}
+      {/*  null}*/}
 
-      <Paper sx={{p: 1}}>
-        <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          navigate('/reportGenerate');
-        }} startIcon={<Undo/>}>
-          Back
-        </Button>
-      </Paper>
+      {/*<Paper sx={{p: 1}}>*/}
+      {/*  <Button variant="contained" color="primary" className={classes.button} onClick={() => {*/}
+      {/*    navigate('/reportGenerate');*/}
+      {/*  }} startIcon={<Undo/>}>*/}
+      {/*    Back*/}
+      {/*  </Button>*/}
+      {/*</Paper>*/}
 
     </Container>
   );

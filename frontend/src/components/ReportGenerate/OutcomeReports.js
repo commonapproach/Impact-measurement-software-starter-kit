@@ -18,7 +18,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
-import {Undo} from "@mui/icons-material";
+import {PictureAsPdf, Undo} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
@@ -111,6 +111,8 @@ export default function OutcomeReports() {
           setOutcomes(outcomes);
         }
       });
+    } else {
+      setOutcomes([])
     }
   }, [selectedOrganization]);
 
@@ -119,8 +121,21 @@ export default function OutcomeReports() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      <Paper sx={{p: 2}} variant={'outlined'} sx={{position: 'relative'}}>
         <Typography variant={'h4'}> Outcomes </Typography>
+
+        <Button variant="outlined"  sx={{position: 'absolute', right:0, marginTop:1.5, backgroundColor:'#dda0dd', color:'white'}} onClick={() => {
+          navigate('/reportGenerate');
+        }} startIcon={<Undo />}>
+          Back
+        </Button>
+        {outcomes.length ?
+          <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
+                  onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
+            Generate PDF File
+          </Button>
+          :
+          null}
 
         <SelectField
           key={'organization'}
@@ -133,6 +148,7 @@ export default function OutcomeReports() {
             );
           }}
         />
+
         {outcomes.length ? outcomes.map((outcome, index) => {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
@@ -143,15 +159,19 @@ export default function OutcomeReports() {
                 {/*<Typography variant={'body1'}> {`Indicators:`}  </Typography>*/}
                   {outcome.indicators.map(indicator => {
                     return (
-                      <Paper elevation={0} sx={{pl: 1}}>
+                      <Paper elevation={0} sx={{pl: 4, pt: 1}}>
                         <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-                        <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+                        <Typography variant={'body1'} sx={{pl: 4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
 
                           {indicator.indicatorReports?
                               (indicator.indicatorReports.map(indicatorReport =>
-                                <Typography variant={'body1'} sx={{pl: 1}}> {`Indicator Report: `}<Link
+                                <Paper elevation={0} sx={{pl: 4}}>
+                                <Typography variant={'body1'}> {`Indicator Report: `}<Link
                                   to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
                                   color={'blue'}>{indicatorReport.name}</Link> </Typography>
+                                  <Typography variant={'body1'} sx={{pl: 2}}> {`Value: ${indicatorReport.value}`} </Typography>
+                                </Paper>
+
                               ))
                             :null
                           }
@@ -169,21 +189,21 @@ export default function OutcomeReports() {
       </Paper>
 
 
-      {outcomes.length ?
-        <Paper sx={{p: 1}}>
-          <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>
-            Generate PDF File
-          </Button>
-        </Paper> :
-        null}
+      {/*{outcomes.length ?*/}
+      {/*  <Paper sx={{p: 1}}>*/}
+      {/*    <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>*/}
+      {/*      Generate PDF File*/}
+      {/*    </Button>*/}
+      {/*  </Paper> :*/}
+      {/*  null}*/}
 
-      <Paper sx={{p: 1}}>
-        <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          navigate('/reportGenerate');
-        }} startIcon={<Undo/>}>
-          Back
-        </Button>
-      </Paper>
+      {/*<Paper sx={{p: 1}}>*/}
+      {/*  <Button variant="contained" color="primary" className={classes.button} onClick={() => {*/}
+      {/*    navigate('/reportGenerate');*/}
+      {/*  }} startIcon={<Undo/>}>*/}
+      {/*    Back*/}
+      {/*  </Button>*/}
+      {/*</Paper>*/}
 
     </Container>
   );

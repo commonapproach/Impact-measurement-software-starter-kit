@@ -2,7 +2,7 @@ import {Link} from "../shared";
 import {Button} from "@mui/material";
 import React from 'react';
 
-export function NavButton({to, text, icon, disabled, buttonWidth, buttonHeight, textSize}) {
+export function NavButton({to, text, icon, disabled, buttonWidth, buttonHeight, textSize, color, variant}) {
   return (
     <Link to={to}>
       <Button
@@ -14,8 +14,8 @@ export function NavButton({to, text, icon, disabled, buttonWidth, buttonHeight, 
           color: '#535353'
         }}
         disabled={disabled}
-        color="inherit"
-        variant="outlined"
+        color={color || "inherit"}
+        variant={variant || "outlined"}
         startIcon={icon}
         size={textSize || "large"}>
         {text}

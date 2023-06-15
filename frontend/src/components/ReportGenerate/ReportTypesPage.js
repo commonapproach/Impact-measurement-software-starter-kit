@@ -1,12 +1,13 @@
 import React, {useContext} from 'react';
 import {UserContext} from "../../context";
-import {Container, Typography} from "@mui/material";
+import {Button, Container, Typography} from "@mui/material";
 import {Edit, FileUpload, People, Undo} from "@mui/icons-material";
 import {NavButton} from "../dashboard/NavButton";
+import {useNavigate} from "react-router-dom";
 
 
 function ReportTypes() {
-  const userContext = useContext(UserContext);
+  const navigate = useNavigate();
 
   return (
     <Container maxWidth="sm" sx={{
@@ -15,20 +16,22 @@ function ReportTypes() {
     }}>
 
 
-
-        <NavButton to={`/reportGenerate/groupMembers`} icon={<People/>} key={'Group Members'} buttonHeight={50} buttonWidth={150} textSize={"small"}
-                   text="Group Members"/>
-
-
-        <NavButton to={`/reportGenerate/indicatorReports`} icon={<Edit/>} key={'Indicator Reports'} buttonHeight={50} buttonWidth={150}  textSize={"small"}
-                   text="Indicator Reports"/>
+      <NavButton to={`/reportGenerate/groupMembers`} icon={<People/>} key={'Group Members'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"}
+                 text="Group Members"/>
 
 
-        <NavButton to={`/reportGenerate/outcomeReports`} icon={<Edit/>} key={'Outcome Reports'} buttonHeight={50} buttonWidth={150}  textSize={"small"}
-                   text="Outcome Reports"/>
+      <NavButton to={`/reportGenerate/indicatorReports`} icon={<Edit/>} key={'Indicator Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"}
+                 text="Indicator Reports"/>
+
+
+      <NavButton to={`/reportGenerate/outcomeReports`} icon={<Edit/>} key={'Outcome Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"}
+                 text="Outcome Reports"/>
 
       <NavButton to={'/reportGenerate/themeReports'} icon={<Edit/>} key={'Theme Reports'} buttonHeight={50}
-                 buttonWidth={150}  textSize={"small"} text="Theme Reports"/>
+                 buttonWidth={150} textSize={"small"} text="Theme Reports"/>
 
       {/*<NavButton to={'/organization-outcomes'} icon={<Edit/>} key={'organization-outcomes'} buttonHeight={50}*/}
       {/*           buttonWidth={150}  textSize={"small"}  text="Theme Report"/>*/}
@@ -36,17 +39,14 @@ function ReportTypes() {
       {/*<NavButton to={'/organization-indicatorReports'} icon={<Edit/>} key={'indicatorReports'} buttonHeight={50}*/}
       {/*           buttonWidth={150}  textSize={"small"} text="Manage Indicator Reports"/>*/}
 
-      <NavButton to={'/dashboard'} icon={<Undo/>} key={'back'} buttonHeight={50} buttonWidth={150} textSize={"small"}
-                 text="Back" />
-
-
-
-
-
-
-
-      {/*<NavButton to={'/settings/manage-forms/client'} icon={<Edit/>}*/}
-      {/*           text="Manage Forms"/>*/}
+      <br/>
+      <Button variant="outlined"
+              sx={{backgroundColor: '#dda0dd', color: 'white'}}
+              onClick={() => {
+                navigate('/dashboard');
+              }} startIcon={<Undo/>}>
+        Back
+      </Button>
 
 
     </Container>);

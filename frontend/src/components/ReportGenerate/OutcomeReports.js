@@ -99,8 +99,11 @@ export default function OutcomeReports() {
         setOrganizations(organizationsOps);
         setLoading(false);
       }
+    }).catch(e => {
+      reportErrorToBackend(e);
+      setLoading(false);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
     });
-
 
   }, []);
 
@@ -110,6 +113,10 @@ export default function OutcomeReports() {
         if (success) {
           setOutcomes(outcomes);
         }
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching outcomes", {variant: 'error'});
       });
     } else {
       setOutcomes([])

@@ -89,6 +89,10 @@ export default function GroupMembers() {
         setGroups(groups);
         setLoading(false);
       }
+    }).catch(e => {
+      reportErrorToBackend(e);
+      setLoading(false);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching groups", {variant: 'error'});
     });
   }, []);
 
@@ -98,6 +102,10 @@ export default function GroupMembers() {
         if (success) {
           setOrganizations(organizations);
         }
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
       });
 
     } else {

@@ -10,6 +10,7 @@ import SelectField from "../shared/fields/SelectField";
 import {Undo, PictureAsPdf} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {jsPDF} from "jspdf";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -86,8 +87,11 @@ export default function IndicatorReports_ReportGenerate() {
           setOrganizations(organizationsOps);
           setLoading(false);
         }
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
       });
-
 
   }, []);
 
@@ -97,6 +101,10 @@ export default function IndicatorReports_ReportGenerate() {
         if (success) {
           setIndicators(indicators);
         }
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching indicators", {variant: 'error'});
       });
     } else {
       setIndicators([])

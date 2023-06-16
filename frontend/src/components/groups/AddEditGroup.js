@@ -59,7 +59,7 @@ export default function AddEditGroup() {
   });
 
   useEffect(() => {
-    if(!userContext.isSuperuser && !userContext.groupAdminOf.length > 0){
+    if(!userContext.isSuperuser && !userContext.groupAdminOf.length > 0) {
       navigate('/groups');
       enqueueSnackbar('Wrong auth', {variant: 'error'})
     }

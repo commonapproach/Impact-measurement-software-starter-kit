@@ -10,6 +10,7 @@ import {PictureAsPdf, Undo} from "@mui/icons-material";
 import {fetchOutcomesThroughTheme} from "../../api/outcomeApi";
 import {fetchThemes} from "../../api/themeApi";
 import {jsPDF} from "jspdf";
+import {reportErrorToBackend} from "../../api/errorReportApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -89,6 +90,10 @@ export default function ThemeReports() {
         if (success) {
           setOutcomes(outcomes)
         }
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching outcomes", {variant: 'error'});
       });
     } else {
       setOutcomes([])
@@ -99,7 +104,6 @@ export default function ThemeReports() {
   useEffect(() => {
       fetchThemes().then(({success, themes}) => {
         if (success) {
-          console.log(themes);
           const themeOps = {};
           themes.map(theme => {
             themeOps[theme._uri] = theme.name
@@ -107,7 +111,11 @@ export default function ThemeReports() {
           setThemes(themeOps);
           setLoading(false);
         }
-      })
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching themes", {variant: 'error'});
+      });
   }, []);
 
   if (loading)

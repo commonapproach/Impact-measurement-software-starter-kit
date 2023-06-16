@@ -141,7 +141,7 @@ export default function IndicatorReports_ReportGenerate() {
 
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'h6'}> {`Indicator: ${indicator.name}`}  </Typography>
-               <Typography variant={'body1'} sx={{pl:4}}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
+               <Typography variant={'body1'} sx={{pl:4}}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} colorWithHover color={'#2f5ac7'}>{indicator.name}</Link> </Typography>
               <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
 
               {indicator.indicatorReports?
@@ -149,7 +149,7 @@ export default function IndicatorReports_ReportGenerate() {
                   <Paper elevation={0} sx={{pl: 4}}>
                     <Typography variant={'body1'}> {`Indicator Report: `}<Link
                       to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
-                      color={'blue'}>{indicatorReport.name}</Link> </Typography>
+                      colorWithHover>{indicatorReport.name}</Link> </Typography>
                     <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
                     <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
                   </Paper>

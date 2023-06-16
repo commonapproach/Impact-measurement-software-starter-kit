@@ -22,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
   },
   linkWithHover: {
     fontWeight: 500,
-    color: 'inherit',
     // textDecorationLine: 'none',
     '&:hover': {
       textDecorationLine: 'underline',
@@ -39,9 +38,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function Link({className = '', color, ...props}) {
+export function Link({className = '', colorWithHover, color, ...props}) {
   const classes = useStyles();
-  return <DomLink {...props} className={color ? classes.linkWithHover : classes.link + ' ' + className}/>
+  return <DomLink {...props} className={colorWithHover ? classes.linkWithHover : classes.link + ' ' + className} color={color || 'inherit'}/>
 }
 
 /**

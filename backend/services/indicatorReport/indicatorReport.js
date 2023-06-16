@@ -38,7 +38,7 @@ const createIndicatorReport = async (req, res) => {
   const organization = await GDBOrganizationModel.findOne({_uri: form.organization});
   if (!organization)
     throw new Server400Error('No such organization');
-  const indicator = await GDBIndicatorModel.findOne({_uri: form.indicator}, {populates: ['unitOfMeasure']});
+  const indicator = await GDBIndicatorModel.findOne({_uri: form.indicator});
   if (!indicator)
     throw new Server400Error('No such indicator');
   if (await GDBIndicatorReportModel.findOne({
@@ -60,7 +60,7 @@ const createIndicatorReport = async (req, res) => {
       hasEnd: {date: new Date(form.endTime)}
     }),
     dateCreated: new Date(form.dateCreated),
-    value: GDBMeasureModel({numericalValue: form.numericalValue, unitOfMeasure: indicator.unitOfMeasure}),
+    value: GDBMeasureModel({numericalValue: form.numericalValue}),
   }, form.uri?{uri: form.uri}:null);
 
 
@@ -94,7 +94,7 @@ const fetchIndicatorReport = async (req, res) => {
   if (!uri)
     throw new Server400Error('Wrong input');
   const indicatorReport = await GDBIndicatorReportModel.findOne({_uri: uri},
-    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value.unitOfMeasure']});
+    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value']});
   if (!indicatorReport)
     throw new Server400Error('No such indicator Report');
   const form = {
@@ -103,7 +103,6 @@ const fetchIndicatorReport = async (req, res) => {
     organization: indicatorReport.forOrganization,
     indicator: indicatorReport.forIndicator,
     numericalValue: indicatorReport.value.numericalValue,
-    unitOfMeasure: indicatorReport.value.unitOfMeasure.label,
     startTime: indicatorReport.hasTime.hasBeginning.date,
     endTime: indicatorReport.hasTime.hasEnd.date,
     dateCreated: indicatorReport.dateCreated
@@ -129,7 +128,7 @@ const updateIndicatorReport = async (req, res) => {
     throw new Server400Error('Wrong input');
 
   const indicatorReport = await GDBIndicatorReportModel.findOne({_uri: uri},
-    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value.unitOfMeasure']});
+    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value']});
   if (!indicatorReport)
     throw new Server400Error('No such Indicator Report');
 
@@ -144,7 +143,7 @@ const updateIndicatorReport = async (req, res) => {
     indicatorReport.forOrganization = organization;
   }
   if (indicatorReport.forIndicator !== form.indicator) {
-    const indicator = await GDBIndicatorModel.findOne({_uri: form.indicator}, {populates: ['unitOfMeasure']});
+    const indicator = await GDBIndicatorModel.findOne({_uri: form.indicator});
     if (!indicator)
       throw new Server400Error('No such indicator');
     // todo: romove the indicator report from previous indicator and add the indicator report to new indicator
@@ -157,7 +156,6 @@ const updateIndicatorReport = async (req, res) => {
     await indicatorReport.forIndicator.save();
     await indicator.save();
     indicatorReport.forIndicator = indicator;
-    indicatorReport.value.unitOfMeasure = indicator.unitOfMeasure
 
   }
 
@@ -196,7 +194,7 @@ const fetchIndicatorReports = async (req, res) => {
     editable = true; // to tell the frontend that the outcome belong to the organization is editable
   }
   const indicatorReports = await GDBIndicatorReportModel.find({forOrganization: orgUri},
-    {populates: ['value.unitOfMeasure', 'hasTime.hasEnd', 'hasTime.hasBeginning']}
+    {populates: ['value', 'hasTime.hasEnd', 'hasTime.hasBeginning', 'forIndicator.unitOfMeasure']}
   );
   return res.status(200).json({success: true, indicatorReports, editable});
 };

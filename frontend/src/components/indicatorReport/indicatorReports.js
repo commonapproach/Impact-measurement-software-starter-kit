@@ -82,8 +82,9 @@ export default function IndicatorReports() {
     },
     {
       label: 'Unit Of Measure',
-      body: ({value}) => {
-        return value.unitOfMeasure.label
+      body: ({forIndicator}) => {
+
+        return forIndicator.unitOfMeasure.label
       }
     },
     {

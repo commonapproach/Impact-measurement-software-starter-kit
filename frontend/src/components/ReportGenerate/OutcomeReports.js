@@ -154,14 +154,14 @@ export default function OutcomeReports() {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
               {/*<Typography variant={'body1'}> {`Outcome: ${outcome.name}`}  </Typography>*/}
-              <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>
+              <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome.name}</Link> </Typography>
               {outcome.indicators?
                 <Paper elevation={0}>
                 {/*<Typography variant={'body1'}> {`Indicators:`}  </Typography>*/}
                   {outcome.indicators.map(indicator => {
                     return (
-                      <Paper elevation={0} sx={{pl: 4, pt: 1}}>
-                        <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
+                      <Paper elevation={0} sx={{pl: 4}}>
+                        <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'#2f5ac7'} colorWithHover>{indicator.name}</Link> </Typography>
                         <Typography variant={'body1'} sx={{pl: 4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
 
                           {indicator.indicatorReports?
@@ -169,7 +169,7 @@ export default function OutcomeReports() {
                                 <Paper elevation={0} sx={{pl: 4}}>
                                 <Typography variant={'body1'}> {`Indicator Report: `}<Link
                                   to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
-                                  color={'blue'}>{indicatorReport.name}</Link> </Typography>
+                                  color={'#2f5ac7'} colorWithHover>{indicatorReport.name}</Link> </Typography>
                                   <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
                                   <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
                                 </Paper>

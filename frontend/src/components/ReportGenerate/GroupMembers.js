@@ -142,7 +142,7 @@ export default function GroupMembers() {
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'h6'}> {`Organization: ${organization.legalName}`}  </Typography>
 
-              <Typography sx={{marginLeft: 4}} variant={'body1'}> {'Legal Name: '}<Link to={`/organizations/${encodeURIComponent(organization._uri)}/edit`} color>{organization.legalName}</Link> </Typography>
+              <Typography sx={{marginLeft: 4}} variant={'body1'}> {'Legal Name: '}<Link to={`/organizations/${encodeURIComponent(organization._uri)}/edit`} colorWithHover color={'#2f5ac7'}>{organization.legalName}</Link> </Typography>
               {organization.contactName ?
                 <Typography sx={{marginLeft: 4}} variant={'body1'}> {`Contact Name: ${organization.contactName}`} </Typography> : null}
               {organization.email ?

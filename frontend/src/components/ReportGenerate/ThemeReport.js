@@ -135,6 +135,7 @@ export default function ThemeReports() {
           label={'Theme'}
           value={selectedTheme}
           options={themes}
+          defaultOptionTitle={'Select a theme'}
           onChange={e => {
             setSelectedTheme(
               e.target.value
@@ -150,15 +151,20 @@ export default function ThemeReports() {
                 <Paper elevation={0}>
                   {outcome.indicators.map(indicator => {
                     return (
-                      <Paper elevation={0} sx={{pl: 1}}>
+                      <Paper elevation={0} sx={{pl: 4}}>
                         <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-                        <Typography variant={'body1'}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+                        <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
 
                         {indicator.indicatorReports?
                           (indicator.indicatorReports.map(indicatorReport =>
-                            <Typography variant={'body1'} sx={{pl: 1}}> {`Indicator Report: `}<Link
-                              to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
-                              color={'blue'}>{indicatorReport.name}</Link> </Typography>
+                            <Paper elevation={0} sx={{pl: 4}}>
+                              <Typography variant={'body1'}> {`Indicator Report: `}<Link
+                                to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
+                                color={'#2f5ac7'} colorWithHover>{indicatorReport.name}</Link> </Typography>
+                              <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
+                              <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
+                            </Paper>
+
                           ))
                           :null
                         }

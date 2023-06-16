@@ -11,6 +11,7 @@ import {Undo, PictureAsPdf} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {useSnackbar} from "notistack";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -34,7 +35,7 @@ export default function IndicatorReports_ReportGenerate() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-
+  const {enqueueSnackbar} = useSnackbar();
 
 
   const generatePDFFile = () => {

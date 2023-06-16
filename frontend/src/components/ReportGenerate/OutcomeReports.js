@@ -3,23 +3,15 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import GeneralField from "../shared/fields/GeneralField";
-import LoadingButton from "../shared/LoadingButton";
-import {AlertDialog} from "../shared/Dialogs";
 import {
   fetchOrganizations,
   fetchOrganizationsBasedOnGroup,
 } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchGroups} from "../../api/groupApi";
 import {PictureAsPdf, Undo} from "@mui/icons-material";
-import {fetchIndicators} from "../../api/indicatorApi";
 import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
 
@@ -50,6 +42,7 @@ export default function OutcomeReports() {
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [outcomes, setOutcomes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const {enqueueSnackbar} = useSnackbar();
 
 
   const generatePDFFile = () => {

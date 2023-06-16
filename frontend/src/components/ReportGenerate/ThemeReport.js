@@ -36,7 +36,6 @@ export default function ThemeReports() {
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
-  const mode = '';
 
   const [themes, setThemes] = useState({});
   const [selectedTheme, setSelectedTheme] = useState('');

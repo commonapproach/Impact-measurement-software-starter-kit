@@ -7,12 +7,8 @@ import {
   fetchOrganizationsBasedOnGroup,
 } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
-import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchGroups} from "../../api/groupApi";
 import {PictureAsPdf, Undo} from "@mui/icons-material";
 import { jsPDF } from "jspdf"
@@ -39,7 +35,7 @@ export default function GroupMembers() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-
+  const {enqueueSnackbar} = useSnackbar();
 
   const [groups, setGroups] = useState({});
   const [selectedGroup, setSelectedGroup] = useState('');

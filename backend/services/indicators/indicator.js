@@ -53,7 +53,8 @@ const fetchIndicators = async (req, res) => {
   } else {
     // the organizationUri is given, return all indicators belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
-      {populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.indicatorReports']});
+      {populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.indicatorReports.value',
+          'hasIndicators.indicatorReports.hasTime.hasBeginning', 'hasIndicators.indicatorReports.hasTime.hasEnd']});
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.hasIndicators)

@@ -142,6 +142,7 @@ export default function OutcomeReports() {
           label={'Organization'}
           value={selectedOrganization}
           options={organizations}
+          defaultOptionTitle={'Select an organization'}
           onChange={e => {
             setSelectedOrganization(
               e.target.value
@@ -169,7 +170,8 @@ export default function OutcomeReports() {
                                 <Typography variant={'body1'}> {`Indicator Report: `}<Link
                                   to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
                                   color={'blue'}>{indicatorReport.name}</Link> </Typography>
-                                  <Typography variant={'body1'} sx={{pl: 2}}> {`Value: ${indicatorReport.value}`} </Typography>
+                                  <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
+                                  <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
                                 </Paper>
 
                               ))
@@ -188,22 +190,6 @@ export default function OutcomeReports() {
 
       </Paper>
 
-
-      {/*{outcomes.length ?*/}
-      {/*  <Paper sx={{p: 1}}>*/}
-      {/*    <Button variant="contained" color="primary" className={classes.button} onClick={generatePDFFile}>*/}
-      {/*      Generate PDF File*/}
-      {/*    </Button>*/}
-      {/*  </Paper> :*/}
-      {/*  null}*/}
-
-      {/*<Paper sx={{p: 1}}>*/}
-      {/*  <Button variant="contained" color="primary" className={classes.button} onClick={() => {*/}
-      {/*    navigate('/reportGenerate');*/}
-      {/*  }} startIcon={<Undo/>}>*/}
-      {/*    Back*/}
-      {/*  </Button>*/}
-      {/*</Paper>*/}
 
     </Container>
   );

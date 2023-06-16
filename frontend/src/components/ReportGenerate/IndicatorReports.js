@@ -141,19 +141,22 @@ export default function IndicatorReports_ReportGenerate() {
 
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'h6'}> {`Indicator: ${indicator.name}`}  </Typography>
-               <Typography variant={'body1'} sx={{marginLeft:2}}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-              <Typography variant={'body1'} sx={{marginLeft:2}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+               <Typography variant={'body1'} sx={{pl:4}}> {'Name: '}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
+              <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
 
               {indicator.indicatorReports?
-                  (indicator.indicatorReports.map(indicatorReport => {
-                    return (
-                        <Typography variant={'body1'} sx={{marginLeft:4}}> {`Indicator Report Name: `} <Link
-                          to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
-                          color={'blue'}>{indicatorReport.name}</Link> </Typography>
-                      );
-                  }))
-                 : null
-                  }
+                (indicator.indicatorReports.map(indicatorReport =>
+                  <Paper elevation={0} sx={{pl: 4}}>
+                    <Typography variant={'body1'}> {`Indicator Report: `}<Link
+                      to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
+                      color={'blue'}>{indicatorReport.name}</Link> </Typography>
+                    <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
+                    <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
+                  </Paper>
+
+                ))
+                :null
+              }
             </Paper>
 
           );

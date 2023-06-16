@@ -39,7 +39,8 @@ const fetchOutcomes = async (req, res) => {
   } else {
     // the organizationId is given, return all outcomes belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
-      {populates: ['hasOutcomes.indicators.unitOfMeasure', 'hasOutcomes.indicators.indicatorReports']});
+      {populates: ['hasOutcomes.indicators.unitOfMeasure', 'hasOutcomes.indicators.indicatorReports.value',
+          'hasOutcomes.indicators.indicatorReports.hasTime.hasBeginning', 'hasOutcomes.indicators.indicatorReports.hasTime.hasEnd']});
     if (!organization)
       throw new Server400Error('No such organization');
     let editable;

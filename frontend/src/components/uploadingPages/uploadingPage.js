@@ -52,7 +52,9 @@ export default function FileUploadingPage() {
     fileContent: null,
     errorDialog: false,
     optionDisabled: false,
+    traceOfUploading: ''
   });
+  const [fileName, setFileName] = useState('')
   const [options, setOptions] = useState({
     fileTypes: ['JSON'],
     formTypes: ['Indicator', 'Indicator Report', 'Outcome'],
@@ -94,12 +96,14 @@ export default function FileUploadingPage() {
     try {
       setState(state => ({...state, loadingButton: true}));
       let responds;
-      const respond = await uploadFile(state.fileContent, state.organization)
+      const respond = await uploadFile(state.fileContent, state.organization, fileName)
       if (respond.success) {
-        console.log('success');
-        setState(state => ({...state, loadingButton: false, submitDialog: false}));
+        console.log(respond.traceOfUploading)
+        setState(state => ({...state, loadingButton: false, submitDialog: false, traceOfUploading:  respond.traceOfUploading}));
         navigate('/dashboard');
         enqueueSnackbar(respond.message || 'Success', {variant: "success"});
+      } else {
+
       }
 
     } catch (e) {
@@ -111,9 +115,6 @@ export default function FileUploadingPage() {
 
   const validate = () => {
     const error = {};
-    // if (!state.formType) {
-    //   error.formType = 'The field cannot be empty';
-    // }
     if (!state.organization) {
       error.organization = 'The field cannot be empty';
     }
@@ -121,7 +122,6 @@ export default function FileUploadingPage() {
       error.fileContent = 'The field cannot be empty';
     }
     setErrors(error);
-    console.log(error)
     return Object.keys(error).length === 0;
   };
 
@@ -210,29 +210,15 @@ export default function FileUploadingPage() {
           title={state.fileType ? `Please upload a ${state.fileType} file` :
             'Please choose file'}
           disabled={!state.fileType}
-          onchange={(fileContent) => {
+          onchange={(fileContent, fileName) => {
             setState(state => ({...state, fileContent: fileContent}));
-            // fileContent.map(fileContent => {
-              // switch (object['@type']) {
-              //   case 'cids:Theme':
-              //     break;
-              //   case 'cids:Outcome':
-              //     break;
-              //   case 'cids:Indicator':
-              //     break;
-              // }
-            // });
-            // if (state.formType === 'Indicator' && state.fileType === 'JSON')
-            //   setState(state => ({...state, fileContent: fileContent}));
-            // if (state.formType === 'Indicator Report' && state.fileType === 'JSON')
-            //   setState(state => ({...state, fileContent: fileContent}));
-            // if (state.formType === 'Outcome' && state.fileType === 'JSON')
-            //   setState(state => ({...state, fileContent: fileContent}));
+
             if (fileContent) {
               setState(state => ({...state, optionDisabled: true}));
             }
 
           }}
+          updateFileName={setFileName}
           whenRemovedFile={() => {
             setState(state => ({...state, optionDisabled: false}));
           }}

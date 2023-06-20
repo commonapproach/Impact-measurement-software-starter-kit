@@ -3,58 +3,22 @@ import {Button, Typography} from "@mui/material";
 import {reportErrorToBackend} from "../../../api/errorReportApi";
 
 const Ajv = require("ajv");
-export default function FileUploader({title, disabled, onchange, importedError, whenRemovedFile}) {
+export default function FileUploader({title, disabled, onchange, importedError, whenRemovedFile, updateFileName}) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [valid, setValid] = useState(false);
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState(importedError);
 
-  // const schemas = {
-  //   'Indicator': {
-  //     type: 'object',
-  //     properties: {
-  //       name: {type: 'string'},
-  //       description: {type: 'string'},
-  //       dateCreated: {type: 'string', format: 'time'},
-  //     },
-  //     required: ['name', 'description']
-  //   },
-  //   'Indicator Report': {
-  //     type: 'object',
-  //     properties: {
-  //       name: {type: 'string'},
-  //       comment: {type: 'string'},
-  //       indicatorName: {type: 'string'},
-  //       numericalValue: {type: 'number'},
-  //       unitOfMeasure: {type: 'string'},
-  //       startTime: {type: 'string', format: 'date-time'},
-  //       endTime: {type: 'string', format: 'date-time'},
-  //       dateCreated: {type: 'string', format: 'date-time'},
-  //     },
-  //     required: [
-  //       'name', 'indicatorName', 'numericalValue', 'unitOfMeasure', 'startTime', 'endTime', 'dateCreated'
-  //     ]
-  //   },
-  //   'Outcome': {
-  //     type: 'object',
-  //     properties: {
-  //       name: {type: 'string'},
-  //       description: {type: 'string'},
-  //       themeName: {type: 'string'}
-  //     },
-  //     required: ['name', 'description', 'themeName']
-  //   },
-  //
-  // };
-
-  const ajv = new Ajv();
-  // const validators = {
-  //   "cids:Indicator": ajv.compile(schemas.Indicator),
-  //   "cids:Outcome": ajv.compile(schemas.Outcome),
-  //   "cids:IndicatorReport": ajv.compile(schemas["Indicator Report"])
-  // }
-
   const reader = new FileReader();
+
+  useEffect(() => {
+    if (selectedFile) {
+      updateFileName(selectedFile.name)
+    } else {
+      updateFileName('')
+    }
+
+  }, [selectedFile])
 
 // set the onload event handler
   reader.onload = function () {
@@ -63,7 +27,7 @@ export default function FileUploader({title, disabled, onchange, importedError, 
     try {
       const fileContents = reader.result;
       let parsed_data = JSON.parse(fileContents);
-      onchange(parsed_data);
+      onchange(parsed_data, selectedFile?.name);
       // expand(parsed_data).then(expanded => {
       //   console.log(expanded)
       // })
@@ -121,15 +85,6 @@ export default function FileUploader({title, disabled, onchange, importedError, 
     whenRemovedFile();
   };
 
-  // const handleUpload = () => {
-  //   // You can perform the upload logic here using the selectedFile
-  //   try {
-  //     reader.readAsText(selectedFile);
-  //   } catch (e) {
-  //     reportErrorToBackend(e);
-  //   }
-  //
-  // };
 
   return (
     <div>

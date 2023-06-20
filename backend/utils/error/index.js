@@ -7,6 +7,7 @@ class NotImplementedError extends Error {
 class Server400Error extends Error {
   constructor(message) {
     super(message);
+    console.error(message);
     this.statusCode = 400;
   }
 }

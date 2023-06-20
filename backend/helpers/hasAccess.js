@@ -28,6 +28,8 @@ async function hasAccess(req, operationType) {
     case 'fileUploading':
       if (userAccount.isSuperuser)
         return true;
+      if (userAccount)
+      break;
     // users
     case 'inviteNewUser':
       return userAccount.isSuperuser;

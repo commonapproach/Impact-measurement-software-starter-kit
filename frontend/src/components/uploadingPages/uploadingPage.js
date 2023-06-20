@@ -3,18 +3,16 @@ import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
 import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
-import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
-import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import FileUploader from "../shared/fields/fileUploader";
 import {uploadFile} from "../../api/fileUploadingApi";
+import { saveAs } from 'file-saver';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -52,7 +50,9 @@ export default function FileUploadingPage() {
     fileContent: null,
     errorDialog: false,
     optionDisabled: false,
-    traceOfUploading: ''
+    traceOfUploading: '',
+    success: false,
+    fail: false,
   });
   const [fileName, setFileName] = useState('')
   const [options, setOptions] = useState({
@@ -98,10 +98,9 @@ export default function FileUploadingPage() {
       let responds;
       const respond = await uploadFile(state.fileContent, state.organization, fileName)
       if (respond.success) {
-        console.log(respond.traceOfUploading)
-        setState(state => ({...state, loadingButton: false, submitDialog: false, traceOfUploading:  respond.traceOfUploading}));
-        navigate('/dashboard');
-        enqueueSnackbar(respond.message || 'Success', {variant: "success"});
+        setState(state => ({...state, loadingButton: false, submitDialog: false, traceOfUploading:  respond.traceOfUploading, success: true}));
+
+        // enqueueSnackbar(respond.message || 'Success', {variant: "success"});
       } else {
 
       }
@@ -242,7 +241,27 @@ export default function FileUploadingPage() {
           buttons={[<Button onClick={() => setState(state => ({...state, errorDialog: false}))}
                             key={'cancel'} autoFocus>{'OK'}</Button>,]}
           open={state.errorDialog}/>
+
+
+        <AlertDialog
+          dialogContentText={state.traceOfUploading}
+          dialogTitle={'Success'}
+          buttons={[<Button onClick={() => {
+            const file = new Blob([state.traceOfUploading], { type: 'text/plain' });
+            saveAs(file, 'traceOfUploads.txt');
+            setState(state => ({...state, success: false}));
+            window.location.reload();
+          }}
+                            key={'Download messages'}>{'Download messages'}</Button>,
+            <Button onClick={() => {
+              setState(state => ({...state, success: false}));
+              window.location.reload();
+            }}
+                    key={'ok'}>{'ok'}</Button>
+            ]}
+          open={state.success}/>
       </Paper>
+
 
 
       <Paper sx={{p: 2}} variant={'outlined'}>

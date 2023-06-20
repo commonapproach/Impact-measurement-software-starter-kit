@@ -59,14 +59,6 @@ const getFullObjectURI = (object) => {
 
 
 
-async function themeBuilder(trans, object, organization, themeDict, objectDict) {
-  const uri = object['@id'];
-  const theme = themeDict[uri];
-  console.log( `    Loading ${uri} of type ${ getPrefixedURI(object['@type'][0])}...`)
-  await transSave(trans, theme);
-}
-
-
 async function transSave(trans, object) {
   const {query} = await object.getQueries();
   return await trans.update(new UpdateQueryPayload()
@@ -143,6 +135,14 @@ const fileUploading = async (req, res, next) => {
         } // if the indicator is in the file, don't have to worry about adding the outcome to the indicator
       }
       await transSave(trans, outcome);
+    }
+
+    async function themeBuilder(trans, object, organization) {
+      const uri = object['@id'];
+      const theme = themeDict[uri];
+      console.log( `    Loading ${uri} of type ${ getPrefixedURI(object['@type'][0])}...`)
+      addTrace(`    Loading ${uri} of type ${ getPrefixedURI(object['@type'][0])}...`)
+      await transSave(trans, theme);
     }
 
     async function indicatorBuilder(trans, object, organization) {
@@ -234,8 +234,8 @@ const fileUploading = async (req, res, next) => {
     const {objects, organizationUri, fileName} = req.body;
     console.log(`Loading ${fileName}...`);
     addTrace(`Loading ${fileName}...`);
-    console.log('   Adding objects to organization: ' + organizationUri);
-    addTrace('   Adding objects to organization: ' + organizationUri)
+    console.log('    Adding objects to organization: ' + organizationUri);
+    addTrace('    Adding objects to organization: ' + organizationUri)
     const expandedObjects = await expand(objects);
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
@@ -392,14 +392,14 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         await indicatorReportBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
-        await themeBuilder(trans, object, organization, themeDict);
+        await themeBuilder(trans, object, organization,);
       }
     }
     await transSave(trans, organization);
     // await organization.save();
-    console.log('   Start to insert data...');
-    addTrace('   Start to insert data...');
-    await trans.commit();
+    console.log('    Start to insert data...');
+    addTrace('    Start to insert data...');
+    // await trans.commit();
     console.log(`Completed loading ${fileName}`);
     addTrace(`Completed loading ${fileName}`);
     return res.status(200).json({success: true, traceOfUploading});

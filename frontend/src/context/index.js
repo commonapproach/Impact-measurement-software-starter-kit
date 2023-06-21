@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const defaultUserContext = {
-  id:'',
+  uri:'',
   givenName:'',
   familyName:'',
   email: '',

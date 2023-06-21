@@ -101,14 +101,12 @@ export default function FileUploadingPage() {
         setState(state => ({...state, loadingButton: false, submitDialog: false, traceOfUploading:  respond.traceOfUploading, success: true}));
 
         // enqueueSnackbar(respond.message || 'Success', {variant: "success"});
-      } else {
-
       }
 
     } catch (e) {
-      setState(state => ({...state, loadingButton: false, submitDialog: false}));
+      setState(state => ({...state, loadingButton: false, submitDialog: false, fail: true, traceOfUploading: e.json?.message}));
       reportErrorToBackend(e);
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      // enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     }
   };
 
@@ -131,7 +129,7 @@ export default function FileUploadingPage() {
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> File Uploading </Typography>
+        <Typography variant={'h4'}> File Upload </Typography>
 
         <SelectField
           disabled={state.optionDisabled}
@@ -226,8 +224,8 @@ export default function FileUploadingPage() {
 
 
         <AlertDialog
-          dialogContentText={state.loadingButton ? 'Please wait a second...' : "You won't be able to edit the information after clicking CONFIRM."}
-          dialogTitle={state.loadingButton ? 'Checking is processing...' : 'Are you sure you want to submit?'}
+          dialogContentText={state.loadingButton ? 'Please wait...' : "You won't be able to edit the information after clicking CONFIRM."}
+          dialogTitle={state.loadingButton ? 'File upload in progress...' : 'Are you sure you want to submit?'}
           buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                             key={'cancel'}>{'cancel'}</Button>,
             <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
@@ -252,7 +250,7 @@ export default function FileUploadingPage() {
             setState(state => ({...state, success: false}));
             window.location.reload();
           }}
-                            key={'Download messages'}>{'Download messages'}</Button>,
+                            key={'Download file upload log'}>{'Download file upload log'}</Button>,
             <Button onClick={() => {
               setState(state => ({...state, success: false}));
               window.location.reload();
@@ -260,6 +258,24 @@ export default function FileUploadingPage() {
                     key={'ok'}>{'ok'}</Button>
             ]}
           open={state.success}/>
+
+        <AlertDialog
+          dialogContentText={state.traceOfUploading}
+          dialogTitle={'Error'}
+          buttons={[<Button onClick={() => {
+            const file = new Blob([state.traceOfUploading], { type: 'text/plain' });
+            saveAs(file, 'traceOfUploads.txt');
+            setState(state => ({...state, fail: false}));
+            window.location.reload();
+          }}
+                            key={'Download file upload log'}>{'Download file upload log'}</Button>,
+            <Button onClick={() => {
+              setState(state => ({...state, fail: false}));
+              window.location.reload();
+            }}
+                    key={'ok'}>{'ok'}</Button>
+          ]}
+          open={state.fail}/>
       </Paper>
 
 

@@ -102,15 +102,17 @@ const fileUploading = async (req, res, next) => {
 
       // add theme to outcome
       if (!object[getFullPropertyURI(GDBOutcomeModel, 'theme')]) {
+        addTrace('Error!')
         addTrace(`    ${uri}: outcome need to contain a Theme`)
-        throw new Server400Error(`    ${uri}: outcome need to contain a Theme`);
+        throw new Server400Error(traceOfUploading);
       }
       outcome.theme = getValue(object, GDBOutcomeModel, 'theme');
 
       // add indicator to outcome
       if (!object[getFullPropertyURI(GDBOutcomeModel, 'indicators')]) {
+        addTrace('Error!')
         addTrace(`    ${uri}: outcome need to contain at least an Indicator`)
-        throw new Server400Error(`    ${uri}: outcome need to contain at least an Indicator`);
+        throw new Server400Error(traceOfUploading);
       }
       if (!outcome.indicators)
         outcome.indicators = [];
@@ -121,12 +123,14 @@ const fileUploading = async (req, res, next) => {
           //in this case, the indicator is not in the file, get the indicator from database and add the outcome to it
           const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
           if (!indicator) {
-            addTrace(`    Incorrect input value: Indicator ${indicatorURI} doesn't exist on both the file and the database`);
-            throw new Server400Error(`    Incorrect input value: Indicator ${indicatorURI} doesn't exist on both the file and the database`);
+            addTrace('Error!')
+            addTrace(`    Indicator ${indicatorURI} appears neither in the file nor in the database`);
+            throw new Server400Error(traceOfUploading);
           }//check if the indicator belongs to the organization
           if (!indicator.forOrganizations.includes(organization._uri)) {
-            addTrace(`    Incorrect input value: Outcome ${indicatorURI} doesn't belong to this organization`);
-            throw new Server400Error(`    Incorrect input value: Outcome ${indicatorURI} doesn't belong to this organization`);
+            addTrace('Error!')
+            addTrace(`    Outcome ${indicatorURI} does not belong to this organization`);
+            throw new Server400Error(traceOfUploading);
           }
           if (!indicator.forOutcomes)
             indicator.forOutcomes = [];
@@ -171,12 +175,14 @@ const fileUploading = async (req, res, next) => {
             //in this case, the outcome is not in the file, get the outcome from database and add indicator to it
             const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
             if (!outcome) {
-              addTrace(`    Incorrect input value: Outcome ${outcomeURI} doesn't exist on both the file and the database`)
-              throw new Server400Error(`    Incorrect input value: Outcome ${outcomeURI} doesn't exist on both the file and the database`);
+              addTrace('Error!')
+              addTrace(`    Outcome ${outcomeURI} appears neither in the file nor in the database`)
+              throw new Server400Error(traceOfUploading);
             }// check if the outcome belongs to the organization
             if (outcome.forOrganization !== organization._uri) {
-              addTrace(`    Incorrect input value: Outcome ${outcomeURI} doesn't belong to this organization`)
-              throw new Server400Error(`    Incorrect input value: Outcome ${outcomeURI} doesn't belong to this organization`);
+              addTrace('Error!')
+              addTrace(`    Outcome ${outcomeURI} doesn't belong to this organization`)
+              throw new Server400Error(traceOfUploading);
             }
             if (!outcome.indicators)
               outcome.indicators = [];
@@ -214,12 +220,14 @@ const fileUploading = async (req, res, next) => {
         // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
         const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
         if (!indicator) {
-          addTrace(`    Incorrect input value: Indicator ${indicatorURI} doesn't exist on both the file and the database`);
-          throw new Server400Error(`    Incorrect input value: Indicator ${indicatorURI} doesn't exist on both the file and the database`);
+          addTrace('Error!')
+          addTrace(`    Indicator ${indicatorURI} appears neither in the file nor in the database`);
+          throw new Server400Error(traceOfUploading);
         }
         if (!indicator.forOrganizations.includes(organization._uri)) {
-          addTrace(`    Incorrect input value: Indicator ${indicatorURI} doesn't belong to this organization`)
-          throw new Server400Error(`    Incorrect input value: Indicator ${indicatorURI} doesn't belong to this organization`);
+          addTrace('Error!')
+          addTrace(`    Indicator ${indicatorURI} doesn't belong to this organization`)
+          throw new Server400Error(traceOfUploading);
         }
         if (!indicator.indicatorReports) {
           indicator.indicatorReports = [];
@@ -240,8 +248,9 @@ const fileUploading = async (req, res, next) => {
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
     if (!organization) {
+      addTrace('Error!')
       addTrace('    Incorrect organization URI: No such Organization')
-      throw new Server400Error('    Incorrect organization URI: No such Organization');
+      throw new Server400Error(traceOfUploading);
     }
     for (let object of expandedObjects) {
       // store the raw object into objectDict
@@ -252,8 +261,9 @@ const fileUploading = async (req, res, next) => {
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'name')] ||
           !object[getFullPropertyURI(GDBOutcomeModel, 'description')]
         ) {
+          addTrace('Error!')
           addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name and description are mandatory`)
-          throw new Server400Error(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name and description are mandatory`);
+          throw new Server400Error(traceOfUploading);
         }
         const outcome = GDBOutcomeModel({
           name: getValue(object, GDBOutcomeModel, 'name'),
@@ -262,12 +272,34 @@ const fileUploading = async (req, res, next) => {
         await transSave(trans, outcome);
         outcomeDict[uri] = outcome;
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
-        if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')] ||
-          !object[getFullPropertyURI(GDBIndicatorModel, 'description')] ||
-          !object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')]) {
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name, description and unitOfMeasure are mandatory`)
-          throw new Server400Error(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name, description and unitOfMeasure are mandatory`);
+        // if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')] ||
+        //   !object[getFullPropertyURI(GDBIndicatorModel, 'description')] ||
+        //   !object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')]) {
+        //   addTrace('Error!')
+        //   addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name, description and unitOfMeasure are mandatory`)
+        //   throw new Server400Error(traceOfUploading);
+        // }
+
+        if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')]){
+          addTrace('Error!')
+          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'name'))} is missing`)
+          throw new Server400Error(traceOfUploading);
         }
+
+        if (!object[getFullPropertyURI(GDBIndicatorModel, 'description')]){
+          addTrace('Error!')
+          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`)
+          throw new Server400Error(traceOfUploading);
+        }
+
+        if (!object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')]){
+          addTrace('Error!')
+          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure'))} is missing`)
+          throw new Server400Error(traceOfUploading);
+        }
+
+
+
         const indicator = GDBIndicatorModel({
           name: getValue(object, GDBIndicatorModel, 'name'),
           description: getValue(object, GDBIndicatorModel, 'description'),
@@ -285,8 +317,9 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'name')] || !object[getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated')] ||
           !object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
+          addTrace('Error!')
           addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name and comment are mandatory`)
-          throw new Server400Error(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name and comment are mandatory`);
+          throw new Server400Error(traceOfUploading);
         }
         const indicatorReport = GDBIndicatorReportModel({
           name: getValue(object, GDBIndicatorReportModel, 'name'),
@@ -332,8 +365,9 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
         if (!object[getFullPropertyURI(GDBThemeModel, 'name')] ||
           !object[getFullPropertyURI(GDBThemeModel, 'description')]) {
+          addTrace('Error!')
           addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name and description are mandatory`);
-          throw new Server400Error(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: name and description are mandatory`);
+          throw new Server400Error(traceOfUploading);
         }
         const theme = GDBThemeModel({
           name: getValue(object, GDBThemeModel, 'name'),
@@ -343,8 +377,9 @@ const fileUploading = async (req, res, next) => {
         themeDict[uri] = theme;
       }  else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
         if (!object[getFullPropertyURI(GDBUnitOfMeasure, 'label')]) {
+          addTrace('Error!')
           addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: label is mandatory`)
-          throw new Server400Error(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: label is mandatory`);
+          throw new Server400Error(traceOfUploading);
         }
         const unitOfMeasure = GDBUnitOfMeasure({
           label: getValue(object, GDBUnitOfMeasure, 'label')
@@ -352,8 +387,9 @@ const fileUploading = async (req, res, next) => {
         await transSave(trans, unitOfMeasure);
       } else if (object['@type'].includes(getFullTypeURI(GDBMeasureModel))) {
         if (!object[getFullPropertyURI(GDBMeasureModel, 'numericalValue')]) {
+          addTrace('Error!')
           addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: numericalValue is mandatory`)
-          throw new Server400Error(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: numericalValue is mandatory`);
+          throw new Server400Error(traceOfUploading);
         }
         const measure = GDBMeasureModel({
           numericalValue: getValue(object, GDBMeasureModel, 'numericalValue')
@@ -362,8 +398,9 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURI(GDBDateTimeIntervalModel))) {
         if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')] ||
           !object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')]) {
+          addTrace('Error!')
           addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: hasBeginning and hasEnd is mandatory`)
-          throw new Server400Error(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: hasBeginning and hasEnd is mandatory`);
+          throw new Server400Error(traceOfUploading);
         }
         const dateTimeInterval = GDBDateTimeIntervalModel({
           hasBeginning: getValue(object, GDBDateTimeIntervalModel, 'hasBeginning') ||
@@ -399,7 +436,7 @@ const fileUploading = async (req, res, next) => {
     // await organization.save();
     console.log('    Start to insert data...');
     addTrace('    Start to insert data...');
-    // await trans.commit();
+    await trans.commit();
     console.log(`Completed loading ${fileName}`);
     addTrace(`Completed loading ${fileName}`);
     return res.status(200).json({success: true, traceOfUploading});

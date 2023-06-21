@@ -190,8 +190,8 @@ export default function AddEditIndicatorReport() {
           </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                       'Are you sure you want to update this Organization?'}
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Indicator Report?' :
+                       'Are you sure you want to update this Indicator Report?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

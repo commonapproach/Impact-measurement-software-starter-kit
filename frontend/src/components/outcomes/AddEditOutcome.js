@@ -126,7 +126,7 @@ export default function AddEditOutcome() {
 
   const validate = () => {
     const error = {};
-    console.log(form)
+    console.log(form.indicators)
     if (form.name === '')
       error.name = 'The field cannot be empty';
     if (!form.indicators.length)
@@ -169,8 +169,8 @@ export default function AddEditOutcome() {
         </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                       'Are you sure you want to update this Organization?'}
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
+                       'Are you sure you want to update this outcome?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

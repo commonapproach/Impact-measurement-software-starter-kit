@@ -105,7 +105,8 @@ const fetchIndicatorReport = async (req, res) => {
     numericalValue: indicatorReport.value.numericalValue,
     startTime: indicatorReport.hasTime.hasBeginning.date,
     endTime: indicatorReport.hasTime.hasEnd.date,
-    dateCreated: indicatorReport.dateCreated
+    dateCreated: indicatorReport.dateCreated,
+    uri: indicatorReport._uri
   };
   return res.status(200).json({indicatorReport: form, success: true});
 };

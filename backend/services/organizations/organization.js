@@ -237,9 +237,11 @@ async function updateOrganization(req, res) {
   organization.email = form.email;
   // organization.hasIdentifier = form.hasIdentifier;
   if (form.areaCode && form.countryCode && form.phoneNumber) {
-    organization.telephone.areaCode = form.areaCode;
-    organization.telephone.countryCode = form.countryCode;
-    organization.telephone.phoneNumber = form.phoneNumber;
+    organization.telephone = {
+      areaCode: form.areaCode,
+      countryCode: form.countryCode,
+      phoneNumber: form.phoneNumber
+    }
   }
 
 

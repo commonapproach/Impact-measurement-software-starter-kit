@@ -29,7 +29,7 @@ const ITEM_HEIGHT = 48;
 function TopNavBar() {
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
-  const id = userContext.id;
+  const uri = userContext.uri;
   const isLoggedin = !!userContext.email;
 
   const [anchorElLeft, setAnchorElLeft] = useState(null);
@@ -149,7 +149,7 @@ function TopNavBar() {
                 <ListItemIcon>
                   <FileUpload fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>
-                <Typography variant="inherit">File Uploading</Typography>
+                <Typography variant="inherit">File Upload</Typography>
               </MenuItem>
 
               <MenuItem onClick={handleLink(`/reportGenerate`)}>
@@ -198,7 +198,7 @@ function TopNavBar() {
                 <Typography variant="inherit">Dashboard</Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleLink('/profile/' + id + '/')}>
+              <MenuItem onClick={handleLink('/profile/' + uri + '/')}>
                 <ListItemIcon>
                   <ManageAccountsIcon fontSize="medium" sx={{color: 'black'}}/>
                 </ListItemIcon>

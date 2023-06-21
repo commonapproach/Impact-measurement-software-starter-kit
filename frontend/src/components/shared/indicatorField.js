@@ -128,7 +128,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <Dropdown
                 label={'Organizations'}
                 key={'organizations'}
@@ -150,7 +150,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               />
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <TextField
                 sx={{mt: 2}}
                 fullWidth

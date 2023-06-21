@@ -11,7 +11,7 @@ const {GDBUnitOfMeasure} = require("../../models/measure");
 
 const fetchIndicators = async (req, res) => {
 
-  const userAccount = await GDBUserAccountModel.findOne({_id: req.session._id});
+  const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   const {organizationUri} = req.params;
   if (!organizationUri) {
     // the organizationId is not given, return all indicators which is reachable by the user
@@ -60,7 +60,7 @@ const fetchIndicators = async (req, res) => {
     if (!organization.hasIndicators)
       return res.status(200).json({success: true, indicators: []});
     let editable;
-    if(userAccount.isSuperuser || organization.editors.includes(userAccount._uri)) {
+    if(userAccount.isSuperuser || organization.editors?.includes(userAccount._uri)) {
       editable = true
       organization.hasIndicators.map(indicator => {
         indicator.editable = true;
@@ -185,7 +185,7 @@ const updateIndicator = async (req, res) => {
   await Promise.all(form.organizations.map(organization => {
     if (!organization.hasIndicators)
       organization.hasIndicators = [];
-    organization.hasIndicators.push(indicator);
+    organization.hasIndicators.push(indicator._uri);
     return organization.save();
   }));
 

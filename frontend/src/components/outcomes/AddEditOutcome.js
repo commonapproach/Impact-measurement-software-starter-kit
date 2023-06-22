@@ -46,7 +46,8 @@ export default function AddEditOutcome() {
     comment: '',
     organization: null,
     indicators:[],
-    uri: ''
+    uri: '',
+    theme: []
     // identifier: ''
   });
   const [loading, setLoading] = useState(true);

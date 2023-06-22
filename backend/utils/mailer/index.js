@@ -12,7 +12,7 @@ const sendVerificationMail = async (email, token) => {
     ...getVerificationTemplate(email, token)
   };
   await new Promise((resole, reject) => {
-    console.log("http://localhost:5000/register/" + token)
+    console.log("http://localhost:3000/verify/" + token)
     transporter.sendMail(mailOptions, function (err) {
       if (err) {
         reject(err);

@@ -126,7 +126,7 @@ const fileUploading = async (req, res, next) => {
             addTrace('Error!')
             addTrace(`    Indicator ${indicatorURI} appears neither in the file nor in the database`);
             throw new Server400Error(traceOfUploading);
-          }//check if the indicator belongs to the organization
+          } //check if the indicator belongs to the organization
           if (!indicator.forOrganizations.includes(organization._uri)) {
             addTrace('Error!')
             addTrace(`    Outcome ${indicatorURI} does not belong to this organization`);

@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
 import Dropdown from "./fields/MultiSelectField";
-import {fetchOrganizations} from "../../api/organizationApi";
+import {fetchOrganizationsInterfaces, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {isValidURL} from "../../helpers/validation_helpers";
 
@@ -52,13 +52,12 @@ export default function IndicatorField({defaultValue, required, onChange, label,
   }, [importErrors]);
 
   useEffect(() => {
-    fetchOrganizations(userContext).then(({success, organizations}) => {
+    fetchOrganizationsInterfaces().then(({success, organizations}) => {
       if(success) {
         const options ={};
         organizations.map(organization => {
           // felt out the organization this user serves as the editor
-          if(userContext.isSuperuser || organization.editors?.includes(userContext.uri))
-            options[organization._uri] = organization.legalName;
+          options[organization._uri] = organization.legalName;
         })
         setOptions(options)
       }
@@ -197,8 +196,6 @@ export default function IndicatorField({defaultValue, required, onChange, label,
                 }
               />
             </Grid>
-
-
           </Grid>
         </>
       }

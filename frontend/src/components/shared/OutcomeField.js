@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
 import {fetchThemes} from "../../api/themeApi";
-import {fetchOrganizations} from "../../api/organizationApi";
+import {fetchOrganizations, fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchIndicators} from "../../api/indicatorApi";
@@ -85,13 +85,12 @@ export default function OutcomeField({
               }
             );
         }),
-      fetchOrganizations().then(({success, organizations}) => {
+      fetchOrganizationsInterfaces().then(({success, organizations}) => {
         if (success) {
           const options = {};
           organizations.map(organization => {
             // only organization which the user serves as an editor should be able to add
-            if (userContext.isSuperuser || organization.editors?.includes(userContext.uri))
-              options[organization._uri] = organization.legalName;
+            options[organization._uri] = organization.legalName;
           });
           setOptions(op => ({...op, organization: options}));
         }
@@ -186,9 +185,9 @@ export default function OutcomeField({
                 value={state.themes}
                 onChange={(e) => {
                   setState(state => ({...state, themes: e.target.value}));
-                  const st = state
+                  const st = state;
                   st.themes = e.target.value;
-                  onChange(st)
+                  onChange(st);
                 }
                 }
                 error={!!errors.themes}
@@ -235,9 +234,9 @@ export default function OutcomeField({
                 options={options.indicators}
                 onChange={(e) => {
                   setState(state => ({...state, indicators: e.target.value}));
-                  const st = state
+                  const st = state;
                   st.indicators = e.target.value;
-                  onChange(st)
+                  onChange(st);
                 }
                 }
                 fullWidth

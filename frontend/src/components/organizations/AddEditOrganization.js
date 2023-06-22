@@ -6,7 +6,13 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {createOrganization, fetchOrganization, fetchOrganizations, updateOrganization} from "../../api/organizationApi";
+import {
+  createOrganization,
+  fetchOrganization,
+  fetchOrganizations,
+  fetchOrganizationsInterfaces,
+  updateOrganization
+} from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
@@ -77,7 +83,7 @@ export default function AddEditOrganization() {
   useEffect(() => {
 
     Promise.all([
-      fetchOrganizations().then(({organizations, success}) => {
+      fetchOrganizationsInterfaces().then(({organizations, success}) => {
         if (success) {
           const orgDict = {};
           organizations.map(org => {
@@ -286,6 +292,7 @@ export default function AddEditOrganization() {
           // disabled={mode === 'new' || !userContext.isSuperuser}
           key={'issuedBy'}
           label={'Number Issued By'}
+          disabled={!userContext.isSuperuser}
           value={form.issuedBy}
           options={options.issuedBy}
           error={!!errors.issuedBy}

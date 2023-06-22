@@ -14,6 +14,22 @@ const fetchOrganizationsHandler = async (req, res, next) => {
   }
 };
 
+const fetchOrganizationsInterfacesHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchOrganizationsInterfaces'))
+      return await fetchOrganizationsInterfaces(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchOrganizationsInterfaces = async (req, res) => {
+  const organizations = await GDBOrganizationModel.find({});
+  const ret = organizations.map(org => ({legalName: org.legalName, _uri: org._uri}));
+  return res.status(200).json({organizations: ret, success: true});
+}
+
 const fetchOrganizations = async (req, res) => {
   const {groupUri} = req.params
   if (!groupUri) {
@@ -54,5 +70,5 @@ const fetchOrganizations = async (req, res) => {
 };
 
 module.exports = {
-  fetchOrganizationsHandler,
+  fetchOrganizationsHandler, fetchOrganizationsInterfacesHandler
 };

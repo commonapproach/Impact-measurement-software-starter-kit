@@ -51,6 +51,7 @@ const inviteNewUser = async (req, res) => {
     const token = sign({
       email
     }, jwtConfig.secret, jwtConfig.options);
+    console.log(token)
     // await sendVerificationMail(email, token); // todo: switch back later
     await userAccount.save();
     await Promise.all(associatedOrganizations.map(organization => {

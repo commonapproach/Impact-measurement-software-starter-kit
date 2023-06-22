@@ -113,32 +113,30 @@ async function organizationBelongsToGroupAdmin(userAccount, organizationUri) {
 const organizationsInSameGroups = async (userAccount, organizations, role) => {
     if (role) {
       await Promise.all(userAccount[role].map(organizationURI => {
-        const organizationId = organizationURI.split('_')[1];
         const query = `
         PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
         select * where { 
-	          ?group :hasOrganization :organization_${organizationId}.
+	          ?group :hasOrganization <${organizationURI}>.
     	      ?group :hasOrganization ?organization.
         }`;
         return GraphDB.sendSelectQuery(query, false, (res) => {
-          const organizationURI = SPARQL.getPrefixedURI(res.organization.id);
-          if (organizationURI.split('_')[1] !== organizationId && !organizations.includes(organizationURI))
-            organizations.push(organizationURI);
+          const organizationUri = SPARQL.getPrefixedURI(res.organization.id);
+          if (organizationUri !== organizationURI && !organizations.includes(organizationUri))
+            organizations.push(organizationUri);
         });
       }));
     } else {
       await Promise.all(userAccount.associatedOrganizations.map(organizationURI => {
-        const organizationId = organizationURI.split('_')[1];
         const query = `
         PREFIX : <http://ontology.eil.utoronto.ca/cids/cidsrep#>
         select * where { 
-	          ?group :hasOrganization :organization_${organizationId}.
+	          ?group :hasOrganization <${organizationURI}>.
     	      ?group :hasOrganization ?organization.
         }`;
         return GraphDB.sendSelectQuery(query, false, (res) => {
-          const organizationURI = SPARQL.getPrefixedURI(res.organization.id);
-          if (organizationURI.split('_')[1] !== organizationId && !organizations.includes(organizationURI))
-            organizations.push(organizationURI);
+          const organizationUri = SPARQL.getPrefixedURI(res.organization.id);
+          if (organizationUri !== organizationURI && !organizations.includes(organizationUri))
+            organizations.push(organizationUri);
         });
       }));
     }
@@ -155,28 +153,28 @@ const organizationsInSameGroups = async (userAccount, organizations, role) => {
  * If the role is not provided, the function will return true if the user serves for
  * the organization(associated with organizationId) or for an organization
  * which is in a same group with the organization(associated with organizationId)
- * @param organizationId the id of the organization
+ * @param organizationUri the uri of the organization
  * @param userAccount user's account
  * @param role role of the user, ex. 'administratorOfs'
  * @returns {Promise<boolean>}
  */
-const isAPartnerOrganization = async (organizationId, userAccount, role) => {
+const isAPartnerOrganization = async (organizationUri, userAccount, role) => {
   if (role) {// return true if the user is one of the role user of the organization
-    if (userAccount[role].includes(`:organization_${organizationId}`))
+    if (userAccount[role].includes(organizationUri))
       return true;
     // fetch all organizations associated with each organizations in userAccount[role]
     const allOrganizations = [];
     await organizationsInSameGroups(userAccount, allOrganizations, role);
-    if (allOrganizations.includes(`:organization_${organizationId}`))
+    if (allOrganizations.includes(organizationUri))
       return true;
     return false;
   } else {
     // return true if the user is one of the sponsored user of the organization
-    if (userAccount.associatedOrganizations.includes(`:organization_${organizationId}`))
+    if (userAccount.associatedOrganizations.includes(organizationUri))
       return true;
     const allOrganizations = [];
     await organizationsInSameGroups(userAccount, allOrganizations);
-    if (allOrganizations.includes(`:organization_${organizationId}`))
+    if (allOrganizations.includes(organizationUri))
       return true;
     return false;
   }
@@ -195,7 +193,7 @@ async function isReachableBy(resource, userAccount, role) {
 
   if (resource.forOrganizations) {
     for (const organizationURI of resource.forOrganizations) {
-      if (await isAPartnerOrganization(organizationURI.split('_')[1], userAccount, role)) {
+      if (await isAPartnerOrganization(organizationURI, userAccount, role)) {
         // if any organization which associated with the indicator is a partner organization of the indicator
         // pass
         return true;
@@ -204,7 +202,7 @@ async function isReachableBy(resource, userAccount, role) {
   }
   // when the resource can only belongs to one organization
   if(resource.forOrganization) {
-    if (await isAPartnerOrganization(resource.forOrganization.split('_')[1], userAccount, role)) {
+    if (await isAPartnerOrganization(resource.forOrganization, userAccount, role)) {
       // if the organization which associated with the indicator is a partner organization of the indicator
       // pass
       return true;

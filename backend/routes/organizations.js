@@ -1,8 +1,9 @@
 const express = require('express');
-const {fetchOrganizationsHandler} = require("../services/organizations/organizations");
+const {fetchOrganizationsHandler, fetchOrganizationsInterfacesHandler} = require("../services/organizations/organizations");
 
 const router = express.Router({mergeParams: true});
 
+router.get('/interface', fetchOrganizationsInterfacesHandler);
 router.get('/:groupUri', fetchOrganizationsHandler);
 router.get('/', fetchOrganizationsHandler);
 

@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchOrganizations} from "../../api/organizationApi";
+import {fetchOrganizations, fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
 import {fetchIndicators} from "../../api/indicatorApi";
@@ -69,13 +69,12 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
 
 
   useEffect(() => {
-    fetchOrganizations().then(({success, organizations}) => {
+    fetchOrganizationsInterfaces().then(({success, organizations}) => {
       if (success) {
         const options = {};
         organizations.map(organization => {
           // only organization which the user serves as an editor should be able to add
-          if(userContext.isSuperuser || organization.editors?.includes(userContext.uri))
-            options[organization._uri] = organization.legalName;
+          options[organization._uri] = organization.legalName;
         });
         setOptions(op => ({...op, organization: options}));
         return options;
@@ -98,7 +97,6 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
         })).then(() => {
           setLoading(false);
           setOptions(op => {
-            console.log(op)
             return op
           })
         }).catch(e => {

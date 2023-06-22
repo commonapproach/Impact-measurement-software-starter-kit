@@ -157,13 +157,34 @@ export default function OutcomeField({
                 }
               />
             </Grid>
+            {/*<Grid item xs={6}>*/}
+            {/*  <LoadingAutoComplete*/}
+            {/*    label="Theme"*/}
+            {/*    options={options}*/}
+            {/*    property={'theme'}*/}
+            {/*    state={state}*/}
+            {/*    onChange={handleChange}*/}
+            {/*    error={!!errors.theme}*/}
+            {/*    helperText={errors.theme}*/}
+            {/*    required={required}*/}
+            {/*    disabled={disabled}*/}
+            {/*    onBlur={() => {*/}
+            {/*      if (!state.theme) {*/}
+            {/*        setErrors(errors => ({...errors, theme: 'This field cannot be empty'}));*/}
+            {/*      } else {*/}
+            {/*        setErrors(errors => ({...errors, theme: null}));*/}
+            {/*      }*/}
+            {/*    }*/}
+            {/*    }*/}
+            {/*  />*/}
+            {/*</Grid>*/}
+
             <Grid item xs={6}>
-              <LoadingAutoComplete
+              <Dropdown
                 label="Theme"
-                options={options}
-                property={'theme'}
-                state={state}
-                onChange={handleChange}
+                options={options.theme}
+                value={state.theme}
+                onChange={handleChange('theme')}
                 error={!!errors.theme}
                 helperText={errors.theme}
                 required={required}
@@ -208,9 +229,7 @@ export default function OutcomeField({
                 options={options.indicators}
                 onChange={handleChange('indicators')}
                 fullWidth
-                // state={state}
                 value={state.indicators}
-                // onChange={handleChange}
                 error={!!errors.indicators}
                 helperText={errors.indicators}
                 required={required}

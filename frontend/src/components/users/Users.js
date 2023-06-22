@@ -65,7 +65,7 @@ export default function Users() {
     {
       label: 'Username/Email',
       body: ({_uri, email}) => {
-        return <Link color to={`/users/${_uri}/edit`}>
+        return <Link colorWithHover to={`/users/${encodeURIComponent(_uri)}/edit`}>
           {email}
         </Link>;
       },

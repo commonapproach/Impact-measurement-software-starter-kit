@@ -67,8 +67,8 @@ export default function Groups() {
   const columns = [
     {
       label: 'Label',
-      body: ({_id, label}) => {
-        return <Link color to={`/groups/${_id}/edit`}>
+      body: ({_uri, label}) => {
+        return <Link colorWithHover to={`/groups/${encodeURIComponent(_uri)}/edit`}>
           {label}
         </Link>;
       },

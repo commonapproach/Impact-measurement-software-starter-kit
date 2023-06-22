@@ -65,9 +65,9 @@ export default function Organizations() {
   const columns = [
     {
       label: 'Legal Name',
-      body: ({_id, legalName, editable}) => {
+      body: ({_uri, legalName, editable}) => {
         return editable?
-          <Link color to={`/organizations/${_id}/edit/`}>
+          <Link colorWithHover to={`/organizations/${encodeURIComponent(_uri)}/edit/`}>
           {legalName}
         </Link>:
           legalName

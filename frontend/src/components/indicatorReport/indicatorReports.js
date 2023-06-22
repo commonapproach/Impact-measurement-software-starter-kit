@@ -5,7 +5,6 @@ import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
 import {useNavigate, useParams} from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
-import {fetchOutcomes} from "../../api/outcomeApi";
 import {fetchIndicatorReports} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 
@@ -68,7 +67,7 @@ export default function IndicatorReports() {
     {
       label: 'Name',
       body: ({_uri, name}) => {
-        return state.editable?<Link color to={`/indicatorReport/${encodeURIComponent(_uri)}/view`}>
+        return state.editable?<Link colorWithHover to={`/indicatorReport/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>:name
       },

@@ -66,7 +66,7 @@ export default function Outcomes() {
     {
       label: 'Name',
       body: ({_uri, name, editable}) => {
-        return editable? <Link color to={`/outcome/${encodeURIComponent(_uri)}/view`}>
+        return editable? <Link colorWithHover to={`/outcome/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>:name
       },

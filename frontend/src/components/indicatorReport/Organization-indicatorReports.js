@@ -63,7 +63,7 @@ export default function Organization_indicatorReports() {
     {
       label: 'Legal Name',
       body: ({_uri, legalName}) => {
-        return <Link color to={`/indicatorReports/${encodeURIComponent(_uri)}`}>
+        return <Link colorWithHover to={`/indicatorReports/${encodeURIComponent(_uri)}`}>
           {legalName}
         </Link>
       },

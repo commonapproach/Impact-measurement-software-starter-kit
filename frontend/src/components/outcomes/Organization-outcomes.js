@@ -65,7 +65,7 @@ export default function Organization_outcomes() {
     {
       label: 'Legal Name',
       body: ({_uri, legalName}) => {
-        return <Link color to={`/outcomes/${encodeURIComponent(_uri)}`}>
+        return <Link colorWithHover to={`/outcomes/${encodeURIComponent(_uri)}`}>
           {legalName}
         </Link>
       },
@@ -77,30 +77,6 @@ export default function Organization_outcomes() {
         return administrator;
       }
     },
-    // {
-    //   label: 'Last name',
-    //   body: ({person}) => {
-    //     if(person && person.familyName)
-    //       return person.familyName
-    //     return 'Not Provided'
-    //   }
-    // },
-    // {
-    //   label: 'Phone Number',
-    //   body: ({primaryContact}) => {
-    //     if (primaryContact && primaryContact.telephone)
-    //       return formatPhoneNumber(primaryContact.telephone);
-    //     return 'Not Provided';
-    //   },
-    // },
-
-    // {
-    //   label: ' ',
-    //   body: ({_id}) =>
-    //     <DropdownMenu urlPrefix={'organizations'} objectId={_id}
-    //                   hideViewOption hideEditOption hideDeleteOption
-    //                   handleDelete={() => showDeleteDialog(_id)}/>
-    // }
   ];
 
   if (state.loading)

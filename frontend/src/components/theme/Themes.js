@@ -65,7 +65,7 @@ export default function Themes() {
     {
       label: 'Name',
       body: ({_uri, name}) => {
-        return <Link color to={`/themes/${encodeURIComponent(_uri)}/view`}>
+        return <Link colorWithHover to={`/themes/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>
       },

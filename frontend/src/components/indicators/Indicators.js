@@ -68,7 +68,7 @@ export default function Indicators() {
       body: ({_uri, name, editable}) => {
         // console.log(editable)
         return editable?
-          <Link color to={`/indicator/${encodeURIComponent(_uri)}/view`}>
+          <Link colorWithHover to={`/indicator/${encodeURIComponent(_uri)}/view`}>
           {name}
         </Link>:
           name

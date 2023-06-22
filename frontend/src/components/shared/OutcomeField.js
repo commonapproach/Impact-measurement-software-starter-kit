@@ -64,7 +64,7 @@ export default function OutcomeField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({theme: {}, indicators: {}});
+  const [options, setOptions] = useState({themes: {}, indicators: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -81,7 +81,7 @@ export default function OutcomeField({
           if (res.success)
             res.themes.map(
               theme => {
-                options.theme[theme._uri] = theme.name;
+                options.themes[theme._uri] = theme.name;
               }
             );
         }),
@@ -181,19 +181,19 @@ export default function OutcomeField({
 
             <Grid item xs={6}>
               <Dropdown
-                label="Theme"
-                options={options.theme}
-                value={state.theme}
-                onChange={handleChange('theme')}
-                error={!!errors.theme}
-                helperText={errors.theme}
+                label="Themes"
+                options={options.themes}
+                value={state.themes}
+                onChange={handleChange('themes')}
+                error={!!errors.themes}
+                helperText={errors.themes}
                 required={required}
                 disabled={disabled}
                 onBlur={() => {
-                  if (!state.theme) {
-                    setErrors(errors => ({...errors, theme: 'This field cannot be empty'}));
+                  if (!state.themes.length) {
+                    setErrors(errors => ({...errors, themes: 'This field cannot be empty'}));
                   } else {
-                    setErrors(errors => ({...errors, theme: null}));
+                    setErrors(errors => ({...errors, themes: null}));
                   }
                 }
                 }

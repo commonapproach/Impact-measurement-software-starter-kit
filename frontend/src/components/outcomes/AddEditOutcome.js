@@ -47,7 +47,7 @@ export default function AddEditOutcome() {
     organization: null,
     indicators:[],
     uri: '',
-    theme: []
+    themes: []
     // identifier: ''
   });
   const [loading, setLoading] = useState(true);
@@ -128,10 +128,12 @@ export default function AddEditOutcome() {
   const validate = () => {
     const error = {};
     console.log(form.indicators)
-    if (form.name === '')
+    if (!form.name)
       error.name = 'The field cannot be empty';
     if (!form.indicators.length)
       error.indicators = 'The field cannot be empty';
+    if (!form.themes.length)
+      error.themes = 'The field cannot be empty';
     if (!form.description)
       error.description = 'The field cannot be empty'
     if(!form.organization)

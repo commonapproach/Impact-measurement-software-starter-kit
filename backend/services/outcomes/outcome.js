@@ -160,7 +160,7 @@ const updateOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || !form.organization || !form.theme || !form.indicators || !form.indicators.length)
+  if (!form || !form.description || !form.name || !form.organization || !form.themes || !form.themes.length || !form.indicators || !form.indicators.length)
     throw new Server400Error('Invalid input');
   // if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
   //   throw new Server400Error('Duplicated identifier');
@@ -169,13 +169,7 @@ const updateOutcome = async (req, res) => {
     throw new Server400Error('No such outcome');
   outcome.name = form.name;
   outcome.description = form.description;
-  if (outcome.theme !== form.theme) {
-    // theme have to be updated
-    const newTheme = await GDBThemeModel.findOne({_uri: form.theme});
-    if (!newTheme)
-      throw new Server400Error('No such theme');
-    outcome.theme = newTheme;
-  }
+  outcome.themes = form.themes
   const organizationDict = {};
   const indicatorDict = {};
 
@@ -292,14 +286,7 @@ const createOutcome = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
-
-  if (form?.themeName) { // handle the case when no such indicator name
-    const theme = await GDBThemeModel.findOne({name: form.themeName});
-    if (!theme)
-      return res.status(200).json({success: false, message: 'Wrong themeName'});
-    form.theme = theme._uri;
-  }
-  if (!form || !form.organization || !form.name || !form.description || !form.theme || !form.indicators || !form.indicators.length)
+  if (!form || !form.organization || !form.name || !form.description || !form.themes || !form.themes.length || !form.indicators || !form.indicators.length)
     throw new Server400Error('Invalid input');
   // if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
   //   throw new Server400Error('Duplicated identifier');
@@ -354,16 +341,12 @@ const createOutcome = async (req, res) => {
       message: 'The name of the outcome has been occupied in organization ' + organizationInProblem
     });
 
-  form.theme = await GDBThemeModel.findOne({_uri: form.theme});
-  if (!form.theme)
-    throw new Server400Error('No such theme');
-
   const outcome = GDBOutcomeModel({
     name: form.name,
     description: form.description,
     forOrganization: form.forOrganization,
     indicators: form.indicators,
-    theme: form.theme
+    themes: form.themes
   });
   await outcome.save();
   // add the outcome to the organizations

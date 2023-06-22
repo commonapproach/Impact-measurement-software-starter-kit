@@ -266,8 +266,8 @@ export default function AddEditGroup() {
         </Button>
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                       'Are you sure you want to update this Organization?'}
+                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Group?' :
+                       'Are you sure you want to update this Group?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

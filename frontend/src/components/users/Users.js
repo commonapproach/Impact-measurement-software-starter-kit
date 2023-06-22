@@ -98,19 +98,19 @@ export default function Users() {
 
     {
       label: 'Role',
-      body: ({isSuperuser, groupAdminOf, administratorOf, editorOf, reporterOf, researcherOf}) => {
+      body: ({isSuperuser, groupAdminOfs, administratorOfs, editorOfs, reporterOfs, researcherOfs}) => {
         let ret = '';
         if (isSuperuser)
           ret += 'Superuser, ';
-        if (groupAdminOf?.length)
+        if (groupAdminOfs?.length)
           ret += 'Group Admin, '
-        if(administratorOf?.length)
+        if(administratorOfs?.length)
           ret += 'Admin, ';
-        if (editorOf?.length)
+        if (editorOfs?.length)
           ret += 'Editor, ';
-        if (reporterOf?.length)
+        if (reporterOfs?.length)
           ret += 'Reporter, '
-        if (researcherOf?.length)
+        if (researcherOfs?.length)
           ret += 'Researcher, '
 
         if(ret === '') {

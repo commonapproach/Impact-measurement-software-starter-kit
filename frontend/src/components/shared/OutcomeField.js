@@ -184,7 +184,13 @@ export default function OutcomeField({
                 label="Themes"
                 options={options.themes}
                 value={state.themes}
-                onChange={handleChange('themes')}
+                onChange={(e) => {
+                  setState(state => ({...state, themes: e.target.value}));
+                  const st = state
+                  st.themes = e.target.value;
+                  onChange(st)
+                }
+                }
                 error={!!errors.themes}
                 helperText={errors.themes}
                 required={required}
@@ -227,7 +233,13 @@ export default function OutcomeField({
                 label="Indicators"
                 key={'indicators'}
                 options={options.indicators}
-                onChange={handleChange('indicators')}
+                onChange={(e) => {
+                  setState(state => ({...state, indicators: e.target.value}));
+                  const st = state
+                  st.indicators = e.target.value;
+                  onChange(st)
+                }
+                }
                 fullWidth
                 value={state.indicators}
                 error={!!errors.indicators}

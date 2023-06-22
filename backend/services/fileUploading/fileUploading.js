@@ -101,12 +101,12 @@ const fileUploading = async (req, res, next) => {
       organization.hasOutcomes.push(outcome._uri);
 
       // add theme to outcome
-      if (!object[getFullPropertyURI(GDBOutcomeModel, 'theme')]) {
+      if (!object[getFullPropertyURI(GDBOutcomeModel, 'themes')]) {
         addTrace('Error!')
-        addTrace(`    ${uri}: outcome need to contain a Theme`)
+        addTrace(`    ${uri}: outcome need to contain at least a Theme`)
         throw new Server400Error(traceOfUploading);
       }
-      outcome.theme = getValue(object, GDBOutcomeModel, 'theme');
+      outcome.themes = getListOfValue(object, GDBOutcomeModel, 'themes');
 
       // add indicator to outcome
       if (!object[getFullPropertyURI(GDBOutcomeModel, 'indicators')]) {

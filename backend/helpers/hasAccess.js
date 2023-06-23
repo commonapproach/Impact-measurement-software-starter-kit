@@ -26,9 +26,7 @@ async function hasAccess(req, operationType) {
     case 'reportFrontendError':
       return true;
     case 'fileUploading':
-      if (userAccount.isSuperuser)
-        return true;
-      if (userAccount)
+      return true; // todo: only editors can upload files
       break;
     // users
     case 'inviteNewUser':
@@ -341,7 +339,7 @@ async function hasAccess(req, operationType) {
         const {organizationUri} = req.params;
         if (!organizationUri)
           throw new Server400Error('organizationURI is needed');
-        if (organizationBelongsToUser(userAccount, organizationUri, 'administratorOfs'))
+        if (await isAPartnerOrganization(organizationUri, userAccount, 'administratorOfs'))
           return true;
       }
       if (userAccount.researcherOfs) {
@@ -381,7 +379,7 @@ async function hasAccess(req, operationType) {
         // only allowed for the organization they are in userAccount.editorOfs
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
-        if (!form || !form.organizations || !form.name || !form.description || !form.theme)
+        if (!form || !form.organizations || !form.name || !form.description || !form.themes)
           throw new Server400Error('Invalid input');
         // all organizations must be in userAccount.editorOfs
         const checkerList = form.organizations.map(organizationUri => {
@@ -410,8 +408,8 @@ async function hasAccess(req, operationType) {
         ));
         for (let group of groups) {
           // fetch all organizations belongs to the group
-          group.organizations = await Promise.all(group.organizations.map(organizationURI => {
-            return GDBOrganizationModel.findOne({_uri: organizationURI});
+          group.organizations = await Promise.all(group.organizations.map(organization => {
+            return GDBOrganizationModel.findOne({_uri: organization._uri || organization});
           }));
           // check if there any organization contain the outcome
           for (let organization of group.organizations) {
@@ -511,7 +509,7 @@ async function hasAccess(req, operationType) {
         // so all organizations in the form must be in userAccount.editorOfs
         const {form} = req.body;
         if (!form || !form.name || !form.comment || !form.organization || !form.indicator
-          || !form.numericalValue || !form.unitOfMeasure || !form.startTime || !form.endTime || !form.dateCreated)
+          || !form.numericalValue || !form.startTime || !form.endTime || !form.dateCreated)
           throw new Server400Error('Invalid input');
         // the organization must be in userAccount.editorOfs
         if(organizationBelongsToUser(userAccount, form.organization, 'editorOfs'))
@@ -648,7 +646,7 @@ async function hasAccess(req, operationType) {
         const {orgUri} = req.params;
         if (!orgUri)
           throw new Server400Error('organizationURI is needed');
-        if (organizationBelongsToUser(userAccount, orgUri, 'administratorOfs'))
+        if (await isAPartnerOrganization(orgUri, userAccount, 'administratorOfs'))
           return true;
       }
       if (userAccount.researcherOfs?.length) {

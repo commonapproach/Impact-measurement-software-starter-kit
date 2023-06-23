@@ -93,7 +93,7 @@ function TopNavBar() {
               }}
             >
 
-              {userContext.isSuperuser || userContext.groupAdminOf.length?
+              {userContext.isSuperuser || userContext.groupAdminOfs.length?
                 <MenuItem onClick={handleLink(`/groups`)}>
                 <ListItemIcon>
                   <People fontSize="medium" sx={{color: 'black'}}/>
@@ -101,7 +101,7 @@ function TopNavBar() {
                 <Typography variant="inherit">Groups</Typography>
               </MenuItem>:<div/>}
 
-              {userContext.isSuperuser || userContext.groupAdminOf.length || userContext.administratorOf.length?
+              {userContext.isSuperuser || userContext.groupAdminOfs.length || userContext.administratorOfs.length?
                 <MenuItem onClick={handleLink(`/organizations`)}>
                   <ListItemIcon>
                     <People fontSize="medium" sx={{color: 'black'}}/>

@@ -114,7 +114,7 @@ export default function Organization_indicators() {
         customToolbar={
 
           <Chip
-            disabled={!userContext.isSuperuser && !userContext.editorOf.length}
+            disabled={!userContext.isSuperuser && !userContext.editorOfs.length}
             onClick={() => navigate('/indicator/new')}
             color="primary"
             icon={<AddIcon/>}

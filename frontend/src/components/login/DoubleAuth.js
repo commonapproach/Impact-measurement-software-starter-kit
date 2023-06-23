@@ -24,6 +24,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 
+
 export default function DoubleAuth() {
   const classes = useStyles();
   const navigate = useNavigate();
@@ -81,11 +82,11 @@ export default function DoubleAuth() {
             givenName: userAccount.person?.givenName,
             familyName: userAccount.person?.familyName,
             isSuperuser: userAccount.isSuperuser,
-            editorOf: userAccount.editorOf || [],
-            reporterOf: userAccount.reporterOf || [],
-            administratorOf: userAccount.administratorOf || [],
-            groupAdminOf: userAccount.groupAdminOf || [],
-            researcherOf: userAccount.researcherOf || [],
+            editorOfs: userAccount.editorOfs || [],
+            reporterOfs: userAccount.reporterOfs || [],
+            administratorOfs: userAccount.administratorOfs || [],
+            groupAdminOfs: userAccount.groupAdminOfs || [],
+            researcherOfs: userAccount.researcherOfs || [],
             associatedOrganizations: userAccount.associatedOrganizations || [],
           });
 

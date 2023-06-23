@@ -65,13 +65,10 @@ export default function Indicators() {
   const columns = [
     {
       label: 'Name',
-      body: ({_uri, name, editable}) => {
-        // console.log(editable)
-        return editable?
-          <Link colorWithHover to={`/indicator/${encodeURIComponent(_uri)}/view`}>
+      body: ({_uri, name}) => {
+        return <Link colorWithHover to={`/indicator/${encodeURIComponent(_uri)}/view`}>
           {name}
-        </Link>:
-          name
+        </Link>
       },
       sortBy: ({name}) => name
     },
@@ -84,10 +81,11 @@ export default function Indicators() {
 
     {
       label: ' ',
-      body: ({_uri}) =>
-        <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
-                      hideEditOption={!userContext.isSuperuser && !userContext.editorOf.length}
-                      handleDelete={() => showDeleteDialog(_uri)}/>
+      body: ({_uri}) => {
+        return <DropdownMenu urlPrefix={'indicator'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+                      hideEditOption={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
+                      handleDelete={() => showDeleteDialog(_uri)}/>;
+      }
     }
   ];
 
@@ -103,7 +101,7 @@ export default function Indicators() {
         uriField="uri"
         customToolbar={
           <Chip
-            disabled={!userContext.isSuperuser}
+            disabled={!userContext.isSuperuser && !userContext.editorOfs.includes(uri)}
             onClick={() => navigate(`/indicator/${encodeURIComponent(uri)}/new`)}
             color="primary"
             icon={<AddIcon/>}

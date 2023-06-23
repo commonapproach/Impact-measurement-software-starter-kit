@@ -67,9 +67,9 @@ export default function IndicatorReports() {
     {
       label: 'Name',
       body: ({_uri, name}) => {
-        return state.editable?<Link colorWithHover to={`/indicatorReport/${encodeURIComponent(_uri)}/view`}>
+        return <Link colorWithHover to={`/indicatorReport/${encodeURIComponent(_uri)}/view`}>
           {name}
-        </Link>:name
+        </Link>
       },
       sortBy: ({name}) => name
     },

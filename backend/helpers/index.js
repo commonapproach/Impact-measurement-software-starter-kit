@@ -120,7 +120,7 @@ const organizationsInSameGroups = async (userAccount, organizations, role) => {
     	      ?group :hasOrganization ?organization.
         }`;
         return GraphDB.sendSelectQuery(query, false, (res) => {
-          const organizationUri = SPARQL.getPrefixedURI(res.organization.id);
+          const organizationUri = res.organization.id;
           if (organizationUri !== organizationURI && !organizations.includes(organizationUri))
             organizations.push(organizationUri);
         });
@@ -134,7 +134,7 @@ const organizationsInSameGroups = async (userAccount, organizations, role) => {
     	      ?group :hasOrganization ?organization.
         }`;
         return GraphDB.sendSelectQuery(query, false, (res) => {
-          const organizationUri = SPARQL.getPrefixedURI(res.organization.id);
+          const organizationUri = res.organization.id;
           if (organizationUri !== organizationURI && !organizations.includes(organizationUri))
             organizations.push(organizationUri);
         });

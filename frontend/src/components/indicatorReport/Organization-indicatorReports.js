@@ -113,7 +113,7 @@ export default function Organization_indicatorReports() {
         uriField="uri"
         customToolbar={
           <Chip
-            disabled={!userContext.isSuperuser && !userContext.editorOf.length}
+            disabled={!userContext.isSuperuser && !userContext.editorOfs.length}
             onClick={() => navigate('/indicatorReport/new')}
             color="primary"
             icon={<AddIcon/>}

@@ -91,7 +91,7 @@ export default function Organization_outcomes() {
         idField="id"
         customToolbar={
           <Chip
-            disabled={!userContext.isSuperuser && !userContext.editorOf.length}
+            disabled={!userContext.isSuperuser && !userContext.editorOfs.length}
             onClick={() => navigate('/outcome/new')}
             color="primary"
             icon={<AddIcon/>}

@@ -65,10 +65,10 @@ export default function Outcomes() {
   const columns = [
     {
       label: 'Name',
-      body: ({_uri, name, editable}) => {
-        return editable? <Link colorWithHover to={`/outcome/${encodeURIComponent(_uri)}/view`}>
+      body: ({_uri, name}) => {
+        return <Link colorWithHover to={`/outcome/${encodeURIComponent(_uri)}/view`}>
           {name}
-        </Link>:name
+        </Link>
       },
       sortBy: ({name}) => name
     },

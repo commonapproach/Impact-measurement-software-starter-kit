@@ -110,13 +110,13 @@ const checkUserSecurityQuestion = async (req, res, next) => {
             userAccount: {
               person: userAccount.person,
               email: userAccount.email,
-              _id: userAccount._id,
+              _uri: userAccount._uri,
               isSuperuser: userAccount.isSuperuser,
-              editorOf: userAccount.editorOfs,
-              reporterOf: userAccount.reporterOfs,
-              administratorOf: userAccount.administratorOfs,
-              groupAdminOf: userAccount.groupAdminOfs,
-              researcherOf: userAccount.researcherOfs,
+              editorOfs: userAccount.editorOfs,
+              reporterOfs: userAccount.reporterOfs,
+              administratorOfs: userAccount.administratorOfs,
+              groupAdminOfs: userAccount.groupAdminOfs,
+              researcherOfs: userAccount.researcherOfs,
               associatedOrganizations: userAccount.associatedOrganizations,
             }});
         } else {

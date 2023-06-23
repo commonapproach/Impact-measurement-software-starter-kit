@@ -117,6 +117,7 @@ const updateGroup = async (req, res) => {
     const index = group.administrator.groupAdminOfs.findIndex(group => group === uri);
     if (index > -1)
       group.administrator.groupAdminOfs.splice(index, 1);
+    await group.administrator.save();
     // add the group to new admin's property
     if (!form.administrator.groupAdminOfs)
       form.administrator.groupAdminOfs = [];

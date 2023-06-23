@@ -22,7 +22,7 @@ export default function Groups() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    if (!userContext.isSuperuser && !userContext.groupAdminOf.length) {
+    if (!userContext.isSuperuser && !userContext.groupAdminOfs.length) {
       navigate('/dashboard');
       enqueueSnackbar("Wrong Auth", {variant: 'error'});
     }

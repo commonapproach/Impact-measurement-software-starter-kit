@@ -9,6 +9,7 @@ import {NavButton} from "./NavButton";
 
 function Dashboard() {
   const userContext = useContext(UserContext);
+  console.log(userContext)
 
   // if (userContext.userTypes.includes('superuser'))
   //   return <DashboardForSuperUser/>;
@@ -27,11 +28,11 @@ function Dashboard() {
       {/*  <NavButton to={`/provider/${organization.id}/edit/organization`} icon={<Edit/>}*/}
       {/*             text="Edit Organization Profile for Home Agency"/>}*/}
 
-      {userContext.isSuperuser || userContext.groupAdminOf.length?
+      {userContext.isSuperuser || userContext.groupAdminOfs.length?
         <NavButton to={`/groups`} icon={<People/>} key={'groups'}
                   text="Manage Groups"/>:null}
 
-      {userContext.isSuperuser || userContext.groupAdminOf.length || userContext.administratorOf.length?
+      {userContext.isSuperuser || userContext.groupAdminOfs.length || userContext.administratorOfs.length?
         <NavButton to={`/organizations`} icon={<People/>} key={'organizations'}
                   text="Manage Organizations"/>:
       null}
@@ -52,8 +53,8 @@ function Dashboard() {
       <NavButton to={'/themes'} icon={<Edit/>} key={'themes'}
                  text="Manage Themes"/>
 
-      <NavButton to={'/fileUploading'} icon={<FileUpload/>} key={'fileUploading'}
-                 text="File Upload"/>
+      {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={'/fileUploading'} icon={<FileUpload/>} key={'fileUploading'}
+                  text="File Upload"/>:null}
 
       <NavButton to={'/reportGenerate'} icon={<Download/>} key={'reportGenerate'}
                  text="Reports"/>

@@ -242,9 +242,40 @@ const fileUploading = async (req, res, next) => {
     const {objects, organizationUri, fileName} = req.body;
     console.log(`Loading ${fileName}...`);
     addTrace(`Loading ${fileName}...`);
+    if (!Array.isArray(objects)) {
+      // the object should be an array
+      console.log('Error');
+      addTrace('Error');
+      console.log('The file should contain a list.');
+      addTrace('The file should contain a list.');
+      throw new Server400Error(traceOfUploading);
+    }
+    if (!objects.length) {
+      // the objects shouldn't be empty
+      console.log('Warning!');
+      console.log('The file is empty');
+      addTrace('Warning!');
+      console.log('The file is empty');
+    }
     console.log('    Adding objects to organization: ' + organizationUri);
-    addTrace('    Adding objects to organization: ' + organizationUri)
+    addTrace('    Adding objects to organization: ' + organizationUri);
+
     const expandedObjects = await expand(objects);
+
+    if (!expandedObjects.length) {
+      console.log('Warning!');
+      console.log('Got an empty list from json-ld expanded function...');
+      console.log('Please check is the object a valid json-ld file: each object must contain @id and @type property. ' +
+        'Some objects must contain @context if needed.');
+      console.log('See more about json-ld at: https://json-ld.org/')
+      addTrace('Warning!');
+      addTrace('Got an empty list from json-ld expanded function...');
+      addTrace('Please check is the object a valid json-ld file: each object must contain @id and @type property. ' +
+        'Some objects must contain @context if needed.');
+      addTrace('See more about json-ld at: https://json-ld.org/')
+      throw new Server400Error(traceOfUploading);
+    }
+
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
     if (!organization) {
@@ -417,6 +448,12 @@ const fileUploading = async (req, res, next) => {
             })
         }, {uri:uri});
         await transSave(trans, dateTimeInterval);
+      } else {
+        console.log('Warning!')
+        console.log('   There is one object being ignored');
+        addTrace('Warning!');
+        addTrace('    There is one object being ignored');
+        throw new Server400Error(traceOfUploading);
       }
     }
 

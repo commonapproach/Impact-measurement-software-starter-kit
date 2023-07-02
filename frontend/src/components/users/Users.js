@@ -3,7 +3,7 @@ import {Chip, Container} from "@mui/material";
 import {Add as AddIcon, Check as YesIcon} from "@mui/icons-material";
 import {DeleteModal, DropdownMenu, Link, Loading, DataTable} from "../shared";
 import {deleteUser, fetchUsers} from "../../api/userApi";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {formatPhoneNumber} from "../../helpers/phone_number_helpers";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
@@ -13,6 +13,7 @@ export default function Users() {
   const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
+  const {organizationURI} = useParams();
   const [state, setState] = useState({
     loading: true,
     data: [],
@@ -23,14 +24,17 @@ export default function Users() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchUsers().then(({data, success}) => {
-      setState(state => ({...state, loading: false, data: data}));
-    }).catch(e => {
-      reportErrorToBackend(e)
-      setState(state => ({...state, loading: false}));
-      navigate('/dashboard');
-      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
-    });
+      // superuser, with no groupURI
+      fetchUsers(encodeURIComponent(organizationURI)).then(({data, success}) => {
+        setState(state => ({...state, loading: false, data: data}));
+      }).catch(e => {
+        reportErrorToBackend(e)
+        setState(state => ({...state, loading: false}));
+        navigate('/dashboard');
+        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+      });
+
+
   }, [trigger]);
 
   const showDeleteDialog = (uri) => {
@@ -65,9 +69,11 @@ export default function Users() {
     {
       label: 'Username/Email',
       body: ({_uri, email}) => {
-        return <Link colorWithHover to={`/users/${encodeURIComponent(_uri)}/edit`}>
+        if (!organizationURI)
+          return <Link colorWithHover to={`/users/${encodeURIComponent(_uri)}/edit`}>
           {email}
         </Link>;
+        return email
       },
       sortBy: ({email}) => email
     },
@@ -93,6 +99,13 @@ export default function Users() {
         if (primaryContact && primaryContact.telephone)
           return formatPhoneNumber(primaryContact.telephone);
         return 'Not Provided';
+      },
+    },
+
+    {
+      label: 'Organizations',
+      body: ({associatedOrganizations}) => {
+        return associatedOrganizations.map(organization => organization.legalName)
       },
     },
 
@@ -125,7 +138,7 @@ export default function Users() {
     {
       label: ' ',
       body: ({_uri}) => {
-        return <DropdownMenu urlPrefix={'users'} objectUri={encodeURIComponent(_uri)} hideDeleteOption hideViewOption
+        return <DropdownMenu urlPrefix={'users'} objectUri={encodeURIComponent(_uri)} hideDeleteOption hideViewOption hideEditOption={organizationURI}
                       handleDelete={() => showDeleteDialog(_uri)}/>;
       }
     }

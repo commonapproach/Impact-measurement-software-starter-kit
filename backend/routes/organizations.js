@@ -3,6 +3,7 @@ const {fetchOrganizationsHandler, fetchOrganizationsInterfacesHandler} = require
 
 const router = express.Router({mergeParams: true});
 
+router.get('/orgAdmin/:orgAdminUri', fetchOrganizationsHandler)
 router.get('/interface', fetchOrganizationsInterfacesHandler);
 router.get('/:groupUri', fetchOrganizationsHandler);
 router.get('/', fetchOrganizationsHandler);

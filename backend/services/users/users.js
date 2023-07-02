@@ -8,7 +8,7 @@ const fetchUsers = async (req, res) => {
   const {orgUri} = req.params;
   if (orgUri) {
     // will only fetch users belong to an organization
-    const organization = await GDBOrganizationModel.findOne({_uri: orgUri}, {populates: ['hasUsers.person']});
+    const organization = await GDBOrganizationModel.findOne({_uri: orgUri}, {populates: ['hasUsers.person', 'hasUsers.associatedOrganizations']});
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.hasUsers)
@@ -21,7 +21,7 @@ const fetchUsers = async (req, res) => {
     return res.status(200).json({data: organization.hasUsers, success: true})
 
   } else {
-    const users = await GDBUserAccountModel.find({}, {populates: ['person']});
+    const users = await GDBUserAccountModel.find({}, {populates: ['person', 'associatedOrganizations']});
 
     users.map((user) => {
       delete user.hash;

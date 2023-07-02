@@ -7,7 +7,7 @@ const {GDBGroupModel} = require("../../models/group");
 const fetchOrganizationsHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchOrganizations'))
-      return await fetchOrganizations(req, res); // todo: handle the case that the option is based on groupUri
+      return await fetchOrganizations(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
     next(e);
@@ -31,8 +31,16 @@ const fetchOrganizationsInterfaces = async (req, res) => {
 }
 
 const fetchOrganizations = async (req, res) => {
-  const {groupUri} = req.params
-  if (!groupUri) {
+  const {groupUri, orgAdminUri} = req.params
+  if (groupUri) {
+    // fetch organizations based on groupURI
+    const group = await GDBGroupModel.findOne({_uri: groupUri}, {populates: ['organizations']});
+    return res.status(200).json({success: true, organizations: group.organizations})
+  } else if(orgAdminUri) {
+    // fetch all orgs managed by the orgAmin
+    const orgs = await GDBOrganizationModel.find({administrator: orgAdminUri});
+    return res.status(200).json({success: true, organizations: orgs})
+  } else {
     const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
     // let organizations = [];
 
@@ -60,10 +68,6 @@ const fetchOrganizations = async (req, res) => {
     })
 
     return res.status(200).json({success: true, organizations: organizations});
-  } else {
-    // fetch organizations based on groupURI
-    const group = await GDBGroupModel.findOne({_uri: groupUri}, {populates: ['organizations']});
-    return res.status(200).json({success: true, organizations: group.organizations})
   }
 
 

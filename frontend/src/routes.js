@@ -44,6 +44,7 @@ import GroupMembers from "./components/ReportGenerate/GroupMembers";
 import IndicatorReports_ReportGenerate from "./components/ReportGenerate/IndicatorReports";
 import OutcomeReports from "./components/ReportGenerate/OutcomeReports";
 import ThemeReports from "./components/ReportGenerate/ThemeReport";
+import OrganizationUsers from "./components/users/organizationUsers";
 
 const routes = (
   <Routes>
@@ -56,6 +57,8 @@ const routes = (
     <Route path="/forgot-password" element={<ForgotPassword/>}/>
     {/*users*/}
     <Route path="/users" element={<PrivateRoute element={Users}/>}/>
+    <Route path="/organizationOfUsers/:organizationURI" element={<PrivateRoute element={Users}/>}/>
+    <Route path="/organizationUsers" element={<PrivateRoute element={OrganizationUsers}/>}/>
     <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
     <Route path="/users/:uri/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
     <Route path="/users/:uri" element={<PrivateRoute element={EditUserForm}/>}/>
@@ -121,7 +124,7 @@ const routes = (
     <Route path={"/reportGenerate/indicatorReports"}
            element={<PrivateRoute element={IndicatorReports_ReportGenerate}/>}/>
     <Route path={"/reportGenerate/outcomeReports"} element={<PrivateRoute element={OutcomeReports}/>}/>
-      <Route path={"/reportGenerate/themeReports"} element={<PrivateRoute element={ThemeReports}/>}/>
+    <Route path={"/reportGenerate/themeReports"} element={<PrivateRoute element={ThemeReports}/>}/>
 
   </Routes>
 );

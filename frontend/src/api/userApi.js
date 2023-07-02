@@ -160,12 +160,11 @@ export function fetchUser(uri) {
  * This function fetches all users.
  * @returns {Promise<any>}
  */
-export function fetchUsers(orgId) {
-  if (!orgId)
+export function fetchUsers(orgUri) {
+  if (!orgUri)
     return getJson('/api/users/');
-  if (orgId)
-    return getJson(`/api/users/${orgId}`);
-
+  if (orgUri)
+    return getJson(`/api/users/${orgUri}`);
 
 }
 

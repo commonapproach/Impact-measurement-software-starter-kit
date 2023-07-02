@@ -17,7 +17,7 @@ const GDBUserAccountModel = createGraphDBModel({
   salt: {type: String, internalKey: ':hasSalt'},
   person: {type: GDBPersonModel, internalKey: 'cids:forPerson', onDelete: DeleteType.CASCADE},
   // userType:{type: [Types.NamedIndividual], internalKey: ':userType'},
-  associatedOrganizations: {type: [Types.NamedIndividual], internalKey: ':associatedOrganization'},
+  associatedOrganizations: {type: [() => require('./organization').GDBOrganizationModel], internalKey: ':associatedOrganization'},
   isSuperuser: {type: Boolean, internalKey: ':isSuperuser'},
   editorOfs: {type: [Types.NamedIndividual], internalKey: ':editorOf'},
   reporterOfs: {type: [Types.NamedIndividual], internalKey: ':reporterOf'},

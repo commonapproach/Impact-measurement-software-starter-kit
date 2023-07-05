@@ -98,7 +98,10 @@ export default function FileUploadingPage() {
       let responds;
       const respond = await uploadFile(state.fileContent, state.organization, fileName)
       if (respond.success) {
-        setState(state => ({...state, loadingButton: false, submitDialog: false, traceOfUploading:  respond.traceOfUploading, success: true}));
+        // let trace = ''
+        // respond.traceOfUploading.map(message => trace += message)
+        setState(state => ({...state, loadingButton: false, submitDialog: false,
+          traceOfUploading: respond.traceOfUploading, success: true}));
 
         // enqueueSnackbar(respond.message || 'Success', {variant: "success"});
       }

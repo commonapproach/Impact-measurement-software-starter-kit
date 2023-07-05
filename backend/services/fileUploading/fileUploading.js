@@ -58,7 +58,6 @@ const getFullObjectURI = (object) => {
 };
 
 
-
 async function transSave(trans, object) {
   const {query} = await object.getQueries();
   return await trans.update(new UpdateQueryPayload()
@@ -85,14 +84,14 @@ const fileUploading = async (req, res, next) => {
     let error = 0;
 
     function addTrace(message) {
-      console.log(message)
+      console.log(message);
       traceOfUploading += message + '\n';
     }
 
     async function outcomeBuilder(trans, object, organization) {
       const uri = object['@id'];
       const outcome = outcomeDict[uri];
-      let hasError = false
+      let hasError = false;
       if (outcome) {
         addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
@@ -105,17 +104,17 @@ const fileUploading = async (req, res, next) => {
 
         // add theme to outcome
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'themes')]) {
-          addTrace('Error!')
+          addTrace('Error!');
           addTrace(`    ${uri}: outcome need to contain at least a Theme`);
           error += 1;
-          hasError = true
+          hasError = true;
         }
         outcome.themes = getListOfValue(object, GDBOutcomeModel, 'themes');
 
         // add indicator to outcome
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'indicators')]) {
-          addTrace('Error!')
-          addTrace(`    ${uri}: outcome need to contain at least an Indicator`)
+          addTrace('Error!');
+          addTrace(`    ${uri}: outcome need to contain at least an Indicator`);
           error += 1;
           hasError = true;
         }
@@ -128,27 +127,28 @@ const fileUploading = async (req, res, next) => {
             //in this case, the indicator is not in the file, get the indicator from database and add the outcome to it
             const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
             if (!indicator) {
-              addTrace('Error!')
+              addTrace('Error!');
               addTrace(`Type 2 Error: bad reference`);
               addTrace(`    Indicator ${indicatorURI} appears neither in the file nor in the database`);
               error += 1;
               hasError = true;
-            } //check if the indicator belongs to the organization
-            if (!indicator.forOrganizations.includes(organization._uri)) {
-              addTrace('Error!')
+            } else if (!indicator.forOrganizations.includes(organization._uri)) {
+              addTrace('Error!');
               addTrace(`    Outcome ${indicatorURI} does not belong to this organization`);
               error += 1;
               hasError = true;
+            } else {
+              if (!indicator.forOutcomes)
+                indicator.forOutcomes = [];
+              indicator.forOutcomes.push(uri);
+              await transSave(trans, indicator);
             }
-            if (!indicator.forOutcomes)
-              indicator.forOutcomes = [];
-            indicator.forOutcomes.push(uri);
-            await transSave(trans, indicator);
+
+
           } // if the indicator is in the file, don't have to worry about adding the outcome to the indicator
         }
-        if (!hasError) {
-          await transSave(trans, outcome);
-        } else {
+        await transSave(trans, outcome);
+        if (hasError) {
           addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
         }
 
@@ -161,68 +161,77 @@ const fileUploading = async (req, res, next) => {
     async function themeBuilder(trans, object, organization) {
       const uri = object['@id'];
       const theme = themeDict[uri];
-      addTrace(`    Loading ${uri} of type ${ getPrefixedURI(object['@type'][0])}...`)
+      addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       await transSave(trans, theme);
     }
 
     async function indicatorBuilder(trans, object, organization) {
       const uri = object['@id'];
+      let hasError = false;
       const indicator = indicatorDict[uri];
-      addTrace(`    Loading ${uri} of type ${ getPrefixedURI(object['@type'][0])}...`)
+      if (indicator) {
+        addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
-      // add the organization to it, and add it to the organization
-      if (!indicator.forOrganizations)
-        indicator.forOrganizations = [];
-      indicator.forOrganizations.push(organization._uri);
-      if (!organization.hasIndicators)
-        organization.hasIndicators = [];
-      organization.hasIndicators.push(indicator._uri);
+        // add the organization to it, and add it to the organization
+        if (!indicator.forOrganizations)
+          indicator.forOrganizations = [];
+        indicator.forOrganizations.push(organization._uri);
+        if (!organization.hasIndicators)
+          organization.hasIndicators = [];
+        organization.hasIndicators.push(indicator._uri);
 
-      // add outcomes
-      if (object[getFullPropertyURI(GDBIndicatorModel, 'forOutcomes')]) {
-        if (!indicator.forOutcomes) {
-          indicator.forOutcomes = [];
+        // add outcomes
+        if (object[getFullPropertyURI(GDBIndicatorModel, 'forOutcomes')]) {
+          if (!indicator.forOutcomes) {
+            indicator.forOutcomes = [];
+          }
+          for (const outcomeURI of getListOfValue(object, GDBIndicatorModel, 'forOutcomes')) {
+            indicator.forOutcomes.push(outcomeURI);
+
+            if (!objectDict[outcomeURI]) {
+              //in this case, the outcome is not in the file, get the outcome from database and add indicator to it
+              const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
+              if (!outcome) {
+                addTrace('Error!');
+                addTrace(`Type 2 Error: bad reference`);
+                addTrace(`    Outcome ${outcomeURI} appears neither in the file nor in the database`);
+                error += 1;
+              }// check if the outcome belongs to the organization
+              if (outcome.forOrganization !== organization._uri) {
+                addTrace('Error!');
+                addTrace(`    Outcome ${outcomeURI} doesn't belong to this organization`);
+                error += 1;
+              }
+              if (!outcome.indicators)
+                outcome.indicators = [];
+              outcome.indicators.push(uri);
+              await transSave(trans, outcome);
+            } // if the outcome is in the file, don't have to worry about adding the indicator to the outcome
+          }
         }
-        for (const outcomeURI of getListOfValue(object, GDBIndicatorModel, 'forOutcomes')) {
-          indicator.forOutcomes.push(outcomeURI);
 
-          if (!objectDict[outcomeURI]) {
-            //in this case, the outcome is not in the file, get the outcome from database and add indicator to it
-            const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
-            if (!outcome) {
-              addTrace('Error!')
-              addTrace(`Type 2 Error: bad reference`)
-              addTrace(`    Outcome ${outcomeURI} appears neither in the file nor in the database`)
-              error += 1;
-            }// check if the outcome belongs to the organization
-            if (outcome.forOrganization !== organization._uri) {
-              addTrace('Error!')
-              addTrace(`    Outcome ${outcomeURI} doesn't belong to this organization`)
-              error += 1;
-            }
-            if (!outcome.indicators)
-              outcome.indicators = [];
-            outcome.indicators.push(uri);
-            await transSave(trans, outcome);
-          } // if the outcome is in the file, don't have to worry about adding the indicator to the outcome
+        // add indicator report
+        if (object[getFullPropertyURI(GDBIndicatorModel, 'indicatorReports')]) {
+          if (!indicator.indicatorReports)
+            indicator.indicatorReports = [];
+          getListOfValue(object, GDBIndicatorModel, 'indicatorReports').map(indicatorReportURI => {
+            indicator.indicatorReports.push(indicatorReportURI);
+          });
         }
+        await transSave(trans, indicator);
+        if (hasError) {
+          addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
+        }
+      } else {
+        addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
       }
 
-      // add indicator report
-      if (object[getFullPropertyURI(GDBIndicatorModel, 'indicatorReports')]) {
-        if (!indicator.indicatorReports)
-          indicator.indicatorReports = [];
-        getListOfValue(object, GDBIndicatorModel, 'indicatorReports').map(indicatorReportURI => {
-          indicator.indicatorReports.push(indicatorReportURI);
-        });
-      }
-      await transSave(trans, indicator);
     }
 
     async function indicatorReportBuilder(trans, object, organization) {
       const uri = object['@id'];
       const indicatorReport = indicatorReportDict[uri];
-      addTrace( `    Loading ${uri} of type ${ getPrefixedURI(object['@type'][0])}...`)
+      addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       // add the organization to it
       indicatorReport.forOrganization = organization._uri;
 
@@ -235,14 +244,14 @@ const fileUploading = async (req, res, next) => {
         // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
         const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
         if (!indicator) {
-          addTrace('Error!')
+          addTrace('Error!');
           addTrace(`Type 2 Error: bad reference`);
           addTrace(`    Indicator ${indicatorURI} appears neither in the file nor in the database`);
           error += 1;
         }
         if (!indicator.forOrganizations.includes(organization._uri)) {
-          addTrace('Error!')
-          addTrace(`    Indicator ${indicatorURI} doesn't belong to this organization`)
+          addTrace('Error!');
+          addTrace(`    Indicator ${indicatorURI} doesn't belong to this organization`);
           error += 1;
         }
         if (!indicator.indicatorReports) {
@@ -301,19 +310,19 @@ const fileUploading = async (req, res, next) => {
       const uri = object['@id'];
       objectDict[uri] = object;
       // assign the object an id and store them into specific dict
+      let hasError = false;
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) { // todo: here don't have to be hardcoded
-        let hasError = false;
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'name')]) {
-          addTrace('Error!')
-          addTrace('Type 1 error: Mandatory property missing')
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'name'))} is missing`);
+          addTrace('Error!');
+          addTrace('Type 1 error: Mandatory property missing');
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'name'))} is missing`);
           error += 1;
           hasError = true;
         }
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'description')]) {
-          addTrace('Error!')
-          addTrace('Type 1 error: Mandatory property missing')
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))} is missing`);
+          addTrace('Error!');
+          addTrace('Type 1 error: Mandatory property missing');
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))} is missing`);
           error += 1;
           hasError = true;
         }
@@ -327,60 +336,65 @@ const fileUploading = async (req, res, next) => {
         }
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
 
-        if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')]){
-          addTrace('Error!');
-          addTrace('Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'name'))} is missing`);
-          error += 1;
-        }
-
-        if (!object[getFullPropertyURI(GDBIndicatorModel, 'description')]){
+        if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`)
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'name'))} is missing`);
           error += 1;
+          hasError = true;
         }
 
-        if (!object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')]){
+        if (!object[getFullPropertyURI(GDBIndicatorModel, 'description')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure'))} is missing`)
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`);
           error += 1;
+          hasError = true;
         }
 
+        if (!object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')]) {
+          addTrace('    Error!');
+          addTrace('    Type 1 error: Mandatory property missing');
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure'))} is missing`);
+          error += 1;
+          hasError = true;
+        }
 
+        // if there is error on building up indicator
+        if (!hasError) {
+          const indicator = GDBIndicatorModel({
+            name: getValue(object, GDBIndicatorModel, 'name'),
+            description: getValue(object, GDBIndicatorModel, 'description'),
+            unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
+              GDBUnitOfMeasure({
+                  label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0],
+                    GDBUnitOfMeasure, 'label'
+                  )
+                },
+                {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0])})
 
-        const indicator = GDBIndicatorModel({
-          name: getValue(object, GDBIndicatorModel, 'name'),
-          description: getValue(object, GDBIndicatorModel, 'description'),
-          unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
-            GDBUnitOfMeasure({
-                label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0],
-                  GDBUnitOfMeasure, 'label'
-                )
-              },
-              {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0])})
+          }, {uri: uri});
+          await transSave(trans, indicator);
+          indicatorDict[uri] = indicator;
+        }
 
-        }, {uri: uri});
-        await transSave(trans, indicator);
-        indicatorDict[uri] = indicator;
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'name')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'name'))} is missing`)
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'name'))} is missing`);
           error += 1;
         }
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))} is missing`)
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))} is missing`);
           error += 1;
         }
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))} is missing`)
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))} is missing`);
           error += 1;
         }
         const indicatorReport = GDBIndicatorReportModel({
@@ -400,24 +414,28 @@ const fileUploading = async (req, res, next) => {
             GDBDateTimeIntervalModel({
 
               hasBeginning: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
-                GDBDateTimeIntervalModel, 'hasBeginning') ||
+                  GDBDateTimeIntervalModel, 'hasBeginning') ||
                 GDBInstant({
                   date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
                     [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
-                }, {uri: getFullObjectURI(
-                  object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-                    [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
-                  )}),
+                }, {
+                  uri: getFullObjectURI(
+                    object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+                      [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+                  )
+                }),
 
               hasEnd: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
                   GDBDateTimeIntervalModel, 'hasEnd') ||
                 GDBInstant({
                   date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
                     [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
-                }, {uri: getFullObjectURI(
+                }, {
+                  uri: getFullObjectURI(
                     object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
                       [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
-                  )})
+                  )
+                })
             }, {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')])})
 
 
@@ -428,13 +446,13 @@ const fileUploading = async (req, res, next) => {
         if (!object[getFullPropertyURI(GDBThemeModel, 'name')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'name'))} is missing`);
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'name'))} is missing`);
           error += 1;
         }
         if (!object[getFullPropertyURI(GDBThemeModel, 'description')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'description'))} is missing`);
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'description'))} is missing`);
           error += 1;
         }
         const theme = GDBThemeModel({
@@ -443,49 +461,49 @@ const fileUploading = async (req, res, next) => {
         }, {uri: uri});
         await transSave(trans, theme);
         themeDict[uri] = theme;
-      }  else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
+      } else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
         if (!object[getFullPropertyURI(GDBUnitOfMeasure, 'label')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBUnitOfMeasure, 'label'))} is missing`)
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBUnitOfMeasure, 'label'))} is missing`);
           error += 1;
         }
         const unitOfMeasure = GDBUnitOfMeasure({
           label: getValue(object, GDBUnitOfMeasure, 'label')
-        }, {uri: uri})
+        }, {uri: uri});
         await transSave(trans, unitOfMeasure);
       } else if (object['@type'].includes(getFullTypeURI(GDBMeasureModel))) {
         if (!object[getFullPropertyURI(GDBMeasureModel, 'numericalValue')]) {
           addTrace('    Error!');
           addTrace('    Type 1 error: Mandatory property missing');
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBUnitOfMeasure, 'numericalValue'))} is missing`);
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: ${getPrefixedURI(getFullPropertyURI(GDBUnitOfMeasure, 'numericalValue'))} is missing`);
           error += 1;
         }
         const measure = GDBMeasureModel({
           numericalValue: getValue(object, GDBMeasureModel, 'numericalValue')
-        }, {uri: uri})
+        }, {uri: uri});
         await transSave(trans, measure);
       } else if (object['@type'].includes(getFullTypeURI(GDBDateTimeIntervalModel))) {
         if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')] ||
           !object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')]) {
-          addTrace('    Error!')
-          addTrace(`    ${uri} of Type ${ getPrefixedURI(object['@type'][0])}: hasBeginning and hasEnd is mandatory`)
+          addTrace('    Error!');
+          addTrace(`    ${uri} of Type ${getPrefixedURI(object['@type'][0])}: hasBeginning and hasEnd is mandatory`);
           error += 1;
         }
         const dateTimeInterval = GDBDateTimeIntervalModel({
           hasBeginning: getValue(object, GDBDateTimeIntervalModel, 'hasBeginning') ||
             GDBInstant({
-              date: new Date (getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0],
+              date: new Date(getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0],
                 GDBInstant, 'date')
-                )
+              )
             }),
           hasEnd: getValue(object, GDBDateTimeIntervalModel, 'hasEnd') ||
             GDBInstant({
-              date: new Date (getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0],
+              date: new Date(getValue(object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0],
                 GDBInstant, 'date')
               )
             })
-        }, {uri:uri});
+        }, {uri: uri});
         await transSave(trans, dateTimeInterval);
       } else {
         addTrace('    Warning!');
@@ -512,7 +530,7 @@ const fileUploading = async (req, res, next) => {
       addTrace('    Start to insert data...');
       // await trans.commit();
       addTrace(`Completed loading ${fileName}`);
-    } else if (error === 1){
+    } else if (error === 1) {
       addTrace(`There is 1 error`);
       addTrace(`Fail to upload`);
     } else {

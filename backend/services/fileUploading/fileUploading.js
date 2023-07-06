@@ -561,10 +561,19 @@ const fileUploading = async (req, res, next) => {
           await transSave(trans, dateTimeInterval);
         }
 
+      } else if(object['@type'].includes(getFullTypeURI(GDBOrganizationModel))) {
+          if (object['@id'] !== organizationUri) {
+            addTrace('        Error: Wrong organization information');
+            addTrace('             Organization in the file is different with the organization chosen in the interface');
+            error += 1;
+          } else {
+            addTrace(`        Warning: organization object is ignored`);
+            addTrace(`            Organization information can only be updated through the interface`);
+          }
+
       } else {
         addTrace('        Warning!');
         addTrace(`            Object with URI ${uri} is being ignored: The object type is not supported`);
-        error += 1;
       }
     }
 

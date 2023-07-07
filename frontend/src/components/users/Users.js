@@ -25,7 +25,7 @@ export default function Users() {
 
   useEffect(() => {
       // superuser, with no groupURI
-      fetchUsers(encodeURIComponent(organizationURI)).then(({data, success}) => {
+      fetchUsers(organizationURI? encodeURIComponent(organizationURI): undefined).then(({data, success}) => {
         setState(state => ({...state, loading: false, data: data}));
       }).catch(e => {
         reportErrorToBackend(e)
@@ -105,7 +105,7 @@ export default function Users() {
     {
       label: 'Organizations',
       body: ({associatedOrganizations}) => {
-        return associatedOrganizations.map(organization => organization.legalName)
+        return associatedOrganizations?.map(organization => organization.legalName)
       },
     },
 

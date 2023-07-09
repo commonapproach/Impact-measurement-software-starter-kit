@@ -153,7 +153,7 @@ const fileUploading = async (req, res, next) => {
         if (hasError) {
           // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
         } else {
-          addTrace(`    Built up ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+          addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         }
 
       } else {
@@ -168,7 +168,7 @@ const fileUploading = async (req, res, next) => {
       if (theme) {
         // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         await transSave(trans, theme);
-        addTrace(`    Built up ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       } else {
         // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
       }
@@ -233,7 +233,7 @@ const fileUploading = async (req, res, next) => {
         if (hasError) {
           // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
         } else {
-          addTrace(`    Built up ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+          addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         }
       } else {
         // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
@@ -281,7 +281,7 @@ const fileUploading = async (req, res, next) => {
         if (hasError) {
           // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
         } else {
-          addTrace(`    Built up ${uri} of type ${getPrefixedURI(object['@type'][0])}...`)
+          addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`)
         }
       } else {
         // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
@@ -563,8 +563,8 @@ const fileUploading = async (req, res, next) => {
 
       } else if(object['@type'].includes(getFullTypeURI(GDBOrganizationModel))) {
           if (object['@id'] !== organizationUri) {
-            addTrace('        Error: Wrong organization information');
-            addTrace('             Organization in the file is different with the organization chosen in the interface');
+            addTrace('        Error:');
+            addTrace('             Organization in the file is different from the organization chosen in the interface');
             error += 1;
           } else {
             addTrace(`        Warning: organization object is ignored`);
@@ -593,7 +593,7 @@ const fileUploading = async (req, res, next) => {
     // await organization.save();
     if (!error) {
       addTrace('    Start to insert data...');
-      // await trans.commit();
+      await trans.commit();
       addTrace(`Completed loading ${fileName}`);
     } else {
       addTrace(`${error} error(s) found`);

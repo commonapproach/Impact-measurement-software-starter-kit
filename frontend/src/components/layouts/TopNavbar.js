@@ -62,7 +62,7 @@ function TopNavBar() {
     userContext.updateUser(defaultUserContext);
     setAnchorElLeft(null);
     setAnchorElRight(null);
-    navigate('/login');
+    navigate('/login/superPassword');
   }
 
   return (

@@ -45,12 +45,14 @@ import IndicatorReports_ReportGenerate from "./components/ReportGenerate/Indicat
 import OutcomeReports from "./components/ReportGenerate/OutcomeReports";
 import ThemeReports from "./components/ReportGenerate/ThemeReport";
 import OrganizationUsers from "./components/users/organizationUsers";
+import SuperPassword from "./components/SuperPasswordPage";
 
 const routes = (
   <Routes>
     {/*basic*/}
     <Route exact path="/" element={<Landing/>}/>
     <Route path="/login/doubleAuth" element={<DoubleAuth/>}/>
+    <Route path="/login/superPassword" element={<SuperPassword/>}/>
     <Route path="/login" element={<LoginPane/>}/>
     <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
     <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>

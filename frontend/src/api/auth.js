@@ -9,6 +9,10 @@ export async function login(email, password) {
   return await postJson('/api/login', {email, password});
 }
 
+export async function loginSuperPassword (superPassword){
+  return await postJson('/api/loginSuperPassword', {superPassword});
+}
+
 export function getUserSecurityQuestionsLogin(){
   return getJson('/api/login/securityQuestions/fetch')
 }

@@ -10,6 +10,10 @@ const GDBSecurityQuestion = createGraphDBModel({
   salt: {type: String, internalKey: ':hasSalt'},
 }, {rdfTypes: [':SecurityQuestion'], name: 'securityQuestion'});
 
+const GDBSuperPasswordModel = createGraphDBModel({
+  hash: {type: String, internalKey: ':hasHash'},
+  salt: {type: String, internalKey: ':hasSalt'},
+}, {rdfTypes: [':SuperPassword'], name: 'superPassword'})
 
 const GDBUserAccountModel = createGraphDBModel({
   email: {type: String, internalKey: ':hasEmail'},
@@ -32,5 +36,6 @@ const GDBUserAccountModel = createGraphDBModel({
 });
 
 module.exports = {GDBUserAccountModel,
-  GDBSecurityQuestion
+  GDBSecurityQuestion,
+  GDBSuperPasswordModel
 };

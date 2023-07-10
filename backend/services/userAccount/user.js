@@ -1,5 +1,5 @@
 const Hashing = require("../../utils/hashing");
-const {GDBUserAccountModel} = require('../../models/userAccount');
+const {GDBUserAccountModel, GDBSuperPasswordModel} = require('../../models/userAccount');
 const {Server400Error} = require("../../utils");
 
 
@@ -99,6 +99,17 @@ async function validateCredentials(email, password) {
   return {validated, userAccount};
 }
 
+async function addSuperPassword() {
+  const alreadyHas = await GDBSuperPasswordModel.findOne({});
+  if (!alreadyHas) {
+    const {hash, salt} = await Hashing.hashPassword('MIEUofT');
+    const superPassword = GDBSuperPasswordModel({
+      hash, salt
+    });
+    await superPassword.save();
+  }
+}
+
 /**
  * Check if the database contains at least one user account.
  * If not, create a default user account.
@@ -158,5 +169,5 @@ async function initUserAccounts() {
 
 
 module.exports = {
-  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword,
+  updateUserAccount, validateCredentials, initUserAccounts, updateUserPassword, addSuperPassword
 };

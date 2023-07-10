@@ -61,13 +61,9 @@ function SuperPassword() {
   return (
     <Container className={classes.container} onKeyPress={onKeyPress}>
       <Paper elevation={5} className={classes.paper}>
-        <Typography variant="h6">
-          Super Password
-        </Typography>
         <TextField
           fullWidth
           variant="outlined"
-          label="Super Password"
           value={superPassword}
           onChange={onChange}
           className={classes.item}
@@ -77,7 +73,7 @@ function SuperPassword() {
           <span style={{color: 'red'}}>{alert}</span>
         </Typography>
         <br/>
-        <Button variant="outlined" color="primary" className={classes.button} onClick={submit}> Log in</Button>
+        <Button variant="outlined" color="primary" className={classes.button} onClick={submit}> Submit </Button>
         <Divider/>
 
       </Paper>

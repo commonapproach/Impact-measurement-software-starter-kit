@@ -8,23 +8,28 @@ const postalCodeRegex = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
 const Validator = {
   email: email => {
-    emailRegex.test(email)
+    emailRegex.test(email);
   },
 
   gender: gender => {
-    return !genderOptions.includes(gender)
+    return !genderOptions.includes(gender);
   },
 
   password: password => {
-    return passwordRegex.test(password)
+    return passwordRegex.test(password);
   },
 
 
   postalCode: postalCode => {
-    return !postalCodeRegex.test(postalCode)
+    return !postalCodeRegex.test(postalCode);
   },
 
 
 };
 
-module.exports = {Validator}
+function isValidURL(uri) {
+  const pattern = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//;
+  return pattern.test(uri);
+}
+
+module.exports = {Validator, isValidURL};

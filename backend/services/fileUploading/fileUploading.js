@@ -11,6 +11,7 @@ const {expand, frame} = require('jsonld');
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBUnitOfMeasure, GDBMeasureModel} = require("../../models/measure");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
+const {isValidURL} = require("../../helpers/validator");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 const fileUploadingHandler = async (req, res, next) => {
@@ -32,17 +33,6 @@ const fileUploadingHandler = async (req, res, next) => {
  */
 const getValue = (object, graphdbModel, property) => {
   return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
-};
-
-/**
- * return list of object URI
- * @param object
- * @param graphdbModel
- * @param property
- * @returns {*}
- */
-const getListOfValue = (object, graphdbModel, property) => {
-  return object[getFullURI(graphdbModel.schema[property].internalKey)].map(obj => obj['@value']);
 };
 
 const getFullTypeURI = (graphdbModel) => {
@@ -82,6 +72,27 @@ const fileUploading = async (req, res, next) => {
     const indicatorReportDict = {};
     let traceOfUploading = '';
     let error = 0;
+
+    /**
+     * return list of object URI
+     * @param object
+     * @param graphdbModel
+     * @param property
+     * @returns {*}
+     */
+    const getListOfValue = (object, graphdbModel, property) => {
+      const ret = object[getFullURI(graphdbModel.schema[property].internalKey)].map(obj => {
+        if (isValidURL(obj['@value'])) {
+          return obj['@value'];
+        } else {
+          error += 1;
+          addTrace('        Error: Invalid URI');
+          addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))}  contains invalid value(s): ${obj['@value']}`);
+        }
+
+      });
+      return ret.filter(uri => !!uri);
+    };
 
     function addTrace(message) {
       console.log(message);
@@ -130,7 +141,7 @@ const fileUploading = async (req, res, next) => {
               const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
               if (!indicator) {
                 addTrace('        Error: bad reference');
-                addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the database`);
+                addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
                 error += 1;
                 hasError = true;
               } else if (!indicator.forOrganizations.includes(organization._uri)) {
@@ -203,7 +214,7 @@ const fileUploading = async (req, res, next) => {
               const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
               if (!outcome) {
                 addTrace('        Error: bad reference');
-                addTrace(`            Outcome ${outcomeURI} appears neither in the file nor in the database`);
+                addTrace(`            Outcome ${outcomeURI} appears neither in the file nor in the sandbox`);
                 error += 1;
               }else if (outcome.forOrganization !== organization._uri) {
                 // check if the outcome belongs to the organization
@@ -260,7 +271,7 @@ const fileUploading = async (req, res, next) => {
           const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
           if (!indicator) {
             addTrace('        Error: bad reference');
-            addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the database`);
+            addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
             error += 1;
           }else if (!indicator.forOrganizations.includes(organization._uri)) {
             addTrace('        Error:');
@@ -334,6 +345,19 @@ const fileUploading = async (req, res, next) => {
     for (let object of expandedObjects) {
       // store the raw object into objectDict
       const uri = object['@id'];
+      if (!isValidURL(uri)){
+        error += 1;
+        addTrace('        Error: Invalid URI');
+        addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))}  contains invalid value(s): ${obj['@value']}`);
+        continue;
+      }
+      if (objectDict[uri]){
+        // duplicated uri
+        error += 1;
+        addTrace('        Error: Duplicated URI');
+        addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}, its URI is duplicated`);
+        continue;
+      }
       objectDict[uri] = object;
       // assign the object an id and store them into specific dict
       let hasError = false;
@@ -578,7 +602,7 @@ const fileUploading = async (req, res, next) => {
     }
 
 
-    for (let object of expandedObjects) {
+    for (let [uri, object] of Object.entries(objectDict)) {
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
         await outcomeBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {

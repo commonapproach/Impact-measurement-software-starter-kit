@@ -12,6 +12,7 @@ const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBUnitOfMeasure, GDBMeasureModel} = require("../../models/measure");
 const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {isValidURL} = require("../../helpers/validator");
+const {GraphDB} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 const fileUploadingHandler = async (req, res, next) => {
@@ -351,13 +352,22 @@ const fileUploading = async (req, res, next) => {
         addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))}  contains invalid value(s): ${obj['@value']}`);
         continue;
       }
-      if (objectDict[uri]){
-        // duplicated uri
+      if (objectDict[uri]) {
+        // duplicated uri in the file
         error += 1;
         addTrace('        Error: Duplicated URI');
-        addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}, its URI is duplicated`);
+        addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in this file`);
         continue;
       }
+      if (await GraphDB.isURIExisted(uri)) {
+        // check whether the uri belongs to other objects
+        // duplicated uri in database
+        error += 1;
+        addTrace('        Error: Duplicated URI');
+        addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in the sandbox`);
+        continue;
+      }
+
       objectDict[uri] = object;
       // assign the object an id and store them into specific dict
       let hasError = false;

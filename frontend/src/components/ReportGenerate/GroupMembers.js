@@ -10,7 +10,7 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {fetchGroups} from "../../api/groupApi";
-import {PictureAsPdf, Undo} from "@mui/icons-material";
+import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
 import { jsPDF } from "jspdf"
 
 const useStyles = makeStyles(() => ({
@@ -41,6 +41,29 @@ export default function GroupMembers() {
   const [selectedGroup, setSelectedGroup] = useState('');
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const generateTXTFile = () => {
+    let str = ''
+    const addLine = (line, space) => {
+      if (space)
+        [...Array(space).keys()].map(() => {
+          str += ' '
+        })
+      str += line + '\n';
+    }
+
+    organizations.map(organization => {
+      addLine(`Organization: ${organization.legalName}`, 2);
+      if (organization.contactName)
+        addLine(`Contact Name: ${organization.contactName}`, 6);
+      if (organization.email)
+        addLine(`Contact Email: ${organization.email}`, 6)
+    })
+
+    const file = new Blob([str], { type: 'text/plain' });
+    saveAs(file, 'groupMember.txt');
+  }
+
 
   const generatePDFFile = () => {
     const pdf = new jsPDF({
@@ -124,8 +147,8 @@ export default function GroupMembers() {
         </Button>
         {organizations.length ?
           <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
-                  onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
-            Generate PDF File
+                  onClick={generateTXTFile} startIcon={<FileDownload />}>
+            Generate txt File
           </Button>
           :
           null}

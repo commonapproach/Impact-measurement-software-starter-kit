@@ -6,7 +6,7 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
-import {PictureAsPdf, Undo} from "@mui/icons-material";
+import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
 import {fetchOutcomesThroughTheme} from "../../api/outcomeApi";
 import {fetchThemes} from "../../api/themeApi";
 import {jsPDF} from "jspdf";
@@ -42,6 +42,66 @@ export default function ThemeReports() {
   const [outcomes, setOutcomes] = useState([])
   const [loading, setLoading] = useState(true);
 
+
+  const generateTXTFile = () => {
+    let str = ''
+    const addLine = (line, space) => {
+      if (space)
+        [...Array(space).keys()].map(() => {
+          str += ' '
+        })
+      str += line + '\n';
+    }
+
+    outcomes.map((outcome, index) => {
+      addLine(`Outcome: ${outcome.name}`, 2);
+      outcome.indicators.map(indicator => {
+        addLine(`Indicator Name: ${indicator.name}`, 6);
+        addLine(`Unit of Measure: ${indicator.unitOfMeasure.label}`, 10);
+        indicator.indicatorReports.map(indicatorReport =>{
+          addLine(`Indicator Report: ${indicatorReport.name}`, 10);
+          addLine(`Value: ${indicatorReport.value.numericalValue}`, 14);
+          addLine(`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`, 14)
+        })
+      })
+    })
+
+    {outcomes.length ? outcomes.map((outcome, index) => {
+      return (
+        <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>
+          {outcome.indicators?
+            <Paper elevation={0}>
+              {outcome.indicators.map(indicator => {
+                return (
+                  <Paper elevation={0} sx={{pl: 4}}>
+                    <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
+                    <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+
+                    {indicator.indicatorReports?
+                      (indicator.indicatorReports.map(indicatorReport =>
+                        <Paper elevation={0} sx={{pl: 4}}>
+                          <Typography variant={'body1'}> {`Indicator Report: `}<Link
+                            to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
+                            color={'#2f5ac7'} colorWithHover>{indicatorReport.name}</Link> </Typography>
+                          <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
+                          <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
+                        </Paper>
+
+                      ))
+                      :null
+                    }
+                  </Paper>)
+              })}
+            </Paper> : null}
+        </Paper>
+      );
+    }) : null}
+
+
+    const file = new Blob([str], { type: 'text/plain' });
+    saveAs(file, 'themeReport.txt');
+  }
 
   const generatePDFFile = () => {
     const pdf = new jsPDF({
@@ -131,8 +191,8 @@ export default function ThemeReports() {
         </Button>
         {!!selectedTheme ?
           <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
-                  onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
-            Generate PDF File
+                  onClick={generateTXTFile} startIcon={<FileDownload />}>
+            Generate TXT File
           </Button>
           :
           null}

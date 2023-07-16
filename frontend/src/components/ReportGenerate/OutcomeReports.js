@@ -11,7 +11,7 @@ import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-import {PictureAsPdf, Undo} from "@mui/icons-material";
+import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
 import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
 
@@ -43,6 +43,34 @@ export default function OutcomeReports() {
   const [outcomes, setOutcomes] = useState([]);
   const [loading, setLoading] = useState(true);
   const {enqueueSnackbar} = useSnackbar();
+
+  const generateTXTFile = () => {
+    let str = ''
+    const addLine = (line, space) => {
+      if (space)
+        [...Array(space).keys()].map(() => {
+          str += ' '
+        })
+      str += line + '\n';
+    }
+
+    outcomes.map(outcome => {
+      addLine('Outcome: ' + outcome.name, 2);
+      outcome.indicators.map(indicator => {
+        addLine(`Indicator Name: ${indicator.name}`, 6);
+        addLine(`Unit of Measure: ${indicator.unitOfMeasure.label}`, 10);
+        indicator.indicatorReports.map(indicatorReport => {
+          addLine(`Indicator Report: ${indicatorReport.name}`, 10);
+          addLine(`Value: ${indicatorReport.value.numericalValue}`, 14);
+          addLine(`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`, 14);
+        })
+      })
+
+    })
+
+    const file = new Blob([str], { type: 'text/plain' });
+    saveAs(file, 'outcomeReport.txt');
+  }
 
 
   const generatePDFFile = () => {
@@ -131,8 +159,8 @@ export default function OutcomeReports() {
         </Button>
         {outcomes.length ?
           <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
-                  onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
-            Generate PDF File
+                  onClick={generateTXTFile} startIcon={<FileDownload />}>
+            Generate TXT File
           </Button>
           :
           null}
@@ -154,7 +182,7 @@ export default function OutcomeReports() {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
               {/*<Typography variant={'body1'}> {`Outcome: ${outcome.name}`}  </Typography>*/}
-              <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome.name}</Link> </Typography>
+              <Typography variant={'body1'}> {'Outcome: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome.name}</Link> </Typography>
               {outcome.indicators?
                 <Paper elevation={0}>
                 {/*<Typography variant={'body1'}> {`Indicators:`}  </Typography>*/}

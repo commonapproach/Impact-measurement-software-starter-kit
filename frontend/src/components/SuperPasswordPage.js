@@ -62,6 +62,7 @@ function SuperPassword() {
     <Container className={classes.container} onKeyPress={onKeyPress}>
       <Paper elevation={5} className={classes.paper}>
         <TextField
+          type="password"
           fullWidth
           variant="outlined"
           value={superPassword}

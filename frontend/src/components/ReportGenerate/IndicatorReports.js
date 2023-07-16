@@ -7,7 +7,7 @@ import {
   fetchOrganizations,
 } from "../../api/organizationApi";
 import SelectField from "../shared/fields/SelectField";
-import {Undo, PictureAsPdf} from "@mui/icons-material";
+import {Undo, PictureAsPdf, FileDownload} from "@mui/icons-material";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
@@ -38,43 +38,65 @@ export default function IndicatorReports_ReportGenerate() {
   const {enqueueSnackbar} = useSnackbar();
 
 
-  const generatePDFFile = () => {
-    const pdf = new jsPDF({
-      orientation: 'p',
-      unit: 'mm',
-      format: 'a5',
-      putOnlyUsedFonts:true
-    });
-    let x = 20
-    let y = 20
-    pdf.setFontSize(20);
-    pdf.text("Indicator Reports", x, y);
-    y += 6;
-    pdf.setFontSize(10);
-    pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
-    y += 10;
-    indicators?.map(indicator => {
-      x = 23;
-      y += 6
-      pdf.text(`Indicator Name: ${indicator.name}`, x, y)
-      y += 6;
-      pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
-      y += 6;
-      indicator.indicatorReports?.map(indicatorReport => {
-        x = 26
-        pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
-        y += 6
-      })
-    })
-    pdf.save('indicator report.pdf');
-
-  }
-
-
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [indicators, setIndicators] = useState([]);
   const [loading, setLoading] = useState(true);
+
+
+  const generateTXTFile = () => {
+    let str = ''
+    const addLine = (line, space) => {
+      if (space)
+        [...Array(space).keys()].map(() => {
+          str += ' '
+        })
+      str += line + '\n';
+    }
+    // const pdf = new jsPDF({
+    //   orientation: 'p',
+    //   unit: 'mm',
+    //   format: 'a5',
+    //   putOnlyUsedFonts:true
+    // });
+
+
+    // let x = 20
+    // let y = 20
+    // pdf.setFontSize(20);
+    // pdf.text("Indicator Reports", x, y);
+    // y += 6;
+    // pdf.setFontSize(10);
+    // pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
+    // y += 10;
+    // indicators?.map(indicator => {
+    //   x = 23;
+    //   y += 6
+    //   pdf.text(`Indicator Name: ${indicator.name}`, x, y)
+    //   y += 6;
+    //   pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
+    //   y += 6;
+    //   indicator.indicatorReports?.map(indicatorReport => {
+    //     x = 26
+    //     pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
+    //     y += 6
+    //   })
+    // })
+    // pdf.save('indicator report.pdf');
+
+    indicators.map(indicator => {
+      addLine(`Indicator: ${indicator.name}`, 2);
+      addLine(`Unit of Measure: ${indicator.unitOfMeasure.label}`, 6);
+      indicator.indicatorReports.map(indicatorReport => {
+        addLine(`Indicator Report: ${indicatorReport.name}`, 6);
+        addLine(`Value: ${indicatorReport.value.numericalValue}`, 10);
+        addLine(`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`, 10);
+      })
+    })
+
+    const file = new Blob([str], { type: 'text/plain' });
+    saveAs(file, 'indicatorReport.txt');
+  }
 
 
 
@@ -127,8 +149,8 @@ export default function IndicatorReports_ReportGenerate() {
         </Button>
         {indicators.length ?
             <Button variant="contained" color="primary" className={classes.button} sx={{position: 'absolute', right:100, marginTop:0}}
-                    onClick={generatePDFFile} startIcon={<PictureAsPdf />}>
-              Generate PDF File
+                    onClick={generateTXTFile} startIcon={<FileDownload />}>
+              Generate TXT File
             </Button>
           :
           null}

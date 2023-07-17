@@ -71,8 +71,72 @@ const fileUploading = async (req, res, next) => {
     const themeDict = {};
     const indicatorDict = {};
     const indicatorReportDict = {};
+    let messageBuffer = {};
     let traceOfUploading = '';
     let error = 0;
+
+    function addMessage(spaces, messageType, {uri, fileName, organizationUri, type}) {
+      let whiteSpaces = ''
+      if (spaces)
+        [...Array(spaces).keys()].map(() => {
+          whiteSpaces += ' '
+        })
+      if (uri && !messageBuffer[uri]){
+        messageBuffer[uri] = []
+      }
+
+      switch (messageType) {
+        case 'startToProcess':
+          if (!messageBuffer['begin'])
+            messageBuffer['begin'] = [];
+          messageBuffer['begin'].push(whiteSpaces + `Loading file ${fileName}...`);
+          break;
+        case 'fileNotAList':
+          messageBuffer['begin'].push(whiteSpaces + 'Error');
+          messageBuffer['begin'].push(whiteSpaces + 'The file should contain a list (start with [ and end with ] ) of json objects.');
+          messageBuffer['begin'].push(whiteSpaces + 'Please consult the JSON-LD reference at: https://json-ld.org/');
+          break;
+        case 'fileEmpty':
+          messageBuffer['begin'].push(whiteSpaces + 'Warning!');
+          messageBuffer['begin'].push(whiteSpaces + 'The file is empty');
+          messageBuffer['begin'].push(whiteSpaces + 'There is nothing to upload');
+          break;
+        case 'addingToOrganization':
+          messageBuffer['begin'].push(whiteSpaces + 'Adding objects to organization with URI: ' + organizationUri);
+          messageBuffer['begin'].push(whiteSpaces + '');
+          break;
+        case 'emptyExpandedObjects':
+          messageBuffer['begin'].push(whiteSpaces + 'Warning!');
+          messageBuffer['begin'].push(whiteSpaces + '    Please check that the file is a valid JSON-LD file and it conforms to context( for example, each object must have an @id and @type property. '
+            + 'Some objects must have a @context');
+          messageBuffer['begin'].push(whiteSpaces + '    Read more about JSON-LD  at: https://json-ld.org/')
+          messageBuffer['begin'].push(whiteSpaces + '    Nothing was uploaded');
+          break;
+        case 'wrongOrganizationURI':
+          messageBuffer['begin'].push(whiteSpaces + `Error: Incorrect organization URI ${organizationUri}: No such Organization`);
+          messageBuffer['begin'].push(whiteSpaces + '    The fail failed to upload');
+          break;
+        case 'invalidURI':
+          messageBuffer[uri].push(whiteSpaces + 'Error: Invalid URI')
+          messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} has been used as an invalid URI`);
+          break;
+        case 'duplicatedURIInFile':
+          messageBuffer[uri].push(whiteSpaces + 'Error: Duplicated URI');
+          messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} has been used as an URI already in another object in this file`);
+          break;
+        case 'duplicatedURIInDataBase':
+          messageBuffer[uri].push(whiteSpaces + 'Error: Duplicated URI');
+          messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} has been used as an URI already in another object in the sandbox`);
+          break;
+
+
+
+
+
+
+
+      }
+    }
 
     /**
      * return list of object URI
@@ -303,12 +367,14 @@ const fileUploading = async (req, res, next) => {
 
     const {objects, organizationUri, fileName} = req.body;
     addTrace(`Loading file ${fileName}...`);
+    addMessage(0, 'startToProcess', {fileName});
     if (!Array.isArray(objects)) {
       // the object should be an array
       addTrace('Error');
-      addTrace('The file should contain a list of json objects.');
+      addTrace('The file should contain a list (start with [ and end with ] ) of json objects.');
       addTrace('Please consult the JSON-LD reference at: https://json-ld.org/')
       error += 1;
+      addMessage(0, 'fileNotAList', {});
       throw new Server400Error(traceOfUploading);
     }
     if (!objects.length) {
@@ -316,11 +382,13 @@ const fileUploading = async (req, res, next) => {
       addTrace('Warning!');
       addTrace('The file is empty');
       addTrace('There is nothing to upload ');
+      addMessage(0, 'fileEmpty', {})
       error += 1;
       throw new Server400Error(traceOfUploading);
     }
     addTrace('    Adding objects to organization with URI: ' + organizationUri);
     addTrace('');
+    addMessage(4, 'addingToOrganization', {organizationUri})
 
     const expandedObjects = await expand(objects);
 
@@ -332,6 +400,7 @@ const fileUploading = async (req, res, next) => {
       addTrace('            Read more about JSON-LD  at: https://json-ld.org/');
       addTrace('            Nothing was uploaded');
       error += 1;
+      addMessage(8, 'emptyExpandedObjects', {})
       throw new Server400Error(traceOfUploading);
     }
 
@@ -340,6 +409,7 @@ const fileUploading = async (req, res, next) => {
     if (!organization) {
       addTrace('        Error: Incorrect organization URI: No such Organization');
       addTrace('            The fail failed to upload');
+      addMessage(8, 'wrongOrganizationURI', {organizationUri});
       throw new Server400Error(traceOfUploading);
     }
 
@@ -349,7 +419,8 @@ const fileUploading = async (req, res, next) => {
       if (!isValidURL(uri)){
         error += 1;
         addTrace('        Error: Invalid URI');
-        addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))}  contains invalid value(s): ${obj['@value']}`);
+        addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an invalid URI`);
+        addMessage(8, 'invalidURI', {uri, type: getPrefixedURI(object['@type'][0])});
         continue;
       }
       if (objectDict[uri]) {
@@ -357,6 +428,7 @@ const fileUploading = async (req, res, next) => {
         error += 1;
         addTrace('        Error: Duplicated URI');
         addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in this file`);
+        addMessage(8, 'duplicatedURIInFile', {uri, type: getPrefixedURI(object['@type'][0])})
         continue;
       }
       if (await GraphDB.isURIExisted(uri)) {
@@ -365,31 +437,36 @@ const fileUploading = async (req, res, next) => {
         error += 1;
         addTrace('        Error: Duplicated URI');
         addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} has been used as an URI already in another object in the sandbox`);
+        addMessage(8, 'duplicatedURIInDataBase', {uri, type: getPrefixedURI(object['@type'][0])})
         continue;
       }
 
       objectDict[uri] = object;
       // assign the object an id and store them into specific dict
       let hasError = false;
+      let hasName = null;
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) { // todo: here don't have to be hardcoded
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`, )
 
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'name')]) {
           addTrace('        Error: Mandatory property missing');
           addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'name'))} is missing`);
           error += 1;
           hasError = true;
+        } else {
+          hasName = getValue(object, GDBOutcomeModel, 'name');
         }
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'description')]) {
           addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))} is missing`);
+          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))} is missing`);
           error += 1;
           hasError = true;
         }
         if (!hasError) {
           const outcome = GDBOutcomeModel({
-            name: getValue(object, GDBOutcomeModel, 'name'),
+            name: hasName,
             description: getValue(object, GDBOutcomeModel, 'description'),
           }, {uri: uri});
           await transSave(trans, outcome);
@@ -404,18 +481,20 @@ const fileUploading = async (req, res, next) => {
           addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'name'))} is missing`);
           error += 1;
           hasError = true;
+        } else {
+          hasName = getValue(object, GDBIndicatorModel, 'name');
         }
 
         if (!object[getFullPropertyURI(GDBIndicatorModel, 'description')]) {
           addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`);
+          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`);
           error += 1;
           hasError = true;
         }
 
         if (!object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')]) {
           addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure'))} is missing`);
+          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure'))} is missing`);
           error += 1;
           hasError = true;
         }
@@ -423,7 +502,7 @@ const fileUploading = async (req, res, next) => {
         // if there is error on building up indicator
         if (!hasError) {
           const indicator = GDBIndicatorModel({
-            name: getValue(object, GDBIndicatorModel, 'name'),
+            name: hasName,
             description: getValue(object, GDBIndicatorModel, 'description'),
             unitOfMeasure: getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
               GDBUnitOfMeasure({
@@ -447,22 +526,24 @@ const fileUploading = async (req, res, next) => {
           addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'name'))} is missing`);
           error += 1;
           hasError = true;
+        } else {
+          hasName = getValue(object, GDBIndicatorReportModel, 'name');
         }
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated')]) {
           addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))} is missing`);
+          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))} is missing`);
           error += 1;
           hasError = true;
         }
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
           addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))} is missing`);
+          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))} is missing`);
           error += 1;
           hasError = true;
         }
         if (!hasError) {
           const indicatorReport = GDBIndicatorReportModel({
-            name: getValue(object, GDBIndicatorReportModel, 'name'),
+            name: hasName,
             dateCreated: new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated')),
             comment: getValue(object, GDBIndicatorReportModel, 'comment'),
 

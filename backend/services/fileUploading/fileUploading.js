@@ -71,11 +71,32 @@ const fileUploading = async (req, res, next) => {
     const themeDict = {};
     const indicatorDict = {};
     const indicatorReportDict = {};
-    let messageBuffer = {};
+    let messageBuffer = {
+      begin: [], end: []
+    };
     let traceOfUploading = '';
     let error = 0;
 
-    function addMessage(spaces, messageType, {uri, fileName, organizationUri, type, property, hasName, value, referenceURI, subjectURI}) {
+    function formatMessage() {
+      let msg = '';
+      messageBuffer.begin.map(sentence => {
+        msg += sentence + '\n'
+      });
+      Object.keys(messageBuffer).map(uri => {
+        if (uri !== 'begin' && uri !== 'end') {
+          messageBuffer[uri].map(sentence => {
+            msg += sentence + '\n';
+          })
+        }
+      })
+      messageBuffer.end?.map(sentence => {
+        msg += sentence + '\n'
+      })
+      return msg;
+    }
+
+    function addMessage(spaces, messageType,
+                        {uri, fileName, organizationUri, type, property, hasName, value, referenceURI, subjectURI, error}) {
       let whiteSpaces = ''
       if (spaces)
         [...Array(spaces).keys()].map(() => {
@@ -87,8 +108,6 @@ const fileUploading = async (req, res, next) => {
 
       switch (messageType) {
         case 'startToProcess':
-          if (!messageBuffer['begin'])
-            messageBuffer['begin'] = [];
           messageBuffer['begin'].push(whiteSpaces + `Loading file ${fileName}...`);
           break;
         case 'fileNotAList':
@@ -114,7 +133,7 @@ const fileUploading = async (req, res, next) => {
           break;
         case 'wrongOrganizationURI':
           messageBuffer['begin'].push(whiteSpaces + `Error: Incorrect organization URI ${organizationUri}: No such Organization`);
-          messageBuffer['begin'].push(whiteSpaces + '    The fail failed to upload');
+          messageBuffer['begin'].push(whiteSpaces + '    The file failed to upload');
           break;
         case 'invalidURI':
           messageBuffer[uri].push(whiteSpaces + 'Error: Invalid URI')
@@ -149,11 +168,11 @@ const fileUploading = async (req, res, next) => {
           break;
         case 'invalidValue':
           messageBuffer[uri].push(whiteSpaces + 'Error: Invalid URI');
-          messageBuffer[uri].push(whiteSpaces + `In object with URI ${uri} of type ${type} attribute ${property}  contains invalid value(s): ${value}`);
+          messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} attribute ${property}  contains invalid value(s): ${value}`);
           break;
         case 'badReference':
           messageBuffer[uri].push(whiteSpaces + 'Error: bad reference');
-          messageBuffer[uri].push(whiteSpaces + `${type} ${referenceURI} appears neither in the file nor in the sandbox`);
+          messageBuffer[uri].push(whiteSpaces + `    ${type} ${referenceURI} appears neither in the file nor in the sandbox`);
           break;
         case 'subjectDoesNotBelong':
           messageBuffer[uri].push(whiteSpaces + 'Error:');
@@ -161,6 +180,17 @@ const fileUploading = async (req, res, next) => {
           break;
         case 'finishedReading':
           messageBuffer[uri].push(whiteSpaces + `Finished reading ${uri} of type ${type}...`);
+          break;
+        case 'insertData':
+          messageBuffer['end'].push(whiteSpaces + 'Start to insert data...');
+          break;
+        case 'completedLoading':
+          messageBuffer['end'].push(whiteSpaces + `Completed loading ${fileName}`);
+          break;
+        case 'errorCounting':
+          messageBuffer['end'].push(whiteSpaces + `${error} error(s) found`);
+          messageBuffer['end'].push(`File failed to upload`);
+          break;
 
 
 
@@ -320,11 +350,15 @@ const fileUploading = async (req, res, next) => {
               if (!outcome) {
                 addTrace('        Error: bad reference');
                 addTrace(`            Outcome ${outcomeURI} appears neither in the file nor in the sandbox`);
+                addMessage(8, 'badReference',
+                  {uri, referenceURI: outcomeURI, type:'Outcome'});
                 error += 1;
               }else if (outcome.forOrganization !== organization._uri) {
                 // check if the outcome belongs to the organization
                 addTrace('        Error:');
                 addTrace(`            Outcome ${outcomeURI} doesn't belong to this organization`);
+                addMessage(8, 'subjectDoesNotBelong',
+                  {uri, type: 'Outcome', subjectURI: outcomeURI});
                 error += 1;
               } else {
                 if (!outcome.indicators)
@@ -350,6 +384,8 @@ const fileUploading = async (req, res, next) => {
           // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
         } else {
           addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+          addMessage(4, 'finishedReading',
+            {uri, type:getPrefixedURI(object['@type'][0])});
         }
       } else {
         // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
@@ -377,10 +413,14 @@ const fileUploading = async (req, res, next) => {
           if (!indicator) {
             addTrace('        Error: bad reference');
             addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
+            addMessage(8, 'badReference',
+              {uri, referenceURI: indicatorURI, type:'Indicator'});
             error += 1;
           }else if (!indicator.forOrganizations.includes(organization._uri)) {
             addTrace('        Error:');
             addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
+            addMessage(8, 'subjectDoesNotBelong',
+              {uri, type: 'Indicator', subjectURI: indicatorURI});
             error += 1;
           } else {
             if (!indicator.indicatorReports) {
@@ -397,7 +437,9 @@ const fileUploading = async (req, res, next) => {
         if (hasError) {
           // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
         } else {
-          addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`)
+          addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+          addMessage(4, 'finishedReading',
+            {uri, type:getPrefixedURI(object['@type'][0])});
         }
       } else {
         // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
@@ -415,7 +457,8 @@ const fileUploading = async (req, res, next) => {
       addTrace('Please consult the JSON-LD reference at: https://json-ld.org/')
       error += 1;
       addMessage(0, 'fileNotAList', {});
-      throw new Server400Error(traceOfUploading);
+      const msg = formatMessage();
+      throw new Server400Error(msg);
     }
     if (!objects.length) {
       // the objects shouldn't be empty
@@ -424,7 +467,8 @@ const fileUploading = async (req, res, next) => {
       addTrace('There is nothing to upload ');
       addMessage(0, 'fileEmpty', {})
       error += 1;
-      throw new Server400Error(traceOfUploading);
+      const msg = formatMessage();
+      throw new Server400Error(msg);
     }
     addTrace('    Adding objects to organization with URI: ' + organizationUri);
     addTrace('');
@@ -441,16 +485,18 @@ const fileUploading = async (req, res, next) => {
       addTrace('            Nothing was uploaded');
       error += 1;
       addMessage(8, 'emptyExpandedObjects', {})
-      throw new Server400Error(traceOfUploading);
+      const msg = formatMessage();
+      throw new Server400Error(msg);
     }
 
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
     if (!organization) {
       addTrace('        Error: Incorrect organization URI: No such Organization');
-      addTrace('            The fail failed to upload');
+      addTrace('            The file failed to upload');
       addMessage(8, 'wrongOrganizationURI', {organizationUri});
-      throw new Server400Error(traceOfUploading);
+      const msg = formatMessage();
+      throw new Server400Error(msg);
     }
 
     for (let object of expandedObjects) {
@@ -729,7 +775,7 @@ const fileUploading = async (req, res, next) => {
         //   hasError = true;
         // }
 
-        if (!object[getFullPropertyURI(GDBDateTimeIntervalModel), 'hasBeginning']) {
+        if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')]) {
           addTrace('        Error: Mandatory property missing');
           addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning'))} is missing`);
           addMessage(8, 'propertyMissing',
@@ -738,7 +784,7 @@ const fileUploading = async (req, res, next) => {
           hasError = true;
         }
 
-        if (!object[getFullPropertyURI(GDBDateTimeIntervalModel), 'hasEnd']) {
+        if (!object[getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')]) {
           addTrace('        Error: Mandatory property missing');
           addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd'))} is missing`);
           addMessage(8, 'propertyMissing',
@@ -770,7 +816,7 @@ const fileUploading = async (req, res, next) => {
             addTrace('        Error:');
             addTrace('             Organization in the file is different from the organization chosen in the interface');
             addMessage(8, 'differentOrganization',
-              {uri, organizationUri})
+              {uri, organizationUri});
             error += 1;
 
           } else {
@@ -802,18 +848,23 @@ const fileUploading = async (req, res, next) => {
     // await organization.save();
     if (!error) {
       addTrace('    Start to insert data...');
+      addMessage(4, 'insertData', {})
       await trans.commit();
       addTrace(`Completed loading ${fileName}`);
+      addMessage(0, 'completedLoading', {fileName})
     } else {
       addTrace(`${error} error(s) found`);
       addTrace(`File failed to upload`);
+      addMessage(0, 'errorCounting', {error})
     }
 
     if (!error) {
-      return res.status(200).json({success: true, traceOfUploading});
+      const msg = formatMessage();
+      return res.status(200).json({success: true, traceOfUploading: msg});
     } else {
+      const msg = formatMessage();
       await trans.rollback();
-      throw new Server400Error(traceOfUploading);
+      throw new Server400Error(msg);
     }
 
   } catch (e) {

@@ -75,7 +75,7 @@ const fileUploading = async (req, res, next) => {
     let traceOfUploading = '';
     let error = 0;
 
-    function addMessage(spaces, messageType, {uri, fileName, organizationUri, type, property, hasName}) {
+    function addMessage(spaces, messageType, {uri, fileName, organizationUri, type, property, hasName, value, referenceURI, subjectURI}) {
       let whiteSpaces = ''
       if (spaces)
         [...Array(spaces).keys()].map(() => {
@@ -134,6 +134,34 @@ const fileUploading = async (req, res, next) => {
         case 'propertyMissing':
           messageBuffer[uri].push(whiteSpaces + `Error: Mandatory property missing`);
           messageBuffer[uri].push(whiteSpaces + `    In object${hasName? ' ' + hasName : ''} with URI ${uri} of type ${type} property ${property} is missing`);
+          break;
+        case 'differentOrganization':
+          messageBuffer['begin'].push(whiteSpaces + `Error:`);
+          messageBuffer['begin'].push(whiteSpaces + `    Organization in the file(URI: ${uri}) is different from the organization chosen in the interface(URI: ${organizationUri})`);
+          break;
+        case 'sameOrganization':
+          messageBuffer['begin'].push(whiteSpaces + ' Warning: organization object is ignored');
+          messageBuffer['begin'].push(whiteSpaces + `    Organization information can only be updated through the interface`);
+          break;
+        case 'unsupportedObject':
+          messageBuffer['end'].push(whiteSpaces + 'Warning!');
+          messageBuffer['end'].push(whiteSpaces + `    Object with URI ${uri} is being ignored: The object type is not supported`)
+          break;
+        case 'invalidValue':
+          messageBuffer[uri].push(whiteSpaces + 'Error: Invalid URI');
+          messageBuffer[uri].push(whiteSpaces + `In object with URI ${uri} of type ${type} attribute ${property}  contains invalid value(s): ${value}`);
+          break;
+        case 'badReference':
+          messageBuffer[uri].push(whiteSpaces + 'Error: bad reference');
+          messageBuffer[uri].push(whiteSpaces + `${type} ${referenceURI} appears neither in the file nor in the sandbox`);
+          break;
+        case 'subjectDoesNotBelong':
+          messageBuffer[uri].push(whiteSpaces + 'Error:');
+          messageBuffer[uri].push(whiteSpaces + `    ${type} ${subjectURI} does not belong to this organization`);
+          break;
+        case 'finishedReading':
+          messageBuffer[uri].push(whiteSpaces + `Finished reading ${uri} of type ${type}...`);
+
 
 
       }
@@ -154,6 +182,8 @@ const fileUploading = async (req, res, next) => {
           error += 1;
           addTrace('        Error: Invalid URI');
           addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))}  contains invalid value(s): ${obj['@value']}`);
+          addMessage(8, 'invalidValue',
+            {uri:object['@id'], type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes')), value: obj['@value']})
         }
 
       });
@@ -183,6 +213,7 @@ const fileUploading = async (req, res, next) => {
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'themes')]) {
           addTrace('        Error: Mandatory property missing');
           addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))} is missing`);
+          addMessage(8, 'propertyMissing', {uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))});
           error += 1;
           hasError = true;
         } else {
@@ -194,6 +225,7 @@ const fileUploading = async (req, res, next) => {
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'indicators')]) {
           addTrace('        Error: Mandatory property missing');
           addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'indicators'))} is missing`);
+          addMessage(8, 'propertyMissing', {uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'indicators'))});
           error += 1;
           hasError = true;
         } else {
@@ -208,11 +240,14 @@ const fileUploading = async (req, res, next) => {
               if (!indicator) {
                 addTrace('        Error: bad reference');
                 addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
+                addMessage(8, 'badReference',
+                  {uri, referenceURI: indicatorURI, type:'Indicator'});
                 error += 1;
                 hasError = true;
               } else if (!indicator.forOrganizations.includes(organization._uri)) {
                 addTrace('        Error:');
-                addTrace(`            Outcome ${indicatorURI} does not belong to this organization`);
+                addTrace(`            Indicator ${indicatorURI} does not belong to this organization`);
+                addMessage(8, 'subjectDoesNotBelong', {uri, type: 'Indicator', subjectURI: indicatorURI})
                 error += 1;
                 hasError = true;
               } else {
@@ -231,6 +266,8 @@ const fileUploading = async (req, res, next) => {
           // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
         } else {
           addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+          addMessage(4, 'finishedReading',
+            {uri, type:getPrefixedURI(object['@type'][0])})
         }
 
       } else {
@@ -246,6 +283,8 @@ const fileUploading = async (req, res, next) => {
         // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         await transSave(trans, theme);
         addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'finishedReading',
+          {uri, type:getPrefixedURI(object['@type'][0])})
       } else {
         // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
       }
@@ -730,16 +769,20 @@ const fileUploading = async (req, res, next) => {
           if (object['@id'] !== organizationUri) {
             addTrace('        Error:');
             addTrace('             Organization in the file is different from the organization chosen in the interface');
+            addMessage(8, 'differentOrganization',
+              {uri, organizationUri})
             error += 1;
 
           } else {
             addTrace(`        Warning: organization object is ignored`);
             addTrace(`            Organization information can only be updated through the interface`);
+            addMessage(8, 'sameOrganization', {uri});
           }
 
       } else {
         addTrace('        Warning!');
         addTrace(`            Object with URI ${uri} is being ignored: The object type is not supported`);
+        addMessage(8, 'unsupportedObject', {uri})
       }
     }
 

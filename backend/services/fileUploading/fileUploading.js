@@ -72,7 +72,7 @@ const fileUploading = async (req, res, next) => {
     const indicatorDict = {};
     const indicatorReportDict = {};
     let messageBuffer = {
-      begin: [], end: []
+      begin: [], end: [], noURI: []
     };
     let traceOfUploading = '';
     let error = 0;
@@ -80,8 +80,11 @@ const fileUploading = async (req, res, next) => {
     function formatMessage() {
       let msg = '';
       messageBuffer.begin.map(sentence => {
-        msg += sentence + '\n'
+        msg += sentence + '\n';
       });
+      messageBuffer['noURI']?.map(sentence => {
+        msg += sentence + '\n';
+      })
       Object.keys(messageBuffer).map(uri => {
         if (uri !== 'begin' && uri !== 'end') {
           messageBuffer[uri].map(sentence => {
@@ -96,7 +99,7 @@ const fileUploading = async (req, res, next) => {
     }
 
     function addMessage(spaces, messageType,
-                        {uri, fileName, organizationUri, type, property, hasName, value, referenceURI, subjectURI, error}) {
+                        {uri, fileName, organizationUri, type, property, hasName, value, referenceURI, subjectURI, error, url}) {
       let whiteSpaces = ''
       if (spaces)
         [...Array(spaces).keys()].map(() => {
@@ -136,6 +139,7 @@ const fileUploading = async (req, res, next) => {
           messageBuffer['begin'].push(whiteSpaces + '    The file failed to upload');
           break;
         case 'invalidURI':
+          messageBuffer[uri].push(`\n`)
           messageBuffer[uri].push(whiteSpaces + 'Error: Invalid URI')
           messageBuffer[uri].push(whiteSpaces + `    In object with URI ${uri} of type ${type} has been used as an invalid URI`);
           break;
@@ -190,6 +194,15 @@ const fileUploading = async (req, res, next) => {
         case 'errorCounting':
           messageBuffer['end'].push(whiteSpaces + `${error} error(s) found`);
           messageBuffer['end'].push(`File failed to upload`);
+          break;
+        case 'invalidURL':
+          messageBuffer['begin'].push(whiteSpaces + 'Error: Invalid URL in context: ' + url);
+          messageBuffer['end'].push(`File failed to upload`);
+          break;
+        case 'noURI':
+          messageBuffer['noURI'].push(whiteSpaces + `Error: No URI`);
+          messageBuffer['noURI'].push(whiteSpaces +`    One object${type? ` with type ${type}`: ''} has no URI`);
+          messageBuffer['noURI'].push(whiteSpaces +'    The object is ignored');
           break;
 
 
@@ -502,6 +515,13 @@ const fileUploading = async (req, res, next) => {
     for (let object of expandedObjects) {
       // store the raw object into objectDict
       const uri = object['@id'];
+      if (!uri) {
+        // in the case there is no URI
+        error += 1;
+        addMessage(8, 'noURI',
+          {type: object['@type'][0]});
+        continue;
+      }
       if (!isValidURL(uri)){
         error += 1;
         addTrace('        Error: Invalid URI');
@@ -870,6 +890,10 @@ const fileUploading = async (req, res, next) => {
   } catch (e) {
     if (trans.active)
       await trans.rollback();
+    if (e.name === 'jsonld.InvalidUrl'){
+      addMessage(4, 'invalidURL', {url: e.details.url})
+      e.message = formatMessage();
+    }
     next(e);
   }
 };

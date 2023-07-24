@@ -1,7 +1,7 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
-import {Loading} from "../shared";
+import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
@@ -150,7 +150,48 @@ export default function AddEditOutcome() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      {mode === 'view'?
+        (
+          <Paper sx={{p: 2}} variant={'outlined'}>
+
+            <Typography variant={'h6'}> {`Name:`} </Typography>
+            <Typography variant={'body1'}> {`${form.name}`} </Typography>
+            <Typography variant={'h6'}> {`URI:`} </Typography>
+            <Typography variant={'body1'}> {`${form.uri}`} </Typography>
+            <Typography variant={'h6'}> {`Organization:`} </Typography>
+            <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organization}</Link> </Typography>
+            <Typography variant={'h6'}> {`Themes:`} </Typography>
+             {form.themes.map(themeURI => {
+              return (
+                <Typography variant={'body1'}>
+                <Link to={`/theme/${encodeURIComponent(themeURI)}/view`} colorWithHover
+                            color={'#2f5ac7'}>{themeURI}</Link>
+                </Typography>
+                );
+            })}
+            <Typography variant={'h6'}> {`Indicators:`} </Typography>
+            {form.indicators.map(indicatorURI => {
+              return (
+                <Typography variant={'body1'}>
+                  <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover
+                        color={'#2f5ac7'}>{indicatorURI}</Link>
+                </Typography>
+              );
+            })}
+            <Typography variant={'h6'}> {`Description:`} </Typography>
+            <Typography variant={'body1'}> {`${form.description}`} </Typography>
+
+            <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+              navigate(`/outcome/${encodeURIComponent(uri)}/edit`);
+            }
+
+            }>
+              Edit
+            </Button>
+
+          </Paper>
+        )
+        : (<Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Outcome </Typography>
         <OutcomeField
           disabled={mode === 'view'}
@@ -167,8 +208,8 @@ export default function AddEditOutcome() {
         {mode==='view'?
           <div/>:
           <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-          Submit
-        </Button>}
+            Submit
+          </Button>}
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
@@ -179,7 +220,7 @@ export default function AddEditOutcome() {
                                       key={'confirm'}
                                       onClick={handleConfirm} children="confirm" autoFocus/>]}
                      open={state.submitDialog}/>
-      </Paper>
+      </Paper>)}
     </Container>);
 
 }

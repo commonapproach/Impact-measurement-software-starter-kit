@@ -155,12 +155,21 @@ export default function AddEditIndicator() {
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
             <Typography variant={'h6'}> {`Organizations:`} </Typography>
           <Typography variant={'body1'}> {form.organizations.map(orgUri => {
-            return (<Link to={`/indicator/${encodeURIComponent(orgUri)}/view`} colorWithHover color={'#2f5ac7'}>{orgUri}</Link>)
+            return (<Link to={`/organizations/${encodeURIComponent(orgUri)}/view`} colorWithHover
+                          color={'#2f5ac7'}>{orgUri}</Link>);
           })} </Typography>
             <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
           <Typography variant={'body1'}> {`${form.unitOfMeasure}`} </Typography>
             <Typography variant={'h6'}> {`Description:`} </Typography>
           <Typography variant={'body1'}> {`${form.description}`} </Typography>
+
+          <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+            navigate(`/indicator/${encodeURIComponent(uri)}/edit`);
+          }
+
+          }>
+            Edit
+          </Button>
 
         </Paper>
         :

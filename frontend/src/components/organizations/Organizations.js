@@ -67,7 +67,7 @@ export default function Organizations() {
       label: 'Legal Name',
       body: ({_uri, legalName, editable}) => {
         return editable?
-          <Link colorWithHover to={`/organizations/${encodeURIComponent(_uri)}/edit/`}>
+          <Link colorWithHover to={`/organizations/${encodeURIComponent(_uri)}/view/`}>
           {legalName}
         </Link>:
           legalName

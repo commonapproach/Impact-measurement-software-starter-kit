@@ -68,7 +68,7 @@ export default function Groups() {
     {
       label: 'Label',
       body: ({_uri, label}) => {
-        return <Link colorWithHover to={`/groups/${encodeURIComponent(_uri)}/edit`}>
+        return <Link colorWithHover to={`/groups/${encodeURIComponent(_uri)}/view`}>
           {label}
         </Link>;
       },

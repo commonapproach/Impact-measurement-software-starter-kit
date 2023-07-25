@@ -44,8 +44,8 @@ export default function AddEditOrganization() {
   const classes = useStyles();
   const navigate = useNavigate();
   const userContext = useContext(UserContext);
-  const {uri} = useParams();
-  const mode = uri ? 'edit' : 'new';
+  const {uri, viewMode} = useParams();
+  const mode = uri ? viewMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({
@@ -94,7 +94,7 @@ export default function AddEditOrganization() {
         }
       }),
     ]).then(() => {
-      if (mode === 'edit' && uri) {
+      if ((mode === 'edit' || mode === 'view') && uri) {
         Promise.all([
           fetchUsers(encodeURIComponent(uri)).then(({data, success}) => {
             const objectForm = {};
@@ -121,7 +121,9 @@ export default function AddEditOrganization() {
                 telephone: organization.telephone?
                   `+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}` :
                   '',
-                uri: organization._uri || ''
+                uri: organization._uri || '',
+                issuedByName: organization.issuedByName,
+                administratorName: organization.administratorName
               });
               setLoading(false)
             }
@@ -134,7 +136,7 @@ export default function AddEditOrganization() {
             enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
           })
         ]);
-      } else if (mode === 'edit' && !uri) {
+      } else if ((mode === 'edit' || mode === 'view') && !uri) {
         navigate('/organizations');
         enqueueSnackbar("No URI provided", {variant: 'error'});
       } else {
@@ -227,7 +229,28 @@ export default function AddEditOrganization() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      {mode === 'view'?
+        <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h6'}> {`Legal Name:`} </Typography>
+          <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
+          <Typography variant={'h6'}> {`URI:`} </Typography>
+          <Typography variant={'body1'}> {`${form.uri}`} </Typography>
+          <Typography variant={'h6'}> {`Organization ID:`} </Typography>
+          <Typography variant={'body1'}> {`${form.organizationNumber}`} </Typography>
+          <Typography variant={'h6'}> {`Issued By:`} </Typography>
+          <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.issuedBy)}/view`} colorWithHover color={'#2f5ac7'}>{form.issuedByName}</Link> </Typography>
+          <Typography variant={'h6'}> {`Telephone:`} </Typography>
+          <Typography variant={'body1'}> {form.telephone} </Typography>
+          <Typography variant={'h6'}> {`Contact Email:`} </Typography>
+          <Typography variant={'body1'}> {form.email} </Typography>
+          <Typography variant={'h6'}> {`Contact Name:`} </Typography>
+          <Typography variant={'body1'}> {form.contactName} </Typography>
+          <Typography variant={'h6'}> {`Organization Administrator:`} </Typography>
+          <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.administrator)}/view`} colorWithHover color={'#2f5ac7'}>{form.administratorName}</Link> </Typography>
+
+
+        </Paper>
+        : (<Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Organization Basic</Typography>
         <GeneralField
           disabled={!userContext.isSuperuser}
@@ -476,13 +499,23 @@ export default function AddEditOrganization() {
                                       key={'confirm'}
                                       onClick={handleConfirm} children="confirm" autoFocus/>]}
                      open={state.submitDialog}/>
-      </Paper>
+      </Paper>)}
+
 
 
       <Paper sx={{p: 2}} variant={'outlined'}>
-        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+        {mode === 'view'?
+          <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+            navigate(`/organizations/${encodeURIComponent(uri)}/edit`);
+          }
+          }>
+            Edit
+          </Button>
+          :
+          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit
-        </Button>
+        </Button> }
+
       </Paper>
 
     </Container>);

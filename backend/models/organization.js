@@ -6,7 +6,7 @@ const {GDBPhoneNumberModel} = require("./phoneNumber");
 
 const GDBOrganizationIdModel = createGraphDBModel({
   hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'},
-  issuedBy: {type: Types.NamedIndividual, internalKey: 'tove_org:issuedBy'}
+  issuedBy: {type: () => GDBOrganizationModel, internalKey: 'tove_org:issuedBy'}
 }, {
   rdfTypes: ['tove_org:OrganizationID'], name: 'organizationId'
 });

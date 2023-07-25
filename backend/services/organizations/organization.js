@@ -117,7 +117,7 @@ async function fetchOrganization(req, res) {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('Organization uri is needed');
-  const organization = await GDBOrganizationModel.findOne({_uri: uri}, {populates: ['hasId', 'hasOutcomes', 'hasIndicators', 'telephone']});
+  const organization = await GDBOrganizationModel.findOne({_uri: uri}, {populates: ['hasId.issuedBy', 'hasOutcomes', 'hasIndicators', 'telephone','administrator.person']});
   if (!organization)
     throw new Server400Error('No such organization');
   const outcomes = organization.hasOutcomes || [];
@@ -128,7 +128,11 @@ async function fetchOrganization(req, res) {
   // }
   const indicators = organization.hasIndicators || [];
   organization.organizationNumber = organization.hasId?.hasIdentifier;
-  organization.issuedBy = organization.hasId?.issuedBy
+  organization.issuedBy = organization.hasId?.issuedBy._uri;
+  organization.issuedByName = organization.hasId?.issuedBy.legalName
+  const administrator = organization.administrator
+  organization.administrator = administrator._uri;
+  organization.administratorName = administrator.person.givenName + ' ' + administrator.person.familyName
   if (!organization.researchers)
     organization.researchers = [];
   if (!organization.reporters)

@@ -112,10 +112,22 @@ const fetchOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is not given');
-  const outcome = await GDBOutcomeModel.findOne({_uri: uri});
+  const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['forOrganization', 'themes', 'indicators']});
   if (!outcome)
     throw new Server400Error('No such outcome');
-  outcome.organization = outcome.forOrganization;
+  outcome.organization = outcome.forOrganization._uri;
+  outcome.organizationName = outcome.forOrganization.legalName;
+  outcome.themeNames = {};
+  outcome.themes.map(theme => {
+    outcome.themeNames[theme._uri] = theme.name;
+  })
+  outcome.themes = outcome.themes.map(theme => theme._uri);
+
+  outcome.indicatorNames = {};
+  outcome.indicators.map(indicator => {
+    outcome.indicatorNames[indicator._uri] = indicator.name;
+  })
+  outcome.indicators = outcome.indicators.map(indicator => indicator._uri);
   // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
   //   return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
   // }));

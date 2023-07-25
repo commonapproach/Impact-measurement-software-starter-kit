@@ -143,6 +143,7 @@ export default function AddEditIndicator() {
   if (loading)
     return <Loading/>;
 
+  console.log(form)
 
   return (
     <Container maxWidth="md">
@@ -156,7 +157,7 @@ export default function AddEditIndicator() {
             <Typography variant={'h6'}> {`Organizations:`} </Typography>
           <Typography variant={'body1'}> {form.organizations.map(orgUri => {
             return (<Link to={`/organizations/${encodeURIComponent(orgUri)}/view`} colorWithHover
-                          color={'#2f5ac7'}>{orgUri}</Link>);
+                          color={'#2f5ac7'}>{form.organizationNames[orgUri]}</Link>);
           })} </Typography>
             <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
           <Typography variant={'body1'}> {`${form.unitOfMeasure}`} </Typography>

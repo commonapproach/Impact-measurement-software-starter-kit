@@ -94,21 +94,23 @@ const fetchIndicatorReport = async (req, res) => {
   if (!uri)
     throw new Server400Error('Wrong input');
   const indicatorReport = await GDBIndicatorReportModel.findOne({_uri: uri},
-    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value', 'forIndicator.unitOfMeasure']});
+    {populates: ['hasTime.hasBeginning', 'hasTime.hasEnd', 'value', 'forIndicator.unitOfMeasure', 'forOrganization']});
   if (!indicatorReport)
     throw new Server400Error('No such indicator Report');
 
   const form = {
     name: indicatorReport.name,
     comment: indicatorReport.comment,
-    organization: indicatorReport.forOrganization,
+    organization: indicatorReport.forOrganization._uri,
     indicator: indicatorReport.forIndicator._uri,
     numericalValue: indicatorReport.value.numericalValue,
     startTime: indicatorReport.hasTime.hasBeginning.date,
     endTime: indicatorReport.hasTime.hasEnd.date,
     dateCreated: indicatorReport.dateCreated,
     uri: indicatorReport._uri,
-    unitOfMeasure: indicatorReport.forIndicator.unitOfMeasure.label
+    unitOfMeasure: indicatorReport.forIndicator.unitOfMeasure.label,
+    indicatorName: indicatorReport.forIndicator.name,
+    organizationName: indicatorReport.forOrganization.legalName
   };
   return res.status(200).json({indicatorReport: form, success: true});
 };

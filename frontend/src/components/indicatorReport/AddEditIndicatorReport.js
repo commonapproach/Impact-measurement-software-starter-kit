@@ -179,9 +179,9 @@ export default function AddEditIndicatorReport() {
           <Typography variant={'h6'}> {`value:`} </Typography>
           <Typography variant={'body1'}> {`${form.numericalValue} (${form.unitOfMeasure})`} </Typography>
           <Typography variant={'h6'}> {`Indicator:`} </Typography>
-          <Typography variant={'body1'}> <Link to={`/indicator/${encodeURIComponent(form.indicator)}/view`} colorWithHover color={'#2f5ac7'}>{form.indicator}</Link> </Typography>
+          <Typography variant={'body1'}> <Link to={`/indicator/${encodeURIComponent(form.indicator)}/view`} colorWithHover color={'#2f5ac7'}>{form.indicatorName}</Link> </Typography>
           <Typography variant={'h6'}> {`Organization:`} </Typography>
-          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organization}</Link> </Typography>
+          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
           <Typography variant={'h6'}> {`Date Created:`} </Typography>
           <Typography variant={'body1'}> {`${(new Date(form.dateCreated)).toLocaleDateString()}`} </Typography>
           <Typography variant={'h6'}> {`Time Interval:`} </Typography>
@@ -189,7 +189,6 @@ export default function AddEditIndicatorReport() {
           <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
             navigate(`/indicatorReport/${encodeURIComponent(uri)}/edit`);
           }
-
           }>
             Edit
           </Button>

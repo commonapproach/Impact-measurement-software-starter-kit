@@ -159,13 +159,13 @@ export default function AddEditOutcome() {
             <Typography variant={'h6'}> {`URI:`} </Typography>
             <Typography variant={'body1'}> {`${form.uri}`} </Typography>
             <Typography variant={'h6'}> {`Organization:`} </Typography>
-            <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organization}</Link> </Typography>
+            <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
             <Typography variant={'h6'}> {`Themes:`} </Typography>
              {form.themes.map(themeURI => {
               return (
                 <Typography variant={'body1'}>
                 <Link to={`/theme/${encodeURIComponent(themeURI)}/view`} colorWithHover
-                            color={'#2f5ac7'}>{themeURI}</Link>
+                            color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
                 </Typography>
                 );
             })}
@@ -174,7 +174,7 @@ export default function AddEditOutcome() {
               return (
                 <Typography variant={'body1'}>
                   <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover
-                        color={'#2f5ac7'}>{indicatorURI}</Link>
+                        color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>
                 </Typography>
               );
             })}
@@ -184,7 +184,6 @@ export default function AddEditOutcome() {
             <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
               navigate(`/outcome/${encodeURIComponent(uri)}/edit`);
             }
-
             }>
               Edit
             </Button>

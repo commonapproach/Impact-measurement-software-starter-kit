@@ -46,22 +46,24 @@ const fetchIndicators = async (req, res) => {
     }));
     // for all indicators, if its id in editableIndicatorIDs, then it is editable
     indicators.map(indicator => {
-      if(editableIndicatorURIs.includes(indicator._uri))
+      if (editableIndicatorURIs.includes(indicator._uri))
         indicator.editable = true;
-    })
+    });
     return res.status(200).json({success: true, indicators});
   } else {
     // the organizationUri is given, return all indicators belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
-      {populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.indicatorReports.value',
-          'hasIndicators.indicatorReports.hasTime.hasBeginning', 'hasIndicators.indicatorReports.hasTime.hasEnd']});
+      {
+        populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.indicatorReports.value',
+          'hasIndicators.indicatorReports.hasTime.hasBeginning', 'hasIndicators.indicatorReports.hasTime.hasEnd']
+      });
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.hasIndicators)
       return res.status(200).json({success: true, indicators: []});
     let editable;
-    if(userAccount.isSuperuser || organization.editors?.includes(userAccount._uri)) {
-      editable = true
+    if (userAccount.isSuperuser || organization.editors?.includes(userAccount._uri)) {
+      editable = true;
       organization.hasIndicators.map(indicator => {
         indicator.editable = true;
       });
@@ -108,6 +110,10 @@ const fetchIndicator = async (req, res) => {
   indicator.organizations = indicator.forOrganizations.map(organization => {
     return organization._uri;
   });
+  indicator.organizationNames = {};
+  indicator.forOrganizations.map(organization => {
+    indicator.organizationNames[organization._uri] = organization.legalName;
+  });
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
@@ -150,7 +156,7 @@ const updateIndicator = async (req, res) => {
     throw new Server400Error('No such indicator');
   indicator.name = form.name;
   indicator.description = form.description;
-  indicator.unitOfMeasure.label = form.unitOfMeasure
+  indicator.unitOfMeasure.label = form.unitOfMeasure;
   const organizationDict = {};
 
 
@@ -177,7 +183,7 @@ const updateIndicator = async (req, res) => {
   await Promise.all(indicator.forOrganizations.map(organization => {
     const index = organization.hasIndicators.indexOf(uri);
     organization.hasIndicators.splice(index, 1);
-    organization.markModified('hasIndicators')
+    organization.markModified('hasIndicators');
     return organization.save();
   }));
 
@@ -216,10 +222,10 @@ const createIndicator = async (req, res) => {
     GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasIndicators']})
   ));
   // for each organization, does it contain any indicator with same name?
-  let duplicate = false
-  let organizationInProblem
+  let duplicate = false;
+  let organizationInProblem;
   form.forOrganizations.map(organization => {
-    if(organization.hasIndicators){
+    if (organization.hasIndicators) {
       organization.hasIndicators.map(indicator => {
         if (indicator.name === form.name) {
           duplicate = true;
@@ -227,19 +233,22 @@ const createIndicator = async (req, res) => {
         }
       });
     }
-  })
+  });
   if (duplicate && organizationInProblem)
-    return res.status(200).json({success: false, message: 'The name of the indicator has been occupied in organization ' + organizationInProblem});
+    return res.status(200).json({
+      success: false,
+      message: 'The name of the indicator has been occupied in organization ' + organizationInProblem
+    });
 
   form.unitOfMeasure = GDBUnitOfMeasure({
     label: form.unitOfMeasure
-  })
+  });
   const indicator = GDBIndicatorModel({
     name: form.name,
     description: form.description,
     forOrganizations: form.forOrganizations,
     unitOfMeasure: form.unitOfMeasure
-  }, form.uri?{uri: form.uri}:null);
+  }, form.uri ? {uri: form.uri} : null);
 
   await indicator.save();
   // add the indicator to the organizations

@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from 'react';
 import {Autocomplete, CircularProgress, Grid, Paper, TextField, Typography} from "@mui/material";
 import {createFilterOptions} from '@mui/material/Autocomplete';
-import {fetchOrganizations, fetchOrganizationsInterfaces} from "../../api/organizationApi";
+import {fetchOrganizationsInterfaces} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
 import {fetchIndicators} from "../../api/indicatorApi";
@@ -59,6 +59,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
     {});
 
   const [options, setOptions] = useState({});
+  const [indicators, setIndicators] = useState({})
   const {enqueueSnackbar} = useSnackbar();
 
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
       }
     }).then((organizations) => {
         Promise.all(Object.keys(organizations).map(organizationUri => {
-          return fetchIndicators(encodeURIComponent(organizationUri), userContext).then(({success, indicators}) => {
+          return fetchIndicators(encodeURIComponent(organizationUri)).then(({success, indicators}) => {
             if (success) {
               const options = {};
               indicators.map(indicator => {
@@ -92,6 +93,11 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                   [organizationUri]: options
                 })
               );
+              const indicatorsDict = {}
+              indicators.map(indicator => {
+                indicatorsDict[indicator._uri] = indicator
+              })
+              setIndicators(indicatorsDict)
             }
           });
         })).then(() => {
@@ -126,10 +132,18 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
   }, [importErrors]);
 
   const handleChange = name => (e, value) => {
-    setState(state => {
-      state[name] = value ?? e.target.value;
-      return state;
-    });
+    if(name !== 'indicator'){
+      setState(state => {
+        state[name] = value ?? e.target.value;
+        return state;
+      });
+    } else {
+      setState(state => {
+        state.indicator = value;
+        state.unitOfMeasure = indicators[value]?.unitOfMeasure.label;
+        return state
+      });
+    }
     // state[name] = value ?? e.target.value;
     onChange(state);
   };
@@ -261,7 +275,9 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 disabled={disabled || !state.organization}
                 options={state.organization? options[state.organization]: []}
                 state={state.organization? state.indicator: null}
-                onChange={handleChange('indicator')}
+                onChange={
+                  handleChange('indicator')
+                }
                 error={!!errors.indicator}
                 helperText={errors.indicator}
                 required={required}
@@ -273,7 +289,18 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 }
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="Unit Of Measure"
+                type="text"
+                value={state.unitOfMeasure}
+                disabled
+                required={required}
+              />
+            </Grid>
+            <Grid item xs={3}>
               <GeneralField
                 fullWidth
                 type={'date'}
@@ -284,7 +311,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 disabled={disabled}
                 error={!!errors.dateCreated}
                 helperText={errors.dateCreated}
-                minWidth={250}
+                minWidth={187}
                 onBlur={() => {
                   if (!state.dateCreated) {
                     setErrors(errors => ({...errors, dateCreated: 'This field cannot be empty'}));
@@ -295,13 +322,13 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
                 }
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
                 value={state.startTime}
                 label={'Start Time'}
-                minWidth={250}
+                minWidth={187}
                 onChange={handleChange('startTime')}
                 required={required}
                 disabled={disabled}
@@ -318,13 +345,13 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
               />
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <GeneralField
                 fullWidth
                 type={'datetime'}
                 value={state.endTime}
                 label={'End Time'}
-                minWidth={250}
+                minWidth={187}
                 onChange={handleChange('endTime')}
                 required={required}
                 disabled={disabled}

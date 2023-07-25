@@ -1,7 +1,7 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
-import {Loading} from "../shared";
+import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
@@ -47,7 +47,7 @@ export default function AddEditIndicatorReport() {
     organization: null,
     indicator: null,
     numericalValue: '',
-    // unitOfMeasure: '',
+    unitOfMeasure: '',
     startTime: '',
     endTime: '',
     dateCreated: '',
@@ -57,7 +57,7 @@ export default function AddEditIndicatorReport() {
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchIndicatorReport(encodeURIComponent(uri), userContext).then(({success, indicatorReport}) => {
+      fetchIndicatorReport(encodeURIComponent(uri)).then(({success, indicatorReport}) => {
         if (success) {
           setForm(indicatorReport);
           setLoading(false);
@@ -169,7 +169,33 @@ export default function AddEditIndicatorReport() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      {mode === 'view'? (
+        <Paper sx={{p: 2}} variant={'outlined'}>
+
+          <Typography variant={'h6'}> {`Name:`} </Typography>
+          <Typography variant={'body1'}> {`${form.name}`} </Typography>
+          <Typography variant={'h6'}> {`URI:`} </Typography>
+          <Typography variant={'body1'}> {`${form.uri}`} </Typography>
+          <Typography variant={'h6'}> {`value:`} </Typography>
+          <Typography variant={'body1'}> {`${form.numericalValue} (${form.unitOfMeasure})`} </Typography>
+          <Typography variant={'h6'}> {`Indicator:`} </Typography>
+          <Typography variant={'body1'}> <Link to={`/indicator/${encodeURIComponent(form.indicator)}/view`} colorWithHover color={'#2f5ac7'}>{form.indicator}</Link> </Typography>
+          <Typography variant={'h6'}> {`Organization:`} </Typography>
+          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organization}</Link> </Typography>
+          <Typography variant={'h6'}> {`Date Created:`} </Typography>
+          <Typography variant={'body1'}> {`${(new Date(form.dateCreated)).toLocaleDateString()}`} </Typography>
+          <Typography variant={'h6'}> {`Time Interval:`} </Typography>
+          <Typography variant={'body1'}> {`${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}`} </Typography>
+          <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+            navigate(`/indicatorReport/${encodeURIComponent(uri)}/edit`);
+          }
+
+          }>
+            Edit
+          </Button>
+
+        </Paper>
+      ): (<Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Indicator Report </Typography>
         <IndicatorReportField
           disabled={mode === 'view'}
@@ -183,11 +209,9 @@ export default function AddEditIndicatorReport() {
           importErrors={errors}
         />
 
-        {mode === 'view' ?
-          <div/> :
-          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-            Submit
-          </Button>}
+        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+          Submit
+        </Button>
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Indicator Report?' :
@@ -198,7 +222,8 @@ export default function AddEditIndicatorReport() {
                                       key={'confirm'}
                                       onClick={handleConfirm} children="confirm" autoFocus/>]}
                      open={state.submitDialog}/>
-      </Paper>
+      </Paper>)}
+
     </Container>);
 
 }

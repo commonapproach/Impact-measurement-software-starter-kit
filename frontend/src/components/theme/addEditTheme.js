@@ -1,7 +1,7 @@
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
 import React, {useEffect, useState, useContext} from "react";
-import {Loading} from "../shared";
+import {Link, Loading} from "../shared";
 import {Button, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
@@ -138,7 +138,24 @@ export default function AddEditTheme() {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{p: 2}} variant={'outlined'}>
+      {mode === 'view' ? (
+        <Paper sx={{p: 2}} variant={'outlined'}>
+
+          <Typography variant={'h6'}> {`Name:`} </Typography>
+          <Typography variant={'body1'}> {`${form.name}`} </Typography>
+          <Typography variant={'h6'}> {`URI:`} </Typography>
+          <Typography variant={'body1'}> {`${form.uri}`} </Typography>
+          <Typography variant={'h6'}> {`description:`} </Typography>
+          <Typography variant={'body1'}> {form.description} </Typography>
+          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
+            navigate(`/themes/${encodeURIComponent(uri)}/edit`);
+          }
+          }>
+            Edit
+          </Button>
+
+        </Paper>
+      ) : (<Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Theme </Typography>
 
         <GeneralField
@@ -202,11 +219,9 @@ export default function AddEditTheme() {
 
           }}
         />
-
-        {operationMode === 'view' ? <div/> :
-          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-            Submit
-          </Button>}
+        <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+          Submit
+        </Button>
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Theme?' :
@@ -217,7 +232,8 @@ export default function AddEditTheme() {
                                       key={'confirm'}
                                       onClick={handleConfirm} children="confirm" autoFocus/>]}
                      open={state.submitDialog}/>
-      </Paper>
+      </Paper>)}
+
     </Container>);
 
 }

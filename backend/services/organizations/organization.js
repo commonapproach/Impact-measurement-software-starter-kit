@@ -117,7 +117,8 @@ async function fetchOrganization(req, res) {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('Organization uri is needed');
-  const organization = await GDBOrganizationModel.findOne({_uri: uri}, {populates: ['hasId.issuedBy', 'hasOutcomes', 'hasIndicators', 'telephone','administrator.person']});
+  const organization = await GDBOrganizationModel.findOne({_uri: uri},
+    {populates: ['hasId.issuedBy', 'hasOutcomes', 'hasIndicators', 'telephone','administrator.person', 'researchers.person', 'editors.person']});
   if (!organization)
     throw new Server400Error('No such organization');
   const outcomes = organization.hasOutcomes || [];
@@ -133,12 +134,37 @@ async function fetchOrganization(req, res) {
   const administrator = organization.administrator
   organization.administrator = administrator._uri;
   organization.administratorName = administrator.person.givenName + ' ' + administrator.person.familyName
-  if (!organization.researchers)
+  if (!organization.researchers){
     organization.researchers = [];
-  if (!organization.reporters)
+  } else {
+    organization.researcherNames = {}
+    organization.researchers = organization.researchers.map(researcher => {
+      organization.researcherNames[researcher._uri] = researcher.person.givenName + ' ' + researcher.person.familyName;
+      return researcher._uri;
+    })
+  }
+
+  if (!organization.reporters){
     organization.reporters = [];
-  if (!organization.editors)
+  } else {
+    organization.reporterNames = {}
+    organization.reporters = organization.reporters.map(reporter => {
+      organization.reporterNames[reporter._uri] = reporter.person.givenName + ' ' + reporter.person.familyName;
+      return reporter._uri;
+    })
+  }
+
+  if (!organization.editors){
     organization.editors = [];
+  } else {
+    organization.editorNames = {}
+    organization.editors = organization.editors.map(editor => {
+      organization.editorNames[editor._uri] = editor.person.givenName + ' ' + editor.person.familyName;
+      return editor._uri;
+    })
+  }
+
+
   // if (organization.administrator)
   //   organization.administrator = organization.administrator;
   // organization.researchers = organization.researchers.map(researcher => researcher.split('_')[1]);

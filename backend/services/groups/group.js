@@ -73,7 +73,7 @@ const fetchGroup = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     return res.status(400).json({success: false, message: 'No uri is given'});
-  const group = await GDBGroupModel.findOne({_uri: uri});
+  const group = await GDBGroupModel.findOne({_uri: uri}, {populates: ['organizations']});
   if (!group)
     return res.status(400).json({success: false, message: 'No such group'});
   // if (group.administrator)
@@ -81,6 +81,11 @@ const fetchGroup = async (req, res) => {
   // if (group.organizations)
   //   group.organizations = group.organizations.map(organization => organization.split('_')[1]);
   group.uri = group._uri
+  group.organizationNames = {};
+  group.organizations = group.organizations.map(organization => {
+    group.organizationNames[organization._uri] = organization.legalName;
+    return organization._uri;
+  })
   return res.status(200).json({success: true, group: group});
 
 };

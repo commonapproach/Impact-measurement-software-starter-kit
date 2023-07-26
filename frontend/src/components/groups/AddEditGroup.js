@@ -97,7 +97,8 @@ export default function AddEditGroup() {
               administrator: group.administrator || '',
               comment: group.comment || '',
               organizations: group.organizations || [],
-              uri: group._uri || ''
+              uri: group._uri || '',
+              organizationNames: group.organizationNames
             });
             setLoading(false);
           }
@@ -194,12 +195,12 @@ export default function AddEditGroup() {
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
           <Typography variant={'h6'}> {`Administrator:`} </Typography>
           <Typography variant={'body1'}> {`${form.administrator}`} </Typography>
-          <Typography variant={'h6'}> {`Orgaizations:`} </Typography>
+          {form.organizations.length? <Typography variant={'h6'}> {`Orgaizations:`} </Typography>:null}
           {form.organizations.map(organizationURI => {
             return (
               <Typography variant={'body1'}>
                 <Link to={`/organizations/${encodeURIComponent(organizationURI)}/view`} colorWithHover
-                      color={'#2f5ac7'}>{organizationURI}</Link>
+                      color={'#2f5ac7'}>{form.organizationNames[organizationURI]}</Link>
               </Typography>
             );
           })}

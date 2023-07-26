@@ -123,7 +123,10 @@ export default function AddEditOrganization() {
                   '',
                 uri: organization._uri || '',
                 issuedByName: organization.issuedByName,
-                administratorName: organization.administratorName
+                administratorName: organization.administratorName,
+                reporterNames:organization.reporterNames,
+                researcherNames: organization.researcherNames,
+                editorNames: organization.editorNames
               });
               setLoading(false)
             }
@@ -247,7 +250,33 @@ export default function AddEditOrganization() {
           <Typography variant={'body1'}> {form.contactName} </Typography>
           <Typography variant={'h6'}> {`Organization Administrator:`} </Typography>
           <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.administrator)}/view`} colorWithHover color={'#2f5ac7'}>{form.administratorName}</Link> </Typography>
-
+          {form.reporters.length? <Typography variant={'h6'}> {`Reporters:`} </Typography>:null}
+          {form.reporters.map(reporterURI => {
+            return (
+              <Typography variant={'body1'}>
+                <Link to={`/indicator/${encodeURIComponent(reporterURI)}/view`} colorWithHover
+                      color={'#2f5ac7'}>{form.reporterNames[reporterURI]}</Link>
+              </Typography>
+            );
+          })}
+          {form.editors.length? <Typography variant={'h6'}> {`Editors:`} </Typography>:null}
+          {form.editors.map(editorURI => {
+            return (
+              <Typography variant={'body1'}>
+                <Link to={`/indicator/${encodeURIComponent(editorURI)}/view`} colorWithHover
+                      color={'#2f5ac7'}>{form.editorNames[editorURI]}</Link>
+              </Typography>
+            );
+          })}
+          {form.researchers.length? <Typography variant={'h6'}> {`Researchers:`} </Typography>:null}
+          {form.researchers.map(researcherURI => {
+            return (
+              <Typography variant={'body1'}>
+                <Link to={`/indicator/${encodeURIComponent(researcherURI)}/view`} colorWithHover
+                      color={'#2f5ac7'}>{form.researcherNames[researcherURI]}</Link>
+              </Typography>
+            );
+          })}
 
         </Paper>
         : (<Paper sx={{p: 2}} variant={'outlined'}>

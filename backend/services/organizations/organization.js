@@ -1,4 +1,4 @@
-const {GDBOrganizationModel, GDBOrganizationIdModel} = require("../../models/organization");
+const {GDBOrganizationModel, GDBOrganizationIdModel, GDBStakeholerModel} = require("../../models/organization");
 const {Server400Error} = require("../../utils");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBThemeModel} = require("../../models/theme");
@@ -34,6 +34,7 @@ async function createOrganization(req, res) {
   if (form.organizationNumber){
     form.hasId = GDBOrganizationIdModel({
       hasIdentifier: form.organizationNumber,
+      dateCreated: new Date()
     });
   }
   if (form.issuedBy)
@@ -131,9 +132,12 @@ async function fetchOrganization(req, res) {
   organization.organizationNumber = organization.hasId?.hasIdentifier;
   organization.issuedBy = organization.hasId?.issuedBy._uri;
   organization.issuedByName = organization.hasId?.issuedBy.legalName
-  const administrator = organization.administrator
-  organization.administrator = administrator._uri;
-  organization.administratorName = administrator.person.givenName + ' ' + administrator.person.familyName
+  if (organization.administrator){
+    const administrator = organization.administrator
+    organization.administrator = administrator._uri;
+    organization.administratorName = administrator.person.givenName + ' ' + administrator.person.familyName
+  }
+
   if (!organization.researchers){
     organization.researchers = [];
   } else {

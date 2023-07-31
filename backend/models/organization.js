@@ -6,7 +6,8 @@ const {GDBPhoneNumberModel} = require("./phoneNumber");
 
 const GDBOrganizationIdModel = createGraphDBModel({
   hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'},
-  issuedBy: {type: () => GDBOrganizationModel, internalKey: 'tove_org:issuedBy'}
+  issuedBy: {type: () => GDBOrganizationModel, internalKey: 'tove_org:issuedBy'},
+  dateCreated: {type: Date, internalKey: 'schema:dateCreated'}
 }, {
   rdfTypes: ['tove_org:OrganizationID'], name: 'organizationId'
 });
@@ -29,6 +30,15 @@ const GDBOrganizationModel = createGraphDBModel({
   rdfTypes: ['cids:Organization'], name: 'organization'
 });
 
+const GDBStakeholderOrganizationModel = createGraphDBModel({
+  description: {type: String, internalKey: 'schema:description'},
+  catchmentArea: {type: String, internalKey: 'cids:hasCatchmentArea'},
+  // charactoristic
+  // name
+},{
+  rdfTypes: ['cids:Organization', 'cids:Stakeholder'], name: 'stakeholder'
+})
+
 module.exports = {
-  GDBOrganizationModel, GDBOrganizationIdModel
+  GDBOrganizationModel, GDBOrganizationIdModel, GDBStakeholerModel
 }

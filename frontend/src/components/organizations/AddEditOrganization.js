@@ -238,17 +238,17 @@ export default function AddEditOrganization() {
           <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`Organization ID:`} </Typography>
+          {form.organizationNumber? <Typography variant={'h6'}> {`Organization ID:`} </Typography>:null}
           <Typography variant={'body1'}> {`${form.organizationNumber}`} </Typography>
-          <Typography variant={'h6'}> {`Issued By:`} </Typography>
+          {form.issuedBy? <Typography variant={'h6'}> {`Issued By:`} </Typography>:null}
           <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.issuedBy)}/view`} colorWithHover color={'#2f5ac7'}>{form.issuedByName}</Link> </Typography>
-          <Typography variant={'h6'}> {`Telephone:`} </Typography>
+          {form.telephone? <Typography variant={'h6'}> {`Telephone:`} </Typography>:null}
           <Typography variant={'body1'}> {form.telephone} </Typography>
-          <Typography variant={'h6'}> {`Contact Email:`} </Typography>
+          {form.email? <Typography variant={'h6'}> {`Contact Email:`} </Typography>:null}
           <Typography variant={'body1'}> {form.email} </Typography>
-          <Typography variant={'h6'}> {`Contact Name:`} </Typography>
+          {form.contactName? <Typography variant={'h6'}> {`Contact Name:`} </Typography>:null}
           <Typography variant={'body1'}> {form.contactName} </Typography>
-          <Typography variant={'h6'}> {`Organization Administrator:`} </Typography>
+          {form.administrator? <Typography variant={'h6'}> {`Organization Administrator:`} </Typography>:null}
           <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.administrator)}/view`} colorWithHover color={'#2f5ac7'}>{form.administratorName}</Link> </Typography>
           {form.reporters.length? <Typography variant={'h6'}> {`Reporters:`} </Typography>:null}
           {form.reporters.map(reporterURI => {

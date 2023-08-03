@@ -330,12 +330,18 @@ async function updateOrganization(req, res) {
     updateRoles(organization, form, 'researchers', 'researcherOfs', userAccountDict),
     updateRoles(organization, form, 'editors', 'editorOfs', userAccountDict)
   ]);
-  if (form.organizationNumber && form.issuedBy) {
-    if (!organization.hasId)
-      organization.hasId = {}
-    organization.hasId.issuedBy = form.issuedBy;
-    organization.hasId.hasIdentifier = form.organizationNumber;
-  }
+
+  // organization.hasIds = form.organizationIds.map(organizationId => {
+  //   if (organizationId.organizationId) {
+  //     return GDBOrganizationIdModel({
+  //       hasIdentifier: organizationId.organizationId,
+  //       issuedBy: organizationId.issuedBy
+  //     }, {uri: organizationId._uri});
+  //   }
+  //
+  // });
+  // organization.hasIds = organization.hasIds.filter(organizationId => !!organizationId); // get rid of undefined
+
   // organization.hasId.hasIdentifier = form.organizationNumber;
   // if(form.issuedBy)
   //   organization.hasId.issuedBy = `:organization_${form.issuedBy}`

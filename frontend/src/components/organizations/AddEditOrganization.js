@@ -131,7 +131,7 @@ export default function AddEditOrganization() {
                 reporterNames:organization.reporterNames,
                 researcherNames: organization.researcherNames,
                 editorNames: organization.editorNames,
-                organizationIds: organization.hasIds.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri}))
+                organizationIds: organization.hasIds.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri, _uri: organizationId._uri}))
               });
               setLoading(false)
             }

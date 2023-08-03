@@ -6,7 +6,7 @@ const {GDBPhoneNumberModel} = require("./phoneNumber");
 
 const GDBOrganizationIdModel = createGraphDBModel({
   hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'},
-  issuedBy: {type: () => GDBOrganizationModel, internalKey: 'tove_org:issuedBy'},
+  issuedBy: {type: (() => GDBOrganizationModel), internalKey: 'tove_org:issuedBy'},
   dateCreated: {type: Date, internalKey: 'schema:dateCreated'}
 }, {
   rdfTypes: ['tove_org:OrganizationID'], name: 'organizationId'
@@ -20,7 +20,7 @@ const GDBOrganizationModel = createGraphDBModel({
   editors: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},
   researchers: {type: [GDBUserAccountModel], internalKey: ':hasResearcher'},
   legalName:{type: String, internalKey:'tove_org:hasLegalName'},
-  hasId: {type: GDBOrganizationIdModel, internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE}, // contains organization number
+  hasIds: {type: [GDBOrganizationIdModel], internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE},
   hasIndicators: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
   hasOutcomes: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
@@ -40,5 +40,5 @@ const GDBStakeholderOrganizationModel = createGraphDBModel({
 })
 
 module.exports = {
-  GDBOrganizationModel, GDBOrganizationIdModel, GDBStakeholerModel
+  GDBOrganizationModel, GDBOrganizationIdModel
 }

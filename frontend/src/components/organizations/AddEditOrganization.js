@@ -20,6 +20,7 @@ import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -53,7 +54,9 @@ export default function AddEditOrganization() {
     loadingButton: false,
   });
   const [errors, setErrors] = useState(
-    {}
+    {
+      organizationIds: {0: {}}
+    }
   );
 
 
@@ -69,7 +72,8 @@ export default function AddEditOrganization() {
     contactName: '',
     email: '',
     telephone: '',
-    uri: ''
+    uri: '',
+    organizationIds: [{organizationId: '', issuedBy: ''}]
   });
   // const [outcomeForm, setOutcomeForm] = useState([
   // ]);
@@ -126,7 +130,8 @@ export default function AddEditOrganization() {
                 administratorName: organization.administratorName,
                 reporterNames:organization.reporterNames,
                 researcherNames: organization.researcherNames,
-                editorNames: organization.editorNames
+                editorNames: organization.editorNames,
+                organizationIds: organization.hasIds.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri}))
               });
               setLoading(false)
             }
@@ -221,6 +226,18 @@ export default function AddEditOrganization() {
     if (!form.legalName) {
       error.legalName = 'The field cannot be empty';
     }
+    // form.organizationIds.map(({organizationId, issuedBy}, index) => {
+    //   if (!organizationId) {
+    //     if (!error.organizationIds)
+    //       error.organizationIds = {};
+    //     error.organizationIds[index].organizationId = 'The field is required'
+    //   }
+    //   if (!issuedBy) {
+    //     if (!error.organizationIds)
+    //       error.organizationIds = {};
+    //     error.organizationIds[index].issuedBy = 'The field is required'
+    //   }
+    // })
     setErrors(error);
 
     return Object.keys(error).length === 0;
@@ -238,8 +255,16 @@ export default function AddEditOrganization() {
           <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          {form.organizationNumber? <Typography variant={'h6'}> {`Organization ID:`} </Typography>:null}
-          <Typography variant={'body1'}> {`${form.organizationNumber}`} </Typography>
+          {form.organizationIds? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
+          {form.organizationIds.map(organizationId => {
+
+            return (
+              <Paper elevation={0}>
+                <Typography variant={'body1'}> {`ID: ${organizationId.organizationId}`}</Typography>
+                <Typography variant={'body1'}> Issued By: <Link to={`/organization/${encodeURIComponent(organizationId.issuedBy._uri)}/view`} colorWithHover color={'#2f5ac7'}>{organizationId.issuedBy.legalName}</Link></Typography>
+              </Paper>
+              )
+          })}
           {form.issuedBy? <Typography variant={'h6'}> {`Issued By:`} </Typography>:null}
           <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.issuedBy)}/view`} colorWithHover color={'#2f5ac7'}>{form.issuedByName}</Link> </Typography>
           {form.telephone? <Typography variant={'h6'}> {`Telephone:`} </Typography>:null}
@@ -279,7 +304,7 @@ export default function AddEditOrganization() {
           })}
 
         </Paper>
-        : (<Paper sx={{p: 2}} variant={'outlined'}>
+        : (<Paper sx={{p: 2, position: 'relative' }} variant={'outlined'}>
         <Typography variant={'h4'}> Organization Basic</Typography>
         <GeneralField
           disabled={!userContext.isSuperuser}
@@ -320,51 +345,6 @@ export default function AddEditOrganization() {
           }}
         />
 
-        <GeneralField
-          disabled={!userContext.isSuperuser}
-          key={'organizationNumber'}
-          label={'Organization Number'}
-          value={form.organizationNumber}
-          required
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={e => form.organizationNumber = e.target.value}
-          error={!!errors.organizationNumber}
-          helperText={errors.organizationNumber}
-          // onBlur={() => {
-          //   if (form.ID === '') {
-          //     setErrors(errors => ({...errors, ID: 'This field cannot be empty'}));
-          //   } else {
-          //     setErrors(errors => ({...errors, ID: ''}));
-          //   }
-          // }}
-        />
-
-
-        <SelectField
-          // disabled={mode === 'new' || !userContext.isSuperuser}
-          key={'issuedBy'}
-          label={'Number Issued By'}
-          disabled={!userContext.isSuperuser}
-          value={form.issuedBy}
-          options={options.issuedBy}
-          error={!!errors.issuedBy}
-          helperText={
-            errors.issuedBy
-          }
-          // onBlur={() => {
-          //   if (form.administrator === '') {
-          //     setErrors(errors => ({...errors, administrator: 'This field cannot be empty'}));
-          //   } else {
-          //     setErrors(errors => ({...errors, administrator: ''}));
-          //   }
-          // }}
-          onChange={e => {
-            setForm(form => ({
-                ...form, issuedBy: e.target.value
-              })
-            );
-          }}
-        />
 
         {/*<GeneralField*/}
         {/*  disabled={!userContext.isSuperuser}*/}
@@ -428,7 +408,6 @@ export default function AddEditOrganization() {
           key={'contactName'}
           label={'Contact Name'}
           value={form.contactName}
-          required
           sx={{mt: '16px', minWidth: 350}}
           onChange={e => form.contactName = e.target.value}
           error={!!errors.contactName}
@@ -517,6 +496,102 @@ export default function AddEditOrganization() {
           minRows={4}
           multiline
         />
+          <Typography variant={'h5'}>Organization ID</Typography>
+          {form.organizationIds.map(({organizationId, issuedBy}, index) => {
+            return <Paper sx={{p: 0, position: 'relative' }} >
+              <div sx={{position: 'relative' }}>
+                {index ===  form.organizationIds.length - 1?
+                  <Chip
+                  variant="contained"
+                  color="primary"
+                  icon={<AddIcon/>}
+                  label={'Add'}
+                  onClick={() => {
+                    const organizationIds = form.organizationIds
+                    organizationIds.push({organizationId: '', issuedBy: ''});
+                    setForm(form => ({...form, organizationIds: organizationIds}));
+                    const organizationIdErrors = errors.organizationIds;
+                    organizationIdErrors[index + 1] = {};
+                    setErrors(errors => ({...errors, organizationIds: organizationIdErrors}));
+                  }}
+                  sx={{position: 'absolute', right:0, marginTop:10, backgroundColor:'#dda0dd', color:'white', width: '100px'}}
+                />:null}
+                {index === form.organizationIds.length - 1 && index !== 0?
+                  <Chip
+                  variant="contained"
+                  color="primary"
+                  icon={<RemoveIcon/>}
+                  label={'Remove'}
+                  onClick={() => {
+                    const organizationIds = form.organizationIds;
+                    organizationIds.pop();
+                    setForm(form => ({...form, organizationIds: organizationIds}));
+                    const organizationIdErrors = errors.organizationIds;
+                    organizationIdErrors[index] = null;
+                    setErrors(errors => ({...errors, organizationIds: organizationIdErrors}));
+                  }}
+                  sx={{position: 'absolute', right:0, marginTop:1.5, backgroundColor:'#dda0dd', color:'white', width: '100px'}}
+                /> :null }
+
+
+              </div>
+
+
+              <GeneralField
+                disabled={!userContext.isSuperuser}
+                key={'organizationId' + Math.random()}
+                label={'Organization ID'}
+                value={organizationId}
+                sx={{mt: '16px', minWidth: 350}}
+                onChange={e => {
+                  form.organizationIds[index].organizationId = e.target.value;
+                }}
+                // error={!!errors.organizationIds[index].organizationId}
+                // helperText={errors.organizationIds[index].organizationId}
+                // onBlur={() => {
+                //   const organizationIdErrors = errors.organizationIds;
+                //   if (form.organizationIds[index].organizationId === '') {
+                //     organizationIdErrors[index].organizationId = 'This field cannot be empty'
+                //   } else {
+                //     organizationIdErrors[index].organizationId = ''
+                //   }
+                //   setErrors(errors => ({...errors, organizationIds: organizationIdErrors}));
+                // }}
+              />
+
+
+              <SelectField
+                // disabled={mode === 'new' || !userContext.isSuperuser}
+                key={'issuedBy' + Math.random()}
+                label={'Number Issued By'}
+                disabled={!userContext.isSuperuser}
+                value={issuedBy}
+                options={options.issuedBy}
+                // error={!!errors.organizationIds[index].issuedBy}
+                // helperText={
+                //   errors.organizationIds[index].issuedBy
+                // }
+                // onBlur={() => {
+                //   const organizationIdErrors = errors.organizationIds;
+                //   if (form.organizationIds[index].issuedBy === '') {
+                //     organizationIdErrors[index].issuedBy = 'This field cannot be empty'
+                //   } else {
+                //     organizationIdErrors[index].issuedBy = ''
+                //   }
+                //   setErrors(errors => ({...errors, organizationIds: organizationIdErrors}));
+                // }}
+                onChange={e => {
+                  const ids = form.organizationIds;
+                  ids[index].issuedBy = e.target.value
+                  setForm(form => ({
+                      ...form, organizationIds: ids
+                    })
+                  );
+                }}
+              />
+            </Paper>
+          })}
+
 
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}

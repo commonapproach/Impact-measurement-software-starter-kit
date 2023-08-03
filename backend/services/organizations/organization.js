@@ -29,8 +29,18 @@ async function createOrganization(req, res) {
     throw new Server400Error('Wrong information input');
   if (!form.legalName)
     throw new Server400Error('Legal name is requested');
-  // if (!form.hasIdentifier)
-  //   throw new Server400Error('Organization ID is requested');
+  const organizationIds = form.organizationIds.map(({organizationId, issuedBy}) => {
+    if (organizationId) {
+      return GDBOrganizationIdModel({
+        hasIdentifier: organizationId,
+        dateCreated: new Date(),
+        issuedBy: issuedBy
+      })
+    } else {
+      throw new Server400Error('OrganizationId is mandatory');
+    }
+
+  });
   if (form.organizationNumber){
     form.hasId = GDBOrganizationIdModel({
       hasIdentifier: form.organizationNumber,
@@ -68,7 +78,7 @@ async function createOrganization(req, res) {
   })
   const organization = GDBOrganizationModel({
     legalName: form.legalName,
-    hasId: form.hasId,
+    hasIds: organizationIds,
     comment: form.comment,
     email: form.email,
     contactName: form.contactName,
@@ -119,7 +129,7 @@ async function fetchOrganization(req, res) {
   if (!uri)
     throw new Server400Error('Organization uri is needed');
   const organization = await GDBOrganizationModel.findOne({_uri: uri},
-    {populates: ['hasId.issuedBy', 'hasOutcomes', 'hasIndicators', 'telephone','administrator.person', 'researchers.person', 'editors.person']});
+    {populates: ['hasIds.issuedBy', 'hasOutcomes', 'hasIndicators', 'telephone','administrator.person', 'researchers.person', 'editors.person']});
   if (!organization)
     throw new Server400Error('No such organization');
   const outcomes = organization.hasOutcomes || [];

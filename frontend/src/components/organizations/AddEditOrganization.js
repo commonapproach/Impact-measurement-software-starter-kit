@@ -503,6 +503,7 @@ export default function AddEditOrganization() {
                 {index ===  form.organizationIds.length - 1?
                   <Chip
                   variant="contained"
+                  disabled={!userContext.isSuperuser || mode !== 'new'}
                   color="primary"
                   icon={<AddIcon/>}
                   label={'Add'}
@@ -519,6 +520,7 @@ export default function AddEditOrganization() {
                 {index === form.organizationIds.length - 1 && index !== 0?
                   <Chip
                   variant="contained"
+                  disabled={!userContext.isSuperuser || mode !== 'new'}
                   color="primary"
                   icon={<RemoveIcon/>}
                   label={'Remove'}
@@ -538,7 +540,7 @@ export default function AddEditOrganization() {
 
 
               <GeneralField
-                disabled={!userContext.isSuperuser}
+                disabled={!userContext.isSuperuser || mode !== 'new'}
                 key={'organizationId' + Math.random()}
                 label={'Organization ID'}
                 value={organizationId}
@@ -561,10 +563,9 @@ export default function AddEditOrganization() {
 
 
               <SelectField
-                // disabled={mode === 'new' || !userContext.isSuperuser}
+                disabled={mode !== 'new' || !userContext.isSuperuser}
                 key={'issuedBy' + Math.random()}
                 label={'Number Issued By'}
-                disabled={!userContext.isSuperuser}
                 value={issuedBy}
                 options={options.issuedBy}
                 // error={!!errors.organizationIds[index].issuedBy}

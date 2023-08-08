@@ -600,7 +600,7 @@ const fileUploading = async (req, res, next) => {
           addTrace('        Error: Mandatory property missing');
           addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`);
           addMessage(8, 'propertyMissing',
-            {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'name'))});
+            {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))});
           error += 1;
           hasError = true;
         }

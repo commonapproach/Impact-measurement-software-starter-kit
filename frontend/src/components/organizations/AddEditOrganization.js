@@ -522,9 +522,9 @@ export default function AddEditOrganization() {
                   variant="contained"
                   disabled={!userContext.isSuperuser || mode !== 'new'}
                   color="primary"
-                  icon={<RemoveIcon/>}
+                  // icon={<RemoveIcon/>}
                   label={'Remove'}
-                  onClick={() => {
+                  onDelete={() => {
                     const organizationIds = form.organizationIds;
                     organizationIds.pop();
                     setForm(form => ({...form, organizationIds: organizationIds}));

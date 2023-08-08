@@ -34,7 +34,6 @@ const GDBStakeholderOrganizationModel = createGraphDBModel({
   description: {type: String, internalKey: 'schema:description'},
   catchmentArea: {type: String, internalKey: 'cids:hasCatchmentArea'},
   // charactoristic
-  // name
 },{
   rdfTypes: ['cids:Organization', 'cids:Stakeholder'], name: 'stakeholder'
 })

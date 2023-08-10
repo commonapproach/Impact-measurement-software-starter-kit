@@ -29,7 +29,10 @@ async function createOrganization(req, res) {
     throw new Server400Error('Wrong information input');
   if (!form.legalName)
     throw new Server400Error('Legal name is requested');
-  const organizationIds = form.organizationIds.map(({organizationId, issuedBy}) => {
+  let organizationIds = form.organizationIds.map(({organizationId, issuedBy}) => {
+    if (!(organizationId && issuedBy)){
+      return null
+    }
     if (organizationId) {
       return GDBOrganizationIdModel({
         hasIdentifier: organizationId,
@@ -39,8 +42,8 @@ async function createOrganization(req, res) {
     } else {
       throw new Server400Error('OrganizationId is mandatory');
     }
-
   });
+  organizationIds = organizationIds.filter(organizationIdObject => !!organizationIdObject);
   if (form.organizationNumber){
     form.hasId = GDBOrganizationIdModel({
       hasIdentifier: form.organizationNumber,

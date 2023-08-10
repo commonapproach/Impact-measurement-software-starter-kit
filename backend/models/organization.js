@@ -31,13 +31,29 @@ const GDBOrganizationModel = createGraphDBModel({
 });
 
 const GDBStakeholderOrganizationModel = createGraphDBModel({
+  // organization's properties
+  comment: {type: String, internalKey: 'rdfs:comment'},
+  hasUsers: {type: [GDBUserAccountModel], internalKey: ':hasUser'},
+  administrator: {type: GDBUserAccountModel, internalKey: ':hasAdministrator'},
+  reporters: {type: [GDBUserAccountModel], internalKey: ':hasReporter'},
+  editors: {type: [GDBUserAccountModel], internalKey: ':hasEditor'},
+  researchers: {type: [GDBUserAccountModel], internalKey: ':hasResearcher'},
+  legalName:{type: String, internalKey:'tove_org:hasLegalName'},
+  hasIds: {type: [GDBOrganizationIdModel], internalKey: 'tove_org:hasID', onDelete: DeleteType.CASCADE},
+  hasIndicators: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
+  hasOutcomes: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome', onDelete: DeleteType.CASCADE},
+  telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
+  contactName: {type: String, internalKey: ':hasContactName'},
+  email: {type: String, internalKey: ':hasEmail'},
+
+  // its own property
   description: {type: String, internalKey: 'schema:description'},
   catchmentArea: {type: String, internalKey: 'cids:hasCatchmentArea'},
-  // charactoristic
+  name: {type: String, internalKey: 'genprops:hasName'},
 },{
   rdfTypes: ['cids:Organization', 'cids:Stakeholder'], name: 'stakeholder'
 })
 
 module.exports = {
-  GDBOrganizationModel, GDBOrganizationIdModel
+  GDBOrganizationModel, GDBOrganizationIdModel, GDBStakeholderOrganizationModel
 }

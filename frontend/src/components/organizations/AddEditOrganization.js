@@ -131,7 +131,7 @@ export default function AddEditOrganization() {
                 reporterNames:organization.reporterNames,
                 researcherNames: organization.researcherNames,
                 editorNames: organization.editorNames,
-                organizationIds: organization.hasIds.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri, _uri: organizationId._uri}))
+                organizationIds: organization.hasIds?.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri, _uri: organizationId._uri})) || []
               });
               setLoading(false)
             }
@@ -346,26 +346,6 @@ export default function AddEditOrganization() {
         />
 
 
-        {/*<GeneralField*/}
-        {/*  disabled={!userContext.isSuperuser}*/}
-        {/*  key={'hasIdentifier'}*/}
-        {/*  label={'ID'}*/}
-        {/*  value={form.hasIdentifier}*/}
-        {/*  required*/}
-        {/*  sx={{mt: '16px', minWidth: 350}}*/}
-        {/*  onChange={e => form.hasIdentifier = e.target.value}*/}
-        {/*  error={!!errors.hasIdentifier}*/}
-        {/*  helperText={errors.hasIdentifier}*/}
-        {/*  onBlur={() => {*/}
-        {/*    if (form.hasIdentifier === '') {*/}
-        {/*      setErrors(errors => ({...errors, hasIdentifier: 'This field cannot be empty'}));*/}
-        {/*    } else {*/}
-        {/*      setErrors(errors => ({...errors, hasIdentifier: ''}));*/}
-        {/*    }*/}
-
-        {/*  }}*/}
-        {/*/>*/}
-
         <GeneralField
           disabled={!userContext.isSuperuser}
           key={'telephone'}
@@ -496,7 +476,7 @@ export default function AddEditOrganization() {
           minRows={4}
           multiline
         />
-          <Typography variant={'h5'}>Organization ID</Typography>
+          {form.organizationIds.length? <Typography variant={'h5'}>Organization ID</Typography>:null}
           {form.organizationIds.map(({organizationId, issuedBy}, index) => {
             return <Paper sx={{p: 0, position: 'relative' }} >
               <div sx={{position: 'relative' }}>

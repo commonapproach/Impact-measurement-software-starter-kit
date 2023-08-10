@@ -27,6 +27,7 @@ const namespaces = {
   'w3c_org': 'http://www.w3.org/ns/org#',
   'dc_elements': 'http://purl.org/dc/elements/1.1/',
   'iso21972': 'http://ontology.eil.utoronto.ca/ISO21972/iso21972#',
+  'genprops': 'https://standards.iso.org/iso-iec/5087/-1/ed-1/en/ontology/GenericProperties#'
 }
 
 function swap(nameSpaces){

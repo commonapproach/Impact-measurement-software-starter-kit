@@ -113,7 +113,7 @@ export default function Stakeholders() {
             }}
             color="primary"
             icon={<AddIcon/>}
-            label="Add new Organization"
+            label="Add new Stakeholder"
             variant="outlined"/>
           <Menu
             open={dropDown}
@@ -123,7 +123,9 @@ export default function Stakeholders() {
               setDropDown(false);
             }}
           >
-            <MenuItem onClick={() => {}} variant="inherit" sx={{width:'180px', padding: '4px 12px'}}>
+            <MenuItem onClick={() => {
+              navigate("/stakeholder/new" );
+            }} variant="inherit" sx={{width:'180px', padding: '4px 12px', height: '25px'}} >
               Organization
             </MenuItem>
           </Menu>

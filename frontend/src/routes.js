@@ -47,6 +47,7 @@ import ThemeReports from "./components/ReportGenerate/ThemeReport";
 import OrganizationUsers from "./components/users/organizationUsers";
 import SuperPassword from "./components/SuperPasswordPage";
 import Stakeholders from "./components/Stakeholders/Stakeholders";
+import AddEditStakeholder from "./components/Stakeholders/AddEditStakeholder";
 
 const routes = (
   <Routes>
@@ -72,6 +73,7 @@ const routes = (
     <Route path="/organizations/:uri/:viewMode" element={<PrivateRoute element={AddEditOrganization}/>}/>
     {/*Stakeholders*/}
     <Route path="/stakeholders" element={<PrivateRoute element={Stakeholders}/>}/>
+    <Route path="/stakeholder/new" element={<PrivateRoute element={AddEditStakeholder}/>}/>
 
     {/*Groups*/}
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>

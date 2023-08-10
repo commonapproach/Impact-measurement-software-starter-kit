@@ -126,7 +126,7 @@ export default function UserFirstEntry() {
         securityQuestions: securityQuestions})
       if(success){
         setState(state => ({...state, loadingButton: false, submitDialog: false}));
-        navigate('/login');
+        navigate('/login/superPassword');
         enqueueSnackbar(message || 'Success', {variant: 'success'});
       }
     } catch (e) {

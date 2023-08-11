@@ -74,6 +74,7 @@ const routes = (
     {/*Stakeholders*/}
     <Route path="/stakeholders" element={<PrivateRoute element={Stakeholders}/>}/>
     <Route path="/stakeholder/new" element={<PrivateRoute element={AddEditStakeholder}/>}/>
+    <Route path="/stakeholder/:uri/:viewMode" element={<PrivateRoute element={AddEditStakeholder}/>}/>
 
     {/*Groups*/}
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>

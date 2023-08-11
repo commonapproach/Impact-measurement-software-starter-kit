@@ -16,7 +16,7 @@ const {initUserAccounts, addSuperPassword} = require('../services/userAccount/us
 const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
-  errorReportRoute, fileUploadingRoute
+  errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -65,6 +65,8 @@ app.use('/api/dynamicClassInstances', dynamicClassInstancesRoute)
 app.use('/api/users', usersRoute);
 app.use('/api/organization', organizationRoute);
 app.use('/api/organizations', organizationsRoute);
+app.use('/api/stakeholder', stakeholderRoute)
+app.use('/api/stakeholders', stakeholdersRoute)
 app.use('/api/theme', themeRoute);
 app.use('/api/themes', themesRoute);
 app.use('/api/indicator', indicatorRoute);

@@ -1,4 +1,6 @@
 module.exports = {
+  stakeholderRoute: require('./stakeholder'),
+  stakeholdersRoute: require('./stakeholders'),
   organizationRoute: require('./organization'),
   organizationsRoute: require('./organizations'),
   usersRoute: require('./users'),

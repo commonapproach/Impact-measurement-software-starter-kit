@@ -5,6 +5,15 @@ export async function fetchOrganization(orgUri,) {
   return getJson('/api/organization/' + orgUri);
 }
 
+export async function fetchStakeholders() {
+  return getJson('/api/stakeholders/');
+}
+
+export async function fetchStakeholder(stakeHolderUri) {
+  return getJson('/api/stakeholder/' + stakeHolderUri)
+}
+
+
 export async function createStakeholder(params) {
   return postJson('/api/stakeholder/', params);
 }

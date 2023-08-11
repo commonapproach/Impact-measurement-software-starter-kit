@@ -7,9 +7,6 @@ import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {
-  createOrganization,
-  fetchOrganization,
-  fetchOrganizations,
   fetchOrganizationsInterfaces,
   updateOrganization
 } from "../../api/organizationApi";
@@ -21,7 +18,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createStakeholder} from "../../api/stakeholderAPI";
+import {createStakeholder, fetchStakeholder} from "../../api/stakeholderAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -83,8 +80,7 @@ export default function AddEditStakeholder() {
         if (success) {
           const orgDict = {};
           organizations.map(org => {
-            if (org._uri !== uri)
-              orgDict[org._uri] = org.legalName;
+            orgDict[org._uri] = org.legalName;
           });
           setOptions(options => ({...options, organizations: orgDict}))
         }
@@ -100,30 +96,34 @@ export default function AddEditStakeholder() {
             if (success)
               setOptions(options => ({...options, objectForm}));
           }),
-          fetchOrganization(encodeURIComponent(uri)).then(res => {
+          fetchStakeholder(encodeURIComponent(uri)).then(res => {
             if (res.success) {
-              const {organization} = res;
+              const {stakeholder} = res;
               setForm({
-                legalName: organization.legalName || '',
-                organizationNumber: organization.organizationNumber || '',
-                issuedBy: organization.issuedBy || '',
-                administrator: organization.administrator || '',
-                reporters: organization.reporters || [],
-                editors: organization.editors || [],
-                researchers: organization.researchers || [],
-                comment: organization.comment || '',
-                contactName: organization.contactName || '',
-                email: organization.email || '',
-                telephone: organization.telephone?
-                  `+${organization.telephone.countryCode} (${String(organization.telephone.phoneNumber).slice(0, 3)}) ${String(organization.telephone.phoneNumber).slice(3, 6)}-${String(organization.telephone.phoneNumber).slice(6, 10)}` :
+                name: stakeholder.name,
+                description: stakeholder.description,
+                catchmentArea: stakeholder.catchmentArea,
+                legalName: stakeholder.legalName || '',
+                organizationNumber: stakeholder.organizationNumber || '',
+                issuedBy: stakeholder.issuedBy || '',
+                administrator: stakeholder.administrator || '',
+                reporters: stakeholder.reporters || [],
+                editors: stakeholder.editors || [],
+                researchers: stakeholder.researchers || [],
+                comment: stakeholder.comment || '',
+                contactName: stakeholder.contactName || '',
+                email: stakeholder.email || '',
+                telephone: stakeholder.telephone?
+                  `+${stakeholder.telephone.countryCode} (${String(stakeholder.telephone.phoneNumber).slice(0, 3)}) ${String(stakeholder.telephone.phoneNumber).slice(3, 6)}-${String(stakeholder.telephone.phoneNumber).slice(6, 10)}` :
                   '',
-                uri: organization._uri || '',
-                issuedByName: organization.issuedByName,
-                administratorName: organization.administratorName,
-                reporterNames:organization.reporterNames,
-                researcherNames: organization.researcherNames,
-                editorNames: organization.editorNames,
-                organizationIds: organization.hasIds.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri, _uri: organizationId._uri}))
+                uri: stakeholder._uri || '',
+                organization: stakeholder._uri,
+                issuedByName: stakeholder.issuedByName,
+                administratorName: stakeholder.administratorName,
+                reporterNames:stakeholder.reporterNames,
+                researcherNames: stakeholder.researcherNames,
+                editorNames: stakeholder.editorNames,
+                organizationIds: stakeholder.hasIds.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri, _uri: organizationId._uri}))
               });
               setLoading(false)
             }
@@ -229,12 +229,20 @@ export default function AddEditStakeholder() {
   if (loading)
     return <Loading/>;
 
+  console.log(options.organizations)
+  console.log(form.organization)
   return (
     <Container maxWidth="md">
       {mode === 'view'?
         <Paper sx={{p: 2}} variant={'outlined'}>
           <Typography variant={'h6'}> {`Legal Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
+          <Typography variant={'h6'}> {`Name:`} </Typography>
+          <Typography variant={'body1'}> {`${form.name}`} </Typography>
+          <Typography variant={'h6'}> {`Description:`} </Typography>
+          <Typography variant={'body1'}> {`${form.description}`} </Typography>
+          <Typography variant={'h6'}> {`Catchment Area:`} </Typography>
+          <Typography variant={'body1'}> {`${form.catchmentArea}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
           {form.organizationIds? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
@@ -365,7 +373,7 @@ export default function AddEditStakeholder() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         {mode === 'view'?
           <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
-            navigate(`/organizations/${encodeURIComponent(uri)}/edit`);
+            navigate(`/stakeholder/${encodeURIComponent(uri)}/edit`);
           }
           }>
             Edit

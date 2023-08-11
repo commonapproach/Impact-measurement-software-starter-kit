@@ -48,6 +48,20 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    case 'createStakeholder':
+      return userAccount.isSuperuser;
+
+    case 'fetchStakeholders':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+    case 'fetchStakeholder':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+
+
     // organizations
     case 'createOrganization':
       return userAccount.isSuperuser;

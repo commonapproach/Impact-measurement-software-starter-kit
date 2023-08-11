@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {fetchStakeholders} from "../../api/stakeholderAPI";
 
 export default function Stakeholders() {
   const navigate = useNavigate();
@@ -26,9 +27,9 @@ export default function Stakeholders() {
   const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    fetchOrganizations().then(res => {
+    fetchStakeholders().then(res => {
       if(res.success)
-        setState(state => ({...state, loading: false, data: res.organizations}));
+        setState(state => ({...state, loading: false, data: res.stakeholders}));
     }).catch(e => {
       reportErrorToBackend(e)
       setState(state => ({...state, loading: false}))
@@ -70,7 +71,7 @@ export default function Stakeholders() {
       label: 'Legal Name',
       body: ({_uri, legalName, editable}) => {
         return editable?
-          <Link colorWithHover to={`/organizations/${encodeURIComponent(_uri)}/view/`}>
+          <Link colorWithHover to={`/stakeholder/${encodeURIComponent(_uri)}/view/`}>
             {legalName}
           </Link>:
           legalName
@@ -87,7 +88,7 @@ export default function Stakeholders() {
     {
       label: ' ',
       body: ({_uri, editable}) =>
-        <DropdownMenu urlPrefix={'organizations'} objectUri={encodeURIComponent(_uri)} hideViewOption hideDeleteOption
+        <DropdownMenu urlPrefix={'stakeholder'} objectUri={encodeURIComponent(_uri)} hideViewOption hideDeleteOption
                       hideEditOption={!editable}
                       handleDelete={() => showDeleteDialog(_uri)}/>
     }

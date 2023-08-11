@@ -100,7 +100,7 @@ export default function Stakeholders() {
   return (
     <Container>
       <DataTable
-        title={"Organizations"}
+        title={"Stakeholders"}
         data={state.data}
         columns={columns}
         idField="id"

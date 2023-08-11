@@ -123,7 +123,7 @@ export default function AddEditStakeholder() {
                 reporterNames:stakeholder.reporterNames,
                 researcherNames: stakeholder.researcherNames,
                 editorNames: stakeholder.editorNames,
-                organizationIds: stakeholder.hasIds.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri, _uri: organizationId._uri}))
+                organizationIds: stakeholder.hasIds?.map(organizationId => ({organizationId: organizationId.hasIdentifier, issuedBy: mode === 'view'? organizationId.issuedBy:organizationId.issuedBy._uri, _uri: organizationId._uri})) || []
               });
               setLoading(false)
             }
@@ -229,8 +229,6 @@ export default function AddEditStakeholder() {
   if (loading)
     return <Loading/>;
 
-  console.log(options.organizations)
-  console.log(form.organization)
   return (
     <Container maxWidth="md">
       {mode === 'view'?
@@ -245,9 +243,8 @@ export default function AddEditStakeholder() {
           <Typography variant={'body1'}> {`${form.catchmentArea}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          {form.organizationIds? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
+          {form.organizationIds.length? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
           {form.organizationIds.map(organizationId => {
-
             return (
               <Paper elevation={0}>
                 <Typography variant={'body1'}> {`ID: ${organizationId.organizationId}`}</Typography>

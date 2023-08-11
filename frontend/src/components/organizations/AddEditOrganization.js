@@ -255,7 +255,7 @@ export default function AddEditOrganization() {
           <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          {form.organizationIds? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
+          {form.organizationIds.length? <Typography variant={'h6'}> {`Organization IDs:`} </Typography>:null}
           {form.organizationIds.map(organizationId => {
 
             return (
@@ -305,7 +305,7 @@ export default function AddEditOrganization() {
 
         </Paper>
         : (<Paper sx={{p: 2, position: 'relative' }} variant={'outlined'}>
-        <Typography variant={'h4'}> Organization Basic</Typography>
+        <Typography variant={'h4'}> Organization Basic </Typography>
         <GeneralField
           disabled={!userContext.isSuperuser}
           key={'legalName'}

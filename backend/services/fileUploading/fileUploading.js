@@ -537,7 +537,7 @@ const fileUploading = async (req, res, next) => {
         addMessage(8, 'duplicatedURIInFile', {uri, type: getPrefixedURI(object['@type'][0])})
         continue;
       }
-      if (await GraphDB.isURIExisted(uri)) {
+      if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullTypeURI(GDBOrganizationModel))) {
         // check whether the uri belongs to other objects
         // duplicated uri in database
         error += 1;

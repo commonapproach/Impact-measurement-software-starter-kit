@@ -254,11 +254,11 @@ const fileUploading = async (req, res, next) => {
 
         // add theme to outcome
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'themes')]) {
-          addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))} is missing`);
-          addMessage(8, 'propertyMissing', {uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))});
-          error += 1;
-          hasError = true;
+          // addTrace('        Error: Mandatory property missing');
+          // addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))} is missing`);
+          // addMessage(8, 'propertyMissing', {uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))});
+          // error += 1;
+          // hasError = true;
         } else {
           outcome.themes = getListOfValue(object, GDBOutcomeModel, 'themes');
         }
@@ -655,19 +655,22 @@ const fileUploading = async (req, res, next) => {
           error += 1;
           hasError = true;
         }
+        let comment;
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
-          addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))} is missing`);
-          addMessage(8, 'propertyMissing',
-            {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))});
-          error += 1;
-          hasError = true;
+          // addTrace('        Error: Mandatory property missing');
+          // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))} is missing`);
+          // addMessage(8, 'propertyMissing',
+          //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))});
+          // error += 1;
+          // hasError = true;
+        } else {
+          comment = getValue(object, GDBIndicatorReportModel, 'comment')
         }
         if (!hasError) {
           const indicatorReport = GDBIndicatorReportModel({
             name: hasName,
             dateCreated: new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated')),
-            comment: getValue(object, GDBIndicatorReportModel, 'comment'),
+            comment: comment,
 
             value: getValue(object, GDBIndicatorReportModel, 'value') ||
               GDBMeasureModel({

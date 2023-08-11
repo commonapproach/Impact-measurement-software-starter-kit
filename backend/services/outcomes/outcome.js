@@ -1,7 +1,6 @@
 const {GDBOrganizationModel} = require("../../models/organization");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
-const {GDBThemeModel} = require("../../models/theme");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");

@@ -647,13 +647,16 @@ const fileUploading = async (req, res, next) => {
         } else {
           hasName = getValue(object, GDBIndicatorReportModel, 'name');
         }
+        let dateCreated;
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated')]) {
-          addTrace('        Error: Mandatory property missing');
-          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))} is missing`);
-          addMessage(8, 'propertyMissing',
-            {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))});
-          error += 1;
-          hasError = true;
+          // addTrace('        Error: Mandatory property missing');
+          // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))} is missing`);
+          // addMessage(8, 'propertyMissing',
+          //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))});
+          // error += 1;
+          // hasError = true;
+        } else {
+          dateCreated = new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated'))
         }
         let comment;
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
@@ -669,7 +672,7 @@ const fileUploading = async (req, res, next) => {
         if (!hasError) {
           const indicatorReport = GDBIndicatorReportModel({
             name: hasName,
-            dateCreated: new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated')),
+            dateCreated: dateCreated,
             comment: comment,
 
             value: getValue(object, GDBIndicatorReportModel, 'value') ||

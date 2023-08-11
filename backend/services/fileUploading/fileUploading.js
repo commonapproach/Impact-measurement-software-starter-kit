@@ -33,7 +33,11 @@ const fileUploadingHandler = async (req, res, next) => {
  * @returns {*}
  */
 const getValue = (object, graphdbModel, property) => {
-  return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
+  if (object[getFullURI(graphdbModel.schema[property].internalKey)]){
+    return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
+  } else {
+    return undefined;
+  }
 };
 
 const getFullTypeURI = (graphdbModel) => {
@@ -669,47 +673,57 @@ const fileUploading = async (req, res, next) => {
         } else {
           comment = getValue(object, GDBIndicatorReportModel, 'comment')
         }
+        let value
+        if (!getValue(object, GDBIndicatorReportModel, 'value') && !getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0], GDBMeasureModel, 'numericalValue')){
+          addTrace('        Error: Mandatory property missing');
+          addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'value'))} is missing`);
+          addMessage(8, 'propertyMissing',
+            {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'value'))});
+          error += 1;
+          hasError = true;
+        } else {
+          value = getValue(object, GDBIndicatorReportModel, 'value') ||
+            GDBMeasureModel({
+              numericalValue: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0],
+                GDBMeasureModel, 'numericalValue'
+              ),
+            },
+            {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0])})
+        }
         if (!hasError) {
           const indicatorReport = GDBIndicatorReportModel({
             name: hasName,
             dateCreated: dateCreated,
             comment: comment,
+            value: value,
 
-            value: getValue(object, GDBIndicatorReportModel, 'value') ||
-              GDBMeasureModel({
-                  numericalValue: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0],
-                    GDBMeasureModel, 'numericalValue'
-                  ),
-                },
-                {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0])}),
-
-            hasTime: getValue(object, GDBIndicatorReportModel, 'hasTime') ||
-              GDBDateTimeIntervalModel({
-
-                hasBeginning: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
-                    GDBDateTimeIntervalModel, 'hasBeginning') ||
-                  GDBInstant({
-                    date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-                      [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
-                  }, {
-                    uri: getFullObjectURI(
-                      object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-                        [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
-                    )
-                  }),
-
-                hasEnd: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
-                    GDBDateTimeIntervalModel, 'hasEnd') ||
-                  GDBInstant({
-                    date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-                      [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
-                  }, {
-                    uri: getFullObjectURI(
-                      object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-                        [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
-                    )
-                  })
-              }, {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')])})
+            // hasTime: getValue(object, GDBIndicatorReportModel, 'hasTime') ||
+            //   GDBDateTimeIntervalModel({
+            //
+            //     hasBeginning: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
+            //         GDBDateTimeIntervalModel, 'hasBeginning') ||
+            //       GDBInstant({
+            //         date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+            //           [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+            //       }, {
+            //         uri: getFullObjectURI(
+            //           object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+            //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+            //         )
+            //       }),
+            //
+            //     hasEnd: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
+            //         GDBDateTimeIntervalModel, 'hasEnd') ||
+            //       GDBInstant({
+            //         date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+            //           [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+            //       }, {
+            //         uri: getFullObjectURI(
+            //           object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
+            //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+            //         )
+            //       })
+            //   }, {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')])})
 
 
           }, {uri: uri});

@@ -48,7 +48,6 @@ export default function AddEditOutcome() {
     indicators:[],
     uri: '',
     themes: []
-    // identifier: ''
   });
   const [loading, setLoading] = useState(true);
 
@@ -131,16 +130,14 @@ export default function AddEditOutcome() {
       error.name = 'The field cannot be empty';
     if (!form.indicators.length)
       error.indicators = 'The field cannot be empty';
-    if (!form.themes.length)
-      error.themes = 'The field cannot be empty';
+    // if (!form.themes.length)
+    //   error.themes = 'The field cannot be empty';
     if (!form.description)
       error.description = 'The field cannot be empty'
     if(!form.organization)
       error.organization = 'The field cannot be empty'
     if(form.uri && !isValidURL(form.uri))
       error.uri = 'Not a valid URI';
-    // if(!form.identifier)
-    //   error.identifier = 'The field cannot be empty'
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -160,7 +157,7 @@ export default function AddEditOutcome() {
             <Typography variant={'body1'}> {`${form.uri}`} </Typography>
             <Typography variant={'h6'}> {`Organization:`} </Typography>
             <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
-            <Typography variant={'h6'}> {`Themes:`} </Typography>
+            {form.themes.length? <Typography variant={'h6'}> {`Themes:`} </Typography>: null}
              {form.themes.map(themeURI => {
               return (
                 <Typography variant={'body1'}>

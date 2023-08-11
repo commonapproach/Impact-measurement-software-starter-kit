@@ -117,6 +117,8 @@ const fetchOutcome = async (req, res) => {
     throw new Server400Error('No such outcome');
   outcome.organization = outcome.forOrganization._uri;
   outcome.organizationName = outcome.forOrganization.legalName;
+  if (!outcome.themes)
+    outcome.themes = [];
   outcome.themeNames = {};
   outcome.themes.map(theme => {
     outcome.themeNames[theme._uri] = theme.name;
@@ -172,7 +174,7 @@ const updateOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('Id is needed');
-  if (!form || !form.description || !form.name || !form.organization || !form.themes || !form.themes.length || !form.indicators || !form.indicators.length)
+  if (!form || !form.description || !form.name || !form.organization || !form.indicators || !form.indicators.length)
     throw new Server400Error('Invalid input');
   // if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
   //   throw new Server400Error('Duplicated identifier');
@@ -181,7 +183,7 @@ const updateOutcome = async (req, res) => {
     throw new Server400Error('No such outcome');
   outcome.name = form.name;
   outcome.description = form.description;
-  outcome.themes = form.themes
+  outcome.themes = form.themes || []
   const organizationDict = {};
   const indicatorDict = {};
 
@@ -298,7 +300,7 @@ const createOutcome = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
-  if (!form || !form.organization || !form.name || !form.description || !form.themes || !form.themes.length || !form.indicators || !form.indicators.length)
+  if (!form || !form.organization || !form.name || !form.description || !form.indicators || !form.indicators.length)
     throw new Server400Error('Invalid input');
   // if (await GDBOutcomeModel.findOne({hasIdentifier: form.identifier}))
   //   throw new Server400Error('Duplicated identifier');
@@ -358,7 +360,7 @@ const createOutcome = async (req, res) => {
     description: form.description,
     forOrganization: form.forOrganization,
     indicators: form.indicators,
-    themes: form.themes
+    themes: form.themes || []
   });
   await outcome.save();
   // add the outcome to the organizations

@@ -190,18 +190,17 @@ export default function OutcomeField({
                   onChange(st);
                 }
                 }
-                error={!!errors.themes}
-                helperText={errors.themes}
-                required={required}
+                // error={!!errors.themes}
+                // helperText={errors.themes}
                 disabled={disabled}
-                onBlur={() => {
-                  if (!state.themes.length) {
-                    setErrors(errors => ({...errors, themes: 'This field cannot be empty'}));
-                  } else {
-                    setErrors(errors => ({...errors, themes: null}));
-                  }
-                }
-                }
+                // onBlur={() => {
+                //   if (!state.themes.length) {
+                //     setErrors(errors => ({...errors, themes: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, themes: null}));
+                //   }
+                // }
+                // }
               />
             </Grid>
             <Grid item xs={6}>
@@ -277,25 +276,7 @@ export default function OutcomeField({
                 />
               </Grid>
 
-              {/*<LoadingAutoComplete*/}
-              {/*  label="Indicators"*/}
-              {/*  options={options}*/}
-              {/*  property={'indicators'}*/}
-              {/*  state={state}*/}
-              {/*  onChange={handleChange}*/}
-              {/*  error={!!errors.indicators}*/}
-              {/*  helperText={errors.indicators}*/}
-              {/*  required={required}*/}
-              {/*  disabled={disabled || !state.organization}*/}
-              {/*  onBlur={() => {*/}
-              {/*    if (!state.indicators) {*/}
-              {/*      setErrors(errors => ({...errors, indicators: 'This field cannot be empty'}));*/}
-              {/*    } else {*/}
-              {/*      setErrors(errors => ({...errors, indicators: null}));*/}
-              {/*    }*/}
-              {/*  }*/}
-              {/*  }*/}
-              {/*/>*/}
+
             </Grid>
             <Grid item xs={12}>
               <TextField

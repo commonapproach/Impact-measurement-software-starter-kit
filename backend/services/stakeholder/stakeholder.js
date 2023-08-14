@@ -1,6 +1,7 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
+const {stakeholderRoute} = require("../../routes");
 
 const fetchStakeholderHandler = async (req, res, next) => {
   try {
@@ -86,6 +87,36 @@ async function createStakeholderHandler(req, res, next) {
   }
 }
 
+async function updateStakeholderHandler(req, res, next) {
+  try {
+    if (await hasAccess(req, 'updateStakeholder')) {
+      return await updateStakeholder(req, res);
+    } else {
+      return res.status(400).json({message: 'Wrong Auth'});
+    }
+  } catch (e) {
+    next(e);
+  }
+}
+
+async function updateStakeholder(req, res) {
+  const {uri} = req.params;
+  if (!uri)
+    throw new Server400Error('Stakeholder uri is needed');
+  const {form} = req.body;
+  if (!form || !form.description || !form.name || !form.catchmentArea || !['local', 'provincial', 'national', 'multinational', 'global'].includes(form.catchmentArea)){
+    throw new Server400Error('Wrong information input');
+  }
+  const targetStakeholder = await GDBStakeholderOrganizationModel.findOne({_uri: uri});
+  if (!targetStakeholder)
+    throw new Server400Error('No such stakeholder');
+  targetStakeholder.description = form.description;
+  targetStakeholder.name = form.name;
+  targetStakeholder.catchmentArea = form.catchmentArea;
+  await targetStakeholder.save();
+  return res.status(200).json({success: true, message: 'Successfully update stakeholder ' + form.name});
+}
+
 
 async function createStakeholder(req, res) {
   const {form} = req.body;
@@ -127,5 +158,6 @@ async function createStakeholder(req, res) {
 
 module.exports = {
   createStakeholderHandler,
-  fetchStakeholderHandler
+  fetchStakeholderHandler,
+  updateStakeholderHandler
 };

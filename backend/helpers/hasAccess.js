@@ -60,6 +60,10 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'updateStakeholder':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
 
 
     // organizations

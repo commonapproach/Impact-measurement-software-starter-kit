@@ -18,8 +18,8 @@ export async function createStakeholder(params) {
   return postJson('/api/stakeholder/', params);
 }
 
-export async function updateOrganization(uri, params) {
-  return putJson('/api/organization/' + uri, params);
+export async function updateStakeholder(uri, params) {
+  return putJson('/api/stakeholder/' + uri, params);
 }
 
 export async function deleteOrganization(id) {

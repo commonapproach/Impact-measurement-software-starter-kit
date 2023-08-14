@@ -18,7 +18,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createStakeholder, fetchStakeholder} from "../../api/stakeholderAPI";
+import {createStakeholder, fetchStakeholder, updateStakeholder} from "../../api/stakeholderAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -187,10 +187,10 @@ export default function AddEditStakeholder() {
           form.telephone.split('(')[1].split(') ')[1].split('-')[0] +
           form.telephone.split('(')[1].split(') ')[1].split('-')[1]);
       }
-      updateOrganization(encodeURIComponent(uri), {form},).then((res) => {
+      updateStakeholder(encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/organizations');
+          navigate('/stakeholders');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -294,7 +294,7 @@ export default function AddEditStakeholder() {
         : (<Paper sx={{p: 2, position: 'relative' }} variant={'outlined'}>
           <Typography variant={'h4'}> Stakeholder </Typography>
           <SelectField
-            disabled={mode !== 'new' || !userContext.isSuperuser}
+            disabled={mode !== 'new'}
             key={'organization'}
             label={'Organization'}
             value={form.organization}

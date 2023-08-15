@@ -5,7 +5,6 @@ import {Link, Loading} from "../shared";
 import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import {
   fetchOrganizations,
-  fetchOrganizationsBasedOnGroup,
 } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import SelectField from "../shared/fields/SelectField";
@@ -181,25 +180,26 @@ export default function OutcomeReports() {
         {outcomes.length ? outcomes.map((outcome, index) => {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
-              {/*<Typography variant={'body1'}> {`Outcome: ${outcome.name}`}  </Typography>*/}
-              <Typography variant={'body1'}> {'Outcome: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome.name}</Link> </Typography>
+              <Typography variant={'body1'}> {'Outcome: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome?.name || ''}</Link> </Typography>
               {outcome.indicators?
                 <Paper elevation={0}>
                 {/*<Typography variant={'body1'}> {`Indicators:`}  </Typography>*/}
                   {outcome.indicators.map(indicator => {
                     return (
                       <Paper elevation={0} sx={{pl: 4}}>
-                        <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'#2f5ac7'} colorWithHover>{indicator.name}</Link> </Typography>
-                        <Typography variant={'body1'} sx={{pl: 4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+                        <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'#2f5ac7'} colorWithHover>{indicator?.name || ''}</Link> </Typography>
+                        <Typography variant={'body1'} sx={{pl: 4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`} </Typography>
 
                           {indicator.indicatorReports?
                               (indicator.indicatorReports.map(indicatorReport =>
                                 <Paper elevation={0} sx={{pl: 4}}>
                                 <Typography variant={'body1'}> {`Indicator Report: `}<Link
                                   to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
-                                  color={'#2f5ac7'} colorWithHover>{indicatorReport.name}</Link> </Typography>
-                                  <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
-                                  <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
+                                  color={'#2f5ac7'} colorWithHover>{indicatorReport.name || null}</Link> </Typography>
+                                  <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value?.numericalValue || null}`} </Typography>
+                                  {indicatorReport.hasTime?
+                                    <Typography variant={'body1'}
+                                               sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>:null}
                                 </Paper>
 
                               ))

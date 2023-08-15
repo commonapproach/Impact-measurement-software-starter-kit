@@ -56,7 +56,8 @@ const fetchIndicators = async (req, res) => {
       {
         populates: ['hasIndicators.unitOfMeasure', 'hasIndicators.indicatorReports.value',
           'hasIndicators.indicatorReports.hasTime.hasBeginning', 'hasIndicators.indicatorReports.hasTime.hasEnd']
-      });
+      }
+      );
     if (!organization)
       throw new Server400Error('No such organization');
     if (!organization.hasIndicators)

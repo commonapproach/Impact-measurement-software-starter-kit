@@ -198,12 +198,12 @@ function TopNavBar() {
                 <Typography variant="inherit">Dashboard</Typography>
               </MenuItem>
 
-              <MenuItem onClick={handleLink('/profile/' + uri + '/')}>
-                <ListItemIcon>
-                  <ManageAccountsIcon fontSize="medium" sx={{color: 'black'}}/>
-                </ListItemIcon>
-                <Typography variant="inherit">Profile</Typography>
-              </MenuItem>
+              {/*<MenuItem onClick={handleLink('/profile/' + uri + '/')}>*/}
+              {/*  <ListItemIcon>*/}
+              {/*    <ManageAccountsIcon fontSize="medium" sx={{color: 'black'}}/>*/}
+              {/*  </ListItemIcon>*/}
+              {/*  <Typography variant="inherit">Profile</Typography>*/}
+              {/*</MenuItem>*/}
 
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>

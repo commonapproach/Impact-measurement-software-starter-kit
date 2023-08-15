@@ -40,6 +40,14 @@ const getValue = (object, graphdbModel, property) => {
   }
 };
 
+const getObjectValue = (object, graphdbModel, property) => {
+  if (object[getFullURI(graphdbModel.schema[property].internalKey)]){
+    return object[getFullURI(graphdbModel.schema[property].internalKey)][0];
+  } else {
+    return undefined;
+  }
+};
+
 const getFullTypeURI = (graphdbModel) => {
   return getFullURI(graphdbModel.schemaOptions.rdfTypes[1]);
 };
@@ -674,7 +682,13 @@ const fileUploading = async (req, res, next) => {
           comment = getValue(object, GDBIndicatorReportModel, 'comment')
         }
         let value
-        if (!getValue(object, GDBIndicatorReportModel, 'value') && !getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0], GDBMeasureModel, 'numericalValue')){
+        let measureURI = getValue(object, GDBIndicatorReportModel, 'value');
+        let measureObject = getObjectValue(object, GDBIndicatorReportModel, 'value');
+
+        let numericalValue;
+        if (measureObject)
+          numericalValue = getValue(measureObject, GDBMeasureModel, 'numericalValue')
+        if (!measureURI && !numericalValue){
           addTrace('        Error: Mandatory property missing');
           addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'value'))} is missing`);
           addMessage(8, 'propertyMissing',
@@ -682,13 +696,11 @@ const fileUploading = async (req, res, next) => {
           error += 1;
           hasError = true;
         } else {
-          value = getValue(object, GDBIndicatorReportModel, 'value') ||
+          value = measureURI ||
             GDBMeasureModel({
-              numericalValue: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0],
-                GDBMeasureModel, 'numericalValue'
-              ),
+              numericalValue
             },
-            {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'value')][0])})
+            {uri: measureObject['@id']})
         }
         if (!hasError) {
           const indicatorReport = GDBIndicatorReportModel({

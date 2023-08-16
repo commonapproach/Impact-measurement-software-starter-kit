@@ -236,9 +236,9 @@ const fileUploading = async (req, res, next) => {
         } else {
           error += 1;
           addTrace('        Error: Invalid URI');
-          addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))}  contains invalid value(s): ${obj['@value']}`);
+          addTrace(`            In object with URI ${object['@id']} of type ${getPrefixedURI(object['@type'][0])} attribute ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, property))}  contains invalid value(s): ${obj['@value']}`);
           addMessage(8, 'invalidValue',
-            {uri:object['@id'], type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes')), value: obj['@value']})
+            {uri:object['@id'], type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, property)), value: obj['@value']})
         }
 
       });
@@ -577,6 +577,7 @@ const fileUploading = async (req, res, next) => {
         } else {
           hasName = getValue(object, GDBOutcomeModel, 'name');
         }
+        let description;
         if (!object[getFullPropertyURI(GDBOutcomeModel, 'description')]) {
           // addTrace('        Error: Mandatory property missing');
           // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))} is missing`);
@@ -584,11 +585,14 @@ const fileUploading = async (req, res, next) => {
           //   {uri, type: getPrefixedURI(object['@type'][0]),hasName, property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))});
           // error += 1;
           // hasError = true;
+        } else {
+          description = getValue(object, GDBOutcomeModel, 'description');
         }
         if (!hasError) {
           const outcome = GDBOutcomeModel({
             name: hasName,
-            description: getValue(object, GDBOutcomeModel, 'description'),
+            description: description,
+            forOrganization: organization._uri
           }, {uri: uri});
           await transSave(trans, outcome);
           outcomeDict[uri] = outcome;
@@ -608,6 +612,7 @@ const fileUploading = async (req, res, next) => {
           hasName = getValue(object, GDBIndicatorModel, 'name');
         }
 
+        let description;
         if (!object[getFullPropertyURI(GDBIndicatorModel, 'description')]) {
           // addTrace('        Error: Mandatory property missing');
           // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`);
@@ -615,6 +620,8 @@ const fileUploading = async (req, res, next) => {
           //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))});
           // error += 1;
           // hasError = true;
+        } else {
+          description = getValue(object, GDBIndicatorModel, 'description')
         }
 
         let unitOfMeasure;
@@ -639,9 +646,9 @@ const fileUploading = async (req, res, next) => {
         if (!hasError) {
           const indicator = GDBIndicatorModel({
             name: hasName,
-            description: getValue(object, GDBIndicatorModel, 'description'),
-            unitOfMeasure
-
+            description,
+            unitOfMeasure,
+            forOrganizations: [organization._uri]
           }, {uri: uri});
           await transSave(trans, indicator);
           indicatorDict[uri] = indicator;
@@ -711,7 +718,7 @@ const fileUploading = async (req, res, next) => {
             dateCreated: dateCreated,
             comment: comment,
             value: value,
-
+            forOrganization: organization._uri
             // hasTime: getValue(object, GDBIndicatorReportModel, 'hasTime') ||
             //   GDBDateTimeIntervalModel({
             //

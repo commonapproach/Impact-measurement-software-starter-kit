@@ -54,14 +54,14 @@ export default function OutcomeReports() {
     }
 
     outcomes.map(outcome => {
-      addLine('Outcome: ' + outcome.name, 2);
+      addLine('Outcome: ' + outcome.name || '', 2);
       outcome.indicators.map(indicator => {
-        addLine(`Indicator Name: ${indicator.name}`, 6);
-        addLine(`Unit of Measure: ${indicator.unitOfMeasure.label}`, 10);
+        addLine(`Indicator Name: ${indicator.name || ''}`, 6);
+        addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 10);
         indicator.indicatorReports.map(indicatorReport => {
-          addLine(`Indicator Report: ${indicatorReport.name}`, 10);
-          addLine(`Value: ${indicatorReport.value.numericalValue}`, 14);
-          addLine(`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`, 14);
+          addLine(`Indicator Report: ${indicatorReport.name || ''}`, 10);
+          addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 14);
+          addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 14);
         })
       })
 

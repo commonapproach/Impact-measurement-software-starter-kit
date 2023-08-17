@@ -3,6 +3,7 @@ const {GDBUserAccountModel} = require("./userAccount");
 const {GDBIndicatorModel} = require("./indicator");
 const {GDBOutcomeModel} = require("./outcome");
 const {GDBPhoneNumberModel} = require("./phoneNumber");
+const {GDBCharacteristicModel} = require("./characteristic");
 
 const GDBOrganizationIdModel = createGraphDBModel({
   hasIdentifier: {type: String, internalKey: 'tove_org:hasIdentifier'},
@@ -26,6 +27,7 @@ const GDBOrganizationModel = createGraphDBModel({
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
   email: {type: String, internalKey: ':hasEmail'},
+  characteristic: {type: () => require("./characteristic").GDBCharacteristicModel, internalKey: 'cids:hasCharacteristic'}
 }, {
   rdfTypes: ['cids:Organization'], name: 'organization'
 });
@@ -50,8 +52,9 @@ const GDBStakeholderOrganizationModel = createGraphDBModel({
   description: {type: String, internalKey: 'schema:description'},
   catchmentArea: {type: String, internalKey: 'cids:hasCatchmentArea'},
   name: {type: String, internalKey: 'genprops:hasName'},
+  characteristic: {type: () => require("./characteristic").GDBCharacteristicModel, internalKey: 'cids:hasCharacteristic'}
 },{
-  rdfTypes: ['cids:Organization', 'cids:Stakeholder'], name: 'stakeholder'
+  rdfTypes: ['cids:Organization', 'cids:Stakeholder'], name: 'stakeholderOrganization'
 })
 
 module.exports = {

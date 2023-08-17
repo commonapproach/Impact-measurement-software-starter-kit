@@ -46,7 +46,7 @@ export default function AddEditIndicator() {
     description: '',
     unitOfMeasure: '',
     uri: '',
-    organizations: []
+    organization: ''
   });
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +73,7 @@ export default function AddEditIndicator() {
       // navigate('/organization-indicators');
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
     } else if (mode === 'new' && orgUri) {
-      setForm(form => ({...form, organizations: [orgUri]}));
+      setForm(form => ({...form, organization: orgUri}));
       setLoading(false);
     } else {
       navigate('/organization-indicators');
@@ -132,8 +132,8 @@ export default function AddEditIndicator() {
 
     if (!form.description)
       error.description = 'The field cannot be empty';
-    if (form.organizations.length === 0)
-      error.organizations = 'The field cannot be empty';
+    if (!form.organization)
+      error.organization = 'The field cannot be empty';
     // if (!form.hasIdentifier)
     //   error.hasIdentifier = 'The field cannot be empty';
     setErrors(error);
@@ -143,7 +143,7 @@ export default function AddEditIndicator() {
   if (loading)
     return <Loading/>;
 
-  console.log(form)
+  console.log(form);
 
   return (
     <Container maxWidth="md">
@@ -152,19 +152,17 @@ export default function AddEditIndicator() {
 
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
-            <Typography variant={'h6'}> {`URI:`} </Typography>
+          <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-            <Typography variant={'h6'}> {`Organizations:`} </Typography>
-          <Typography variant={'body1'}> {form.organizations.map(orgUri => {
-            return (<Link to={`/organizations/${encodeURIComponent(orgUri)}/view`} colorWithHover
-                          color={'#2f5ac7'}>{form.organizationNames[orgUri]}</Link>);
-          })} </Typography>
-            <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
+          <Typography variant={'h6'}> {`Organization:`} </Typography>
+          <Typography variant={'body1'}> {<Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover
+                                                color={'#2f5ac7'}>{form.organizationName}</Link>} </Typography>
+          <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
           <Typography variant={'body1'}> {`${form.unitOfMeasure}`} </Typography>
-            <Typography variant={'h6'}> {`Description:`} </Typography>
+          <Typography variant={'h6'}> {`Description:`} </Typography>
           <Typography variant={'body1'}> {`${form.description}`} </Typography>
 
-          <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/indicator/${encodeURIComponent(uri)}/edit`);
           }
 

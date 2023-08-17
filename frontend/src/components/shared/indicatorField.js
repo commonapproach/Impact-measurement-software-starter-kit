@@ -7,36 +7,48 @@ import {UserContext} from "../../context";
 import {isValidURL} from "../../helpers/validation_helpers";
 
 
-// const filterOptions = createFilterOptions({
-//   ignoreAccents: false,
-//   matchFrom: 'start'
-// });
+const filterOptions = createFilterOptions({
+  ignoreAccents: false,
+  matchFrom: 'start'
+});
 
 
-// function LoadingAutoComplete({label, options, property, state, onChange, disabled, error, helperText, required, onBlur}) {
-//   return (
-//     <Autocomplete
-//       sx={{mt: 2}}
-//       options={Object.keys(options[property])}
-//       getOptionLabel={(key) => options[property][key]}
-//       fullWidth
-//       value={state[property]}
-//       onChange={onChange(property)}
-//       filterOptions={filterOptions}
-//       renderInput={(params) =>
-//         <TextField
-//           {...params}
-//           required={required}
-//           label={label}
-//           disabled={disabled}
-//           error={error}
-//           helperText={helperText}
-//           onBlur={onBlur}
-//         />
-//       }
-//     />
-//   );
-// }
+function LoadingAutoComplete({
+                               label,
+                               options,
+                               property,
+                               state,
+                               onChange,
+                               disabled,
+                               error,
+                               helperText,
+                               required,
+                               onBlur
+                             }) {
+  return (
+    <Autocomplete
+      sx={{mt: 2}}
+      options={Object.keys(options)}
+      getOptionLabel={(key) => options[key]}
+      fullWidth
+      disabled={disabled}
+      value={state[property]}
+      onChange={onChange(property)}
+      filterOptions={filterOptions}
+      renderInput={(params) =>
+        <TextField
+          {...params}
+          required={required}
+          label={label}
+          disabled={disabled}
+          error={error}
+          helperText={helperText}
+          onBlur={onBlur}
+        />
+      }
+    />
+  );
+}
 
 export default function IndicatorField({defaultValue, required, onChange, label, disabled, importErrors, disabledOrganization, disabledURI}) {
 
@@ -128,24 +140,25 @@ export default function IndicatorField({defaultValue, required, onChange, label,
             </Grid>
 
             <Grid item xs={12}>
-              <Dropdown
-                label={'Organizations'}
-                key={'organizations'}
-                value={state.organizations}
-                onChange={handleChange('organizations')}
+              <LoadingAutoComplete
+                key={'organization'}
+                label={"Organization"}
                 options={options}
-                error={!!errors.organizations}
-                helperText={errors.organizations}
-                disabled={disabled || disabledOrganization}
+                property={'organization'}
+                state={state}
+                onChange={handleChange}
+                error={!!errors.organization}
+                helperText={errors.organization}
+                required={required}
+                disabled={disabled}
                 onBlur={() => {
-                  if (state.organizations.length === 0) {
-                    setErrors(errors => ({...errors, organizations: 'This field cannot be empty'}));
-                  }else {
-                    setErrors(errors => ({...errors, organizations: null}));
+                  if (!state.organization) {
+                    setErrors(errors => ({...errors, organization: 'This field cannot be empty'}));
+                  } else {
+                    setErrors(errors => ({...errors, organization: null}));
                   }
                 }
                 }
-                sx={{mt: 2}}
               />
             </Grid>
 

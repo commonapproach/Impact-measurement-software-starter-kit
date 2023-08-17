@@ -105,16 +105,12 @@ const fetchIndicator = async (req, res) => {
   indicator.unitOfMeasure = indicator.unitOfMeasure.label;
   if (!indicator)
     throw new Server400Error('No such indicator');
-  indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(orgURI => {
-    return GDBOrganizationModel.findOne({_uri: orgURI});
-  }));
-  indicator.organizations = indicator.forOrganizations.map(organization => {
-    return organization._uri;
-  });
-  indicator.organizationNames = {};
-  indicator.forOrganizations.map(organization => {
-    indicator.organizationNames[organization._uri] = organization.legalName;
-  });
+  indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization})
+  // indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(orgURI => {
+  //   return GDBOrganizationModel.findOne({_uri: orgURI});
+  // }));
+  indicator.organization = indicator.forOrganization._uri
+  indicator.organizationName = indicator.forOrganization.legalName;
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
@@ -150,7 +146,7 @@ const updateIndicator = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('Uri is needed');
-  if (!form || !form.description || !form.name || form.organizations.length === 0 || !form.unitOfMeasure)
+  if (!form || !form.description || !form.name || !form.organization || !form.unitOfMeasure)
     throw new Server400Error('Invalid input');
   const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure']});
   if (!indicator)
@@ -158,45 +154,58 @@ const updateIndicator = async (req, res) => {
   indicator.name = form.name;
   indicator.description = form.description;
   indicator.unitOfMeasure.label = form.unitOfMeasure;
-  const organizationDict = {};
+  if (indicator.forOrganization !== form.organization) {
 
-
-  // fetch indicator.forOrganizations from database
-  indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(organizationURI =>
-    GDBOrganizationModel.findOne({_uri: organizationURI})
-  ));
-  // cache indicator.forOrganizations into dict
-  cacheListOfOrganizations(indicator.forOrganizations, organizationDict);
-  // fetch form.organizations from database
-  form.organizations = await Promise.all(form.organizations.map(organizationUri => {
-      // if the organization already in the dict, simply get from dict
-      if (organizationDict[organizationUri])
-        return organizationDict[organizationUri];
-      // otherwise, fetch
-      return GDBOrganizationModel.findOne({_uri: organizationUri});
-    }
-  ));
-  // cache organizations which is not in dict
-  cacheListOfOrganizations(form.organizations, organizationDict);
-
-
-  // remove the indicator from every organizations in indicator.forOrganizations
-  await Promise.all(indicator.forOrganizations.map(organization => {
-    const index = organization.hasIndicators.indexOf(uri);
-    organization.hasIndicators.splice(index, 1);
-    organization.markModified('hasIndicators');
-    return organization.save();
-  }));
-
-  // add the indicator to every organizations in form.organizations
-  await Promise.all(form.organizations.map(organization => {
-    if (!organization.hasIndicators)
-      organization.hasIndicators = [];
-    organization.hasIndicators.push(indicator._uri);
-    return organization.save();
-  }));
-
-  indicator.forOrganizations = form.organizations;
+    indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization});
+    form.organization = await GDBOrganizationModel.findOne({_uri: form.organization});
+    // remove the indicator from previous organization
+    indicator.forOrganization.hasIndicators = indicator.forOrganization.hasIndicators.filter(
+      indicatorUri => indicatorUri !== uri
+    )
+    await indicator.forOrganization.save();
+    // add the indicator to the new organization
+    if (!form.organization.hasIndicators)
+      form.organization.hasIndicators = []
+    form.organization.hasIndicators.push(uri);
+    await form.organization.save();
+  }
+  // const organizationDict = {};
+  // // fetch indicator.forOrganizations from database
+  // indicator.forOrganizations = await Promise.all(indicator.forOrganizations.map(organizationURI =>
+  //   GDBOrganizationModel.findOne({_uri: organizationURI})
+  // ));
+  // // cache indicator.forOrganizations into dict
+  // cacheListOfOrganizations(indicator.forOrganizations, organizationDict);
+  // // fetch form.organizations from database
+  // form.organizations = await Promise.all(form.organizations.map(organizationUri => {
+  //     // if the organization already in the dict, simply get from dict
+  //     if (organizationDict[organizationUri])
+  //       return organizationDict[organizationUri];
+  //     // otherwise, fetch
+  //     return GDBOrganizationModel.findOne({_uri: organizationUri});
+  //   }
+  // ));
+  // // cache organizations which is not in dict
+  // cacheListOfOrganizations(form.organizations, organizationDict);
+  //
+  //
+  // // remove the indicator from every organizations in indicator.forOrganizations
+  // await Promise.all(indicator.forOrganizations.map(organization => {
+  //   const index = organization.hasIndicators.indexOf(uri);
+  //   organization.hasIndicators.splice(index, 1);
+  //   organization.markModified('hasIndicators');
+  //   return organization.save();
+  // }));
+  //
+  // // add the indicator to every organizations in form.organizations
+  // await Promise.all(form.organizations.map(organization => {
+  //   if (!organization.hasIndicators)
+  //     organization.hasIndicators = [];
+  //   organization.hasIndicators.push(indicator._uri);
+  //   return organization.save();
+  // }));
+  //
+  indicator.forOrganization = form.organization;
   await indicator.save();
   return res.status(200).json({success: true});
 
@@ -217,24 +226,21 @@ const createIndicator = async (req, res) => {
   if (!userAccount)
     throw new Server400Error('Wrong auth');
   const {form} = req.body;
-  if (!form || !form.organizations || !form.name || !form.description || !form.unitOfMeasure)
+  if (!form || !form.organization || !form.name || !form.description || !form.unitOfMeasure)
     throw new Server400Error('Invalid input');
-  form.forOrganizations = await Promise.all(form.organizations.map(organizationUri =>
-    GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasIndicators']})
-  ));
+  form.forOrganization = await  GDBOrganizationModel.findOne({_uri: form.organization}, {populates: ['hasIndicators']})
   // for each organization, does it contain any indicator with same name?
   let duplicate = false;
   let organizationInProblem;
-  form.forOrganizations.map(organization => {
-    if (organization.hasIndicators) {
-      organization.hasIndicators.map(indicator => {
-        if (indicator.name === form.name) {
-          duplicate = true;
-          organizationInProblem = organization._id;
-        }
-      });
-    }
-  });
+  if (form.organization.hasIndicators) {
+    form.organization.hasIndicators.map(indicator => {
+      if (indicator.name === form.name) {
+        duplicate = true;
+        organizationInProblem = form.organization._id;
+      }
+    });
+  }
+
   if (duplicate && organizationInProblem)
     return res.status(200).json({
       success: false,
@@ -247,18 +253,23 @@ const createIndicator = async (req, res) => {
   const indicator = GDBIndicatorModel({
     name: form.name,
     description: form.description,
-    forOrganizations: form.forOrganizations,
+    forOrganization: form.forOrganization._uri,
     unitOfMeasure: form.unitOfMeasure
   }, form.uri ? {uri: form.uri} : null);
 
   await indicator.save();
+  if (!form.forOrganization.hasIndicators)
+    form.forOrganization.hasIndicators = [];
+  form.forOrganization.hasIndicators.push(indicator)
+  await form.forOrganization.save()
+
   // add the indicator to the organizations
-  await Promise.all(indicator.forOrganizations.map(organization => {
-    if (!organization.hasIndicators)
-      organization.hasIndicators = [];
-    organization.hasIndicators.push(indicator);
-    return organization.save();
-  }));
+  // await Promise.all(indicator.forOrganizations.map(organization => {
+  //   if (!organization.hasIndicators)
+  //     organization.hasIndicators = [];
+  //   organization.hasIndicators.push(indicator);
+  //   return organization.save();
+  // }));
   // const ownership = GDBOwnershipModel({
   //   resource: indicator,
   //   owner: userAccount,

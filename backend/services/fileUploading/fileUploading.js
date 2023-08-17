@@ -299,7 +299,7 @@ const fileUploading = async (req, res, next) => {
                   {uri, referenceURI: indicatorURI, type:'Indicator'});
                 error += 1;
                 hasError = true;
-              } else if (!indicator.forOrganizations.includes(organization._uri)) {
+              } else if (!indicator.forOrganization !== organization._uri) {
                 addTrace('        Error:');
                 addTrace(`            Indicator ${indicatorURI} does not belong to this organization`);
                 addMessage(8, 'subjectDoesNotBelong', {uri, type: 'Indicator', subjectURI: indicatorURI})
@@ -354,9 +354,7 @@ const fileUploading = async (req, res, next) => {
         // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
         // add the organization to it, and add it to the organization
-        if (!indicator.forOrganizations)
-          indicator.forOrganizations = [];
-        indicator.forOrganizations.push(organization._uri);
+        indicator.forOrganization = organization._uri;
         if (!organization.hasIndicators)
           organization.hasIndicators = [];
         organization.hasIndicators.push(indicator._uri);
@@ -441,7 +439,7 @@ const fileUploading = async (req, res, next) => {
             addMessage(8, 'badReference',
               {uri, referenceURI: indicatorURI, type:'Indicator'});
             error += 1;
-          }else if (!indicator.forOrganizations.includes(organization._uri)) {
+          }else if (!indicator.forOrganization !== organization._uri) {
             addTrace('        Error:');
             addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
             addMessage(8, 'subjectDoesNotBelong',
@@ -648,7 +646,7 @@ const fileUploading = async (req, res, next) => {
             name: hasName,
             description,
             unitOfMeasure,
-            forOrganizations: [organization._uri]
+            forOrganization: organization._uri
           }, {uri: uri});
           await transSave(trans, indicator);
           indicatorDict[uri] = indicator;

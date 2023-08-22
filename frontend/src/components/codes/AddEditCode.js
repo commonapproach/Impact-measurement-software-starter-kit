@@ -53,9 +53,7 @@ export default function AddEditCode() {
     loadingButton: false,
   });
   const [errors, setErrors] = useState(
-    {
-      organizationIds: {0: {}}
-    }
+    {}
   );
 
 
@@ -108,7 +106,7 @@ export default function AddEditCode() {
           }
         );
       } else if ((mode === 'edit' || mode === 'view') && !uri) {
-        navigate('/organizations');
+        navigate('/codes');
         enqueueSnackbar("No URI provided", {variant: 'error'});
       } else {
         setLoading(false);
@@ -147,21 +145,14 @@ export default function AddEditCode() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating code', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      if (form.telephone) {
-        form.countryCode = 1;
-        form.areaCode = Number(form.telephone.match(/\(\d{3}\)/)[0].match(/\d{3}/)[0]);
-        form.phoneNumber = Number(form.telephone.split('(')[1].split(') ')[0] +
-          form.telephone.split('(')[1].split(') ')[1].split('-')[0] +
-          form.telephone.split('(')[1].split(') ')[1].split('-')[1]);
-      }
       updateOrganization(encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/organizations');
+          navigate('/codes');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -170,7 +161,7 @@ export default function AddEditCode() {
         }
         console.log(e);
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating code', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -204,62 +195,22 @@ export default function AddEditCode() {
     <Container maxWidth="md">
       {mode === 'view' ?
         <Paper sx={{p: 2}} variant={'outlined'}>
-          <Typography variant={'h6'}> {`Legal Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.legalName}`} </Typography>
+          <Typography variant={'h6'}> {`Name:`} </Typography>
+          <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          {form.organizationIds.length ? <Typography variant={'h6'}> {`Organization IDs:`} </Typography> : null}
-          {form.organizationIds.map(organizationId => {
+          {form.definedBy ? <Typography variant={'h6'}> {`Defined By:`} </Typography> : null}
+          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.definedBy)}/view`}
+                                               colorWithHover color={'#2f5ac7'}>{options.definedBy[form.definedBy]}</Link> </Typography>
+          {form.specification ? <Typography variant={'h6'}> {`specification:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.specification} </Typography>
+          {form.identifier ? <Typography variant={'h6'}> {`identifier:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.identifier} </Typography>
+          {form.codeValue ? <Typography variant={'h6'}> {`Code Value:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.codeValue} </Typography>
+          {form.iso72Value ? <Typography variant={'h6'}> {`iso72 Value:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.iso72Value} </Typography>
 
-            return (
-              <Paper elevation={0}>
-                <Typography variant={'body1'}> {`ID: ${organizationId.organizationId}`}</Typography>
-                <Typography variant={'body1'}> Issued By: <Link
-                  to={`/organization/${encodeURIComponent(organizationId.issuedBy._uri)}/view`} colorWithHover
-                  color={'#2f5ac7'}>{organizationId.issuedBy.legalName}</Link></Typography>
-              </Paper>
-            );
-          })}
-          {form.issuedBy ? <Typography variant={'h6'}> {`Issued By:`} </Typography> : null}
-          <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.issuedBy)}/view`}
-                                               colorWithHover color={'#2f5ac7'}>{form.issuedByName}</Link> </Typography>
-          {form.telephone ? <Typography variant={'h6'}> {`Telephone:`} </Typography> : null}
-          <Typography variant={'body1'}> {form.telephone} </Typography>
-          {form.email ? <Typography variant={'h6'}> {`Contact Email:`} </Typography> : null}
-          <Typography variant={'body1'}> {form.email} </Typography>
-          {form.contactName ? <Typography variant={'h6'}> {`Contact Name:`} </Typography> : null}
-          <Typography variant={'body1'}> {form.contactName} </Typography>
-          {form.administrator ? <Typography variant={'h6'}> {`Organization Administrator:`} </Typography> : null}
-          <Typography variant={'body1'}> <Link to={`/organization/${encodeURIComponent(form.administrator)}/view`}
-                                               colorWithHover color={'#2f5ac7'}>{form.administratorName}</Link>
-          </Typography>
-          {form.reporters.length ? <Typography variant={'h6'}> {`Reporters:`} </Typography> : null}
-          {form.reporters.map(reporterURI => {
-            return (
-              <Typography variant={'body1'}>
-                <Link to={`/indicator/${encodeURIComponent(reporterURI)}/view`} colorWithHover
-                      color={'#2f5ac7'}>{form.reporterNames[reporterURI]}</Link>
-              </Typography>
-            );
-          })}
-          {form.editors.length ? <Typography variant={'h6'}> {`Editors:`} </Typography> : null}
-          {form.editors.map(editorURI => {
-            return (
-              <Typography variant={'body1'}>
-                <Link to={`/indicator/${encodeURIComponent(editorURI)}/view`} colorWithHover
-                      color={'#2f5ac7'}>{form.editorNames[editorURI]}</Link>
-              </Typography>
-            );
-          })}
-          {form.researchers.length ? <Typography variant={'h6'}> {`Researchers:`} </Typography> : null}
-          {form.researchers.map(researcherURI => {
-            return (
-              <Typography variant={'body1'}>
-                <Link to={`/indicator/${encodeURIComponent(researcherURI)}/view`} colorWithHover
-                      color={'#2f5ac7'}>{form.researcherNames[researcherURI]}</Link>
-              </Typography>
-            );
-          })}
 
         </Paper>
         : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
@@ -411,8 +362,8 @@ export default function AddEditCode() {
           />
 
           <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Organization?' :
-                         'Are you sure you want to update this Organization?'}
+                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Code?' :
+                         'Are you sure you want to update this Code?'}
                        buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                          key={'cancel'}>{'cancel'}</Button>,
                          <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
@@ -425,7 +376,7 @@ export default function AddEditCode() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         {mode === 'view' ?
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-            navigate(`/organizations/${encodeURIComponent(uri)}/edit`);
+            navigate(`/code/${encodeURIComponent(uri)}/edit`);
           }
           }>
             Edit

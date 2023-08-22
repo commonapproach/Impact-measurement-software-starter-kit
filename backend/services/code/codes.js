@@ -10,7 +10,7 @@ const fetchCodes = async (req, res) => {
 
 const fetchCodesHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'fetchThemes'))
+    if (await hasAccess(req, 'fetchCodes'))
       return await fetchCodes(req, res);
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {

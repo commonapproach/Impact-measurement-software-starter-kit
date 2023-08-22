@@ -261,7 +261,7 @@ export default function AddEditOrganization() {
             return (
               <Paper elevation={0}>
                 <Typography variant={'body1'}> {`ID: ${organizationId.organizationId}`}</Typography>
-                <Typography variant={'body1'}> Issued By: <Link to={`/organization/${encodeURIComponent(organizationId.issuedBy._uri)}/view`} colorWithHover color={'#2f5ac7'}>{organizationId.issuedBy.legalName}</Link></Typography>
+                <Typography variant={'body1'}> Issued By: <Link to={`/organizations/${encodeURIComponent(organizationId.issuedBy._uri)}/view`} colorWithHover color={'#2f5ac7'}>{organizationId.issuedBy.legalName}</Link></Typography>
               </Paper>
               )
           })}

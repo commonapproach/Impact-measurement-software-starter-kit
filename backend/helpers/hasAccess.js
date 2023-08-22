@@ -57,6 +57,9 @@ async function hasAccess(req, operationType) {
       if (userAccount.isSuperuser)
         return true;
       break;
+    case 'fetchCodes':
+      if (userAccount.isSuperuser)
+        return true;
 
 
     // stakeholder

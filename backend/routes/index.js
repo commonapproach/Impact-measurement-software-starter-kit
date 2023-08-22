@@ -16,5 +16,7 @@ module.exports = {
   groupsRoute: require('./groups'),
   groupRoute: require('./group'),
   errorReportRoute: require('./errorReport'),
-  fileUploadingRoute: require('./fileUploading')
+  fileUploadingRoute: require('./fileUploading'),
+  codeRoute: require('./code'),
+  codesRoute: require('./codes')
 }

@@ -48,6 +48,8 @@ import OrganizationUsers from "./components/users/organizationUsers";
 import SuperPassword from "./components/SuperPasswordPage";
 import Stakeholders from "./components/Stakeholders/Stakeholders";
 import AddEditStakeholder from "./components/Stakeholders/AddEditStakeholder";
+import AddEditCode from "./components/codes/AddEditCode";
+import Codes from "./components/codes/Codes";
 
 const routes = (
   <Routes>
@@ -75,6 +77,12 @@ const routes = (
     <Route path="/stakeholders" element={<PrivateRoute element={Stakeholders}/>}/>
     <Route path="/stakeholder/new" element={<PrivateRoute element={AddEditStakeholder}/>}/>
     <Route path="/stakeholder/:uri/:viewMode" element={<PrivateRoute element={AddEditStakeholder}/>}/>
+
+    {/*Codes*/}
+    <Route path="/codes" element={<PrivateRoute element={Codes}/>}/>
+    <Route path="/code/new" element={<PrivateRoute element={AddEditCode}/>}/>
+    <Route path="/code/:uri/:viewMode" element={<PrivateRoute element={AddEditCode}/>}/>
+
 
     {/*Groups*/}
     <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>

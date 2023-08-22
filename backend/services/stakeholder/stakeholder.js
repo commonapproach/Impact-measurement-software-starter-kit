@@ -1,7 +1,6 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
-const {stakeholderRoute} = require("../../routes");
 
 const fetchStakeholderHandler = async (req, res, next) => {
   try {

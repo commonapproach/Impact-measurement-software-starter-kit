@@ -47,15 +47,17 @@ export default function AddEditCharacteristic() {
     locked: false
   })
 
+  const [form, setForm] = useState({
+    codes: '',
+    stakeholder: '',
+    name: '',
+    value: ''
+  })
+
   const [errors, setErrors] = useState(
     {}
   )
-
-
-  const [form, setForm] = useState({
-    ...defaultAddEditQuestionFields,
-    options: [{key: 0, label: ''}]
-  })
+  
 
   const [types, setTypes] = useState({fieldTypes: {}, dataTypes: {}, optionsFromLabel: {}});
   const [loading, setLoading] = useState(true);

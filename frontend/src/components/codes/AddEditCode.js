@@ -7,9 +7,7 @@ import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {
-  fetchOrganization,
   fetchOrganizations,
-  updateOrganization
 } from "../../api/organizationApi";
 import {useSnackbar} from "notistack";
 import {fetchUsers} from "../../api/userApi";
@@ -19,7 +17,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createCode, fetchCode} from "../../api/codeAPI";
+import {createCode, fetchCode, updateCode} from "../../api/codeAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -149,7 +147,7 @@ export default function AddEditCode() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateOrganization(encodeURIComponent(uri), {form},).then((res) => {
+      updateCode(encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');

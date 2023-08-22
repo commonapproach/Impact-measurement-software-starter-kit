@@ -12,8 +12,8 @@ export async function createCode(params) {
   return postJson('/api/code/', params);
 }
 
-export async function updateOrganization(uri, params) {
-  return putJson('/api/organization/' + uri, params);
+export async function updateCode(uri, params) {
+  return putJson('/api/code/' + uri, params);
 }
 
 export async function deleteOrganization(id) {

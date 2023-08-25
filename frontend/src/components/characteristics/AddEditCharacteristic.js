@@ -1,33 +1,40 @@
-import React, {useCallback, useEffect, useState} from 'react';
 import {makeStyles} from "@mui/styles";
 import {useNavigate, useParams} from "react-router-dom";
-import {defaultAddEditQuestionFields} from "../../constants/default_fields";
-import {Loading} from "../shared";
-import {Chip, Button, Container, Paper, Typography, Divider, IconButton, Grid} from "@mui/material";
-import SelectField from '../shared/fields/SelectField.js'
-import Dropdown from "../shared/fields/MultiSelectField";
+import React, {useEffect, useState, useContext} from "react";
+import {Link, Loading} from "../shared";
+import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
-import RadioField from "../shared/fields/RadioField";
-import {
-  createCharacteristic, fetchCharacteristic,
-  fetchCharacteristicFieldTypes,
-  fetchCharacteristicsDataTypes,
-  fetchCharacteristicsOptionsFromClass, updateCharacteristic
-} from "../../api/characteristicApi";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {Add as AddIcon, Delete as DeleteIcon} from "@mui/icons-material";
-
+import {
+  fetchOrganizations,
+} from "../../api/organizationApi";
+import {useSnackbar} from "notistack";
+import {fetchUsers} from "../../api/userApi";
+import Dropdown from "../shared/fields/MultiSelectField";
+import SelectField from "../shared/fields/SelectField";
+import {UserContext} from "../../context";
+import {reportErrorToBackend} from "../../api/errorReportApi";
+import {isValidURL} from "../../helpers/validation_helpers";
+import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
+import {createCode, fetchCode, fetchCodes, updateCode} from "../../api/codeAPI";
+import {fetchStakeholders} from "../../api/stakeholderAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
   },
   button: {
+    marginLeft: 10,
     marginTop: 12,
     marginBottom: 0,
     length: 100
   },
+  link: {
+    marginTop: 20,
+    marginLeft: 15,
+    color: '#007dff',
+  }
 }));
 
 
@@ -35,397 +42,285 @@ export default function AddEditCharacteristic() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const {id, option} = useParams();
-
+  const userContext = useContext(UserContext);
+  const {uri, viewMode} = useParams();
+  const mode = uri ? viewMode : 'new';
+  const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({
-    success: false,
     submitDialog: false,
     loadingButton: false,
-    successDialog: false,
-    failDialog: false,
-    locked: false
-  })
-
-  const [form, setForm] = useState({
-    codes: '',
-    stakeholder: '',
-    name: '',
-    value: ''
-  })
-
+  });
   const [errors, setErrors] = useState(
     {}
-  )
-  
+  );
 
-  const [types, setTypes] = useState({fieldTypes: {}, dataTypes: {}, optionsFromLabel: {}});
+
+  const [form, setForm] = useState({
+    stakeholders: [],
+    codes: [],
+    name: '',
+    value: ''
+  });
+  // const [outcomeForm, setOutcomeForm] = useState([
+  // ]);
   const [loading, setLoading] = useState(true);
+  const [options, setOptions] = useState({
+    stakeholders: {},
+    codes: {}
+  });
+
 
   useEffect(() => {
-    const newTypes = {};
+
     Promise.all([
-      fetchCharacteristicFieldTypes().then(fieldTypes => newTypes.fieldTypes = fieldTypes),
-      fetchCharacteristicsDataTypes().then(dataTypes => newTypes.dataTypes = dataTypes),
-      fetchCharacteristicsOptionsFromClass().then(optionsFromClass => newTypes.optionsFromClass = optionsFromClass)
+      fetchCodes().then(({codes, success}) => {
+        if (success) {
+          const codeDict = {};
+          codes.map(code => {
+            codeDict[code._uri] = code.name;
+          });
+          setOptions(options => ({...options, codes: codeDict}));
+        }
+      }),
+      fetchStakeholders().then(({stakeholders, success}) => {
+        if (success) {
+          const stakeholderDict = {}
+          stakeholders.map(stakeholder => {
+            stakeholderDict[stakeholder._uri] = stakeholder.name;
+          })
+          setOptions(options => ({...options, stakeholders: stakeholderDict}));
+        }
+      })
     ]).then(() => {
-      if (option === 'edit' && id) {
-        return fetchCharacteristic(id).then(res => {
-          const data = res.fetchData
-          const locked = res.locked
-          if (data.fieldType === 'MultiSelectField' || data.fieldType === 'SingleSelectField' || data.fieldType === 'RadioSelectField') {
-            if (data.options) {
-              data.classOrManually = 'manually'
-              data.optionsFromClass = ''
-            } else if (data.optionsFromClass) {
-              data.classOrManually = 'class'
-              data.options = [{key: 0, label: ''}]
-            }
-          } else {
-            data.classOrManually = 'class'
-            data.options = [{key: 0, label: ''}]
-            data.optionsFromClass = ''
+      if ((mode === 'edit' || mode === 'view') && uri) {
+        fetchCode(encodeURIComponent(uri)).then(res => {
+          if (res.success) {
+            const {code} = res;
+            setForm({...code, uri: code._uri});
+            setLoading(false);
           }
-          setForm(data)
-          setState(state => ({...state, locked}))
-        })
+        }).catch(e => {
+            if (e.json)
+              setErrors(e.json);
+            console.log(e);
+            setLoading(false);
+            reportErrorToBackend(e);
+            enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
+          }
+        );
+      } else if ((mode === 'edit' || mode === 'view') && !uri) {
+        navigate('/codes');
+        enqueueSnackbar("No URI provided", {variant: 'error'});
+      } else {
+        setLoading(false);
       }
-    }).then(() => {
-      setTypes(newTypes);
-      setLoading(false);
     }).catch(e => {
+      console.log(e);
       if (e.json)
         setErrors(e.json);
-      setLoading(false)
-      setState(state => ({...state, failDialog: true}))
+      reportErrorToBackend(e);
+      setLoading(false);
+
+      enqueueSnackbar(e.json?.message || "Error occurs", {variant: 'error'});
     });
-  }, [])
 
 
-  const handleAdd = () => {
-    setForm(form => ({...form, options: form.options.concat({label: '', key: Math.random()})}))
-  }
-
-  const handleRemove = () => {
-    setForm(form => ({...form, options: form.options.splice(0, form.options.length - 1)}))
-  }
+  }, [mode]);
 
   const handleSubmit = () => {
     if (validate()) {
-      setState(state => ({...state, submitDialog: true}))
+      setState(state => ({...state, submitDialog: true}));
     }
-  }
+  };
 
-  const handleConfirm = async () => {
-    setState(state => ({...state, loadingButton: true}))
-    const readyForm = {...form, classOrManually: undefined}
-    if (!isSelected()) {
-      readyForm.options = undefined
-      readyForm.optionsFromClass = undefined
-    } else if (form.classOrManually === 'class') {
-      readyForm.options = undefined
-    } else if (form.classOrManually === 'manually') {
-      readyForm.optionsFromClass = undefined
-    }
-    if (form.fieldType === 'MultiSelectField') {
-      readyForm.multipleValues = true
-    } else {
-      readyForm.multipleValues = false
-    }
-    console.log(readyForm)
-    if (option === 'add') {
-      createCharacteristic(readyForm).then(res => {
+  const handleConfirm = () => {
+    setState(state => ({...state, loadingButton: true}));
+    if (mode === 'new') {
+      createCode({form}).then((ret) => {
+        if (ret.success) {
+          setState({loadingButton: false, submitDialog: false,});
+          navigate('/codes');
+          enqueueSnackbar(ret.message || 'Success', {variant: "success"});
+        }
+
+      }).catch(e => {
+        if (e.json) {
+          setErrors(e.json);
+        }
+        reportErrorToBackend(e);
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating code', {variant: "error"});
+        setState({loadingButton: false, submitDialog: false,});
+      });
+    } else if (mode === 'edit') {
+      updateCode(encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
-          setState(state => ({...state, loadingButton: false, submitDialog: false, successDialog: true}))
+          setState({loadingButton: false, submitDialog: false,});
+          navigate('/codes');
+          enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
         if (e.json) {
-          setErrors(e.json)
+          setErrors(e.json);
         }
-        setState(state => ({...state, loadingButton: false, submitDialog: false, failDialog: true}))
-      })
-    } else if (option === 'edit') {
-      updateCharacteristic(id, readyForm).then(res => {
-        if (res.success) {
-          setState(state => ({...state, loadingButton: false, submitDialog: false, successDialog: true}))
-        }
-      }).catch(e => {
-        if (e.json) {
-          setErrors(e.json)
-        }
-        setState(state => ({...state, loadingButton: false, submitDialog: false, failDialog: true}))
-      })
+        console.log(e);
+        reportErrorToBackend(e);
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating code', {variant: "error"});
+        setState({loadingButton: false, submitDialog: false,});
+      });
     }
-  }
 
-  const displayDataTypeValue = () => {
-    if (form.fieldType === 'TextField') {
-      form.dataType = 'xsd:string'
-      return 'xsd:string'
-    } else if (form.fieldType === "NumberField") {
-      form.dataType = 'xsd:number'
-      return 'xsd:number'
-    } else if (form.fieldType === 'BooleanRadioField') {
-      form.dataType = 'xsd:boolean'
-      return 'xsd:boolean'
-    } else if (form.fieldType === 'DateField' || form.fieldType === 'DateTimeField' || form.fieldType === 'TimeField') {
-      form.dataType = 'xsd:datetimes'
-      return 'xsd:datetimes'
-    } else if (isSelected()) {
-      form.dataType = 'owl:NamedIndividual'
-      return 'owl:NamedIndividual'
-    } else if (form.fieldType === 'PhoneNumberField' || form.fieldType === 'AddressField') {
-      form.dataType = 'owl:NamedIndividual'
-      return 'owl:NamedIndividual'
-    }
-  }
-
-  const isSelected = () => {
-    return form.fieldType === 'MultiSelectField' || form.fieldType === 'SingleSelectField' || form.fieldType === 'RadioSelectField'
-  }
+  };
 
   const validate = () => {
-    const errors = {};
-    for (const [label, value] of Object.entries(form)) {
-      if (label === 'label' || label === 'description' || label === 'fieldType' || label === 'classOrManually' || label === 'name') {
-        if (value === '') {
-          errors[label] = 'This field cannot be empty'
-        }
-      } else if (label === 'codes' && value.length === 0) {
-        // errors[label] = 'This field cannot be empty'
-      } else if (isSelected() && label === 'optionsFromClass' && form.classOrManually === 'class' && value === '') {
-        errors[label] = 'This field cannot be empty'
-      } else if (isSelected() && label === 'options' && form.classOrManually === 'manually') {
-        for (let i = 0; i < form.options.length; i++) {
-          if (!form.options[i].label) {
-            if (!errors[label]) {
-              errors[label] = {}
-            }
-            errors[label][form.options[i].key] = 'This field cannot be empty, please fill in or remove this field'
-          }
-        }
+    const error = {};
+    Object.keys(form).map(key => {
+      if (key !== 'uri' && !form[key]) {
+        error[key] = 'This field cannot be empty';
       }
+    });
+    if (form.uri && !isValidURL(form.uri)) {
+      error.uri = 'The field should be a valid URI';
     }
-    setErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    if (form.identifier && !isValidURL(form.identifier)){
+      error.identifier = 'The field should be a valid URI'
+    }
+
+    setErrors(error);
+
+    return Object.keys(error).length === 0;
+    // && outcomeFormErrors.length === 0 && indicatorFormErrors.length === 0;
+  };
 
   if (loading)
-    return <Loading/>
+    return <Loading/>;
 
   return (
+    <Container maxWidth="md">
+      {mode === 'view' ?
+        <Paper sx={{p: 2}} variant={'outlined'}>
+          <Typography variant={'h6'}> {`Name:`} </Typography>
+          <Typography variant={'body1'}> {`${form.name}`} </Typography>
+          <Typography variant={'h6'}> {`URI:`} </Typography>
+          <Typography variant={'body1'}> {`${form.uri}`} </Typography>
+          {form.definedBy ? <Typography variant={'h6'}> {`Defined By:`} </Typography> : null}
+          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.definedBy)}/view`}
+                                               colorWithHover color={'#2f5ac7'}>{options.definedBy[form.definedBy]}</Link> </Typography>
+          {form.specification ? <Typography variant={'h6'}> {`specification:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.specification} </Typography>
+          {form.identifier ? <Typography variant={'h6'}> {`identifier:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.identifier} </Typography>
+          {form.codeValue ? <Typography variant={'h6'}> {`Code Value:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.codeValue} </Typography>
+          {form.iso72Value ? <Typography variant={'h6'}> {`iso72 Value:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.iso72Value} </Typography>
 
 
-    <Container maxWidth='md'>
-      <Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Characteristic</Typography>
-        <GeneralField
-          key={'name'}
-          label={'Name'}
-          value={form.name}
-          required
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={e => form.name = e.target.value}
-          disabled={state.locked}
-          error={!!errors.name}
-          helperText={errors.name}
-        />
-        <GeneralField
-          key={'description'}
-          label={'Description'}
-          value={form.description}
-          required
-          sx={{mt: '16px', minWidth: 350}}
-          onChange={e => form.description = e.target.value}
-          // onBlur={() => handleOnBlur(field, option)}
-          error={!!errors.description}
-          helperText={errors.description}
-          multiline
-          disabled={state.locked}
-        />
-        <Dropdown
-          key={'codes'}
-          options={[]}
-          label={'Codes'}
-          value={form.codes}
-          onChange={e => form.codes = e.target.value}
-          error={!!errors.codes}
-          helperText={errors.codes}
-          required
-          disabled={state.locked}
-        />
-
-        <Divider sx={{pt: 2}}/>
-        <Typography sx={{pt: 3}} variant={'h4'}> Implementation</Typography>
-
-
-        <SelectField
-          key={"fieldType"}
-          label={'Field Type'}
-          InputLabelProps={{id: 'FieldType',}}
-          options={types.fieldTypes}
-          value={form.fieldType}
-          noEmpty={true}
-          required
-          onChange={e => setForm(form => ({...form, fieldType: e.target.value}))}
-          // onBlur={() => handleOnBlur(field, option)}
-          error={!!errors.fieldType}
-          helperText={errors.fieldType}
-          disabled={state.locked}
-        />
-
-        {isSelected() ?
-          <RadioField
-            label={'Choosing options from class or input manually'}
-            onChange={e => setForm(form => ({...form, classOrManually: e.target.value}))}
+        </Paper>
+        : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
+          <Typography variant={'h4'}> Code </Typography>
+          <GeneralField
+            disabled={!userContext.isSuperuser}
+            key={'name'}
+            label={'Name'}
+            value={form.name}
             required
-            value={form.classOrManually}
-            options={{Class: 'class', Manually: 'manually'}}
-            disabled={state.locked}
-          /> : <div/>}
+            sx={{mt: '16px', minWidth: 350}}
+            onChange={e => form.name = e.target.value}
+            error={!!errors.name}
+            helperText={errors.name}
+          />
+
+          <GeneralField
+            key={'uri'}
+            label={'URI'}
+            value={form.uri}
+            sx={{mt: '16px', minWidth: 350}}
+            onChange={e => form.uri = e.target.value}
+            error={!!errors.uri}
+            helperText={errors.uri}
+            onBlur={() => {
+              if (form.uri && !isValidURL(form.uri)) {
+                setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
+              } else {
+                setErrors(errors => ({...errors, uri: ''}));
+              }
+            }}
+          />
+
+          <Dropdown
+            label="Stakeholders"
+            key={'stakeholders'}
+            value={form.stakeholders}
+            onChange={e => {
+              form.stakeholders = e.target.value;
+            }}
+            options={options.stakeholders}
+            error={!!errors.stakeholders}
+            helperText={errors.stakeholders}
+            // sx={{mb: 2}}
+          />
+
+          <Dropdown
+            label="Codes"
+            key={'codes'}
+            value={form.codes}
+            onChange={e => {
+              form.codes = e.target.value;
+            }}
+            options={options.codes}
+            error={!!errors.codes}
+            helperText={errors.codes}
+            // sx={{mb: 2}}
+          />
 
 
-        <SelectField
-          key={"dataType"}
-          label={'Data Type'}
-          InputLabelProps={{id: 'dataType',}}
-          options={types.dataTypes}
-          value={displayDataTypeValue()}
-          // noEmpty={true}
-          required
-          onChange={e => form.dataType = e.target.value}
-          // onBlur={() => handleOnBlur(field, option)}
-          error={!!errors.dataType}
-          helperText={errors.dataType}
-          disabled
-        />
+          <GeneralField
+            disabled={!userContext.isSuperuser}
+            key={'value'}
+            label={'Value'}
+            value={form.value}
+            sx={{mt: '16px', minWidth: 350}}
+            onChange={e => form.value = e.target.value}
+            error={!!errors.value}
+            helperText={errors.value}
+            onBlur={() => {
+              if (form.value === '') {
+                setErrors(errors => ({...errors, value: 'This field cannot be empty'}));
+              } else {
+                setErrors(errors => ({...errors, value: ''}));
+              }
+            }}
+          />
 
 
-        <GeneralField
-          key={'label'}
-          label={'label'}
-          value={form.label}
-          required
-          onChange={e => form.label = e.target.value}
-          // onBlur={() => handleOnBlur(field, option)}
-          error={!!errors.label}
-          helperText={errors.label}
-          sx={{mt: '16px', minWidth: 350}}
-          disabled={state.locked}
-        />
+          <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Code?' :
+                         'Are you sure you want to update this Code?'}
+                       buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                                         key={'cancel'}>{'cancel'}</Button>,
+                         <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                                        key={'confirm'}
+                                        onClick={handleConfirm} children="confirm" autoFocus/>]}
+                       open={state.submitDialog}/>
+        </Paper>)}
 
 
-        {isSelected() && form.classOrManually === 'class' ? <SelectField
-          key={"optionsFromClass"}
-          label={'Options From Class'}
-          InputLabelProps={{id: 'optionsFromClass',}}
-          options={types.optionsFromClass}
-          value={form.optionsFromClass}
-          noEmpty={true}
-          required
-          onChange={e => form.optionsFromClass = e.target.value}
-          // onBlur={() => handleOnBlur(field, option)}
-          error={!!errors.optionsFromClass}
-          helperText={errors.optionsFromClass}
-          disabled={state.locked}
-        /> : <div/>}
+      <Paper sx={{p: 2}} variant={'outlined'}>
+        {mode === 'view' ?
+          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
+            navigate(`/code/${encodeURIComponent(uri)}/edit`);
+          }
+          }>
+            Edit
+          </Button>
+          :
+          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+            Submit
+          </Button>}
 
-
-
-        {isSelected() && form.classOrManually === 'manually' ? <div>
-          {/*<Button variant="contained" color="primary" className={classes.button} onClick={handleAdd}>*/}
-          {/*  Add*/}
-          {/*</Button>*/}
-
-          {form.options.map((option, index) =>
-            <div>
-              <Grid display={'flex'}>
-                <GeneralField
-                  key={option.key}
-                  label={'Option Label ' + (index + 1)}
-                  value={form.options[index].label}
-                  required
-                  onChange={e => form.options[index].label = e.target.value}
-                  sx={{mt: '16px', minWidth: 350}}
-                  error={!!errors.options && !!errors.options[option.key]}
-                  helperText={!!errors.options && errors.options[option.key]}
-                  disabled={state.locked}
-                />
-                <IconButton
-                  onClick={() => {
-                    if (index !== 0 || (index === 0 && form.options.length > 1)) {
-                      const temp = [...form.options]
-                      temp.splice(index, 1)
-                      setForm(form => ({...form, options: [...temp]}))
-                    }
-
-                  }}
-                  // className={classes.button}
-                  size="large" className={classes.button}>
-                  <DeleteIcon fontSize="small" color="secondary"/>
-                </IconButton>
-                {index === form.options.length - 1?
-                  <IconButton
-                    onClick={handleAdd}
-                    size="large" className={classes.button}>
-                    <AddIcon fontSize="small" color="primary"/>
-                  </IconButton>:
-                <span/>}
-
-              </Grid>
-
-
-            </div>
-          )}
-        </div> : <div/>}
-
-
-
-        {!state.locked? <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-          submit
-        </Button>: <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-          navigate('/characteristics')
-        }}>
-          back
-        </Button>}
-
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={'Are you sure you want to create a new characteristic?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm} children='confirm' autoFocus/>]}
-                     open={state.submitDialog && option === 'add'}/>
-
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={'Are you sure you want to update the characteristic?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm} children='confirm' autoFocus/>]}
-                     open={state.submitDialog && option === 'edit'}/>
-
-
-        <AlertDialog dialogContentText={option === 'add'? "You have successfully created a new characteristics":
-        'You have successfully update the characteristic'}
-                     dialogTitle={'Success'}
-                     buttons={[<Button onClick={() => {
-                       navigate('/characteristics')
-                     }} key={'success'}> {'ok'}</Button>]}
-                     open={state.successDialog}/>
-        <AlertDialog dialogContentText={errors.message || "Error occurs"}
-                     dialogTitle={'Fail'}
-                     buttons={[<Button onClick={() => {
-                       navigate('/characteristics')
-                     }} key={'fail'}>{'ok'}</Button>]}
-                     open={state.failDialog}/>
       </Paper>
 
-    </Container>
-
-  )
-
+    </Container>);
 
 }

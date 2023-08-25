@@ -1,182 +1,120 @@
-import React, {useEffect, useState} from 'react';
-import {
-  Chip, Container, IconButton, Dialog, DialogActions, DialogTitle, DialogContent,
-  Button, Box
-} from "@mui/material";
-import {makeStyles} from "@mui/styles";
-import {Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon} from "@mui/icons-material";
-import {DeleteModal, Loading, DataTable} from "../shared";
-import SelectField from "../shared/fields/SelectField";
-import GeneralField from "../shared/fields/GeneralField";
-import {useNavigate} from "react-router-dom";
-import {fetchCharacteristics, deleteCharacteristic, fetchCharacteristicsDataTypes} from "../../api/characteristicApi";
-import {AlertDialog} from "../shared/Dialogs";
-import LoadingButton from "../shared/LoadingButton";
+import React, { useEffect, useState, useContext } from 'react';
+import { Chip, Container } from "@mui/material";
+import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
+import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
+import { useNavigate } from "react-router-dom";
+import { useSnackbar } from 'notistack';
+import {UserContext} from "../../context";
+import {deleteTheme, fetchThemes} from "../../api/themeApi";
+import {reportErrorToBackend} from "../../api/errorReportApi";
+import {fetchCodes} from "../../api/codeAPI";
 
-const useStyles = makeStyles(() => ({
-  button: {
-    padding: 4
-  },
-  formControl: {
-    margin: null,
-  },
-}));
+export default function Codes() {
+  const navigate = useNavigate();
+  const {enqueueSnackbar} = useSnackbar();
 
-export default function Characteristics() {
+  const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,
-    // value: {},
-    selectedId: null,
-    selectedName: '',
-    showErrorDialog: false,
+    data: [],
+    selectedUri: null,
+    deleteDialogTitle: '',
     showDeleteDialog: false,
-    loadingButton: false
   });
-  const [form, setForm] = useState(
-    []
-  )
-  const [dataTypes, setDataTypes] = useState({})
-  const [errors, setErrors] = useState(
-    {}
-  )
-  const [trigger, setTrigger] = useState(
-    false
-  )
-  const classes = useStyles();
-  const navigate = useNavigate();
+  const [trigger, setTrigger] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchCharacteristics().then(res => {
-        if (res.success) {
-          setForm(res.data.map(characteristic => {
-            return {
-              id: characteristic.id,
-              label: characteristic.implementation.label,
-              name: characteristic.name,
-              fieldType: characteristic.implementation.fieldType.label,
-              dataType: characteristic.implementation.valueDataType
-            }
-          }))
-        }
-      }
-    ),
-      fetchCharacteristicsDataTypes().then(newDataTypes =>setDataTypes(newDataTypes))]).then(
-        setState(state => ({...state, loading: false}))).catch(e => {
-      if (e.json) {
-        setErrors(e.json)
-      }
-      setState(state => ({...state, loading: false, showErrorDialog: true}))
-    })
-
+    fetchCodes().then(res => {
+      if(res.success)
+        setState(state => ({...state, loading: false, data: res.codes}));
+    }).catch(e => {
+      setState(state => ({...state, loading: false}))
+      navigate('/dashboard');
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    });
   }, [trigger]);
 
-  const showDeleteDialog = (id, name) => () => {
+  const showDeleteDialog = (uri) => {
     setState(state => ({
-      ...state, selectedId: id, showDeleteDialog: true, selectedName: name
+      ...state, selectedUri: uri, showDeleteDialog: true,
+      deleteDialogTitle: 'Delete theme ' + uri + ' ?'
     }));
   };
 
-  const handleCancel = () => {
-    setState(state => ({
-      ...state, selectedId: null, showDeleteDialog: false, selectedName: ''
-    }))
-  }
+  const handleDelete = async (uri, form) => {
 
-  const handleConfirm = async () => {
-    try {
-      await deleteCharacteristic(state.selectedId);
+    deleteTheme(uri).then(({success, message})=>{
+      if (success) {
+        setState(state => ({
+          ...state, showDeleteDialog: false,
+        }));
+        setTrigger(!trigger);
+        enqueueSnackbar(message || "Success", {variant: 'success'})
+      }
+    }).catch((e)=>{
       setState(state => ({
-        ...state, showDeleteDialog: false, selectedId: null, selectedName: '', loadingButton: false,
-        // data: state.data.filter(item => item.id !== state.selectedId)
-      }))
-      setTrigger(!trigger)
-      // setForm(form.filter(item => item.id !== state.selectedId))
-    } catch (e) {
-      if (e.json)
-        setErrors(e.json)
-      setState(state => ({
-        ...state,
-        showDeleteDialog: false,
-        selectedId: null,
-        selectedName: '',
-        loadingButton: false,
-        showErrorDialog: true
-      }))
-    }
-  }
+        ...state, showDeleteDialog: false,
+      }));
+      reportErrorToBackend(e)
+      setTrigger(!trigger);
+      enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+    });
+
+  };
 
   const columns = [
     {
       label: 'Name',
-      body: ({name}) => <Box sx={{width: '60%'}}>{name}</Box>
+      body: ({_uri, name}) => {
+        return <Link colorWithHover to={`/code/${encodeURIComponent(_uri)}/view`}>
+          {name}
+        </Link>
+      },
+      sortBy: ({legalName}) => legalName
     },
     {
-      label: 'Label',
-      body: ({label}) => label
+      label: 'Description',
+      body: ({description}) => {
+        return description;
+      }
     },
-    {
-      label: 'Field Type',
-      body: ({fieldType}) => fieldType
-    },
-    {
-      label: 'Data Type',
-      body: ({dataType}) => dataTypes[dataType]
-    },
+
     {
       label: ' ',
-      body: ({id, name}) => {
-        return (
-          <span>
-              <IconButton
-                onClick={() => navigate('/characteristic/' + id + '/edit')}
-                className={classes.button}
-                size="large">
-                <EditIcon fontSize="small" color="primary"/>
-              </IconButton>
-              <IconButton
-                onClick={showDeleteDialog(id, name)}
-                className={classes.button}
-                size="large">
-                <DeleteIcon fontSize="small" color="secondary"/>
-              </IconButton>
-            </span>
-        );
-      }
+      body: ({_uri}) =>
+        <DropdownMenu urlPrefix={'code'} objectUri={encodeURIComponent(_uri)} hideDeleteOption
+                      hideEditOption={!userContext.isSuperuser} handleDelete={() => showDeleteDialog(_uri)}/>
     }
   ];
 
   if (state.loading)
-    return <Loading message={`Loading characteristics...`}/>;
+    return <Loading message={`Loading codes...`}/>;
 
   return (
     <Container>
       <DataTable
-        title={"Characteristics"}
-        data={form}
+        title={"Codes"}
+        data={state.data}
         columns={columns}
-        customToolbar={<Chip
-          onClick={() => {
-            navigate('/characteristic/add')
-          }}
-          color="primary"
-          icon={<AddIcon/>}
-          label="Add"
-          variant="outlined"/>}
-      />
+        uriField="uriField"
+        customToolbar={
+          <Chip
+            disabled={!userContext.isSuperuser}
+            onClick={() => navigate('/code/new')}
+            color="primary"
+            icon={<AddIcon/>}
+            label="Add new Theme"
+            variant="outlined"/>
+        }
 
-      <AlertDialog dialogContentText={errors.message || "Error occurs"}
-                   dialogTitle={'Fail'}
-                   buttons={[<Button onClick={() => {
-                     navigate('/dashboard')
-                   }} key={'fail'}>{'ok'}</Button>]}
-                   open={state.showErrorDialog}/>
-      <AlertDialog dialogContentText={'Are you sure to delete Characteristic ' + state.selectedName}
-                   dialogTitle={'Delete characteristic'}
-                   buttons={[<Button onClick={handleCancel} key={'Cancel'}>{'cancel'}</Button>,
-                     <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                    key={'confirm'}
-                                    onClick={handleConfirm} children='confirm' autoFocus/>]}
-                   open={state.showDeleteDialog}/>
+      />
+      <DeleteModal
+        objectUri={state.selectedUri}
+        title={state.deleteDialogTitle}
+        show={state.showDeleteDialog}
+        onHide={() => setState(state => ({...state, showDeleteDialog: false}))}
+        delete={handleDelete}
+      />
     </Container>
   );
 }

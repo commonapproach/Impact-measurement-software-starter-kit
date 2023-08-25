@@ -46,10 +46,11 @@ import OutcomeReports from "./components/ReportGenerate/OutcomeReports";
 import ThemeReports from "./components/ReportGenerate/ThemeReport";
 import OrganizationUsers from "./components/users/organizationUsers";
 import SuperPassword from "./components/SuperPasswordPage";
-import Stakeholders from "./components/Stakeholders/Stakeholders";
-import AddEditStakeholder from "./components/Stakeholders/AddEditStakeholder";
+import Stakeholders from "./components/stakeholders/Stakeholders";
+import AddEditStakeholder from "./components/stakeholders/AddEditStakeholder";
 import AddEditCode from "./components/codes/AddEditCode";
 import Codes from "./components/codes/Codes";
+import AddEditCharacteristic from "./components/characteristics/AddEditCharacteristic";
 
 const routes = (
   <Routes>
@@ -73,7 +74,7 @@ const routes = (
     <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
     <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
     <Route path="/organizations/:uri/:viewMode" element={<PrivateRoute element={AddEditOrganization}/>}/>
-    {/*Stakeholders*/}
+    {/*stakeholders*/}
     <Route path="/stakeholders" element={<PrivateRoute element={Stakeholders}/>}/>
     <Route path="/stakeholder/new" element={<PrivateRoute element={AddEditStakeholder}/>}/>
     <Route path="/stakeholder/:uri/:viewMode" element={<PrivateRoute element={AddEditStakeholder}/>}/>
@@ -82,6 +83,11 @@ const routes = (
     <Route path="/codes" element={<PrivateRoute element={Codes}/>}/>
     <Route path="/code/new" element={<PrivateRoute element={AddEditCode}/>}/>
     <Route path="/code/:uri/:viewMode" element={<PrivateRoute element={AddEditCode}/>}/>
+
+    {/*Codes*/}
+    {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
+    <Route path="/characteristic/new" element={<PrivateRoute element={AddEditCharacteristic}/>}/>
+    <Route path="/characteristic/:uri/:viewMode" element={<PrivateRoute element={AddEditCharacteristic}/>}/>
 
 
     {/*Groups*/}

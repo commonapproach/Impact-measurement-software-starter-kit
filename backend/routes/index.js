@@ -18,5 +18,7 @@ module.exports = {
   errorReportRoute: require('./errorReport'),
   fileUploadingRoute: require('./fileUploading'),
   codeRoute: require('./code'),
-  codesRoute: require('./codes')
+  codesRoute: require('./codes'),
+  characteristicRoute: require('./characteristic'),
+  characteristicsRoute: require('./characteristics')
 }

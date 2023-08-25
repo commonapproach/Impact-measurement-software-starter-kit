@@ -216,9 +216,6 @@ const fileUploading = async (req, res, next) => {
           messageBuffer['noURI'].push(whiteSpaces +`    One object${type? ` with type ${type}`: ''} has no URI`);
           messageBuffer['noURI'].push(whiteSpaces +'    The object is ignored');
           break;
-
-
-
       }
     }
 

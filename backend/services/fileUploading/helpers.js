@@ -1,3 +1,5 @@
+const {isValidURL} = require("../../helpers/validator");
+const {GDBOutcomeModel} = require("../../models/outcome");
 
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 

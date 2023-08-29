@@ -14,7 +14,7 @@ const {indicatorBuilder} = require("./builders");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 
-async function fileUploadingHandler(req, res, next) {
+async function newFileUploadingHandler(req, res, next) {
   try {
     if (await hasAccess(req, 'fileUploading')) {
       const dicts = {
@@ -37,7 +37,7 @@ async function fileUploadingHandler(req, res, next) {
       const {objects, organizationUri, fileName} = req.body;
 
 
-      return await fileUploading(trans, {dicts, errorCounter}, objects, {organizationUri, fileName}, {formatMessage, addMessage});
+      return await fileUploading(trans, {dicts, errorCounter, messageBuffer}, objects, {organizationUri, fileName}, {formatMessage, addMessage});
     } else {
       return res.status(400).json({message: 'Wrong Auth'});
     }
@@ -49,9 +49,10 @@ async function fileUploadingHandler(req, res, next) {
 
 async function fileUploading(trans, holders, objects, fileInformation, helpers) {
   const {fileName, organizationUri} = fileInformation;
-  let {dicts, errorCounter} = fileInformation;
+  let {dicts, errorCounter, messageBuffer} = holders;
   const {formatMessage, addMessage} = helpers
-  addMessage(0, 'startToProcess', {fileName});
+  addMessage(0, 'startToProcess', {fileName}, messageBuffer);
+
 
   if (!Array.isArray(objects)) {
     // the object should be an array
@@ -63,7 +64,7 @@ async function fileUploading(trans, holders, objects, fileInformation, helpers) 
 
   if (!objects.length) {
     // the objects shouldn't be empty
-    addMessage(0, 'fileEmpty', {})
+    addMessage(0, 'fileEmpty', {}, messageBuffer)
     errorCounter += 1;
     const msg = formatMessage();
     throw new Server400Error(msg);
@@ -73,14 +74,14 @@ async function fileUploading(trans, holders, objects, fileInformation, helpers) 
 
   if (!expandedObjects.length) {
     errorCounter += 1;
-    addMessage(8, 'emptyExpandedObjects', {})
+    addMessage(8, 'emptyExpandedObjects', {}, messageBuffer)
     const msg = formatMessage();
     throw new Server400Error(msg);
   }
 
   const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
   if (!organization) {
-    addMessage(8, 'wrongOrganizationURI', {organizationUri});
+    addMessage(8, 'wrongOrganizationURI', {organizationUri}, messageBuffer);
     const msg = formatMessage();
     throw new Server400Error(msg);
   }
@@ -92,7 +93,7 @@ async function fileUploading(trans, holders, objects, fileInformation, helpers) 
       // in the case there is no URI
       errorCounter += 1;
       addMessage(8, 'noURI',
-        {type: object['@type'][0]});
+        {type: object['@type'][0]}, messageBuffer);
       continue;
     }
     if (!isValidURL(uri)){
@@ -100,32 +101,32 @@ async function fileUploading(trans, holders, objects, fileInformation, helpers) 
       addMessage(8, 'invalidURI', {uri, type: getPrefixedURI(object['@type'][0])});
       continue;
     }
-    if (objectDict[uri]) {
+    if (dicts.object[uri]) {
       // duplicated uri in the file
       errorCounter += 1;
-      addMessage(8, 'duplicatedURIInFile', {uri, type: getPrefixedURI(object['@type'][0])})
+      addMessage(8, 'duplicatedURIInFile', {uri, type: getPrefixedURI(object['@type'][0])}, messageBuffer)
       continue;
     }
     if (await GraphDB.isURIExisted(uri) && !object['@type'].includes(getFullURI('cids:Organization'))) {
       // check whether the uri belongs to other objects
       // duplicated uri in database
       errorCounter += 1;
-      addMessage(8, 'duplicatedURIInDataBase', {uri, type: getPrefixedURI(object['@type'][0])})
+      addMessage(8, 'duplicatedURIInDataBase', {uri, type: getPrefixedURI(object['@type'][0])}, messageBuffer)
       continue;
     }
 
     // assign the object an id and store them into specific dict
-    dicts.objectDict[uri] = object;
+    dicts.object[uri] = object;
     if (isType(object, 'cids:Indicator')) {
       dicts['indicator'][uri] = {uri};
     } else if (isType(object, 'cids:Outcome')){
       dicts['outcome'][uri] = {uri};
     } else {
-      addMessage(8, 'unsupportedObject', {uri})
+      addMessage(8, 'unsupportedObject', {uri}, messageBuffer)
     }
   }
 
-  for (let [uri, object] of Object.entries(dicts.objectDict)) {
+  for (let [uri, object] of Object.entries(dicts.object)) {
     if (isType(object, 'cids:Indicator')) {
       await indicatorBuilder(trans, object, organization, dicts);
     }
@@ -135,4 +136,8 @@ async function fileUploading(trans, holders, objects, fileInformation, helpers) 
 
 
 
+}
+
+module.exports = {
+  newFileUploadingHandler
 }

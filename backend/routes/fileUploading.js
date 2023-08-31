@@ -6,6 +6,6 @@ const {newFileUploadingHandler} = require("../services/fileUploading/newFileUplo
 
 const router = express.Router({mergeParams: true});
 
-router.post('/', newFileUploadingHandler);
+router.post('/', fileUploadingHandler);
 
 module.exports = router;

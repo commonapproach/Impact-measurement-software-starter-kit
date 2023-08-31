@@ -109,4 +109,4 @@ async function generalBuilder(trans, object, organization, dicts, errorCounter, 
 }
 
 
-module.exports = {indicatorBuilder};
+module.exports = {};

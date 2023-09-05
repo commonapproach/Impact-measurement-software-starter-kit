@@ -336,7 +336,7 @@ export default function AddEditOrganization() {
           error={!!errors.uri}
           helperText={errors.uri}
           onBlur={() => {
-            if (form.uri !== '' || !isValidURL(form.uri)){
+            if (form.uri !== '' && !isValidURL(form.uri)){
               setErrors(errors => ({...errors, uri: 'Please input an valid URI'}));
             } else {
               setErrors(errors => ({...errors, uri: ''}));

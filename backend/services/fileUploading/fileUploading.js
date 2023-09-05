@@ -99,7 +99,7 @@ const fileUploading = async (req, res, next) => {
         msg += sentence + '\n';
       });
       Object.keys(messageBuffer).map(uri => {
-        if (uri !== 'begin' && uri !== 'end') {
+        if (uri !== 'begin' && uri !== 'end' && uri !== 'noURI') {
           messageBuffer[uri].map(sentence => {
             msg += sentence + '\n';
           });
@@ -136,8 +136,10 @@ const fileUploading = async (req, res, next) => {
       let title;
       if (rejectFile) {
         title = 'Error';
-      } else {
+      } else if (flag) {
         title = 'Warning';
+      } else if (ignoreInstance) {
+        title = 'Object Ignored'
       }
 
 
@@ -195,6 +197,8 @@ const fileUploading = async (req, res, next) => {
         case 'propertyMissing':
           messageBuffer[uri].push(whiteSpaces + `${title}: Mandatory property missing`);
           messageBuffer[uri].push(whiteSpaces + `    In object${hasName ? ' ' + hasName : ''} with URI ${uri} of type ${type} property ${property} is missing`);
+          if (ignoreInstance)
+            messageBuffer[uri].push(whiteSpaces + '    The object is ignored');
           break;
         case 'differentOrganization':
           messageBuffer['begin'].push(whiteSpaces + `${title}:`);
@@ -587,14 +591,12 @@ const fileUploading = async (req, res, next) => {
 
     async function indicatorReportBuilder(trans, object, organization) {
       const uri = object['@id'];
-      let hasError = false;
+      let ignore = false;
       const indicatorReport = indicatorReportDict[uri];
       const config = baseLevelConfig.indicatorReport;
 
 
       if (indicatorReport) {
-        // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-        // add the organization to it
         indicatorReport.forOrganization = organization._uri;
 
 
@@ -673,9 +675,25 @@ const fileUploading = async (req, res, next) => {
         // add indicator to the indicatorReport
 
         indicatorReport.forIndicator = getValue(object, GDBIndicatorReportModel, 'forIndicator');
+        if (!indicatorReport.forIndicator && config['cids:forIndicator']) {
+          if (config['cids:forIndicator'].rejectFile)
+            error += 1;
+          if (config['cids:forIndicator'].ignoreInstance) {
+            ignore = true;
+            delete indicatorReportDict[uri];
+          }
+          addMessage(8, 'propertyMissing',
+            {
+              uri,
+              type: getPrefixedURI(object['@type'][0]),
+              property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'forIndicator'))
+            },
+            config['cids:forIndicator']
+          );
+        }
 
         // add the indicatorReport to indicator if needed
-        if (!indicatorDict[indicatorReport.forIndicator]) {
+        if (!ignore && !indicatorDict[indicatorReport.forIndicator]) {
           // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
           const indicator = await GDBIndicatorModel.findOne({_uri: indicatorReport.forIndicator});
           if (!indicator) {
@@ -700,9 +718,7 @@ const fileUploading = async (req, res, next) => {
 
         }
 
-        if (hasError) {
-          // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
-        } else {
+        if (!ignore) {
           addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
           addMessage(4, 'finishedReading',
             {uri, type: getPrefixedURI(object['@type'][0])}, {});
@@ -771,8 +787,14 @@ const fileUploading = async (req, res, next) => {
       if (!uri) {
         // in the case there is no URI
         // error += 1;
-        addMessage(8, 'noURI',
-          {type: object['@type'][0]}, {ignoreInstance: true});
+        if (object['@type'].includes(getFullTypeURI(GDBOrganizationModel))) {
+          addMessage(8, 'noURI',
+            {type: object['@type'][0]}, {rejectFile: true});
+          error += 1
+        } else {
+          addMessage(8, 'noURI',
+            {type: object['@type'][0]}, {ignoreInstance: true});
+        }
         continue;
       }
       if (!isValidURL(uri)) {
@@ -1150,7 +1172,7 @@ const fileUploading = async (req, res, next) => {
           addTrace('             Organization in the file is different from the organization chosen in the interface');
           addMessage(8, 'differentOrganization',
             {uri, organizationUri}, {rejectFile: true});
-          error += 1;
+          // error += 1;
 
         } else {
           addTrace(`        Warning: organization object is ignored`);
@@ -1179,7 +1201,7 @@ const fileUploading = async (req, res, next) => {
     }
     await transSave(trans, organization);
     // await organization.save();
-    if (error) {
+    if (!error) {
       addTrace('    Start to insert data...');
       addMessage(4, 'insertData', {}, {});
 
@@ -1196,7 +1218,7 @@ const fileUploading = async (req, res, next) => {
       });
       await Promise.all(outcomes.map(outcome => transSave(trans, outcome)));
 
-      const indicatorReports = Object.entries(indicatorDict).map(([uri, indicatorReport]) => {
+      const indicatorReports = Object.entries(indicatorReportDict).map(([uri, indicatorReport]) => {
         return GDBIndicatorReportModel(
           indicatorReport, {_uri: indicatorReport._uri}
         );

@@ -1,11 +1,8 @@
 const baseLevelConfig = {
-  beginningObjects: {},
-  organization: {
 
-  },
+  theme: {},
   outcome: {
     'cids:hasIndicator': {flag: true},
-
   },
   indicator: {
     'cids:forOutcome': {flag: true},

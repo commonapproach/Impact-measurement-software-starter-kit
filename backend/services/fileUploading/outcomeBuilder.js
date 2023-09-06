@@ -1,73 +1,111 @@
 const {baseLevelConfig} = require("./configs");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBIndicatorModel} = require("../../models/indicator");
+const {fileUploadingHandler} = require("./fileUploading");
+const {Server400Error} = require("../../utils");
+const {GDBOrganizationModel} = require("../../models/organization");
 
 const {getFullURI, getPrefixedURI, getObjectValue} = require('graphdb-utils').SPARQL;
 
-async function outcomeBuilder(trans, object, organization, error, {outcomeDict, objectDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue}) {
-  const uri = object['@id'];
-  const outcome = outcomeDict[uri];
+async function outcomeBuilder(environment, trans, object, organization, error, {outcomeDict, objectDict}, {
+  addMessage,
+  addTrace,
+  transSave,
+  getFullPropertyURI,
+  getValue,
+  getListOfValue
+}, form) {
+  let uri = object['@id'];
+  const outcome = environment === 'fileUploading' ? outcomeDict[uri] : GDBOutcomeModel({}, {uri: form.uri});
+  if (environment !== 'fileUploading') {
+    await transSave(trans, outcome);
+    uri = outcome._uri;
+  }
+
   const config = baseLevelConfig['outcome'];
   let hasError = false;
   if (outcome) {
-    if (object[getFullPropertyURI(GDBOutcomeModel, 'name')]) {
-      outcome.hasName = getValue(object, GDBOutcomeModel, 'name');
+    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'name')]) || form.name) {
+      outcome.name = environment === 'fileUploading' ? getValue(object, GDBOutcomeModel, 'name') : form.name;
     }
     if (!outcome.hasName && config["cids:hasName"]) {
-      if (config["cids:hasName"].rejectFile)
-        error += 1;
-      addMessage(8, 'propertyMissing',
-        {
-          uri,
-          type: getPrefixedURI(object['@type'][0]),
-          property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'hasName'))
-        },
-        config["cids:hasName"]
-      );
+      if (config["cids:hasName"].rejectFile) {
+        if (environment === 'fileUploading') {
+          error += 1;
+        } else {
+          throw new Server400Error('Name is mandatory');
+        }
+      }
+
+      if (environment === 'fileUploading')
+        addMessage(8, 'propertyMissing',
+          {
+            uri,
+            type: getPrefixedURI(object['@type'][0]),
+            property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'hasName'))
+          },
+          config["cids:hasName"]
+        );
 
     }
 
-    if (object[getFullPropertyURI(GDBOutcomeModel, 'description')]) {
-      outcome.hasName = getValue(object, GDBOutcomeModel, 'description');
+    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'description')]) || form.description) {
+      outcome.description = getValue(object, GDBOutcomeModel, 'description') || form.description;
     }
     if (!outcome.description && config["cids:hasDescription"]) {
+      if (config["cids:hasDescription"].rejectFile) {
+        if (environment === 'fileUploading') {
+          error += 1;
+        } else {
+          throw new Server400Error('Description is Mandatory');
+        }
 
-      if (config["cids:hasDescription"].rejectFile)
-        error += 1;
-      addMessage(8, 'propertyMissing',
-        {
-          uri,
-          type: getPrefixedURI(object['@type'][0]),
-          property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))
-        },
-        config["cids:hasDescription"]
-      );
+      }
+      if (environment === 'fileUploading')
+        addMessage(8, 'propertyMissing',
+          {
+            uri,
+            type: getPrefixedURI(object['@type'][0]),
+            property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))
+          },
+          config["cids:hasDescription"]
+        );
 
     }
 
 
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
     // add the organization to it, and add it to the organization
+    if (environment !== 'fileUploading') {
+      organization = await GDBOrganizationModel.findOne({_uri: form.organization});
+    }
     outcome.forOrganization = organization._uri;
+
     if (!organization.hasOutcomes)
       organization.hasOutcomes = [];
-    organization.hasOutcomes.push(outcome._uri);
+    organization.hasOutcomes.push(uri);
 
     // add theme to outcome
-    if (object[getFullPropertyURI(GDBOutcomeModel, 'themes')]) {
-      outcome.themes = getListOfValue(object, GDBOutcomeModel, 'themes');
+    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'themes')]) || form?.themes) {
+      outcome.themes = environment === 'fileUploading' ? getListOfValue(object, GDBOutcomeModel, 'themes') : form.themes;
     }
     if ((!outcome.themes || !outcome.themes.length) && config['cids:forTheme']) {
-      if (config['cids:forTheme'].rejectFile)
-        error += 1;
-      addMessage(8, 'propertyMissing',
-        {
-          uri,
-          type: getPrefixedURI(object['@type'][0]),
-          property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))
-        },
-        config["cids:forTheme"]
-      );
+      if (config['cids:forTheme'].rejectFile) {
+        if (environment === 'fileUploading') {
+          error += 1;
+        } else {
+          throw new Server400Error('Themes are mandatory');
+        }
+      }
+      if (environment === 'fileUploading')
+        addMessage(8, 'propertyMissing',
+          {
+            uri,
+            type: getPrefixedURI(object['@type'][0]),
+            property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))
+          },
+          config["cids:forTheme"]
+        );
     }
 
 
@@ -83,41 +121,56 @@ async function outcomeBuilder(trans, object, organization, error, {outcomeDict, 
 
 
     // add indicator to outcome
-    if (!object[getFullPropertyURI(GDBOutcomeModel, 'indicators')] && config['cids:hasIndicator']) {
-      if (config['cids:hasIndicator'].rejectFile)
-        error += 1;
-      addMessage(8, 'propertyMissing',
-        {
-          uri,
-          type: getPrefixedURI(object['@type'][0]),
-          property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'indicators'))
-        },
-        config['cids:hasIndicator']
-      );
-    } else if (object[getFullPropertyURI(GDBOutcomeModel, 'indicators')]) {
+    if (((environment === 'fileUploading' && !object[getFullPropertyURI(GDBOutcomeModel, 'indicators')]) || (environment !== 'fileUploading' && (!form.indicators || !form.indicators.length))) && config['cids:hasIndicator']) {
+      if (config['cids:hasIndicator'].rejectFile) {
+        if (environment === 'fileUploading') {
+          error += 1;
+        } else {
+          throw new Server400Error('Indicators are mandatory');
+        }
+      }
+      if (environment === 'fileUploading')
+        addMessage(8, 'propertyMissing',
+          {
+            uri,
+            type: getPrefixedURI(object['@type'][0]),
+            property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'indicators'))
+          },
+          config['cids:hasIndicator']
+        );
+    } else if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'indicators')]) || (form.indicators)) {
       if (!outcome.indicators)
         outcome.indicators = [];
-      for (const indicatorURI of getListOfValue(object, GDBOutcomeModel, 'indicators')) {
+      for (const indicatorURI of environment === 'fileUploading'? getListOfValue(object, GDBOutcomeModel, 'indicators') : form.indicators) {
         outcome.indicators.push(indicatorURI);
         // add outcome to indicator
-        if (!objectDict[indicatorURI]) {
+        if (environment !== 'fileUploading' || !objectDict[indicatorURI]) {
           //in this case, the indicator is not in the file, get the indicator from database and add the outcome to it
           const indicator = await GDBIndicatorModel.findOne({_uri: indicatorURI});
           if (!indicator) {
-            addTrace('        Error: bad reference');
-            addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
-            addMessage(8, 'badReference',
-              {uri, referenceURI: indicatorURI, type: 'Indicator'}, {rejectFile: true});
-            error += 1;
+            if (environment === 'fileUploading') {
+              addTrace('        Error: bad reference');
+              addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
+              addMessage(8, 'badReference',
+                {uri, referenceURI: indicatorURI, type: 'Indicator'}, {rejectFile: true});
+              error += 1;
+            } else {
+              throw new Server400Error(`Indicator ${indicatorURI} is not in the database`)
+            }
+
           } else if (!indicator.forOrganization !== organization._uri) {
-            addTrace('        Error:');
-            addTrace(`            Indicator ${indicatorURI} does not belong to this organization`);
-            addMessage(8, 'subjectDoesNotBelong', {
-              uri,
-              type: 'Indicator',
-              subjectURI: indicatorURI
-            }, {rejectFile: true});
-            error += 1;
+            if (environment === 'fileUploading') {
+              addTrace('        Error:');
+              addTrace(`            Indicator ${indicatorURI} does not belong to this organization`);
+              addMessage(8, 'subjectDoesNotBelong', {
+                uri,
+                type: 'Indicator',
+                subjectURI: indicatorURI
+              }, {rejectFile: true});
+              error += 1;
+            } else {
+              throw new Server400Error(`Indicator ${indicatorURI} does not belong to this organization`)
+            }
           } else {
             if (!indicator.forOutcomes)
               indicator.forOutcomes = [];
@@ -144,4 +197,4 @@ async function outcomeBuilder(trans, object, organization, error, {outcomeDict, 
 
 }
 
-module.exports = {outcomeBuilder}
+module.exports = {outcomeBuilder};

@@ -309,7 +309,7 @@ const createOutcome = async (req, res) => {
   //   GDBOrganizationModel.findOne({_id: organizationId}, {populates: ['hasOutcomes']})
   // ));
 
-  // for each organization, does it contain any indicator with same name?
+  // for each organization, does it contain any outcome with same name?
   let duplicate = false;
   let organizationInProblem;
   if (form.forOrganization.hasOutcomes) {

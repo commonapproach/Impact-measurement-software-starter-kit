@@ -1054,7 +1054,7 @@ const fileUploading = async (req, res, next) => {
 
     for (let [uri, object] of Object.entries(objectDict)) {
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
-        error = await outcomeBuilder(trans, object, organization, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue});
+        error = await outcomeBuilder('fileUploading', trans, object, organization, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue});
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
         await indicatorBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {

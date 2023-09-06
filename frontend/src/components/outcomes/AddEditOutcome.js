@@ -132,8 +132,8 @@ export default function AddEditOutcome() {
       error.indicators = 'The field cannot be empty';
     // if (!form.themes.length)
     //   error.themes = 'The field cannot be empty';
-    if (!form.description)
-      error.description = 'The field cannot be empty'
+    // if (!form.description)
+    //   error.description = 'The field cannot be empty'
     if(!form.organization)
       error.organization = 'The field cannot be empty'
     if(form.uri && !isValidURL(form.uri))

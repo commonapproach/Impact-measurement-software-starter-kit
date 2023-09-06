@@ -1126,4 +1126,4 @@ const fileUploading = async (req, res, next) => {
   }
 };
 
-module.exports = {fileUploadingHandler};
+module.exports = {fileUploadingHandler, transSave};

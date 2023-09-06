@@ -6,6 +6,9 @@ const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
+const {outcomeBuilder} = require("../fileUploading/outcomeBuilder");
+const {getRepository} = require("../../loaders/graphDB");
+const {transSave} = require("../fileUploading/fileUploading");
 
 
 const fetchOutcomes = async (req, res) => {
@@ -147,12 +150,20 @@ const fetchOutcome = async (req, res) => {
 };
 
 const createOutcomeHandler = async (req, res, next) => {
+  const repo = await getRepository();
+  const trans = await repo.beginTransaction();
+  trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass);
   try {
-    if (await hasAccess(req, 'createOutcome'))
-      return await createOutcome(req, res);
+    if (await hasAccess(req, 'createOutcome')){
+      const {form} = req.body;
+      await outcomeBuilder('interface', trans, null, null, null, {}, {transSave}, form);
+      await trans.commit();
+      return res.status(200).json({success: true});
+    }
+      // return await createOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
-
   } catch (e) {
+    await trans.rollback();
     next(e);
   }
 };

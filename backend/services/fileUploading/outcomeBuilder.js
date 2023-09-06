@@ -15,8 +15,10 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
   getValue,
   getListOfValue
 }, form) {
-  let uri = object['@id'];
-  const outcome = environment === 'fileUploading' ? outcomeDict[uri] : GDBOutcomeModel({}, {uri: form.uri});
+  let uri = object? object['@id'] : undefined;
+  const outcome = environment === 'fileUploading' ? outcomeDict[uri] : GDBOutcomeModel({
+    name: form.name
+  }, {uri: form.uri});
   if (environment !== 'fileUploading') {
     await transSave(trans, outcome);
     uri = outcome._uri;
@@ -158,7 +160,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
               throw new Server400Error(`Indicator ${indicatorURI} is not in the database`)
             }
 
-          } else if (!indicator.forOrganization !== organization._uri) {
+          } else if (indicator.forOrganization !== organization._uri) {
             if (environment === 'fileUploading') {
               addTrace('        Error:');
               addTrace(`            Indicator ${indicatorURI} does not belong to this organization`);
@@ -181,10 +183,13 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
         } // if the indicator is in the file, don't have to worry about adding the outcome to the indicator
       }
     }
-
+    if (environment === 'interface') {
+      await transSave(trans, organization);
+      await transSave(trans, outcome);
+    }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
-    } else {
+    } else if (environment === 'fileUploading'){
       addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});

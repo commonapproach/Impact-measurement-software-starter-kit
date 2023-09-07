@@ -3,7 +3,7 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {isValidURL} = require("../../helpers/validator");
 const {GDBOutcomeModel} = require("../../models/outcome");
-const {addMessage} = require("./helpers");
+const {addMessage} = require("../helpers");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 const graphDBUtilsModelDict = {

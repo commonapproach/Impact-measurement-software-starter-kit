@@ -1,11 +1,10 @@
-const {baseLevelConfig} = require("./configs");
+const {baseLevelConfig} = require("../fileUploading/configs");
 const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBIndicatorModel} = require("../../models/indicator");
-const {fileUploadingHandler} = require("./fileUploading");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 
-const {getFullURI, getPrefixedURI, getObjectValue} = require('graphdb-utils').SPARQL;
+const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function outcomeBuilder(environment, trans, object, organization, error, {outcomeDict, objectDict}, {
   addMessage,
@@ -17,8 +16,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
 }, form) {
   let uri = object? object['@id'] : undefined;
   const outcome = environment === 'fileUploading' ? outcomeDict[uri] : GDBOutcomeModel({
-    name: form.name
-  }, {uri: form.uri});
+  }, );
   if (environment !== 'fileUploading') {
     await transSave(trans, outcome);
     uri = outcome._uri;

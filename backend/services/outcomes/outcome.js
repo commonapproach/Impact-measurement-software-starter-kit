@@ -6,7 +6,7 @@ const {GDBOwnershipModel} = require("../../models/ownership");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
-const {outcomeBuilder} = require("../fileUploading/outcomeBuilder");
+const {outcomeBuilder} = require("./outcomeBuilder");
 const {getRepository} = require("../../loaders/graphDB");
 const {transSave} = require("../fileUploading/fileUploading");
 

@@ -1,6 +1,6 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {getRepository} = require("../../loaders/graphDB");
-const {formatMessage, addMessage, isType} = require('./helpers');
+const {formatMessage, addMessage, isType} = require('../helpers');
 const {Server400Error} = require("../../utils");
 const {expand} = require("jsonld");
 const {GDBOrganizationModel} = require("../../models/organization");

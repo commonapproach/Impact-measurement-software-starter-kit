@@ -73,7 +73,7 @@ async function themeBuilder(environment, trans, object, error, {themeDict}, {
       theme.codes = environment === 'fileUploading' ? getListOfValue(object, GDBThemeModel, 'codes') : form.codes;
     }
 
-    if ((theme.codes || !theme.codes.length) && config['cids:hasCode']) {
+    if ((!theme.codes || !theme.codes.length) && config['cids:hasCode']) {
       if (config['cids:hasCode'].rejectFile) {
         if (environment === 'fileUploading') {
           error += 1;

@@ -18,7 +18,6 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
 }, form) {
   let uri = object? object['@id'] : undefined;
   const outcome = environment === 'fileUploading' ? outcomeDict[uri] : GDBOutcomeModel({
-    name: form.name
   }, {uri: form.uri});
   if (environment !== 'fileUploading') {
     await transSave(trans, outcome);
@@ -28,7 +27,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
   const config = baseLevelConfig['outcome'];
   let hasError = false;
   if (outcome) {
-    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'name')]) || form.name) {
+    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'name')]) || form?.name) {
       outcome.name = environment === 'fileUploading' ? getValue(object, GDBOutcomeModel, 'name') : form.name;
     }
     if (!outcome.name && config["cids:hasName"]) {
@@ -120,7 +119,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     }
 
     // codes
-    if ((outcome.codes || !outcome.codes.length) && config['cids:hasCode']) {
+    if ((!outcome.codes || !outcome.codes.length) && config['cids:hasCode']) {
       if (config['cids:hasCode'].rejectFile) {
         if (environment === 'fileUploading') {
           error += 1;

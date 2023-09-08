@@ -8,7 +8,7 @@ const {GDBIndicatorModel} = require("../../models/indicator");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {outcomeBuilder} = require("./outcomeBuilder");
 const {getRepository} = require("../../loaders/graphDB");
-const {transSave} = require("../fileUploading/fileUploading");
+const {transSave} = require("../helpers");
 
 
 const fetchOutcomes = async (req, res) => {
@@ -156,7 +156,7 @@ const createOutcomeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createOutcome')){
       const {form} = req.body;
-      await outcomeBuilder('interface', trans, null, null, null, {}, {transSave}, form);
+      await outcomeBuilder('interface', trans, null, null, null,null, {}, {transSave}, form);
       await trans.commit();
       return res.status(200).json({success: true});
     }

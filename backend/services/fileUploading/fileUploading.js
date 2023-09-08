@@ -16,6 +16,8 @@ const {baseLevelConfig} = require('./configs');
 const {config} = require("dotenv");
 const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
 const {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue} = require("../helpers")
+const {GDBImpactNormsModel} = require("../../models/impactStuffs");
+const {themeBuilder} = require("../theme/themeBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -245,49 +247,6 @@ const fileUploading = async (req, res, next) => {
       traceOfUploading += message + '\n';
     }
 
-
-    async function themeBuilder(trans, object, organization) {
-      const uri = object['@id'];
-      const theme = themeDict[uri];
-      const config = baseLevelConfig['theme'];
-      if (theme) {
-
-        if (object[getFullPropertyURI(GDBThemeModel, 'name')]) {
-          theme.name = getValue(object, GDBThemeModel, 'name');
-        } else if (config['cids:hasName']) {
-          if (config['cids:hasName'].rejectFile)
-            error += 1;
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'name'))
-            },
-            config['cids:hasName']
-          );
-        }
-
-        if (object[getFullPropertyURI(GDBThemeModel, 'description')]) {
-          theme.description = getValue(object, GDBThemeModel, 'description');
-        } else if (config['cids:hasDescription']) {
-          if (config['cids:hasDescription'].rejectFile)
-            error += 1;
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'description'))
-            },
-            config['cids:hasDescription']
-          );
-        }
-
-        addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-        addMessage(4, 'finishedReading',
-          {uri, type: getPrefixedURI(object['@type'][0])}, {});
-      }
-
-    }
 
     async function indicatorBuilder(trans, object, organization) {
       const uri = object['@id'];
@@ -598,6 +557,8 @@ const fileUploading = async (req, res, next) => {
 
 
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri}, {populates: ['hasOutcomes']});
+    const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}) || GDBImpactNormsModel({organization: organizationUri});
+
     if (!organization) {
       addTrace('        Error: Incorrect organization URI: No such Organization');
       addTrace('            The file failed to upload');
@@ -852,40 +813,6 @@ const fileUploading = async (req, res, next) => {
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         themeDict[uri] = {_uri: uri};
 
-
-        // if (!object[getFullPropertyURI(GDBThemeModel, 'name')]) {
-        //   addTrace('        Error: Mandatory property missing');
-        //   addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'name'))} is missing`);
-        //   addMessage(8, 'propertyMissing',
-        //     {
-        //       hasName,
-        //       uri,
-        //       type: getPrefixedURI(object['@type'][0]),
-        //       property: getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'name'))
-        //     });
-        //   error += 1;
-        //   hasError = true;
-        // } else {
-        //   hasName = getValue(object, GDBThemeModel, 'name');
-        // }
-        // let hasDescription;
-        // if (!object[getFullPropertyURI(GDBThemeModel, 'description')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'description'))} is missing`);
-        //   // addMessage(8, 'propertyMissing',
-        //   //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBThemeModel, 'description'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   hasDescription = getValue(object, GDBThemeModel, 'description');
-        // }
-        // if (!hasError) {
-        //   const theme = GDBThemeModel({
-        //     name: hasName,
-        //     description: hasDescription
-        //   }, {uri: uri});
-        //   await transSave(trans, theme);
-        // }
       } else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
@@ -1015,16 +942,24 @@ const fileUploading = async (req, res, next) => {
 
     for (let [uri, object] of Object.entries(objectDict)) {
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
-        error = await outcomeBuilder('fileUploading', trans, object, organization, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue});
+        error = await outcomeBuilder('fileUploading', trans, object, organization,impactNorms, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue});
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
         await indicatorBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         await indicatorReportBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
-        await themeBuilder(trans, object, organization,);
+        await themeBuilder('fileUploading', trans, object, error, {themeDict}, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
       }
     }
     await transSave(trans, organization);
+    await transSave(trans, impactNorms);
     // await organization.save();
     if (!error) {
       addTrace('    Start to insert data...');

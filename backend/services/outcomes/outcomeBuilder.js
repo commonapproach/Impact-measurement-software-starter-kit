@@ -3,10 +3,12 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel} = require("../../models/organization");
+const {GDBImpactNormsModel} = require("../../models/impactStuffs");
+const {GDBThemeModel} = require("../../models/theme");
 
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function outcomeBuilder(environment, trans, object, organization, error, {outcomeDict, objectDict}, {
+async function outcomeBuilder(environment, trans, object, organization, impactNorms, error, {outcomeDict, objectDict}, {
   addMessage,
   addTrace,
   transSave,
@@ -16,7 +18,8 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
 }, form) {
   let uri = object? object['@id'] : undefined;
   const outcome = environment === 'fileUploading' ? outcomeDict[uri] : GDBOutcomeModel({
-  }, );
+    name: form.name
+  }, {uri: form.uri});
   if (environment !== 'fileUploading') {
     await transSave(trans, outcome);
     uri = outcome._uri;
@@ -28,10 +31,11 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
     if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'name')]) || form.name) {
       outcome.name = environment === 'fileUploading' ? getValue(object, GDBOutcomeModel, 'name') : form.name;
     }
-    if (!outcome.hasName && config["cids:hasName"]) {
+    if (!outcome.name && config["cids:hasName"]) {
       if (config["cids:hasName"].rejectFile) {
         if (environment === 'fileUploading') {
           error += 1;
+          hasError = true;
         } else {
           throw new Server400Error('Name is mandatory');
         }
@@ -56,6 +60,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
       if (config["cids:hasDescription"].rejectFile) {
         if (environment === 'fileUploading') {
           error += 1;
+          hasError = true;
         } else {
           throw new Server400Error('Description is Mandatory');
         }
@@ -78,8 +83,13 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
     // add the organization to it, and add it to the organization
     if (environment !== 'fileUploading') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
+      impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization})
     }
     outcome.forOrganization = organization._uri;
+    if (!impactNorms.outcomes)
+      impactNorms.outcomes = []
+    impactNorms.outcomes.push(uri);
+
 
     if (!organization.hasOutcomes)
       organization.hasOutcomes = [];
@@ -93,6 +103,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
       if (config['cids:forTheme'].rejectFile) {
         if (environment === 'fileUploading') {
           error += 1;
+          hasError = true;
         } else {
           throw new Server400Error('Themes are mandatory');
         }
@@ -105,6 +116,27 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
             property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'themes'))
           },
           config["cids:forTheme"]
+        );
+    }
+
+    // codes
+    if ((outcome.codes || !outcome.codes.length) && config['cids:hasCode']) {
+      if (config['cids:hasCode'].rejectFile) {
+        if (environment === 'fileUploading') {
+          error += 1;
+          hasError = true;
+        } else {
+          throw new Server400Error('Codes are mandatory');
+        }
+      }
+      if (environment === 'fileUploading')
+        addMessage(8, 'propertyMissing',
+          {
+            uri,
+            type: getPrefixedURI(object['@type'][0]),
+            property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'codes'))
+          },
+          config['cids:hasCode']
         );
     }
 
@@ -125,6 +157,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
       if (config['cids:hasIndicator'].rejectFile) {
         if (environment === 'fileUploading') {
           error += 1;
+          hasError = true;
         } else {
           throw new Server400Error('Indicators are mandatory');
         }
@@ -153,6 +186,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
               addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
               addMessage(8, 'badReference',
                 {uri, referenceURI: indicatorURI, type: 'Indicator'}, {rejectFile: true});
+              hasError = true;
               error += 1;
             } else {
               throw new Server400Error(`Indicator ${indicatorURI} is not in the database`)
@@ -168,6 +202,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
                 subjectURI: indicatorURI
               }, {rejectFile: true});
               error += 1;
+              hasError = true;
             } else {
               throw new Server400Error(`Indicator ${indicatorURI} does not belong to this organization`)
             }
@@ -184,6 +219,7 @@ async function outcomeBuilder(environment, trans, object, organization, error, {
     if (environment === 'interface') {
       await transSave(trans, organization);
       await transSave(trans, outcome);
+      await transSave(trans, impactNorms);
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);

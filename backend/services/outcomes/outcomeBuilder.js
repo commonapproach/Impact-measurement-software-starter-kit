@@ -52,7 +52,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
 
     }
 
-    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'description')]) || form.description) {
+    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'description')]) || form?.description) {
       outcome.description = getValue(object, GDBOutcomeModel, 'description') || form.description;
     }
     if (!outcome.description && config["cids:hasDescription"]) {
@@ -119,6 +119,10 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     }
 
     // codes
+    if ((object && object[getFullPropertyURI(GDBThemeModel, 'codes')]) || form?.codes) {
+      outcome.codes = environment === 'fileUploading' ? getListOfValue(object, GDBThemeModel, 'codes') : form.codes;
+    }
+
     if ((!outcome.codes || !outcome.codes.length) && config['cids:hasCode']) {
       if (config['cids:hasCode'].rejectFile) {
         if (environment === 'fileUploading') {

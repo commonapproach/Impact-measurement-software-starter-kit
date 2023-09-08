@@ -14,7 +14,7 @@ async function themeBuilder(environment, trans, object, error, {themeDict}, {
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
   const theme = environment === 'fileUploading' ? themeDict[uri] : GDBThemeModel({
-    name: form.name
+    // name: form.name
   }, {uri: form.uri});
   if (environment === 'interface') {
     await transSave(trans, theme);
@@ -24,7 +24,7 @@ async function themeBuilder(environment, trans, object, error, {themeDict}, {
 
   if (theme) {
 
-    if ((object && object[getFullPropertyURI(GDBThemeModel, 'name')]) || form.name) {
+    if ((object && object[getFullPropertyURI(GDBThemeModel, 'name')]) || form?.name) {
       theme.name = environment === 'fileUploading' ? getValue(object, GDBThemeModel, 'name') : form.name;
     } else if (config['cids:hasName']) {
       if (config['cids:hasName'].rejectFile) {
@@ -46,7 +46,7 @@ async function themeBuilder(environment, trans, object, error, {themeDict}, {
         );
     }
 
-    if ((object && object[getFullPropertyURI(GDBThemeModel, 'description')]) || form.description) {
+    if ((object && object[getFullPropertyURI(GDBThemeModel, 'description')]) || form?.description) {
       theme.description = environment === 'fileUploading' ? getValue(object, GDBThemeModel, 'description') : form.description;
     } else if (config['cids:hasDescription']) {
       if (config['cids:hasDescription'].rejectFile) {

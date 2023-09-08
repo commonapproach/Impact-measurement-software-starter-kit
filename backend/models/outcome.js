@@ -8,6 +8,7 @@ const GDBOutcomeModel = createGraphDBModel({
   themes: {type: [GDBThemeModel], internalKey: 'cids:forTheme'},
   forOrganization: {type: () => require("./organization").GDBOrganizationModel, internalKey: 'cids:forOrganization'},
   indicators: {type:　[() => require("./indicator").GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
+  codes: {type: [() => require('./code').GDBCodeModel], internalKey: 'cids:codes'}
 }, {
   rdfTypes: ['cids:Outcome'], name: 'outcome'
 });

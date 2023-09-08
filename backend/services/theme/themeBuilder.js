@@ -104,7 +104,7 @@ async function themeBuilder(environment, trans, object, error, {themeDict}, {
         {uri, type: getPrefixedURI(object['@type'][0])}, {});
     }
   }
-  return Error
+  return error
 
 }
 

@@ -415,7 +415,7 @@ const fileUploading = async (req, res, next) => {
 
         if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
           indicatorReport.comment = getValue(object, GDBIndicatorReportModel, 'comment');
-        } else {
+        } else if (config['cids:hasComment']) {
           if (config['cids:hasComment'].rejectFile)
             error += 1;
           addMessage(8, 'propertyMissing',

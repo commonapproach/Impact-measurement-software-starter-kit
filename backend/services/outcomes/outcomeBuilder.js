@@ -45,7 +45,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
           {
             uri,
             type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'hasName'))
+            property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'name'))
           },
           config["cids:hasName"]
         );

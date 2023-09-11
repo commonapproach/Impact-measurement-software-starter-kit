@@ -18,6 +18,7 @@ const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
 const {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue} = require("../helpers")
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {themeBuilder} = require("../theme/themeBuilder");
+const {GDBCodeModel} = require("../../models/code");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -46,6 +47,7 @@ const fileUploading = async (req, res, next) => {
     const objectDict = {};
     const outcomeDict = {};
     const themeDict = {};
+    const codeDict = {}
     const indicatorDict = {};
     const indicatorReportDict = {};
     let messageBuffer = {
@@ -619,36 +621,6 @@ const fileUploading = async (req, res, next) => {
         outcomeDict[uri] = {_uri: uri};
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
-
-        // if (!object[getFullPropertyURI(GDBOutcomeModel, 'name')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'name'))} is missing`);
-        //   // addMessage(8, 'propertyMissing', {uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'name'))})
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   hasName = getValue(object, GDBOutcomeModel, 'name');
-        // }
-        // let description;
-        // if (!object[getFullPropertyURI(GDBOutcomeModel, 'description')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))} is missing`);
-        //   // addMessage(8, 'propertyMissing',
-        //   //   {uri, type: getPrefixedURI(object['@type'][0]),hasName, property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, 'description'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   description = getValue(object, GDBOutcomeModel, 'description');
-        // }
-        // if (!hasError) {
-        //   const outcome = GDBOutcomeModel({
-        //     name: hasName,
-        //     description: description,
-        //     forOrganization: organization._uri
-        //   }, {uri: uri});
-        //   await transSave(trans, outcome);
-        //   // outcomeDict[uri] = outcome;
-        // }
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
@@ -813,6 +785,10 @@ const fileUploading = async (req, res, next) => {
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         themeDict[uri] = {_uri: uri};
 
+      } else if (object['@type'].includes(getFullTypeURI(GDBCodeModel))) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        codeDict[uri] = {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);

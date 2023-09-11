@@ -19,6 +19,7 @@ const {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue} 
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {themeBuilder} = require("../theme/themeBuilder");
 const {GDBCodeModel} = require("../../models/code");
+const {codeBuilder} = require("../code/codeBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -918,13 +919,22 @@ const fileUploading = async (req, res, next) => {
 
     for (let [uri, object] of Object.entries(objectDict)) {
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
-        error = await outcomeBuilder('fileUploading', trans, object, organization,impactNorms, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue});
+        error = await outcomeBuilder('fileUploading', trans, object, organization,impactNorms, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue}, null);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
         await indicatorBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         await indicatorReportBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
         await themeBuilder('fileUploading', trans, object, error, {themeDict}, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
+      } else if (object['@type'].includes(getFullTypeURI(GDBCodeModel))) {
+        await codeBuilder('fileUploading', trans, object,organization, error, {codeDict}, {
           addMessage,
           addTrace,
           transSave,

@@ -4,7 +4,7 @@ const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
-async function codeBuilder(environment, trans, object, organization, impactNorms, error, {codeDict, objectDict}, {
+async function codeBuilder(environment, trans, object, organization, error, {codeDict}, {
   addMessage,
   addTrace,
   transSave,

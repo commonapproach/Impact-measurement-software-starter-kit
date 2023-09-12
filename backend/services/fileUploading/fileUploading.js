@@ -20,6 +20,8 @@ const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {themeBuilder} = require("../theme/themeBuilder");
 const {GDBCodeModel} = require("../../models/code");
 const {codeBuilder} = require("../code/codeBuilder");
+const {GDBCharacteristicModel} = require("../../models/characteristic");
+const {characteristicBuilder} = require("../characteristic/characteristicBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -48,7 +50,8 @@ const fileUploading = async (req, res, next) => {
     const objectDict = {};
     const outcomeDict = {};
     const themeDict = {};
-    const codeDict = {}
+    const codeDict = {};
+    const characteristicDict = {}
     const indicatorDict = {};
     const indicatorReportDict = {};
     let messageBuffer = {
@@ -790,6 +793,12 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         codeDict[uri] = {_uri: uri};
+
+      } else if (object['@type'].includes(getFullTypeURI(GDBCharacteristicModel))) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        characteristicDict[uri] = {_uri: uri};
+
       } else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
@@ -925,7 +934,7 @@ const fileUploading = async (req, res, next) => {
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
         await indicatorReportBuilder(trans, object, organization,);
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
-        await themeBuilder('fileUploading', trans, object, error, {themeDict}, {
+        error = await themeBuilder('fileUploading', trans, object, error, {themeDict}, {
           addMessage,
           addTrace,
           transSave,
@@ -934,7 +943,16 @@ const fileUploading = async (req, res, next) => {
           getListOfValue
         }, null);
       } else if (object['@type'].includes(getFullTypeURI(GDBCodeModel))) {
-        await codeBuilder('fileUploading', trans, object,organization, error, {codeDict}, {
+        error = await codeBuilder('fileUploading', trans, object,organization, error, {codeDict}, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
+      } else if (object['@type'].includes(getFullTypeURI(GDBCharacteristicModel))) {
+        error = await characteristicBuilder('fileUploading', trans, object, error, {characteristicDict}, {
           addMessage,
           addTrace,
           transSave,

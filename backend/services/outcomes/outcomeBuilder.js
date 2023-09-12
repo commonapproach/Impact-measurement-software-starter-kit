@@ -119,8 +119,8 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     }
 
     // codes
-    if ((object && object[getFullPropertyURI(GDBThemeModel, 'codes')]) || form?.codes) {
-      outcome.codes = environment === 'fileUploading' ? getListOfValue(object, GDBThemeModel, 'codes') : form.codes;
+    if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'codes')]) || form?.codes) {
+      outcome.codes = environment === 'fileUploading' ? getListOfValue(object, GDBOutcomeModel, 'codes') : form.codes;
     }
 
     if ((!outcome.codes || !outcome.codes.length) && config['cids:hasCode']) {

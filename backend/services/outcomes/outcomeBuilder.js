@@ -86,7 +86,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     }
     outcome.forOrganization = organization._uri;
     if (!impactNorms.outcomes)
-      impactNorms.outcomes = []
+      impactNorms.outcomes = [];
     impactNorms.outcomes.push(uri);
 
 

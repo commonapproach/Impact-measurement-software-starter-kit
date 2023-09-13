@@ -4,7 +4,6 @@ const {GDBIndicatorModel} = require("../../models/indicator");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {GDBThemeModel} = require("../../models/theme");
 
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 

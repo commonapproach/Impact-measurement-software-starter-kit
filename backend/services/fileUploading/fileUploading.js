@@ -51,7 +51,7 @@ const fileUploading = async (req, res, next) => {
     const outcomeDict = {};
     const themeDict = {};
     const codeDict = {};
-    const characteristicDict = {}
+    const characteristicDict = {};
     const indicatorDict = {};
     const indicatorReportDict = {};
     let messageBuffer = {

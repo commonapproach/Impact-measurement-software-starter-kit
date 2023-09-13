@@ -85,7 +85,8 @@ async function createOrganization(req, res) {
     comment: form.comment,
     email: form.email,
     contactName: form.contactName,
-    telephone: telephone
+    telephone: telephone,
+    characteristic: form.characteristic
   }, form.uri?{uri:form.uri}:null);
 
   await organization.save();

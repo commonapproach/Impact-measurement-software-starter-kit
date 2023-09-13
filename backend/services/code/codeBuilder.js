@@ -3,6 +3,7 @@ const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {getObjectValue} = require("../helpers");
 
 async function codeBuilder(environment, trans, object, organization, error, {codeDict}, {
   addMessage,
@@ -197,7 +198,7 @@ async function codeBuilder(environment, trans, object, organization, error, {cod
           config['iso21972:value']
         );
     } else {
-      code[iso72Value] = measureURI ||
+      code.iso72Value = measureURI ||
         GDBMeasureModel({
             numericalValue: iso72Value
           },

@@ -1,6 +1,6 @@
 const {createGraphDBModel, Types} = require("graphdb-utils");
 const {GDBIndicatorReportModel} = require("./indicatorReport");
-const {GDBUnitOfMeasure} = require("./measure");
+const {GDBUnitOfMeasure, GDBMeasureModel} = require("./measure");
 const {GDBOutcomeModel} = require("./outcome");
 const {GDBCodeModel} = require("./code");
 
@@ -11,7 +11,8 @@ const GDBIndicatorModel = createGraphDBModel({
   indicatorReports: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'},
   forOrganization: {type: () => require('./organization').GDBOrganizationModel, internalKey: 'cids:definedBy'},
   unitOfMeasure: {type: GDBUnitOfMeasure, internalKey: 'iso21972:unit_of_measure'},
-  codes: {type: GDBCodeModel, internalKey: 'cids:hasCode'}
+  codes: {type: GDBCodeModel, internalKey: 'cids:hasCode'},
+  baseline: {type: GDBMeasureModel, internalKey: 'cids:hasBaseline'}
 }, {
   rdfTypes: ['cids:Indicator'], name: 'indicator'
 });

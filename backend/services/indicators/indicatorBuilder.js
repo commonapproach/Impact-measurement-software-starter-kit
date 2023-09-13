@@ -4,6 +4,8 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
+const {GDBMeasureModel} = require("../../models/measure");
+const {getObjectValue} = require("../helpers");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -91,6 +93,39 @@ async function indicatorBuilder(environment, trans, object, organization, impact
           },
           config["cids:hasDescription"]
         );
+    }
+
+    let measureURI = getValue(object, mainModel, 'baseline');
+    let measureObject = getObjectValue(object, mainModel, 'baseline');
+
+    let baseline;
+    if (measureObject)
+      baseline = getValue(measureObject, GDBMeasureModel, 'numericalValue');
+
+    if (!measureURI && !baseline && config['cids:hasBaseline'] && !form.baseline) {
+      if (config['cids:hasBaseline'].rejectFile) {
+        if (environment === 'interface') {
+          throw new Server400Error('Baseline is Mandatory');
+        } else if (environment === 'fileUploading') {
+          error += 1;
+          hasError = true;
+        }
+      }
+      if (environment === 'fileUploading')
+        addMessage(8, 'propertyMissing',
+          {
+            uri,
+            type: getPrefixedURI(object['@type'][0]),
+            property: getPrefixedURI(getFullPropertyURI(mainModel, 'baseline'))
+          },
+          config['cids:hasBaseline']
+        );
+    } else {
+      indicator.baseline = measureURI ||
+        GDBMeasureModel({
+            numericalValue: baseline
+          },
+          {uri: measureObject['@id']});
     }
 
     // codes

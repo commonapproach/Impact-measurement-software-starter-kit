@@ -1,3 +1,4 @@
+const {Server400Error} = require("../utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
@@ -42,4 +43,32 @@ async function transSave(trans, object) {
     .setTimeout(5));
 }
 
-module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue}
+
+function assignValue(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error){
+  if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
+    mainObject[propertyName] = environment === 'fileUploading' ? getValue(object, mainModel, propertyName) : form[propertyName];
+  }
+  if (!mainObject[propertyName] && config[internalKey]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      } else if (environment === 'interface') {
+        throw new Server400Error(`${propertyName} is mandatory`);
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+        },
+        config[internalKey]
+      );
+  }
+  return {hasError, error}
+}
+
+
+module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue}

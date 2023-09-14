@@ -22,6 +22,8 @@ const {GDBCodeModel} = require("../../models/code");
 const {codeBuilder} = require("../code/codeBuilder");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {characteristicBuilder} = require("../characteristic/characteristicBuilder");
+const {indicatorReportBuilder} = require("../indicatorReport/indicatorReportBuilder");
+const {indicatorBuilder} = require("../indicators/indicatorBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -253,148 +255,6 @@ const fileUploading = async (req, res, next) => {
       traceOfUploading += message + '\n';
     }
 
-
-
-    async function indicatorReportBuilder(trans, object, organization) {
-      const uri = object['@id'];
-      let ignore = false;
-      const indicatorReport = indicatorReportDict[uri];
-      const config = baseLevelConfig.indicatorReport;
-
-
-      if (indicatorReport) {
-        indicatorReport.forOrganization = organization._uri;
-
-
-        if (object[getFullPropertyURI(GDBIndicatorReportModel, 'name')]) {
-          indicatorReport.name = getValue(object, GDBIndicatorReportModel, 'name');
-        } else if (config['cids:hasName']) {
-          if (config['cids:hasName'].rejectFile)
-            error += 1;
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'name'))
-            },
-            config['cids:hasName']
-          );
-        }
-
-        if (object[getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated')]) {
-          indicatorReport.dateCreated = new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated'));
-        } else if (config['sch:dateCreated']) {
-          if (config['sch:dateCreated'].rejectFile)
-            error += 1;
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))
-            },
-            config['sch:dateCreated']
-          );
-        }
-
-        if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
-          indicatorReport.comment = getValue(object, GDBIndicatorReportModel, 'comment');
-        } else if (config['cids:hasComment']) {
-          if (config['cids:hasComment'].rejectFile)
-            error += 1;
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))
-            },
-            config['cids:hasComment']
-          );
-        }
-
-        let measureURI = getValue(object, GDBIndicatorReportModel, 'value');
-        let measureObject = getObjectValue(object, GDBIndicatorReportModel, 'value');
-
-        let numericalValue;
-        if (measureObject)
-          numericalValue = getValue(measureObject, GDBMeasureModel, 'numericalValue');
-
-        if (!measureURI && !numericalValue && config['iso21972:value']) {
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'value'))
-            },
-            config['iso21972:value']
-          );
-          if (config['iso21972:value'].rejectFile)
-            error += 1;
-        } else {
-          indicatorReport.value = measureURI ||
-            GDBMeasureModel({
-                numericalValue
-              },
-              {uri: measureObject['@id']});
-        }
-
-
-        // add indicator to the indicatorReport
-
-        indicatorReport.forIndicator = getValue(object, GDBIndicatorReportModel, 'forIndicator');
-        if (!indicatorReport.forIndicator && config['cids:forIndicator']) {
-          if (config['cids:forIndicator'].rejectFile)
-            error += 1;
-          if (config['cids:forIndicator'].ignoreInstance) {
-            ignore = true;
-            delete indicatorReportDict[uri];
-          }
-          addMessage(8, 'propertyMissing',
-            {
-              uri,
-              type: getPrefixedURI(object['@type'][0]),
-              property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'forIndicator'))
-            },
-            config['cids:forIndicator']
-          );
-        }
-
-        // add the indicatorReport to indicator if needed
-        if (!ignore && !indicatorDict[indicatorReport.forIndicator]) {
-          // the indicator is not in the file, fetch it from the database and add the indicatorReport to it
-          const indicatorURI = indicatorReport.forIndicator;
-          const indicator = await GDBIndicatorModel.findOne({_uri: indicatorReport.forIndicator});
-          if (!indicator) {
-            addTrace('        Error: bad reference');
-            addTrace(`            Indicator ${indicatorURI} appears neither in the file nor in the sandbox`);
-            addMessage(8, 'badReference',
-              {uri, referenceURI: indicatorURI, type: 'Indicator'}, {rejectFile: true});
-            error += 1;
-          } else if (!indicator.forOrganization !== organization._uri) {
-            addTrace('        Error:');
-            addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
-            addMessage(8, 'subjectDoesNotBelong',
-              {uri, type: 'Indicator', subjectURI: indicatorURI}, {rejectFile: true});
-            error += 1;
-          } else {
-            if (!indicator.indicatorReports) {
-              indicator.indicatorReports = [];
-            }
-            indicator.indicatorReports.push(uri);
-            await transSave(trans, indicator);
-          }
-
-        }
-
-        if (!ignore) {
-          addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
-          addMessage(4, 'finishedReading',
-            {uri, type: getPrefixedURI(object['@type'][0])}, {});
-        }
-      } else {
-        // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
-      }
-
-    }
 
     const {objects, organizationUri, fileName} = req.body;
     addTrace(`Loading file ${fileName}...`);
@@ -807,9 +667,30 @@ const fileUploading = async (req, res, next) => {
       if (object['@type'].includes(getFullTypeURI(GDBOutcomeModel))) {
         error = await outcomeBuilder('fileUploading', trans, object, organization,impactNorms, error, {objectDict, outcomeDict}, {addMessage, addTrace, transSave, getFullPropertyURI, getValue, getListOfValue}, null);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorModel))) {
-        await indicatorBuilder(trans, object, organization,);
+        error = await indicatorBuilder('fileUploading', trans, object, organization, impactNorms, error, {
+          indicatorDict,
+          objectDict
+        }, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
-        await indicatorReportBuilder(trans, object, organization,);
+        error = await indicatorReportBuilder('fileUploading', trans, object, organization, impactNorms, error, {
+          indicatorDict,
+          indicatorReportDict,
+          objectDict
+        }, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
         error = await themeBuilder('fileUploading', trans, object, error, {themeDict}, {
           addMessage,

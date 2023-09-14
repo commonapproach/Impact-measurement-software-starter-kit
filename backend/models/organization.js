@@ -27,7 +27,7 @@ const GDBOrganizationModel = createGraphDBModel({
   telephone: {type: GDBPhoneNumberModel, internalKey: 'ic:hasTelephone', onDelete: DeleteType.CASCADE},
   contactName: {type: String, internalKey: ':hasContactName'},
   email: {type: String, internalKey: ':hasEmail'},
-  characteristic: {type: () => require("./characteristic").GDBCharacteristicModel, internalKey: 'cids:hasCharacteristic'}
+  characteristics: {type: [() => require("./characteristic").GDBCharacteristicModel], internalKey: 'cids:hasCharacteristic'}
 }, {
   rdfTypes: ['cids:Organization'], name: 'organization'
 });

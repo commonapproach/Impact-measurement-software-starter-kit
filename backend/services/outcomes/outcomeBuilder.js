@@ -225,7 +225,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);
-    } else if (environment === 'fileUploading'){
+    } else if (environment === 'fileUploading') {
       addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
       addMessage(4, 'finishedReading',
         {uri, type: getPrefixedURI(object['@type'][0])}, {});

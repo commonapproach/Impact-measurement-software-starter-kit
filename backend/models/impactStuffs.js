@@ -6,13 +6,17 @@ const {GDBIndicatorModel} = require("./indicator");
 const {GDBIndicatorReportModel} = require("./indicatorReport");
 
 const GDBImpactModelModel = createGraphDBModel({
-  organization: {type: GDBOrganizationModel, internalKey: 'cids:forOrganization'},
+  name: {type: String, internalKey: 'cids:hasName'},
+  description: {type: String, internalKey: 'cids:hasName'},
+  organization: {type: GDBOrganizationModel, internalKey: 'cids:forDescription'},
 }, {
   rdfTypes: ['cids:ImpactModel'], name: 'impactModel'
 });
 
 
 const GDBImpactNormsModel = createGraphDBModel({
+  name: {type: String, internalKey: 'cids:hasName'},
+  description: {type: String, internalKey: 'cids:hasName'},
   organization: {type: GDBOrganizationModel, internalKey: 'cids:forOrganization'},
   stakeholders: {type: [GDBStakeholderModel], internalKey: 'cids:hasStakeholder'},
   outcomes: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome'},

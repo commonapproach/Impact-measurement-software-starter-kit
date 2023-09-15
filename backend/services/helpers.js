@@ -70,5 +70,31 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
   return {hasError, error}
 }
 
+function assignValues(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error, getListOfValue){
+  if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
+    mainObject[propertyName] = environment === 'fileUploading' ? getListOfValue(object, mainModel, propertyName) : form[propertyName];
+  }
+  if ((!mainObject[propertyName] || !mainObject[propertyName].length) && config[internalKey]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      } else if (environment === 'interface') {
+        throw new Server400Error(`${propertyName} is mandatory`);
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+        },
+        config[internalKey]
+      );
+  }
+  return {hasError, error}
+}
 
-module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue}
+
+module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues}

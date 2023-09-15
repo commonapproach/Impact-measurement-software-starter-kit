@@ -93,7 +93,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
       organization.hasOutcomes = [];
     organization.hasOutcomes.push(uri);
 
-    // add theme to outcome
+    // add themes to outcome
     if ((object && object[getFullPropertyURI(GDBOutcomeModel, 'themes')]) || form?.themes) {
       outcome.themes = environment === 'fileUploading' ? getListOfValue(object, GDBOutcomeModel, 'themes') : form.themes;
     }

@@ -95,38 +95,7 @@ async function indicatorBuilder(environment, trans, object, organization, impact
         );
     }
 
-    let measureURI = getValue(object, mainModel, 'baseline');
-    let measureObject = getObjectValue(object, mainModel, 'baseline');
 
-    let baseline;
-    if (measureObject)
-      baseline = getValue(measureObject, GDBMeasureModel, 'numericalValue');
-
-    if (!measureURI && !baseline && config['cids:hasBaseline'] && !form.baseline) {
-      if (config['cids:hasBaseline'].rejectFile) {
-        if (environment === 'interface') {
-          throw new Server400Error('Baseline is Mandatory');
-        } else if (environment === 'fileUploading') {
-          error += 1;
-          hasError = true;
-        }
-      }
-      if (environment === 'fileUploading')
-        addMessage(8, 'propertyMissing',
-          {
-            uri,
-            type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(mainModel, 'baseline'))
-          },
-          config['cids:hasBaseline']
-        );
-    } else {
-      indicator.baseline = measureURI ||
-        GDBMeasureModel({
-            numericalValue: baseline
-          },
-          {uri: measureObject['@id']});
-    }
 
     // codes
     if ((object && object[getFullPropertyURI(mainModel, 'codes')]) || form?.codes) {

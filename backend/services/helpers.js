@@ -1,4 +1,5 @@
 const {Server400Error} = require("../utils");
+const {GDBMeasureModel} = require("../models/measure");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
@@ -96,5 +97,41 @@ function assignValues(environment, config, object, mainModel, mainObject, proper
   return {hasError, error}
 }
 
+function assignMeasure(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, uri, hasError, error, form) {
+  let measureURI = getValue(object, mainModel, propertyName);
+  let measureObject = getObjectValue(object, mainModel, propertyName);
 
-module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues}
+  let numericalValue;
+  if (measureObject)
+    numericalValue = getValue(measureObject, GDBMeasureModel, 'numericalValue');
+
+  if (!measureURI && !numericalValue && config[internalKey] && !form[propertyName]) {
+    if (config[internalKey].rejectFile) {
+      if (environment === 'interface') {
+        throw new Server400Error(`${propertyName} is Mandatory`);
+      } else if (environment === 'fileUploading') {
+        error += 1;
+        hasError = true;
+      }
+    }
+    if (environment === 'fileUploading')
+      addMessage(8, 'propertyMissing',
+        {
+          uri,
+          type: getPrefixedURI(object['@type'][0]),
+          property: getPrefixedURI(getFullPropertyURI(mainModel, propertyName))
+        },
+        config[internalKey]
+      );
+  } else if (measureURI || numericalValue){
+    mainObject[propertyName] = measureURI ||
+      GDBMeasureModel({
+          numericalValue
+        },
+        {uri: measureObject? measureObject['@id'] : null});
+  }
+  return {hasError, error}
+}
+
+
+module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues, assignMeasure}

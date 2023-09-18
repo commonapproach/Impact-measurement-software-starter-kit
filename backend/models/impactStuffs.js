@@ -20,9 +20,9 @@ const GDBImpactNormsModel = createGraphDBModel({
   organization: {type: GDBOrganizationModel, internalKey: 'cids:forOrganization'},
   stakeholders: {type: [GDBStakeholderModel], internalKey: 'cids:hasStakeholder'},
   outcomes: {type: [GDBOutcomeModel], internalKey: 'cids:hasOutcome'},
-  // stakeholderOutcome: {type: [], internalKey: 'cids:hasStakeholderOutcome'},
+  stakeholderOutcomes: {type: [require('./stakeholderOutcome').GDBStakeholderOutcomeModel], internalKey: 'cids:hasStakeholderOutcome'},
   indicators: {type: [GDBIndicatorModel], internalKey: 'cids:hasIndicatorReport'},
-  // impactReports: {type: [], internalKey: 'cids:hasImpactReport'}
+  impactReports: {type: [require('./impactReport').GDBImpactReportModel], internalKey: 'cids:hasImpactReport'},
   indicatorReports: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'}
 }, {
   rdfTypes: ['cids:ImpactModel', "cids:ImpactNorms"], name: 'impactNorms'

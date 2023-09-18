@@ -5,7 +5,7 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
 const {GDBMeasureModel} = require("../../models/measure");
-const {getObjectValue} = require("../helpers");
+const {getObjectValue, assignMeasure} = require("../helpers");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -22,6 +22,7 @@ async function indicatorBuilder(environment, trans, object, organization, impact
   let uri = object ? object['@id'] : undefined;
   const mainModel = GDBIndicatorModel;
   let hasError = false;
+  let ret;
   const indicator = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
     await transSave(trans, indicator);
@@ -95,7 +96,9 @@ async function indicatorBuilder(environment, trans, object, organization, impact
         );
     }
 
-
+    ret = assignMeasure(environment, config, object, mainModel, indicator, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, null)
+    hasError = ret.hasError;
+    error = ret.error;
 
     // codes
     if ((object && object[getFullPropertyURI(mainModel, 'codes')]) || form?.codes) {

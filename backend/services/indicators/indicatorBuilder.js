@@ -56,7 +56,7 @@ async function indicatorBuilder(environment, trans, object, organization, impact
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignMeasure(environment, config, object, mainModel, indicator, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
+    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
     hasError = ret.hasError;
     error = ret.error;
 
@@ -87,10 +87,10 @@ async function indicatorBuilder(environment, trans, object, organization, impact
           config['cids:forOutcome']
         );
     } else if ((object && object[getFullPropertyURI(mainModel, 'forOutcomes')]) || form.outcomes) {
-      if (!indicator.forOutcomes)
-        indicator.forOutcomes = [];
+      if (!mainObject.forOutcomes)
+        mainObject.forOutcomes = [];
       for (const outcomeURI of environment === 'fileUploading'? getListOfValue(object, mainModel, 'forOutcomes') : form.outcomes) {
-        indicator.forOutcomes.push(outcomeURI);
+        mainObject.forOutcomes.push(outcomeURI);
         if (environment === 'interface' || !objectDict[outcomeURI]) {
           // in this case, the outcome is not in the file, get the outcome from database and add indicator to it
           const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
@@ -131,10 +131,10 @@ async function indicatorBuilder(environment, trans, object, organization, impact
     // add indicator report, in this case, indicator reports will not be in the form
     if (environment !== 'interface') {
       if (object[getFullPropertyURI(mainModel, 'indicatorReports')]) {
-        if (!indicator.indicatorReports)
-          indicator.indicatorReports = [];
+        if (!mainObject.indicatorReports)
+          mainObject.indicatorReports = [];
         getListOfValue(object, mainModel, 'indicatorReports').map(indicatorReportURI => {
-          indicator.indicatorReports.push(indicatorReportURI);
+          mainObject.indicatorReports.push(indicatorReportURI);
         });
       } else if (config['cids:hasIndicatorReport']) {
         if (config['cids:hasIndicatorReport'].rejectFile) {

@@ -26,19 +26,19 @@ async function characteristicBuilder(environment, trans, object, error, {charact
   let hasError = false;
   if (mainObject) {
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, null, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'codes', 'cids:hasCode', addMessage, null, uri, hasError, error, getListOfValue);
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'codes', 'cids:hasCode', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'stakeholders', 'cids:forStakeholder', addMessage, null, uri, hasError, error, getListOfValue);
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'stakeholders', 'cids:forStakeholder', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, null, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 

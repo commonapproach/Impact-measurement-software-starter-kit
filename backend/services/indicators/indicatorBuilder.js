@@ -5,7 +5,7 @@ const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
 const {GDBMeasureModel} = require("../../models/measure");
-const {getObjectValue, assignMeasure} = require("../helpers");
+const {getObjectValue, assignMeasure, assignValue, assignValues} = require("../helpers");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -23,14 +23,14 @@ async function indicatorBuilder(environment, trans, object, organization, impact
   const mainModel = GDBIndicatorModel;
   let hasError = false;
   let ret;
-  const indicator = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await transSave(trans, indicator);
-    uri = indicator._uri;
+    await transSave(trans, mainObject);
+    uri = mainObject._uri;
   }
 
   const config = baseLevelConfig['indicator'];
-  if (indicator) {
+  if (mainObject) {
     // addTrace(`    Loading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
 
     // add the organization to it, and add it to the organization
@@ -39,7 +39,7 @@ async function indicatorBuilder(environment, trans, object, organization, impact
       impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
     }
 
-    indicator.forOrganization = organization._uri;
+    mainObject.forOrganization = organization._uri;
     if (!impactNorms.indicators)
       impactNorms.indicators = [];
     impactNorms.indicators.push(uri);
@@ -48,82 +48,21 @@ async function indicatorBuilder(environment, trans, object, organization, impact
       organization.hasIndicators = [];
     organization.hasIndicators.push(uri);
 
-
-    if ((object && object[getFullPropertyURI(mainModel, 'name')]) || form?.name) {
-      indicator.name = environment === 'fileUploading' ? getValue(object, mainModel, 'name') : form.name;
-    }
-    if (!indicator.name && config["cids:hasName"]) {
-      if (config["cids:hasName"].rejectFile) {
-        if (environment === 'fileUploading') {
-          error += 1;
-          hasError = true;
-        } else if (environment === 'interface') {
-          throw new Server400Error('Name is mandatory');
-        }
-      }
-      if (environment === 'fileUploading')
-        addMessage(8, 'propertyMissing',
-          {
-            uri,
-            type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(mainModel, 'name'))
-          },
-          config["cids:hasName"]
-        );
-    }
-
-    if ((object && object[getFullPropertyURI(mainModel, 'description')]) || form?.description) {
-      indicator.description = environment === 'fileUploading' ? getValue(object, mainModel, 'description') : form.description;
-    }
-
-    if (!indicator.description && config["cids:hasDescription"]) {
-      if (config["cids:hasDescription"].rejectFile) {
-        if (environment === 'fileUploading') {
-          error += 1;
-          hasError = true;
-        } else if (environment === 'interface') {
-          throw new Server400Error('Description is mandatory');
-        }
-      }
-      if (environment === 'fileUploading')
-        addMessage(8, 'propertyMissing',
-          {
-            uri,
-            type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(mainModel, 'description'))
-          },
-          config["cids:hasDescription"]
-        );
-    }
-
-    ret = assignMeasure(environment, config, object, mainModel, indicator, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, null)
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 
-    // codes
-    if ((object && object[getFullPropertyURI(mainModel, 'codes')]) || form?.codes) {
-      indicator.codes = environment === 'fileUploading' ? getListOfValue(object, mainModel, 'codes') : form.codes;
-    }
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
+    hasError = ret.hasError;
+    error = ret.error;
 
-    if ((!indicator.codes || !indicator.codes.length) && config['cids:hasCode']) {
-      if (config['cids:hasCode'].rejectFile) {
-        if (environment === 'fileUploading') {
-          error += 1;
-          hasError = true;
-        } else {
-          throw new Server400Error('Codes are mandatory');
-        }
-      }
-      if (environment === 'fileUploading')
-        addMessage(8, 'propertyMissing',
-          {
-            uri,
-            type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(mainModel, 'codes'))
-          },
-          config['cids:hasCode']
-        );
-    }
+    ret = assignMeasure(environment, config, object, mainModel, indicator, 'baseline', 'cids:hasBaseline', addMessage, uri, hasError, error, form);
+    hasError = ret.hasError;
+    error = ret.error;
+
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'codes', 'cids:hasCode', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
 
 
     // add outcomes

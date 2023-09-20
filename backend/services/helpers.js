@@ -18,6 +18,10 @@ const getValue = (object, graphdbModel, property) => {
   }
 };
 
+const getFullObjectURI = (object) => {
+  return object["@id"];
+};
+
 const getObjectValue = (object, graphdbModel, property) => {
   if (object[getFullURI(graphdbModel.schema[property].internalKey)]) {
     return object[getFullURI(graphdbModel.schema[property].internalKey)][0];
@@ -134,4 +138,4 @@ function assignMeasure(environment, config, object, mainModel, mainObject, prope
 }
 
 
-module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues, assignMeasure}
+module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues, assignMeasure, getFullObjectURI}

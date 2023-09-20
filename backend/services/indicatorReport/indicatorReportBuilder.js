@@ -1,5 +1,5 @@
 const {baseLevelConfig} = require("../fileUploading/configs");
-const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues} = require("../helpers");
+const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues, getFullObjectURI} = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBMeasureModel} = require("../../models/measure");
 const {GDBIndicatorModel} = require("../../models/indicator");
@@ -7,6 +7,7 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
+const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorReportBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -56,7 +57,7 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValues(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, form, uri, hasError, error, getListOfValue)
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, form, uri, hasError, error);
     error = ret.error;
     hasError = ret.hasError;
 
@@ -99,6 +100,35 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
         await transSave(trans, indicator);
       }
     }
+
+    // add the timeInterval to indicator report
+    // todo: add form to it
+    // mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
+    //       GDBDateTimeIntervalModel({
+    //         hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //             GDBDateTimeIntervalModel, 'hasBeginning') ||
+    //           GDBInstant({
+    //             date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+    //           }, {
+    //             uri: getFullObjectURI(
+    //               object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //                 [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+    //             )
+    //           }),
+    //
+    //         hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //             GDBDateTimeIntervalModel, 'hasEnd') ||
+    //           GDBInstant({
+    //             date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+    //           }, {
+    //             uri: getFullObjectURI(
+    //               object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //                 [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+    //             )
+    //           })
+    //       }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])})
 
     if (!ignore && !hasError && environment === 'fileUploading') {
       addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);

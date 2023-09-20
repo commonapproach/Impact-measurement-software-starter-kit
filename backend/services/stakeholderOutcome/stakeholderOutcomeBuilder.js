@@ -7,6 +7,7 @@ const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function stakeholderOutcomeBuilder(environment, trans, object, organization, impactNorms, error, {
+  outcomeDict,
   stakeholderOutcomeDict,
   objectDict
 }, {
@@ -45,7 +46,7 @@ async function stakeholderOutcomeBuilder(environment, trans, object, organizatio
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'comment', 'cids:hasComment', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'description', 'cids:hasDescription', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 

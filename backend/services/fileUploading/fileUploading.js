@@ -27,6 +27,8 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {stakeholderOutcomeBuilder} = require("../stakeholderOutcome/stakeholderOutcomeBuilder");
 const {impactNormsBuilder} = require("../impactStuffs/impactStuffs");
 const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
+const {GDBHowMuchImpactModel, GDBImpactDepthModel, GDBImpactScaleModel} = require("../../models/howMuchImpact");
+const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -55,6 +57,7 @@ const fileUploading = async (req, res, next) => {
     const indicatorReportDict = {};
     const impactReportDict = {};
     const stakeholderOutcomeDict = {};
+    const howMuchImpactDict = {};
 
     let messageBuffer = {
       begin: [], end: [], noURI: []
@@ -399,6 +402,12 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         impactReportDict[uri] = {_uri: uri};
+      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
+        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))
+      ) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        howMuchImpactDict[uri] = {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
@@ -599,6 +608,18 @@ const fileUploading = async (req, res, next) => {
           getValue,
           getListOfValue
         }, null);
+      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
+        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))
+      ) {
+        const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))? 'impactScale' : 'impactDepth'
+        error = await howMuchImpactBuilder('fileUploading', subType, trans, object, organization, impactNorms, error, {howMuchImpactDict, objectDict}, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
       }
     }
     await transSave(trans, organization);
@@ -658,8 +679,21 @@ const fileUploading = async (req, res, next) => {
       });
       await Promise.all(impactReports.map(impactReport => transSave(trans, impactReport)));
 
-      
+      const howMuchImpacts = Object.entries(howMuchImpactDict).map(([uri, howMuchImpact]) => {
+        if (howMuchImpact.subType === 'impactScale') {
+          delete howMuchImpact.subType
+          return GDBImpactScaleModel(
+            howMuchImpact, {_uri: howMuchImpact._uri}
+          );
+        } else {
+          delete howMuchImpact.subType
+          return GDBImpactDepthModel(
+            howMuchImpact, {_uri: howMuchImpact._uri}
+          );
+        }
 
+      });
+      await Promise.all(howMuchImpacts.map(howMuchImpact => transSave(trans, howMuchImpact)));
 
 
       await trans.commit();

@@ -51,6 +51,7 @@ import AddEditStakeholder from "./components/stakeholders/AddEditStakeholder";
 import AddEditCode from "./components/codes/AddEditCode";
 import Codes from "./components/codes/Codes";
 import AddEditCharacteristic from "./components/characteristics/AddEditCharacteristic";
+import Characteristic_ReportGenerate from "./components/ReportGenerate/CharacteristicReports";
 
 const routes = (
   <Routes>
@@ -148,6 +149,7 @@ const routes = (
            element={<PrivateRoute element={IndicatorReports_ReportGenerate}/>}/>
     <Route path={"/reportGenerate/outcomeReports"} element={<PrivateRoute element={OutcomeReports}/>}/>
     <Route path={"/reportGenerate/themeReports"} element={<PrivateRoute element={ThemeReports}/>}/>
+      <Route path={"/reportGenerate/characteristicReports"} element={<PrivateRoute element={Characteristic_ReportGenerate}/>}/>
 
   </Routes>
 );

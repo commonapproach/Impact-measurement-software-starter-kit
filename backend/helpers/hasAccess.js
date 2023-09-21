@@ -54,6 +54,12 @@ async function hasAccess(req, operationType) {
         return true;
       break
 
+    // characteristic
+    case 'fetchCharacteristics':
+      return true;
+      break
+
+
     // code
     case 'createCode':
       if (userAccount.isSuperuser)

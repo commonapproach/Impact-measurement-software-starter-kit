@@ -14,7 +14,9 @@ const baseLevelConfig = {
     'iso21972:value': {flag: true}
   },
   stakeholderOutcome: {},
-  characteristic: {}
+  characteristic: {},
+  impactScale:{},
+  impactDepth: {}
 };
 
 module.exports = {

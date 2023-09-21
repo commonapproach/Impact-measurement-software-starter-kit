@@ -6,7 +6,7 @@ const GDBHowMuchImpactModel = createGraphDBModel({
   indicator: {type: GDBIndicatorModel, internalKey: 'cids:forIndicator'},
   value: {type: GDBMeasureModel, internalKey: 'iso21972:value'},
 }, {
-  rdfTypes: ['cids:HowMuchImpact'], name: 'howMuchImpact'
+  rdfTypes: ['owl:NamedIndividual', 'cids:HowMuchImpact'], name: 'howMuchImpact'
 });
 
 const GDBImpactScaleModel = createGraphDBModel({

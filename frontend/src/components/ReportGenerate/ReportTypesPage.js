@@ -33,6 +33,9 @@ function ReportTypes() {
       <NavButton to={'/reportGenerate/themeReports'} icon={<Edit/>} key={'Theme Reports'} buttonHeight={50}
                  buttonWidth={150} textSize={"small"} text="Theme Reports"/>
 
+      <NavButton to={'/reportGenerate/characteristicReports'} icon={<Edit/>} key={'Characteristic Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"} text="Characteristic Reports"/>
+
       {/*<NavButton to={'/organization-outcomes'} icon={<Edit/>} key={'organization-outcomes'} buttonHeight={50}*/}
       {/*           buttonWidth={150}  textSize={"small"}  text="Theme Report"/>*/}
 

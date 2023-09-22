@@ -354,6 +354,7 @@ const fileUploading = async (req, res, next) => {
           uri,
           type: getPrefixedURI(object['@type'][0])
         }, {ignoreInstance: true});
+        error += 1
         continue;
       }
 

@@ -16,7 +16,8 @@ const baseLevelConfig = {
   stakeholderOutcome: {},
   characteristic: {},
   impactScale:{},
-  impactDepth: {}
+  impactDepth: {},
+  code: {}
 };
 
 module.exports = {

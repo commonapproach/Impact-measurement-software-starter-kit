@@ -58,7 +58,7 @@ async function codeBuilder(environment, trans, object, organization, error, {cod
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'cids:hasIdentification', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'identifier', 'tove_org:hasIdentifier', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 

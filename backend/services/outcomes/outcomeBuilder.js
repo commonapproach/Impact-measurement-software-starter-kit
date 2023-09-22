@@ -58,6 +58,11 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
     hasError = ret.hasError;
     error = ret.error;
 
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'stakeholderOutcomes', 'cids:hasStakeholderOutcome', addMessage, form, uri, hasError, error, getListOfValue)
+    hasError = ret.hasError;
+    error = ret.error;
+
+    // todo: handle the case when stakeholderOutcomes is in the database
 
 
     // add indicator to outcome

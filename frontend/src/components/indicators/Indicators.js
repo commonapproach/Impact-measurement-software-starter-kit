@@ -26,8 +26,10 @@ export default function Indicators() {
 
   useEffect(() => {
     fetchIndicators(encodeURIComponent(uri)).then(res => {
-      if(res.success)
+      if(res.success) {
+        console.log(res.indicators)
         setState(state => ({...state, loading: false, data: res.indicators}));
+      }
     }).catch(e => {
       setState(state => ({...state, loading: false}))
       reportErrorToBackend(e)

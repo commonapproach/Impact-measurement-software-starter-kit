@@ -50,6 +50,7 @@ async function transSave(trans, object) {
 
 
 function assignValue(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error){
+  let ignore;
   if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
     mainObject[propertyName] = environment === 'fileUploading' ? getValue(object, mainModel, propertyName) : form[propertyName];
   }
@@ -60,6 +61,10 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
         hasError = true;
       } else if (environment === 'interface') {
         throw new Server400Error(`${propertyName} is mandatory`);
+      }
+    } else if (config[internalKey].ignoreInstance) {
+      if (environment === 'fileUploading') {
+        ignore = true;
       }
     }
     if (environment === 'fileUploading')
@@ -72,7 +77,7 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
         config[internalKey]
       );
   }
-  return {hasError, error}
+  return {hasError, error, ignore}
 }
 
 function assignValues(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error, getListOfValue){

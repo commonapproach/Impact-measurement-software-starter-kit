@@ -48,7 +48,7 @@ async function indicatorBuilder(environment, trans, object, organization, impact
       organization.hasIndicators = [];
     organization.hasIndicators.push(uri);
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'tove_org:hasName', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
 

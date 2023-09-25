@@ -680,6 +680,13 @@ const fileUploading = async (req, res, next) => {
       });
       await Promise.all(impactReports.map(impactReport => transSave(trans, impactReport)));
 
+      const stakeholderOutcomes = Object.entries(stakeholderOutcomeDict).map(([uri, stakeholderOutcome]) => {
+        return GDBStakeholderOutcomeModel(
+          stakeholderOutcome, {_uri: stakeholderOutcome._uri}
+        );
+      });
+      await Promise.all(stakeholderOutcomes.map(stakeholderOutcome => transSave(trans, stakeholderOutcome)));
+
       const howMuchImpacts = Object.entries(howMuchImpactDict).map(([uri, howMuchImpact]) => {
         if (howMuchImpact.subType === 'impactScale') {
           delete howMuchImpact.subType

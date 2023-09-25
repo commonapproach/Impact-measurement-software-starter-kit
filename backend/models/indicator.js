@@ -4,7 +4,7 @@ const {GDBOutcomeModel} = require("./outcome");
 const {GDBMeasureModel} = require("./measure");
 
 const GDBIndicatorModel = createGraphDBModel({
-  name: {type: String, internalKey: 'tove_org:hasName'}, // todo: here is issue, on protege, it should be tov_org:hasName
+  name: {type: String, internalKey: 'cids:hasName'}, // todo: here is issue, on protege, it should be tov_org:hasName
   description: {type: String, internalKey: 'cids:hasDescription'},
   forOutcomes: {type: [GDBOutcomeModel], internalKey: 'cids:forOutcome'},
   indicatorReports: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'},

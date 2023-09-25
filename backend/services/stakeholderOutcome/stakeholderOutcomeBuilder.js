@@ -70,6 +70,11 @@ async function stakeholderOutcomeBuilder(environment, trans, object, organizatio
     hasError = ret.hasError;
     error = ret.error;
 
+    ret = assignValues(environment, config, object, mainModel, mainObject, 'impactReports', 'cids:hasImpactReport', addMessage, form, uri, hasError, error, getListOfValue);
+    hasError = ret.hasError;
+    error = ret.error;
+    // todo: add stakeholderOutcome to impactReport if needed
+
     ret = assignValue(environment, config, object, mainModel, mainObject, 'outcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;

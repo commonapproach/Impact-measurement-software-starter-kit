@@ -63,7 +63,10 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
 
     // add indicator to the indicatorReport
 
-    assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
+    error = ret.error;
+    hasError = ret.hasError;
+    ignore = ret.ignore;
 
     // add the indicatorReport to indicator if needed
     if (environment === 'interface' || (!ignore && !indicatorDict[mainObject.forIndicator])) {

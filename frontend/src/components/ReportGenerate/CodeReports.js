@@ -148,6 +148,8 @@ export default function Code_ReportGenerate() {
                           sx={{pl: 4}}> {`Identifier: ${code.identifier || 'Not Given'}`} </Typography>
               <Typography variant={'body1'}
                           sx={{pl: 4}}> {`Specification: ${code.specification || 'Not Given'}`} </Typography>
+              <Typography variant={'body1'}
+                          sx={{pl: 4}}> {`Description: ${code.description || 'Not Given'}`} </Typography>
             </Paper>
 
           );

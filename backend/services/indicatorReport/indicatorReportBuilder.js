@@ -1,5 +1,7 @@
 const {baseLevelConfig} = require("../fileUploading/configs");
-const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues, getFullObjectURI} = require("../helpers");
+const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues, getFullObjectURI,
+  assignMeasure
+} = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBMeasureModel} = require("../../models/measure");
 const {GDBIndicatorModel} = require("../../models/indicator");
@@ -57,7 +59,7 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
     hasError = ret.hasError;
     error = ret.error;
 
-    ret = assignValue(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, form, uri, hasError, error);
+    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, uri, hasError, error);
     error = ret.error;
     hasError = ret.hasError;
 

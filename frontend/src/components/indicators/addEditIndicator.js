@@ -46,7 +46,8 @@ export default function AddEditIndicator() {
     description: '',
     unitOfMeasure: '',
     uri: '',
-    organization: ''
+    organization: '',
+    baseline: ''
   });
   const [loading, setLoading] = useState(true);
 
@@ -158,7 +159,9 @@ export default function AddEditIndicator() {
           <Typography variant={'body1'}> {<Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover
                                                 color={'#2f5ac7'}>{form.organizationName}</Link>} </Typography>
           <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
-          <Typography variant={'body1'}> {`${form.unitOfMeasure}`} </Typography>
+          <Typography variant={'body1'}> {`${form.unitOfMeasure || 'Not Given'}`} </Typography>
+          <Typography variant={'h6'}> {`Baseline:`} </Typography>
+          <Typography variant={'body1'}> {`${form.baseline}`} </Typography>
           <Typography variant={'h6'}> {`Description:`} </Typography>
           <Typography variant={'body1'}> {`${form.description}`} </Typography>
 

@@ -88,7 +88,7 @@ export default function IndicatorField({defaultValue, required, onChange, label,
   return (
     <Paper variant="outlined" sx={{mt: 3, mb: 3, p: 2.5, borderRadius: 2}}>
       {label? <Typography variant="h5">
-        {label} {required ? '*' : ''}
+        {label}
       </Typography>: <div/>}
       {
         <>

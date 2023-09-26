@@ -10,6 +10,7 @@ import {UserContext} from "../../context";
 import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indicatorApi";
 import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {fetchCodesInterfaces} from "../../api/codeAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -40,6 +41,10 @@ export default function AddEditIndicator() {
     {}
   );
 
+  const [codesInterfaces, setCodesInterfaces] = useState({
+
+  })
+
   const [form, setForm] = useState({
     name: '',
     // hasIdentifier: '',
@@ -47,9 +52,24 @@ export default function AddEditIndicator() {
     unitOfMeasure: '',
     uri: '',
     organization: '',
-    baseline: ''
+    baseline: '',
+    codes: []
   });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCodesInterfaces().then(({success, codesInterfaces}) => {
+      if (success){
+        console.log(codesInterfaces)
+        setCodesInterfaces(codesInterfaces)
+      }
+    }).catch(e => {
+      if (e.json)
+        setErrors(e.json)
+      reportErrorToBackend(e)
+      enqueueSnackbar(e.json?.message || "Error occur when fetching code interface", {variant: 'error'});
+    })
+  }, [])
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
@@ -144,8 +164,6 @@ export default function AddEditIndicator() {
   if (loading)
     return <Loading/>;
 
-  console.log(form);
-
   return (
     <Container maxWidth="md">
       {mode === 'view' ?
@@ -162,6 +180,13 @@ export default function AddEditIndicator() {
           <Typography variant={'body1'}> {`${form.unitOfMeasure || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Baseline:`} </Typography>
           <Typography variant={'body1'}> {`${form.baseline}`} </Typography>
+          <Typography variant={'h6'}> {`codes:`} </Typography>
+          {form.codes?.length?
+            form.codes.map(code => <Typography variant={'body1'}> {<Link to={`/code/${encodeURIComponent(code)}/view`} colorWithHover
+                                                                         color={'#2f5ac7'}>{codesInterfaces[code]}</Link>} </Typography>)
+
+            : 'Not Given'}
+
           <Typography variant={'h6'}> {`Description:`} </Typography>
           <Typography variant={'body1'}> {`${form.description}`} </Typography>
 

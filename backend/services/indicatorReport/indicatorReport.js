@@ -101,16 +101,16 @@ const fetchIndicatorReport = async (req, res) => {
   const form = {
     name: indicatorReport.name,
     comment: indicatorReport.comment,
-    organization: indicatorReport.forOrganization._uri,
-    indicator: indicatorReport.forIndicator._uri,
+    organization: indicatorReport.forOrganization?._uri,
+    indicator: indicatorReport.forIndicator?._uri,
     numericalValue: indicatorReport.value.numericalValue,
-    startTime: indicatorReport.hasTime.hasBeginning.date,
-    endTime: indicatorReport.hasTime.hasEnd.date,
+    startTime: indicatorReport.hasTime?.hasBeginning.date,
+    endTime: indicatorReport.hasTime?.hasEnd.date,
     dateCreated: indicatorReport.dateCreated,
     uri: indicatorReport._uri,
-    unitOfMeasure: indicatorReport.forIndicator.unitOfMeasure.label,
-    indicatorName: indicatorReport.forIndicator.name,
-    organizationName: indicatorReport.forOrganization.legalName
+    unitOfMeasure: indicatorReport.forIndicator?.unitOfMeasure?.label,
+    indicatorName: indicatorReport.forIndicator?.name,
+    organizationName: indicatorReport.forOrganization?.legalName
   };
   return res.status(200).json({indicatorReport: form, success: true});
 };

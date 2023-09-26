@@ -82,20 +82,19 @@ export default function IndicatorReports() {
     {
       label: 'Unit Of Measure',
       body: ({forIndicator}) => {
-
-        return forIndicator.unitOfMeasure.label
+        return forIndicator?.unitOfMeasure?.label
       }
     },
     {
       label: 'Start Time',
       body: ({hasTime}) => {
-        return (new Date(hasTime.hasBeginning.date)).toString()
+        return hasTime? (new Date(hasTime?.hasBeginning.date)).toString() : 'Not Given'
       },
     },
     {
       label: 'End Time',
       body: ({hasTime}) => {
-        return (new Date(hasTime.hasEnd.date)).toString()
+        return hasTime? (new Date(hasTime.hasEnd.date)).toString() : 'Not Given'
       },
     },
 

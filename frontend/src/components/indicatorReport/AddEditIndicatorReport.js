@@ -173,19 +173,19 @@ export default function AddEditIndicatorReport() {
         <Paper sx={{p: 2}} variant={'outlined'}>
 
           <Typography variant={'h6'}> {`Name:`} </Typography>
-          <Typography variant={'body1'}> {`${form.name}`} </Typography>
+          <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
           <Typography variant={'h6'}> {`value:`} </Typography>
-          <Typography variant={'body1'}> {`${form.numericalValue} (${form.unitOfMeasure})`} </Typography>
+          <Typography variant={'body1'}> {`${form.numericalValue || 'Not Given'} (${form.unitOfMeasure || 'Not Given'})`} </Typography>
           <Typography variant={'h6'}> {`Indicator:`} </Typography>
           <Typography variant={'body1'}> <Link to={`/indicator/${encodeURIComponent(form.indicator)}/view`} colorWithHover color={'#2f5ac7'}>{form.indicatorName}</Link> </Typography>
           <Typography variant={'h6'}> {`Organization:`} </Typography>
           <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
           <Typography variant={'h6'}> {`Date Created:`} </Typography>
-          <Typography variant={'body1'}> {`${(new Date(form.dateCreated)).toLocaleDateString()}`} </Typography>
+          <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
           <Typography variant={'h6'}> {`Time Interval:`} </Typography>
-          <Typography variant={'body1'}> {`${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}`} </Typography>
+          <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
           <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
             navigate(`/indicatorReport/${encodeURIComponent(uri)}/edit`);
           }

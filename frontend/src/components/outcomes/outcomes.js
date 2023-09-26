@@ -75,7 +75,7 @@ export default function Outcomes() {
     {
       label: 'Indicators',
       body: ({indicators}) => {
-        return indicators.map(indicator => indicator.name).join(', ')
+        return indicators?.map(indicator => indicator.name).join(', ')
         // console.log(indicators)
         // return indicators.join(", ");
       }

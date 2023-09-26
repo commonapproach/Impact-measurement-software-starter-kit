@@ -1,5 +1,6 @@
 const express = require('express');
-const {createCharacteristicHandler} = require("../services/characteristic/characteristic");
+const {createCharacteristicHandler, fetchCharacteristicHandler} = require("../services/characteristic/characteristic");
+const {fetchCharacteristicsHandler} = require("../services/characteristic/characteristics");
 
 
 
@@ -7,7 +8,7 @@ const {createCharacteristicHandler} = require("../services/characteristic/charac
 const router = express.Router({mergeParams: true});
 
 router.post('/', createCharacteristicHandler);
-// router.get('/:uri/', fetchCodeHandler);
+router.get('/:uri/', fetchCharacteristicHandler);
 // router.put('/:uri/', updateCodeHandler);
 // router.delete('/:uri', null);
 

@@ -19,6 +19,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 import {createCode, fetchCode, fetchCodes, updateCode} from "../../api/codeAPI";
 import {fetchStakeholders} from "../../api/stakeholderAPI";
+import {createCharacteristic, fetchCharacteristic, updateCharacteristic} from "../../api/characteristicApi";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -94,10 +95,10 @@ export default function AddEditCharacteristic() {
       })
     ]).then(() => {
       if ((mode === 'edit' || mode === 'view') && uri) {
-        fetchCode(encodeURIComponent(uri)).then(res => {
+        fetchCharacteristic(encodeURIComponent(uri)).then(res => {
           if (res.success) {
-            const {code} = res;
-            setForm({...code, uri: code._uri});
+            const {characteristic} = res;
+            setForm({...characteristic, uri: characteristic._uri});
             setLoading(false);
           }
         }).catch(e => {
@@ -137,7 +138,7 @@ export default function AddEditCharacteristic() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createCode({form}).then((ret) => {
+      createCharacteristic({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');
@@ -153,7 +154,7 @@ export default function AddEditCharacteristic() {
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
-      updateCode(encodeURIComponent(uri), {form},).then((res) => {
+      updateCharacteristic(encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate('/codes');
@@ -203,22 +204,21 @@ export default function AddEditCharacteristic() {
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          {form.definedBy ? <Typography variant={'h6'}> {`Defined By:`} </Typography> : null}
-          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.definedBy)}/view`}
-                                               colorWithHover color={'#2f5ac7'}>{options.definedBy[form.definedBy]}</Link> </Typography>
+          <Typography variant={'h6'}> {`Codes:`} </Typography>
+          {form.codes.map(code =>
+            <Typography variant={'body1'}> <Link to={`/code/${encodeURIComponent(code)}/view`}
+                                                 colorWithHover color={'#2f5ac7'}>{options[code] || code}</Link> </Typography>
+          )}
+
           {form.specification ? <Typography variant={'h6'}> {`specification:`} </Typography> : null}
           <Typography variant={'body1'}> {form.specification} </Typography>
-          {form.identifier ? <Typography variant={'h6'}> {`identifier:`} </Typography> : null}
-          <Typography variant={'body1'}> {form.identifier} </Typography>
-          {form.codeValue ? <Typography variant={'h6'}> {`Code Value:`} </Typography> : null}
-          <Typography variant={'body1'}> {form.codeValue} </Typography>
-          {form.iso72Value ? <Typography variant={'h6'}> {`iso72 Value:`} </Typography> : null}
-          <Typography variant={'body1'}> {form.iso72Value} </Typography>
+          {form.value ? <Typography variant={'h6'}> {`Value:`} </Typography> : null}
+          <Typography variant={'body1'}> {form.value} </Typography>
 
 
         </Paper>
         : (<Paper sx={{p: 2, position: 'relative'}} variant={'outlined'}>
-          <Typography variant={'h4'}> Code </Typography>
+          <Typography variant={'h4'}> Characteristic </Typography>
           <GeneralField
             disabled={!userContext.isSuperuser}
             key={'name'}
@@ -295,8 +295,8 @@ export default function AddEditCharacteristic() {
 
 
           <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Code?' :
-                         'Are you sure you want to update this Code?'}
+                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Characteristic?' :
+                         'Are you sure you want to update this Characteristic?'}
                        buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                          key={'cancel'}>{'cancel'}</Button>,
                          <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

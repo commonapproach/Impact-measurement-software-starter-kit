@@ -59,6 +59,10 @@ async function hasAccess(req, operationType) {
       return true;
       break
 
+    case 'fetchCharacteristic':
+      return true;
+      break
+
 
     // code
     case 'createCode':

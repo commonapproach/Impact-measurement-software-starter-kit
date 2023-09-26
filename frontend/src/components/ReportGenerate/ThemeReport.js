@@ -8,7 +8,7 @@ import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
 import {fetchOutcomesThroughTheme} from "../../api/outcomeApi";
-import {fetchThemes} from "../../api/themeApi";
+import {fetchTheme, fetchThemes} from "../../api/themeApi";
 import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 
@@ -39,6 +39,7 @@ export default function ThemeReports() {
 
   const [themes, setThemes] = useState({});
   const [selectedTheme, setSelectedTheme] = useState('');
+  const [theme, setTheme] = useState({})
   const [outcomes, setOutcomes] = useState([])
   const [loading, setLoading] = useState(true);
 
@@ -76,7 +77,7 @@ export default function ThemeReports() {
                 return (
                   <Paper elevation={0} sx={{pl: 4}}>
                     <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-                    <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+                    <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label}`} </Typography>
 
                     {indicator.indicatorReports?
                       (indicator.indicatorReports.map(indicatorReport =>
@@ -143,19 +144,22 @@ export default function ThemeReports() {
   }
 
 
+
   useEffect(() => {
     if (selectedTheme) {
-      fetchOutcomesThroughTheme(encodeURIComponent(selectedTheme)).then(({success, outcomes}) => {
-        if (success) {
-          setOutcomes(outcomes)
+      Promise.all([fetchOutcomesThroughTheme(encodeURIComponent(selectedTheme)), fetchTheme(encodeURIComponent(selectedTheme))]).
+      then(([outcomeRet, themeRet]) => {
+        if (outcomeRet.success && themeRet.success){
+          setOutcomes(outcomeRet.outcomes)
+          setTheme(themeRet.theme)
         }
-      }).catch(e => {
-        reportErrorToBackend(e);
+      }).catch(() => {
         setLoading(false);
-        enqueueSnackbar(e.json?.message || "Error occurs when fetching outcomes", {variant: 'error'});
-      });
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching outcomes and themes", {variant: 'error'});
+      })
     } else {
-      setOutcomes([])
+      setOutcomes([]);
+      setTheme({})
     }
   }, [selectedTheme]);
 
@@ -209,18 +213,26 @@ export default function ThemeReports() {
             );
           }}
         />
+        {!!selectedTheme?
+          <Paper elevation={0}>
+          <Typography variant={'body1'} sx={{pl: 4}}>{`Theme Name: `} <Link to={`/theme/${encodeURIComponent(theme._uri)}/view`} color={'#2f5ac7'} colorWithHover>{theme.name || 'Not Given'}</Link> </Typography>
+          <Typography variant={'body1'} sx={{pl:4}}> {`Description: ${theme.description || 'Not Given'}`} </Typography>
+          </Paper>
+          : null}
+
+        {outcomes.length? <Typography sx={{pl:4}} variant={'h5'} > {'Outcomes:'} </Typography>:null}
 
         {outcomes.length ? outcomes.map((outcome, index) => {
           return (
-            <Paper sx={{p: 2}} variant={'outlined'}>
-              <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'blue'}>{outcome.name}</Link> </Typography>
+            <Paper sx={{p: 2, pl:8}} variant={'outlined'}>
+              <Typography variant={'body1'}> {'Name: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome.name}</Link> </Typography>
               {outcome.indicators?
                 <Paper elevation={0}>
                   {outcome.indicators.map(indicator => {
                     return (
                       <Paper elevation={0} sx={{pl: 4}}>
                         <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'blue'}>{indicator.name}</Link> </Typography>
-                        <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure.label}`} </Typography>
+                        <Typography variant={'body1'} sx={{pl:4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`} </Typography>
 
                         {indicator.indicatorReports?
                           (indicator.indicatorReports.map(indicatorReport =>
@@ -228,8 +240,9 @@ export default function ThemeReports() {
                               <Typography variant={'body1'}> {`Indicator Report: `}<Link
                                 to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
                                 color={'#2f5ac7'} colorWithHover>{indicatorReport.name}</Link> </Typography>
-                              <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value.numericalValue}`} </Typography>
-                              <Typography variant={'body1'} sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>
+                              <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value?.numericalValue}`} </Typography>
+                              {indicatorReport.hasTime? <Typography variant={'body1'}
+                                           sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime?.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime?.hasEnd.date)).toLocaleString()}`} </Typography>:null}
                             </Paper>
 
                           ))

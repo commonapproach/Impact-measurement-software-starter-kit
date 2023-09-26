@@ -86,7 +86,7 @@ const routes = (
     <Route path="/code/new" element={<PrivateRoute element={AddEditCode}/>}/>
     <Route path="/code/:uri/:viewMode" element={<PrivateRoute element={AddEditCode}/>}/>
 
-    {/*Codes*/}
+    {/*Characteristic*/}
     {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
     <Route path="/characteristic/new" element={<PrivateRoute element={AddEditCharacteristic}/>}/>
     <Route path="/characteristic/:uri/:viewMode" element={<PrivateRoute element={AddEditCharacteristic}/>}/>

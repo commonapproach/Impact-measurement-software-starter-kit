@@ -17,7 +17,7 @@ const {initStreetTypes, initStreetDirections} = require('../services/address');
 const {organizationRoute, organizationsRoute, usersRoute, themeRoute, themesRoute, indicatorsRoute, indicatorRoute,
   outcomesRoute, outcomeRoute, indicatorReportRoute, indicatorReportsRoute, userRoute, groupsRoute, groupRoute,
   errorReportRoute, fileUploadingRoute, stakeholderRoute, stakeholdersRoute, codeRoute, codesRoute, characteristicRoute,
-  characteristicsRoute
+  characteristicsRoute, stakeholderOutcomeRoute
 } = require("../routes");
 
 const {userTypesRoute, profileRoute, dynamicClassInstancesRoute} = require("../routes/general");
@@ -88,6 +88,7 @@ app.use('/api/codes', codesRoute);
 app.use('/api/code', codeRoute);
 app.use('/api/characteristics', characteristicsRoute);
 app.use('/api/characteristic', characteristicRoute);
+app.use('/api/stakeholderOutcome', stakeholderOutcomeRoute)
 
 
 

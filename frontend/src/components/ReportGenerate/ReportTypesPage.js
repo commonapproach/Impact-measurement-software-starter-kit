@@ -39,8 +39,9 @@ function ReportTypes() {
       <NavButton to={'/reportGenerate/codeReports'} icon={<Edit/>} key={'Code Reports'} buttonHeight={50}
                  buttonWidth={150} textSize={"small"} text="Code Reports"/>
 
-      {/*<NavButton to={'/organization-outcomes'} icon={<Edit/>} key={'organization-outcomes'} buttonHeight={50}*/}
-      {/*           buttonWidth={150}  textSize={"small"}  text="Theme Report"/>*/}
+      <NavButton to={`/reportGenerate/stakeholderReportOutcomeReports`} icon={<Edit/>} key={'StakeholderOutcome Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"}
+                 text="Stakeholder Outcome"/>
 
       {/*<NavButton to={'/organization-indicatorReports'} icon={<Edit/>} key={'indicatorReports'} buttonHeight={50}*/}
       {/*           buttonWidth={150}  textSize={"small"} text="Manage Indicator Reports"/>*/}

@@ -63,6 +63,11 @@ async function hasAccess(req, operationType) {
       return true;
       break
 
+    // stakeholderOutcomes
+    case 'fetchStakeholderOutcomes':
+      return true;
+      break
+
 
     // code
     case 'createCode':
@@ -92,6 +97,10 @@ async function hasAccess(req, operationType) {
       break;
 
     case 'fetchStakeholder':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'fetchStakeholderInterface':
       if (userAccount.isSuperuser)
         return true;
       break;

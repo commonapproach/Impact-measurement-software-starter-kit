@@ -53,6 +53,8 @@ import Codes from "./components/codes/Codes";
 import AddEditCharacteristic from "./components/characteristics/AddEditCharacteristic";
 import Characteristic_ReportGenerate from "./components/ReportGenerate/CharacteristicReports";
 import Code_ReportGenerate from "./components/ReportGenerate/CodeReports";
+import StakeholderOutcomeReports from "./components/ReportGenerate/StakeholderOutcomeReport";
+import AddEditStakeholderOutcome from "./components/stakeholderOutcome/AddEditStakeholderOutcome";
 
 const routes = (
   <Routes>
@@ -117,6 +119,11 @@ const routes = (
     <Route path="/outcome/:orgUri/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/:uri/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
+
+    {/*stakeholderOutcome*/}
+    <Route path="/stakeholderOutcome/new" element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+    <Route path="/stakeholderOutcome/:uri/:operationMode" element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+
     {/*file uploading page*/}
     <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
     <Route path="/fileUploading/:orgUri/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
@@ -153,6 +160,8 @@ const routes = (
     <Route path={"/reportGenerate/characteristicReports"}
            element={<PrivateRoute element={Characteristic_ReportGenerate}/>}/>
     <Route path={"/reportGenerate/codeReports"} element={<PrivateRoute element={Code_ReportGenerate}/>}/>
+    <Route path={"/reportGenerate/stakeholderReportOutcomeReports"}
+           element={<PrivateRoute element={StakeholderOutcomeReports}/>}/>
 
   </Routes>
 );

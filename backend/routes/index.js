@@ -20,5 +20,6 @@ module.exports = {
   codeRoute: require('./code'),
   codesRoute: require('./codes'),
   characteristicRoute: require('./characteristic'),
-  characteristicsRoute: require('./characteristics')
+  characteristicsRoute: require('./characteristics'),
+  stakeholderOutcomeRoute: require('./stakeholderOutcome')
 }

@@ -1,6 +1,7 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel, GDBStakeholderOrganizationModel} = require("../../models/organization");
+const {GDBStakeholderModel} = require("../../models/stakeholder");
 
 const fetchStakeholderHandler = async (req, res, next) => {
   try {
@@ -11,6 +12,25 @@ const fetchStakeholderHandler = async (req, res, next) => {
     next(e);
   }
 };
+
+const fetchStakeholderInterfaceHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchStakeholderInterface'))
+      return await fetchStakeholderInterface(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+async function fetchStakeholderInterface(req, res) {
+  const stakeholders = await GDBStakeholderModel.find({});
+  const stakeholderInterfaces = {}
+  stakeholders.map(stakeholder => {
+    stakeholderInterfaces[stakeholder._uri] = stakeholder.name
+  });
+  return res.status(200).json({success: true, stakeholderInterfaces});
+}
 
 
 async function fetchStakeholder(req, res) {
@@ -158,5 +178,6 @@ async function createStakeholder(req, res) {
 module.exports = {
   createStakeholderHandler,
   fetchStakeholderHandler,
-  updateStakeholderHandler
+  updateStakeholderHandler,
+  fetchStakeholderInterfaceHandler
 };

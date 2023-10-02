@@ -8,10 +8,11 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, updateOutcome} from "../../api/outcomeApi";
+import {createOutcome, fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
 import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
+import {fetchCodesInterfaces} from "../../api/codeAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -56,6 +57,8 @@ export default function AddEditStakeholderOutcome() {
     impactReports: []
   });
   const [dict, setDict] = useState({
+    outcome: {},
+    code:{},
     stakeholder: {}
   })
   const [loading, setLoading] = useState(true);
@@ -63,11 +66,13 @@ export default function AddEditStakeholderOutcome() {
   useEffect(() => {
     Promise.all(
       [
-        fetchStakeholderInterfaces()
+        fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
       ]
-    ).then(([{stakeholderInterfaces}]) => {
+    ).then(([{stakeholderInterfaces}, {codesInterfaces}, {outcomeInterfaces}]) => {
       const dict = {}
+      dict['outcome'] = outcomeInterfaces
       dict['stakeholder'] = stakeholderInterfaces
+      dict['code'] = codesInterfaces
       console.log(dict)
       setDict(dict);
     }).catch(e=> {
@@ -84,6 +89,7 @@ export default function AddEditStakeholderOutcome() {
     if((mode === 'edit' && uri) || (mode === 'view' && uri)){
       fetchStakeholderOutcome(encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
         if(success){
+          console.log(stakeholderOutcome)
           stakeholderOutcome.uri = stakeholderOutcome._uri;
           setForm(stakeholderOutcome);
           setLoading(false)
@@ -92,7 +98,7 @@ export default function AddEditStakeholderOutcome() {
         if (e.json)
           setErrors(e.json);
         setLoading(false);
-        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching stakeholder outcome", {variant: 'error'});
       });
     } else if(mode === 'edit' && (!uri || !orgUri) ) {
       navigate(-1);
@@ -188,17 +194,20 @@ export default function AddEditStakeholderOutcome() {
             <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(form.stakeholder)}/view`} colorWithHover color={'#2f5ac7'}>{dict.stakeholder[form.stakeholder]}</Link> </Typography>
             <Typography variant={'h6'}> {`isUnderserved:`} </Typography>
             <Typography variant={'body1'}> {`${form.isUnderserved}`} </Typography>
-            <Typography variant={'h6'}> {`importance:`} </Typography>
+            <Typography variant={'h6'}> {`Importance:`} </Typography>
             <Typography variant={'body1'}> {`${form.importance}`} </Typography>
-            {/*{form.themes.length? <Typography variant={'h6'}> {`Themes:`} </Typography>: null}*/}
-            {/*{form.themes.map(themeURI => {*/}
-            {/*  return (*/}
-            {/*    <Typography variant={'body1'}>*/}
-            {/*      <Link to={`/theme/${encodeURIComponent(themeURI)}/view`} colorWithHover*/}
-            {/*            color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>*/}
-            {/*    </Typography>*/}
-            {/*  );*/}
-            {/*})}*/}
+            <Typography variant={'h6'}> {`Outcome:`} </Typography>
+            <Typography variant={'body1'}> <Link to={`/outcome/${encodeURIComponent(form.outcome)}/view`} colorWithHover color={'#2f5ac7'}>{dict.outcome[form.outcome]}</Link> </Typography>
+
+            {form.codes?.length? <Typography variant={'h6'}> {`Codes:`} </Typography>: null}
+            {form.codes?.map(codeURI => {
+              return (
+                <Typography variant={'body1'}>
+                  <Link to={`/code/${encodeURIComponent(codeURI)}/view`} colorWithHover
+                        color={'#2f5ac7'}>{dict.code[codeURI]}</Link>
+                </Typography>
+              );
+            })}
             {/*<Typography variant={'h6'}> {`Indicators:`} </Typography>*/}
             {/*{form.indicators.map(indicatorURI => {*/}
             {/*  return (*/}

@@ -385,6 +385,9 @@ async function hasAccess(req, operationType) {
 
 
     // outcomes
+
+    case 'fetchOutcomeInterface':
+      return true
     case 'fetchOutcomes':
       if (userAccount.isSuperuser)
         return true;

@@ -181,7 +181,7 @@ export default function StakeholderOutcomeReports() {
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'body1'}> {`Stakeholder Outcome Name: `}<Link to={`/stakeholderOutcome/${encodeURIComponent(stakeholderOutcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{stakeholderOutcome.name || ''}</Link> </Typography>
               <Typography variant={'body1'}> {`Description: ${stakeholderOutcome.description}`} </Typography>
-              <Typography variant={'body1'}> {`Outcome: ` }<Link to={`/stakeholderOutcome/${encodeURIComponent(stakeholderOutcome.outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{stakeholderOutcome.outcome.name || ''}</Link></Typography>
+              <Typography variant={'body1'}> {`Outcome: ` }<Link to={`/outcome/${encodeURIComponent(stakeholderOutcome.outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{stakeholderOutcome.outcome.name || ''}</Link></Typography>
               <Typography variant={'body1'}> {`Importance: ${stakeholderOutcome.importance}` }</Typography>
               <Typography variant={'body1'}> {`isUnderserved: ${stakeholderOutcome.isUnderserved}`}</Typography>
               <Typography variant={'body1'}> {stakeholderOutcome.codes?.length? `Codes: `: ''} </Typography>

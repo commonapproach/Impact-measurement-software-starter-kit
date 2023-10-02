@@ -12,6 +12,10 @@ export async function fetchOutcome(uri) {
   return getJson('/api/outcome/' + uri);
 }
 
+export async function fetchOutcomeInterfaces() {
+  return getJson('/api/outcome/interface');
+}
+
 export async function createOutcome(params) {
   return postJson(`/api/outcome/`, params);
 }

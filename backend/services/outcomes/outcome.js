@@ -98,6 +98,26 @@ const fetchOutcomeHandler = async (req, res, next) => {
   }
 };
 
+const fetchOutcomeInterfaceHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchOutcomeInterface'))
+      return await fetchOutcomeInterface(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+
+  } catch (e) {
+    next(e);
+  }
+};
+
+async function fetchOutcomeInterface(req, res) {
+  const outcomes = await GDBOutcomeModel.find({});
+  const outcomeInterfaces = {}
+  outcomes.map(outcome => {
+    outcomeInterfaces[outcome._uri] = outcome.name
+  })
+  return res.status(200).json({success: true, outcomeInterfaces});
+}
+
 const fetchOutcomesThroughTheme = async (req, res) => {
   const {themeUri} = req.params;
   if (!themeUri)
@@ -114,24 +134,25 @@ const fetchOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is not given');
-  const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['forOrganization', 'themes', 'indicators']});
+  const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['themes', 'indicators']});
   if (!outcome)
     throw new Server400Error('No such outcome');
-  outcome.organization = outcome.forOrganization._uri;
-  outcome.organizationName = outcome.forOrganization.legalName;
+  outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization})
+  outcome.organization = outcome.forOrganization?._uri;
+  outcome.organizationName = outcome.forOrganization?.legalName;
   if (!outcome.themes)
     outcome.themes = [];
   outcome.themeNames = {};
-  outcome.themes.map(theme => {
+  outcome.themes?.map(theme => {
     outcome.themeNames[theme._uri] = theme.name;
   })
-  outcome.themes = outcome.themes.map(theme => theme._uri);
+  outcome.themes = outcome.themes?.map(theme => theme._uri);
 
   outcome.indicatorNames = {};
-  outcome.indicators.map(indicator => {
+  outcome.indicators?.map(indicator => {
     outcome.indicatorNames[indicator._uri] = indicator.name;
   })
-  outcome.indicators = outcome.indicators.map(indicator => indicator._uri);
+  outcome.indicators = outcome.indicators?.map(indicator => indicator._uri);
   // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
   //   return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
   // }));
@@ -411,5 +432,6 @@ module.exports = {
   createOutcomeHandler,
   fetchOutcomesHandler,
   fetchOutcomeHandler,
-  fetchOutcomesThroughThemeHandler
+  fetchOutcomesThroughThemeHandler,
+  fetchOutcomeInterfaceHandler
 };

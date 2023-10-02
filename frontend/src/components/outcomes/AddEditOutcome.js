@@ -157,24 +157,24 @@ export default function AddEditOutcome() {
             <Typography variant={'body1'}> {`${form.uri}`} </Typography>
             <Typography variant={'h6'}> {`Organization:`} </Typography>
             <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
-            {form.themes.length? <Typography variant={'h6'}> {`Themes:`} </Typography>: null}
-             {form.themes.map(themeURI => {
+            {<Typography variant={'h6'}> {`Themes:`} </Typography>}
+             {form.themes?.length? form.themes.map(themeURI => {
               return (
                 <Typography variant={'body1'}>
                 <Link to={`/theme/${encodeURIComponent(themeURI)}/view`} colorWithHover
                             color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
                 </Typography>
                 );
-            })}
+            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
             <Typography variant={'h6'}> {`Indicators:`} </Typography>
-            {form.indicators.map(indicatorURI => {
+            {form.indicators?.length? form.indicators.map(indicatorURI => {
               return (
                 <Typography variant={'body1'}>
                   <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover
                         color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>
                 </Typography>
               );
-            })}
+            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
             <Typography variant={'h6'}> {`Description:`} </Typography>
             <Typography variant={'body1'}> {`${form.description}`} </Typography>
 

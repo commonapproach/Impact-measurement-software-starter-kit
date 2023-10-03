@@ -55,6 +55,8 @@ import Characteristic_ReportGenerate from "./components/ReportGenerate/Character
 import Code_ReportGenerate from "./components/ReportGenerate/CodeReports";
 import StakeholderOutcomeReports from "./components/ReportGenerate/StakeholderOutcomeReport";
 import AddEditStakeholderOutcome from "./components/stakeholderOutcome/AddEditStakeholderOutcome";
+import ImpactReports_ReportGenerate from "./components/ReportGenerate/ImpactReports";
+import AddEditImpactReport from "./components/impactReport/AddEditImpactReport";
 
 const routes = (
   <Routes>
@@ -122,8 +124,12 @@ const routes = (
 
     {/*stakeholderOutcome*/}
     <Route path="/stakeholderOutcome/new" element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
-    <Route path="/stakeholderOutcome/:uri/:operationMode" element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+    <Route path="/stakeholderOutcome/:uri/:operationMode"
+           element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
 
+
+    <Route path="/impactReport/new" element={<PrivateRoute element={AddEditImpactReport}/>}/>
+    <Route path="/impactReport/:uri/:operationMode" element={<PrivateRoute element={AddEditImpactReport}/>}/>
     {/*file uploading page*/}
     <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
     <Route path="/fileUploading/:orgUri/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
@@ -160,8 +166,10 @@ const routes = (
     <Route path={"/reportGenerate/characteristicReports"}
            element={<PrivateRoute element={Characteristic_ReportGenerate}/>}/>
     <Route path={"/reportGenerate/codeReports"} element={<PrivateRoute element={Code_ReportGenerate}/>}/>
-    <Route path={"/reportGenerate/stakeholderReportOutcomeReports"}
+    <Route path={"/reportGenerate/stakeholderOutcomeReports"}
            element={<PrivateRoute element={StakeholderOutcomeReports}/>}/>
+    <Route path={"/reportGenerate/impactReports-reports"}
+           element={<PrivateRoute element={ImpactReports_ReportGenerate}/>}/>
 
   </Routes>
 );

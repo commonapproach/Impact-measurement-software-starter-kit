@@ -26,6 +26,28 @@ const fetchStakeholderOutcomesHandler = async (req, res, next) => {
   }
 };
 
+const fetchStakeholderOutcomeInterfacesHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+      return await fetchStakeholderOutcomeInterfaces(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchStakeholderOutcomeInterfaces = async (req, res) => {
+  const stakeholderOutcomes = await GDBStakeholderOutcomeModel.find({})
+  const stakeholderOutcomeInterface = {}
+  stakeholderOutcomes.map(
+    stakeholderOutcome => {
+      stakeholderOutcomeInterface[stakeholderOutcome._uri] = stakeholderOutcome.name
+    }
+  )
+  return res.status(200).json({success: true, stakeholderOutcomeInterface});
+}
+
 const fetchStakeholderOutcomes = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
@@ -46,5 +68,5 @@ const fetchStakeholderOutcomesThroughStakeholder = async (req, res) => {
 
 
 module.exports = {
-  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomesHandler
+  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomesHandler, fetchStakeholderOutcomeInterfacesHandler
 }

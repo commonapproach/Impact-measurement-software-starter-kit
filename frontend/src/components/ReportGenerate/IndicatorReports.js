@@ -198,23 +198,6 @@ export default function IndicatorReports_ReportGenerate() {
       </Paper>
 
 
-      {/*{indicators.length ?*/}
-      {/*  <Paper sx={{p: 1}} elevation={0}>*/}
-      {/*    <Button variant="contained" color="primary" className={classes.button}*/}
-      {/*            onClick={generatePDFFile} startIcon={<PictureAsPdf />}>*/}
-      {/*      Generate PDF File*/}
-      {/*    </Button>*/}
-      {/*  </Paper> :*/}
-      {/*  null}*/}
-
-      {/*<Paper sx={{p: 1}}>*/}
-      {/*  <Button variant="contained" color="primary" className={classes.button} onClick={() => {*/}
-      {/*    navigate('/reportGenerate');*/}
-      {/*  }} startIcon={<Undo/>}>*/}
-      {/*    Back*/}
-      {/*  </Button>*/}
-      {/*</Paper>*/}
-
     </Container>
   );
 

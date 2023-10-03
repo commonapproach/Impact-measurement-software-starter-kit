@@ -48,6 +48,17 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    // impactReport
+    case 'fetchImpactReport':
+      if (userAccount.isSuperuser)
+        return true
+      break
+
+    case 'fetchImpactReports':
+      if (userAccount.isSuperuser)
+        return true
+      break
+
     // characteristic
     case 'createCharacteristic':
       if (userAccount.isSuperuser)

@@ -187,19 +187,19 @@ export default function OutcomeReports() {
                   {outcome.indicators.map(indicator => {
                     return (
                       <Paper elevation={0} sx={{pl: 4}}>
-                        <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'#2f5ac7'} colorWithHover>{indicator?.name || ''}</Link> </Typography>
-                        <Typography variant={'body1'} sx={{pl: 4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`} </Typography>
+                        <Typography variant={'body1'}> {`Indicator Name: `}<Link to={`/indicator/${encodeURIComponent(indicator._uri)}/view`} color={'#2f5ac7'} colorWithHover>{indicator?.name || 'Name Not Given'}</Link> </Typography>
+                        <Typography variant={'body1'} sx={{pl: 4}}> {`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`} </Typography>
 
                           {indicator.indicatorReports?
                               (indicator.indicatorReports.map(indicatorReport =>
                                 <Paper elevation={0} sx={{pl: 4}}>
                                 <Typography variant={'body1'}> {`Indicator Report: `}<Link
                                   to={`/indicatorReport/${encodeURIComponent(indicatorReport._uri)}/view`}
-                                  color={'#2f5ac7'} colorWithHover>{indicatorReport.name || null}</Link> </Typography>
-                                  <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value?.numericalValue || null}`} </Typography>
-                                  {indicatorReport.hasTime?
-                                    <Typography variant={'body1'}
-                                               sx={{pl: 4}}> {`Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}`} </Typography>:null}
+                                  color={'#2f5ac7'} colorWithHover>{indicatorReport.name || 'Name Not Given'}</Link> </Typography>
+                                  <Typography variant={'body1'} sx={{pl: 4}}> {`Value: ${indicatorReport.value?.numericalValue || 'Not Given'}`} </Typography>
+                                  {<Typography variant={'body1'}
+                                               sx={{pl: 4}}> {`Time Interval: ${indicatorReport.hasTime? `${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : 'Not Given'}`}
+                                  </Typography>}
                                 </Paper>
 
                               ))

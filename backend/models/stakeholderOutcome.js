@@ -6,9 +6,9 @@ const GDBStakeholderOutcomeModel = createGraphDBModel({
   name: {type: String, internalKey: 'cids:hasName'},
   codes : {type: [GDBCodeModel], internalKey: 'cids:hasCode'},
   stakeholder: {type: () => require('./stakeholder').GDBStakeholderModel, internalKey: 'cids:forStakeholder'},
-  forOutcome: {type: () => require('./outcome').GDBOutcomeModel, internalKey: 'cids:forOutcome'},
+  outcome: {type: () => require('./outcome').GDBOutcomeModel, internalKey: 'cids:forOutcome'},
   importance: {type: String, internalKey: 'cids:hasImportance'},
-  isUnderserved: {type: Boolean, internalKey: 'cids:isUndererved'},
+  isUnderserved: {type: Boolean, internalKey: 'cids:isUnderserved'},
   indicators: {type: [() => require('./indicator').GDBIndicatorModel], internalKey: 'cids:hasIndicator'},
   impactReports: {type: [() => require('./impactReport').GDBImpactReportModel], internalKey: 'cids:hasImpactReport'}
 },{

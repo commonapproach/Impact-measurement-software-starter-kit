@@ -4,6 +4,10 @@ export async function fetchCodes() {
   return getJson('/api/codes/');
 }
 
+export async function fetchCodesInterfaces() {
+  return getJson('/api/codes/interface/');
+}
+
 export async function fetchCode(uri) {
   return getJson('/api/code/' + uri);
 }

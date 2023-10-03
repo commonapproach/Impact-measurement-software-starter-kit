@@ -18,6 +18,10 @@ const getValue = (object, graphdbModel, property) => {
   }
 };
 
+const getFullObjectURI = (object) => {
+  return object["@id"];
+};
+
 const getObjectValue = (object, graphdbModel, property) => {
   if (object[getFullURI(graphdbModel.schema[property].internalKey)]) {
     return object[getFullURI(graphdbModel.schema[property].internalKey)][0];
@@ -46,6 +50,7 @@ async function transSave(trans, object) {
 
 
 function assignValue(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error){
+  let ignore;
   if ((object && object[getFullPropertyURI(mainModel, propertyName)]) || form && form[propertyName]) {
     mainObject[propertyName] = environment === 'fileUploading' ? getValue(object, mainModel, propertyName) : form[propertyName];
   }
@@ -56,6 +61,10 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
         hasError = true;
       } else if (environment === 'interface') {
         throw new Server400Error(`${propertyName} is mandatory`);
+      }
+    } else if (config[internalKey].ignoreInstance) {
+      if (environment === 'fileUploading') {
+        ignore = true;
       }
     }
     if (environment === 'fileUploading')
@@ -68,7 +77,7 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
         config[internalKey]
       );
   }
-  return {hasError, error}
+  return {hasError, error, ignore}
 }
 
 function assignValues(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, form, uri, hasError, error, getListOfValue){
@@ -134,4 +143,4 @@ function assignMeasure(environment, config, object, mainModel, mainObject, prope
 }
 
 
-module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues, assignMeasure}
+module.exports = {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue, assignValue, assignValues, assignMeasure, getFullObjectURI}

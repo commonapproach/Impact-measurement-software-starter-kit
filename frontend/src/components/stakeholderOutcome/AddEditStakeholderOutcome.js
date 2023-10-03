@@ -8,8 +8,11 @@ import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
-import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
+import {createOutcome, fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import {fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
+import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
+import {fetchCodesInterfaces} from "../../api/codeAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -23,7 +26,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-export default function AddEditOutcome() {
+export default function AddEditStakeholderOutcome() {
 
   const classes = useStyles();
   const navigate = useNavigate();
@@ -43,27 +46,59 @@ export default function AddEditOutcome() {
 
   const [form, setForm] = useState({
     name: '',
-    comment: '',
-    organization: null,
-    indicators:[],
+    description: '',
+    codes: [],
+    stakeholder: '',
     uri: '',
-    themes: []
+    outcome: '',
+    importance: '',
+    inUnderserved: '',
+    indicators: [],
+    impactReports: []
   });
+  const [dict, setDict] = useState({
+    outcome: {},
+    code:{},
+    stakeholder: {}
+  })
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    Promise.all(
+      [
+        fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
+      ]
+    ).then(([{stakeholderInterfaces}, {codesInterfaces}, {outcomeInterfaces}]) => {
+      const dict = {}
+      dict['outcome'] = outcomeInterfaces
+      dict['stakeholder'] = stakeholderInterfaces
+      dict['code'] = codesInterfaces
+      console.log(dict)
+      setDict(dict);
+    }).catch(e=> {
+      if (e.json) {
+        setErrors(e.json);
+      }
+      console.log(e)
+      enqueueSnackbar(e.json?.message || 'Error occurs when fetching interfaces', {variant: "error"});
+      setState({loadingButton: false, submitDialog: false,});
+    })
+  }, [])
+
+  useEffect(() => {
     if((mode === 'edit' && uri) || (mode === 'view' && uri)){
-      fetchOutcome(encodeURIComponent(uri)).then(({success, outcome}) => {
+      fetchStakeholderOutcome(encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
         if(success){
-          outcome.uri = outcome._uri;
-          setForm(outcome);
+          console.log(stakeholderOutcome)
+          stakeholderOutcome.uri = stakeholderOutcome._uri;
+          setForm(stakeholderOutcome);
           setLoading(false)
         }
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
         setLoading(false);
-        enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching stakeholder outcome", {variant: 'error'});
       });
     } else if(mode === 'edit' && (!uri || !orgUri) ) {
       navigate(-1);
@@ -103,7 +138,7 @@ export default function AddEditOutcome() {
           setErrors(e.json);
         }
         console.log(e)
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating organization', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating stakeholder Outcome', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
@@ -155,26 +190,33 @@ export default function AddEditOutcome() {
             <Typography variant={'body1'}> {`${form.name}`} </Typography>
             <Typography variant={'h6'}> {`URI:`} </Typography>
             <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-            <Typography variant={'h6'}> {`Organization:`} </Typography>
-            <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
-            {<Typography variant={'h6'}> {`Themes:`} </Typography>}
-             {form.themes?.length? form.themes.map(themeURI => {
+            <Typography variant={'h6'}> {`Stakeholder:`} </Typography>
+            <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(form.stakeholder)}/view`} colorWithHover color={'#2f5ac7'}>{dict.stakeholder[form.stakeholder]}</Link> </Typography>
+            <Typography variant={'h6'}> {`isUnderserved:`} </Typography>
+            <Typography variant={'body1'}> {`${form.isUnderserved}`} </Typography>
+            <Typography variant={'h6'}> {`Importance:`} </Typography>
+            <Typography variant={'body1'}> {`${form.importance}`} </Typography>
+            <Typography variant={'h6'}> {`Outcome:`} </Typography>
+            <Typography variant={'body1'}> <Link to={`/outcome/${encodeURIComponent(form.outcome)}/view`} colorWithHover color={'#2f5ac7'}>{dict.outcome[form.outcome]}</Link> </Typography>
+
+            {form.codes?.length? <Typography variant={'h6'}> {`Codes:`} </Typography>: null}
+            {form.codes?.map(codeURI => {
               return (
                 <Typography variant={'body1'}>
-                <Link to={`/theme/${encodeURIComponent(themeURI)}/view`} colorWithHover
-                            color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
-                </Typography>
-                );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
-            <Typography variant={'h6'}> {`Indicators:`} </Typography>
-            {form.indicators?.length? form.indicators.map(indicatorURI => {
-              return (
-                <Typography variant={'body1'}>
-                  <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover
-                        color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>
+                  <Link to={`/code/${encodeURIComponent(codeURI)}/view`} colorWithHover
+                        color={'#2f5ac7'}>{dict.code[codeURI]}</Link>
                 </Typography>
               );
-            }): <Typography variant={'body1'}> {`Not Given`} </Typography>}
+            })}
+            {/*<Typography variant={'h6'}> {`Indicators:`} </Typography>*/}
+            {/*{form.indicators.map(indicatorURI => {*/}
+            {/*  return (*/}
+            {/*    <Typography variant={'body1'}>*/}
+            {/*      <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover*/}
+            {/*            color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>*/}
+            {/*    </Typography>*/}
+            {/*  );*/}
+            {/*})}*/}
             <Typography variant={'h6'}> {`Description:`} </Typography>
             <Typography variant={'body1'}> {`${form.description}`} </Typography>
 
@@ -188,35 +230,35 @@ export default function AddEditOutcome() {
           </Paper>
         )
         : (<Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Outcome </Typography>
-        <OutcomeField
-          disabled={mode === 'view'}
-          disabledOrganization={!!orgUri}
-          disableURI={mode !== 'new'}
-          defaultValue={form}
-          required
-          onChange={(state) => {
-            setForm(form => ({...form, ...state}));
-          }}
-          importErrors={errors}
-        />
+          <Typography variant={'h4'}> Outcome </Typography>
+          <OutcomeField
+            disabled={mode === 'view'}
+            disabledOrganization={!!orgUri}
+            disableURI={mode !== 'new'}
+            defaultValue={form}
+            required
+            onChange={(state) => {
+              setForm(form => ({...form, ...state}));
+            }}
+            importErrors={errors}
+          />
 
-        {mode==='view'?
-          <div/>:
-          <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-            Submit
-          </Button>}
+          {mode==='view'?
+            <div/>:
+            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+              Submit
+            </Button>}
 
-        <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
-                     dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
-                       'Are you sure you want to update this outcome?'}
-                     buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
-                                       key={'cancel'}>{'cancel'}</Button>,
-                       <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
-                                      key={'confirm'}
-                                      onClick={handleConfirm} children="confirm" autoFocus/>]}
-                     open={state.submitDialog}/>
-      </Paper>)}
+          <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
+                       dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Outcome?' :
+                         'Are you sure you want to update this outcome?'}
+                       buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
+                                         key={'cancel'}>{'cancel'}</Button>,
+                         <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}
+                                        key={'confirm'}
+                                        onClick={handleConfirm} children="confirm" autoFocus/>]}
+                       open={state.submitDialog}/>
+        </Paper>)}
     </Container>);
 
 }

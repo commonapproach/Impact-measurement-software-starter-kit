@@ -18,6 +18,27 @@ const createCharacteristicHandler = async (req, res, next) => {
   }
 };
 
+
+const fetchCharacteristicHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchCharacteristic'))
+      return await fetchCharacteristic(req, res);
+    return res.status(400).json({message: 'Wrong Auth'});
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchCharacteristic= async (req, res) => {
+  const {uri} = req.params;
+  if (!uri)
+    throw Server400Error('A uri is needed');
+  const characteristic = await GDBCharacteristicModel.findOne({_uri: uri}, );
+  if (!characteristic)
+    throw Server400Error('No such characteristic');
+  return res.status(200).json({success: true, characteristic});
+}
+
 const updateCharacteristicHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'updateCharacteristic')) {
@@ -82,5 +103,5 @@ async function createCharacteristic({form, codeDict, errorProcessor, environment
 
 
 module.exports = {
-  createCharacteristicHandler
+  createCharacteristicHandler, fetchCharacteristicHandler
 }

@@ -48,11 +48,37 @@ async function hasAccess(req, operationType) {
         return true;
       break;
 
+    // impactReport
+    case 'fetchImpactReport':
+      if (userAccount.isSuperuser)
+        return true
+      break
+
+    case 'fetchImpactReports':
+      if (userAccount.isSuperuser)
+        return true
+      break
+
     // characteristic
     case 'createCharacteristic':
       if (userAccount.isSuperuser)
         return true;
       break
+
+    // characteristic
+    case 'fetchCharacteristics':
+      return true;
+      break
+
+    case 'fetchCharacteristic':
+      return true;
+      break
+
+    // stakeholderOutcomes
+    case 'fetchStakeholderOutcomes':
+      return true;
+      break
+
 
     // code
     case 'createCode':
@@ -82,6 +108,10 @@ async function hasAccess(req, operationType) {
       break;
 
     case 'fetchStakeholder':
+      if (userAccount.isSuperuser)
+        return true;
+      break;
+    case 'fetchStakeholderInterface':
       if (userAccount.isSuperuser)
         return true;
       break;
@@ -366,6 +396,9 @@ async function hasAccess(req, operationType) {
 
 
     // outcomes
+
+    case 'fetchOutcomeInterface':
+      return true
     case 'fetchOutcomes':
       if (userAccount.isSuperuser)
         return true;

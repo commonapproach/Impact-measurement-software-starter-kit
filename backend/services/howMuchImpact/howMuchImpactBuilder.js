@@ -6,8 +6,7 @@ const {Server400Error} = require("../../utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function howMuchImpactBuilder(environment, subType,trans, object, organization, impactNorms, error, {
-  impactScaleDict,
-  impactDepthDict,
+  howMuchImpactDict,
   objectDict
 }, {
                                            addMessage,
@@ -24,13 +23,14 @@ async function howMuchImpactBuilder(environment, subType,trans, object, organiza
   let ignore;
   const GDBDict = {impactScale: GDBImpactScaleModel, impactDepth: GDBImpactDepthModel}
   const mainModel = GDBDict[subType];
-  const mainObject = environment === 'fileUploading' ? impactScaleDict[uri] : mainModel({}, {uri: form.uri});
+  const mainObject = environment === 'fileUploading' ? howMuchImpactDict[uri] : mainModel({}, {uri: form.uri});
+  mainObject.subType = subType
 
   if (environment !== 'fileUploading') {
     await transSave(trans, mainObject);
     uri = mainObject._uri;
   }
-  const config = baseLevelConfig['impactScale'];
+  const config = baseLevelConfig[subType];
 
   if (mainObject) {
     ret = assignValue(environment, config, object, mainModel, mainObject, 'indicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
@@ -79,3 +79,5 @@ async function howMuchImpactBuilder(environment, subType,trans, object, organiza
   return error;
 
 }
+
+module.exports = {howMuchImpactBuilder}

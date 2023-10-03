@@ -11,6 +11,10 @@ import IndicatorReportField from "../shared/IndicatorReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import {fetchImpactReport} from "../../api/impactReportAPI";
+import {fetchOrganizations} from "../../api/organizationApi";
+import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
+import {fetchStakeholders} from "../../api/stakeholderAPI";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -24,7 +28,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-export default function AddEditIndicatorReport() {
+export default function AddEditImpactReport() {
 
   const classes = useStyles();
   const navigate = useNavigate();
@@ -41,31 +45,55 @@ export default function AddEditIndicatorReport() {
     {}
   );
 
+  const [ops, setOps] = useState({
+    organization: {},
+    stakeholderOutcome: {}
+  });
+
   const [form, setForm] = useState({
     name: '',
     comment: '',
+    impactScale: '',
+    impactDepth: '',
+    forStakeholderOutcome: '',
     organization: null,
-    indicator: null,
-    numericalValue: '',
-    unitOfMeasure: '',
-    startTime: '',
-    endTime: '',
-    dateCreated: '',
     uri: ''
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    Promise.all([fetchOrganizations(),]).then(
+      ([{organizations},]) => {
+        const organizationsOps = {};
+        organizations.map(organization => {
+          organizationsOps[organization._uri] = organization.legalName;
+        });
+        setOps(ops => ({...ops, organization: organizationsOps}));
+        setLoading(false);
+      }
+    ).catch(([e]) => {
+      reportErrorToBackend(e);
+      setLoading(false);
+      enqueueSnackbar(e.json?.message || "Error occurs when fetching organizations", {variant: 'error'});
+    });
+
+  }, []);
+
+  useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
-      fetchIndicatorReport(encodeURIComponent(uri)).then(({success, indicatorReport}) => {
+      fetchImpactReport(encodeURIComponent(uri)).then(({success, impactReport}) => {
         if (success) {
-          setForm(indicatorReport);
+          impactReport.uri = impactReport._uri;
+          impactReport.organization = impactReport.forOrganization;
+          impactReport.impactScale = impactReport.impactScale?.value?.numericalValue;
+          impactReport.impactDepth = impactReport.impactDepth?.value?.numericalValue;
+          setForm(impactReport);
           setLoading(false);
         }
       }).catch(e => {
         if (e.json)
           setErrors(e.json);
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         setLoading(false);
         navigate(-1);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
@@ -108,22 +136,22 @@ export default function AddEditIndicatorReport() {
           setErrors(e.json);
         }
         console.log(e);
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating indicator report', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit' && uri) {
-      updateIndicatorReport(encodeURIComponent(uri),{form}).then((res) => {
+      updateIndicatorReport(encodeURIComponent(uri), {form}).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
-          navigate(`/indicatorReports/${encodeURIComponent(form.organization)}`);
+          navigate(`/impactReports/${encodeURIComponent(form.organization)}`);
         }
       }).catch(e => {
         if (e.json) {
           setErrors(e.json);
         }
-        reportErrorToBackend(e)
+        reportErrorToBackend(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when updating outcome', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -146,9 +174,9 @@ export default function AddEditIndicatorReport() {
     if (!form.endTime)
       error.endTime = 'The field cannot be empty';
     if (form.uri && !isValidURL(form.uri))
-      error.uri = 'The field cannot be empty'
-    if (!!form.startTime && !!form.endTime && form.startTime > form.endTime){
-      error.startTime = 'The date must be earlier than the end date'
+      error.uri = 'The field cannot be empty';
+    if (!!form.startTime && !!form.endTime && form.startTime > form.endTime) {
+      error.startTime = 'The date must be earlier than the end date';
       error.endTime = 'The date must be later than the start date';
     }
 
@@ -169,33 +197,37 @@ export default function AddEditIndicatorReport() {
 
   return (
     <Container maxWidth="md">
-      {mode === 'view'? (
+      {mode === 'view' ? (
         <Paper sx={{p: 2}} variant={'outlined'}>
 
           <Typography variant={'h6'}> {`Name:`} </Typography>
           <Typography variant={'body1'}> {`${form.name || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
-          <Typography variant={'h6'}> {`value:`} </Typography>
-          <Typography variant={'body1'}> {`${form.numericalValue || 'Not Given'} (${form.unitOfMeasure || 'Not Given'})`} </Typography>
-          <Typography variant={'h6'}> {`Indicator:`} </Typography>
-          <Typography variant={'body1'}> <Link to={`/indicator/${encodeURIComponent(form.indicator)}/view`} colorWithHover color={'#2f5ac7'}>{form.indicatorName}</Link> </Typography>
+          <Typography variant={'h6'}> {`Comment:`} </Typography>
+          <Typography variant={'body1'}> {`${form.comment || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Organization:`} </Typography>
-          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`} colorWithHover color={'#2f5ac7'}>{form.organizationName}</Link> </Typography>
-          <Typography variant={'h6'}> {`Date Created:`} </Typography>
-          <Typography variant={'body1'}> {form.dateCreated ? `${(new Date(form.dateCreated)).toLocaleDateString()}`: 'Not Given'} </Typography>
-          <Typography variant={'h6'}> {`Time Interval:`} </Typography>
-          <Typography variant={'body1'}> {(form.startTime && form.endTime)? `${(new Date(form.startTime)).toLocaleString()} to ${(new Date(form.endTime)).toLocaleString()}` : 'Not Given'} </Typography>
-          <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
-            navigate(`/indicatorReport/${encodeURIComponent(uri)}/edit`);
+          <Typography variant={'body1'}> <Link to={`/organizations/${encodeURIComponent(form.organization)}/view`}
+                                               colorWithHover
+                                               color={'#2f5ac7'}>{ops.organization[form.organization]}</Link>
+          </Typography>
+
+          <Typography variant={'h6'}> {`Impact Scale:`} </Typography>
+          <Typography variant={'body1'}> {`${form.impactScale || 'Not Given'}`} </Typography>
+
+          <Typography variant={'h6'}> {`Impact Depth:`} </Typography>
+          <Typography variant={'body1'}> {`${form.impactDepth|| 'Not Given'}`} </Typography>
+
+          <Button variant="contained" color="primary" className={classes.button} onClick={() => {
+            navigate(`/impactReport/${encodeURIComponent(uri)}/edit`);
           }
           }>
             Edit
           </Button>
 
         </Paper>
-      ): (<Paper sx={{p: 2}} variant={'outlined'}>
-        <Typography variant={'h4'}> Indicator Report </Typography>
+      ) : (<Paper sx={{p: 2}} variant={'outlined'}>
+        <Typography variant={'h4'}> Impact Report </Typography>
         <IndicatorReportField
           disabled={mode === 'view'}
           disabledOrganization={!!orgUri}

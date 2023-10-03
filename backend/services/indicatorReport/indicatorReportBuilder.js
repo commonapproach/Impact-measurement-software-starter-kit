@@ -1,5 +1,7 @@
 const {baseLevelConfig} = require("../fileUploading/configs");
-const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue} = require("../helpers");
+const {getFullPropertyURI, getValue, getObjectValue, transSave, assignValue, assignValues, getFullObjectURI,
+  assignMeasure
+} = require("../helpers");
 const {GDBIndicatorReportModel} = require("../../models/indicatorReport");
 const {GDBMeasureModel} = require("../../models/measure");
 const {GDBIndicatorModel} = require("../../models/indicator");
@@ -7,6 +9,7 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
+const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorReportBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -56,72 +59,16 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
     hasError = ret.hasError;
     error = ret.error;
 
-
-    let measureURI = getValue(object, mainModel, 'value');
-    let measureObject = getObjectValue(object, mainModel, 'value');
-
-    let value;
-    if (measureObject)
-      value = getValue(measureObject, GDBMeasureModel, 'numericalValue');
-
-    if (!measureURI && !value && config['iso21972:value'] && !form.value) {
-      if (config['iso21972:value'].rejectFile) {
-        if (environment === 'interface') {
-          throw new Server400Error('Indicator Report Iso21972 Value is Mandatory');
-        } else if (environment === 'fileUploading') {
-          error += 1;
-          hasError = true;
-        }
-      }
-      if (environment === 'fileUploading')
-        addMessage(8, 'propertyMissing',
-          {
-            uri,
-            type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(mainModel, 'value'))
-          },
-          config['iso21972:value']
-        );
-    } else {
-      mainObject.value = measureURI ||
-        GDBMeasureModel({
-            numericalValue: value
-          },
-          {uri: measureObject['@id']});
-    }
-
+    ret = assignMeasure(environment, config, object, mainModel, mainObject, 'value', 'iso21972:value', addMessage, uri, hasError, error);
+    error = ret.error;
+    hasError = ret.hasError;
 
     // add indicator to the indicatorReport
 
-    mainObject.forIndicator = environment === 'fileUploading' ? getValue(object, GDBIndicatorReportModel, 'forIndicator') : form.forIndicator;
-    if (!mainObject.forIndicator && config['cids:forIndicator']) {
-      if (config['cids:forIndicator'].rejectFile) {
-        if (environment === 'fileUploading') {
-          error += 1;
-          hasError = true;
-        } else if (environment === 'interface') {
-          throw new Server400Error('For indicator is mandatory');
-        }
-      }
-      if (config['cids:forIndicator'].ignoreInstance) {
-        if (environment === 'fileUploading') {
-          ignore = true;
-          delete indicatorReportDict[uri];
-        } else if (environment === 'interface') {
-          throw new Server400Error('For indicator is mandatory');
-        }
-      }
-      if (environment === 'fileUploading') {
-        addMessage(8, 'propertyMissing',
-          {
-            uri,
-            type: getPrefixedURI(object['@type'][0]),
-            property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'forIndicator'))
-          },
-          config['cids:forIndicator']
-        );
-      }
-    }
+    ret = assignValue(environment, config, object, mainModel, mainObject, 'forIndicator', 'cids:forIndicator', addMessage, form, uri, hasError, error);
+    error = ret.error;
+    hasError = ret.hasError;
+    ignore = ret.ignore;
 
     // add the indicatorReport to indicator if needed
     if (environment === 'interface' || (!ignore && !indicatorDict[mainObject.forIndicator])) {
@@ -158,6 +105,35 @@ async function indicatorReportBuilder(environment, trans, object, organization, 
         await transSave(trans, indicator);
       }
     }
+
+    // add the timeInterval to indicator report
+    // todo: add form to it
+    // mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
+    //       GDBDateTimeIntervalModel({
+    //         hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //             GDBDateTimeIntervalModel, 'hasBeginning') ||
+    //           GDBInstant({
+    //             date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+    //           }, {
+    //             uri: getFullObjectURI(
+    //               object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //                 [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+    //             )
+    //           }),
+    //
+    //         hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+    //             GDBDateTimeIntervalModel, 'hasEnd') ||
+    //           GDBInstant({
+    //             date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //               [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+    //           }, {
+    //             uri: getFullObjectURI(
+    //               object[getFullPropertyURI(mainModel, 'hasTime')][0]
+    //                 [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+    //             )
+    //           })
+    //       }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])})
 
     if (!ignore && !hasError && environment === 'fileUploading') {
       addTrace(`    Finished reading ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);

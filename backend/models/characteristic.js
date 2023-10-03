@@ -1,10 +1,9 @@
 const {createGraphDBModel, Types} = require("graphdb-utils");
 const {GDBCodeModel} = require("./code");
-const {GDBStakeholderModel} = require("./stakeholder");
 
 const GDBCharacteristicModel = createGraphDBModel({
   codes: {type: [GDBCodeModel], internalKey: 'cids:hasCode'},
-  stakeholders: {type: [GDBStakeholderModel], internalKey: 'cids:forStakeholder'},
+  stakeholders: {type: [() => require('./stakeholder').GDBStakeholderModel], internalKey: 'cids:forStakeholder'},
   name: {type: String, internalKey: 'cids:hasName'},
   value: {type: String, internalKey: 'iso21972:value'}
 }, {

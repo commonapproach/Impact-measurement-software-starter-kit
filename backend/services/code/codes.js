@@ -18,6 +18,22 @@ const fetchCodesHandler = async (req, res, next) => {
   }
 };
 
+const fetchCodesInterface = async (req, res) => {
+  const codes = await GDBCodeModel.find({});
+  const codesInterfaces = {}
+  codes.map(code => codesInterfaces[code._uri] = code.name)
+
+  return res.status(200).json({success: true, codesInterfaces});
+};
+
+const fetchCodesInterfaceHandler = async (req, res, next) => {
+  try {
+    return await fetchCodesInterface(req, res);
+  } catch (e) {
+    next(e);
+  }
+};
+
 module.exports = {
-  fetchCodesHandler
+  fetchCodesHandler, fetchCodesInterfaceHandler
 }

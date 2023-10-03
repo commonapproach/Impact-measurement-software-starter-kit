@@ -33,8 +33,19 @@ function ReportTypes() {
       <NavButton to={'/reportGenerate/themeReports'} icon={<Edit/>} key={'Theme Reports'} buttonHeight={50}
                  buttonWidth={150} textSize={"small"} text="Theme Reports"/>
 
-      {/*<NavButton to={'/organization-outcomes'} icon={<Edit/>} key={'organization-outcomes'} buttonHeight={50}*/}
-      {/*           buttonWidth={150}  textSize={"small"}  text="Theme Report"/>*/}
+      <NavButton to={'/reportGenerate/characteristicReports'} icon={<Edit/>} key={'Characteristic Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"} text="Characteristic Reports"/>
+
+      <NavButton to={'/reportGenerate/codeReports'} icon={<Edit/>} key={'Code Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"} text="Code Reports"/>
+
+      <NavButton to={`/reportGenerate/stakeholderOutcomeReports`} icon={<Edit/>} key={'StakeholderOutcome Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"}
+                 text="Stakeholder Outcomes"/>
+
+      <NavButton to={`/reportGenerate/impactReports-reports`} icon={<Edit/>} key={'Impact Reports'} buttonHeight={50}
+                 buttonWidth={150} textSize={"small"}
+                 text="Impact Reports"/>
 
       {/*<NavButton to={'/organization-indicatorReports'} icon={<Edit/>} key={'indicatorReports'} buttonHeight={50}*/}
       {/*           buttonWidth={150}  textSize={"small"} text="Manage Indicator Reports"/>*/}

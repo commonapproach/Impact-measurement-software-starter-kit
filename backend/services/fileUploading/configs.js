@@ -12,7 +12,12 @@ const baseLevelConfig = {
     'cids:hasName': {flag: true},
     'cids:forIndicator': {ignoreInstance: true},
     'iso21972:value': {flag: true}
-  }
+  },
+  stakeholderOutcome: {},
+  characteristic: {},
+  impactScale:{},
+  impactDepth: {},
+  code: {}
 };
 
 module.exports = {

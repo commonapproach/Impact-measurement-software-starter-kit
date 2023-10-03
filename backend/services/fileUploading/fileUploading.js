@@ -12,8 +12,6 @@ const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
 const {isValidURL} = require("../../helpers/validator");
 const {GraphDB} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
-const {baseLevelConfig} = require('./configs');
-const {config} = require("dotenv");
 const {outcomeBuilder} = require("../outcomes/outcomeBuilder");
 const {transSave, getFullPropertyURI, getFullTypeURI, getValue, getObjectValue} = require("../helpers")
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
@@ -24,6 +22,13 @@ const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {characteristicBuilder} = require("../characteristic/characteristicBuilder");
 const {indicatorReportBuilder} = require("../indicatorReport/indicatorReportBuilder");
 const {indicatorBuilder} = require("../indicators/indicatorBuilder");
+const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
+const {GDBImpactReportModel} = require("../../models/impactReport");
+const {stakeholderOutcomeBuilder} = require("../stakeholderOutcome/stakeholderOutcomeBuilder");
+const {impactNormsBuilder} = require("../impactStuffs/impactStuffs");
+const {impactReportBuilder} = require("../impactReport/impactReportBuilder");
+const {GDBHowMuchImpactModel, GDBImpactDepthModel, GDBImpactScaleModel} = require("../../models/howMuchImpact");
+const {howMuchImpactBuilder} = require("../howMuchImpact/howMuchImpactBuilder");
 
 const fileUploadingHandler = async (req, res, next) => {
   try {
@@ -35,12 +40,6 @@ const fileUploadingHandler = async (req, res, next) => {
   }
 };
 
-
-
-
-const getFullObjectURI = (object) => {
-  return object["@id"];
-};
 
 
 const fileUploading = async (req, res, next) => {
@@ -56,6 +55,10 @@ const fileUploading = async (req, res, next) => {
     const characteristicDict = {};
     const indicatorDict = {};
     const indicatorReportDict = {};
+    const impactReportDict = {};
+    const stakeholderOutcomeDict = {};
+    const howMuchImpactDict = {};
+
     let messageBuffer = {
       begin: [], end: [], noURI: []
     };
@@ -243,7 +246,7 @@ const fileUploading = async (req, res, next) => {
               type: getPrefixedURI(object['@type'][0]),
               property: getPrefixedURI(getFullPropertyURI(GDBOutcomeModel, property)),
               value: obj['@value']
-            });
+            }, {});
         }
 
       });
@@ -351,6 +354,7 @@ const fileUploading = async (req, res, next) => {
           uri,
           type: getPrefixedURI(object['@type'][0])
         }, {ignoreInstance: true});
+        error += 1
         continue;
       }
 
@@ -367,57 +371,6 @@ const fileUploading = async (req, res, next) => {
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorDict[uri] = {_uri: uri};
-        // if (!object[getFullPropertyURI(GDBIndicatorModel, 'name')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'name'))} is missing`);
-        //   // addMessage(8, 'propertyMissing', {uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'name'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   hasName = getValue(object, GDBIndicatorModel, 'name');
-        // }
-
-        // let description;
-        // if (!object[getFullPropertyURI(GDBIndicatorModel, 'description')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))} is missing`);
-        //   // addMessage(8, 'propertyMissing',
-        //   //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'description'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   description = getValue(object, GDBIndicatorModel, 'description')
-        // }
-
-        // let unitOfMeasure;
-        // if (!object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure'))} is missing`);
-        //   // addMessage(8, 'propertyMissing',
-        //   //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   unitOfMeasure = getValue(object, GDBIndicatorModel, 'unitOfMeasure') ||
-        //   GDBUnitOfMeasure({
-        //       label: getValue(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0],
-        //         GDBUnitOfMeasure, 'label'
-        //       )
-        //     },
-        //     {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorModel, 'unitOfMeasure')][0])})
-        // }
-
-        // if there is error on building up indicator
-        // if (!hasError) {
-        //   const indicator = GDBIndicatorModel({
-        //     name: hasName,
-        //     description,
-        //     unitOfMeasure,
-        //     forOrganization: organization._uri
-        //   }, {uri: uri});
-        //   await transSave(trans, indicator);
-        //   indicatorDict[uri] = indicator;
-        // }
 
       } else if (object['@type'].includes(getFullTypeURI(GDBIndicatorReportModel))) {
 
@@ -425,100 +378,6 @@ const fileUploading = async (req, res, next) => {
         addMessage(4, 'readingMessage',
           {uri, type: getPrefixedURI(object['@type'][0])}, {});
         indicatorReportDict[uri] = {_uri: uri};
-
-        // if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'name')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'name'))} is missing`);
-        //   // addMessage(8, 'propertyMissing',
-        //   //   {uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'name'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   hasName = getValue(object, GDBIndicatorReportModel, 'name');
-        // }
-        // let dateCreated;
-        // if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))} is missing`);
-        //   // addMessage(8, 'propertyMissing',
-        //   //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'dateCreated'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   dateCreated = new Date(getValue(object, GDBIndicatorReportModel, 'dateCreated'))
-        // }
-        // let comment;
-        // if (!object[getFullPropertyURI(GDBIndicatorReportModel, 'comment')]) {
-        //   // addTrace('        Error: Mandatory property missing');
-        //   // addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))} is missing`);
-        //   // addMessage(8, 'propertyMissing',
-        //   //   {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'comment'))});
-        //   // error += 1;
-        //   // hasError = true;
-        // } else {
-        //   comment = getValue(object, GDBIndicatorReportModel, 'comment')
-        // }
-        // let value
-        // let measureURI = getValue(object, GDBIndicatorReportModel, 'value');
-        // let measureObject = getObjectValue(object, GDBIndicatorReportModel, 'value');
-        //
-        // let numericalValue;
-        // if (measureObject)
-        //   numericalValue = getValue(measureObject, GDBMeasureModel, 'numericalValue')
-        // if (!measureURI && !numericalValue){
-        //   addTrace('        Error: Mandatory property missing');
-        //   addTrace(`            In object${hasName ? ' ' + hasName:''} with URI ${uri} of type ${getPrefixedURI(object['@type'][0])} property ${getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'value'))} is missing`);
-        //   addMessage(8, 'propertyMissing',
-        //     {hasName, uri, type: getPrefixedURI(object['@type'][0]), property: getPrefixedURI(getFullPropertyURI(GDBIndicatorReportModel, 'value'))});
-        //   error += 1;
-        //   hasError = true;
-        // } else {
-        //   value = measureURI ||
-        //     GDBMeasureModel({
-        //       numericalValue
-        //     },
-        //     {uri: measureObject['@id']})
-        // }
-        // if (!hasError) {
-        //   const indicatorReport = GDBIndicatorReportModel({
-        //     name: hasName,
-        //     dateCreated: dateCreated,
-        //     comment: comment,
-        //     value: value,
-        //     forOrganization: organization._uri
-        //     // hasTime: getValue(object, GDBIndicatorReportModel, 'hasTime') ||
-        //     //   GDBDateTimeIntervalModel({
-        //     //
-        //     //     hasBeginning: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
-        //     //         GDBDateTimeIntervalModel, 'hasBeginning') ||
-        //     //       GDBInstant({
-        //     //         date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-        //     //           [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
-        //     //       }, {
-        //     //         uri: getFullObjectURI(
-        //     //           object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-        //     //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
-        //     //         )
-        //     //       }),
-        //     //
-        //     //     hasEnd: getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0],
-        //     //         GDBDateTimeIntervalModel, 'hasEnd') ||
-        //     //       GDBInstant({
-        //     //         date: new Date(getValue(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-        //     //           [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
-        //     //       }, {
-        //     //         uri: getFullObjectURI(
-        //     //           object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')][0]
-        //     //             [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
-        //     //         )
-        //     //       })
-        //     //   }, {uri: getFullObjectURI(object[getFullPropertyURI(GDBIndicatorReportModel, 'hasTime')])})
-        //
-        //
-        //   }, {uri: uri});
-        //   await transSave(trans, indicatorReport);
-        //   indicatorReportDict[uri] = indicatorReport;
-        // }
 
       } else if (object['@type'].includes(getFullTypeURI(GDBThemeModel))) {
 
@@ -536,6 +395,20 @@ const fileUploading = async (req, res, next) => {
         addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
         characteristicDict[uri] = {_uri: uri};
 
+      } else if (object['@type'].includes(getFullTypeURI(GDBStakeholderOutcomeModel))) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        stakeholderOutcomeDict[uri] = {_uri: uri};
+      } else if (object['@type'].includes(getFullTypeURI(GDBImpactReportModel))) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        impactReportDict[uri] = {_uri: uri};
+      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
+        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))
+      ) {
+        addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
+        addMessage(4, 'readingMessage', {uri, type: getPrefixedURI(object['@type'][0])}, {});
+        howMuchImpactDict[uri] = {_uri: uri};
       } else if (object['@type'].includes(getFullTypeURI(GDBUnitOfMeasure))) {
 
         addTrace(`    Reading object with URI ${uri} of type ${getPrefixedURI(object['@type'][0])}...`);
@@ -718,6 +591,36 @@ const fileUploading = async (req, res, next) => {
           getValue,
           getListOfValue
         }, null);
+      } else if (object['@type'].includes(getFullTypeURI(GDBStakeholderOutcomeModel))) {
+        error = await stakeholderOutcomeBuilder('fileUploading', trans, object, organization, impactNorms, error, {outcomeDict, stakeholderOutcomeDict, objectDict}, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
+      } else if (object['@type'].includes(getFullTypeURI(GDBImpactReportModel))) {
+        error = await impactReportBuilder('fileUploading', trans, object, organization, impactNorms, error, {stakeholderOutcomeDict,impactReportDict, objectDict}, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
+      } else if (object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2])) ||
+        object['@type'].includes(getFullURI(GDBImpactDepthModel.schemaOptions.rdfTypes[2]))
+      ) {
+        const subType = object['@type'].includes(getFullURI(GDBImpactScaleModel.schemaOptions.rdfTypes[2]))? 'impactScale' : 'impactDepth'
+        error = await howMuchImpactBuilder('fileUploading', subType, trans, object, organization, impactNorms, error, {howMuchImpactDict, objectDict}, {
+          addMessage,
+          addTrace,
+          transSave,
+          getFullPropertyURI,
+          getValue,
+          getListOfValue
+        }, null);
       }
     }
     await transSave(trans, organization);
@@ -732,7 +635,23 @@ const fileUploading = async (req, res, next) => {
           indicator, {_uri: indicator._uri}
         );
       });
-      await Promise.all(indicators.map(indicator => transSave(trans, indicator)))
+
+      await Promise.all(indicators.map(indicator => transSave(trans, indicator)));
+
+      const codes = Object.entries(codeDict).map(([uri, code]) => {
+        return GDBCodeModel(
+          code, {_uri: code._uri}
+        );
+      })
+      await Promise.all(codes.map(code => transSave(trans, code)));
+
+      const characteristics = Object.entries(characteristicDict).map(([uri, characteristic]) => {
+        return GDBCharacteristicModel(
+          characteristic, {_uri: characteristic._uri}
+        );
+      })
+      await Promise.all(characteristics.map(characteristic => transSave(trans, characteristic)));
+
       const outcomes = Object.entries(outcomeDict).map(([uri, outcome]) => {
         return GDBOutcomeModel(
           outcome, {_uri: outcome._uri}
@@ -753,6 +672,36 @@ const fileUploading = async (req, res, next) => {
         );
       });
       await Promise.all(themes.map(theme => transSave(trans, theme)));
+
+      const impactReports = Object.entries(impactReportDict).map(([uri, impactReport]) => {
+        return GDBImpactReportModel(
+          impactReport, {_uri: impactReport._uri}
+        );
+      });
+      await Promise.all(impactReports.map(impactReport => transSave(trans, impactReport)));
+
+      const stakeholderOutcomes = Object.entries(stakeholderOutcomeDict).map(([uri, stakeholderOutcome]) => {
+        return GDBStakeholderOutcomeModel(
+          stakeholderOutcome, {_uri: stakeholderOutcome._uri}
+        );
+      });
+      await Promise.all(stakeholderOutcomes.map(stakeholderOutcome => transSave(trans, stakeholderOutcome)));
+
+      const howMuchImpacts = Object.entries(howMuchImpactDict).map(([uri, howMuchImpact]) => {
+        if (howMuchImpact.subType === 'impactScale') {
+          delete howMuchImpact.subType
+          return GDBImpactScaleModel(
+            howMuchImpact, {_uri: howMuchImpact._uri}
+          );
+        } else {
+          delete howMuchImpact.subType
+          return GDBImpactDepthModel(
+            howMuchImpact, {_uri: howMuchImpact._uri}
+          );
+        }
+
+      });
+      await Promise.all(howMuchImpacts.map(howMuchImpact => transSave(trans, howMuchImpact)));
 
 
       await trans.commit();

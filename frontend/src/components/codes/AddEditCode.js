@@ -208,6 +208,8 @@ export default function AddEditCode() {
           <Typography variant={'body1'}> {form.codeValue} </Typography>
           {form.iso72Value ? <Typography variant={'h6'}> {`iso72 Value:`} </Typography> : null}
           <Typography variant={'body1'}> {form.iso72Value} </Typography>
+          <Typography variant={'h6'}> {`Description:`} </Typography>
+          <Typography variant={'body1'}> {`${form.description}`} </Typography>
 
 
         </Paper>

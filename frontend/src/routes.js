@@ -51,6 +51,12 @@ import AddEditStakeholder from "./components/stakeholders/AddEditStakeholder";
 import AddEditCode from "./components/codes/AddEditCode";
 import Codes from "./components/codes/Codes";
 import AddEditCharacteristic from "./components/characteristics/AddEditCharacteristic";
+import Characteristic_ReportGenerate from "./components/ReportGenerate/CharacteristicReports";
+import Code_ReportGenerate from "./components/ReportGenerate/CodeReports";
+import StakeholderOutcomeReports from "./components/ReportGenerate/StakeholderOutcomeReport";
+import AddEditStakeholderOutcome from "./components/stakeholderOutcome/AddEditStakeholderOutcome";
+import ImpactReports_ReportGenerate from "./components/ReportGenerate/ImpactReports";
+import AddEditImpactReport from "./components/impactReport/AddEditImpactReport";
 
 const routes = (
   <Routes>
@@ -84,7 +90,7 @@ const routes = (
     <Route path="/code/new" element={<PrivateRoute element={AddEditCode}/>}/>
     <Route path="/code/:uri/:viewMode" element={<PrivateRoute element={AddEditCode}/>}/>
 
-    {/*Codes*/}
+    {/*Characteristic*/}
     {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
     <Route path="/characteristic/new" element={<PrivateRoute element={AddEditCharacteristic}/>}/>
     <Route path="/characteristic/:uri/:viewMode" element={<PrivateRoute element={AddEditCharacteristic}/>}/>
@@ -115,6 +121,15 @@ const routes = (
     <Route path="/outcome/:orgUri/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
     <Route path="/outcome/:uri/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
+
+    {/*stakeholderOutcome*/}
+    <Route path="/stakeholderOutcome/new" element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+    <Route path="/stakeholderOutcome/:uri/:operationMode"
+           element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+
+
+    <Route path="/impactReport/new" element={<PrivateRoute element={AddEditImpactReport}/>}/>
+    <Route path="/impactReport/:uri/:operationMode" element={<PrivateRoute element={AddEditImpactReport}/>}/>
     {/*file uploading page*/}
     <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
     <Route path="/fileUploading/:orgUri/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
@@ -148,6 +163,13 @@ const routes = (
            element={<PrivateRoute element={IndicatorReports_ReportGenerate}/>}/>
     <Route path={"/reportGenerate/outcomeReports"} element={<PrivateRoute element={OutcomeReports}/>}/>
     <Route path={"/reportGenerate/themeReports"} element={<PrivateRoute element={ThemeReports}/>}/>
+    <Route path={"/reportGenerate/characteristicReports"}
+           element={<PrivateRoute element={Characteristic_ReportGenerate}/>}/>
+    <Route path={"/reportGenerate/codeReports"} element={<PrivateRoute element={Code_ReportGenerate}/>}/>
+    <Route path={"/reportGenerate/stakeholderOutcomeReports"}
+           element={<PrivateRoute element={StakeholderOutcomeReports}/>}/>
+    <Route path={"/reportGenerate/impactReports-reports"}
+           element={<PrivateRoute element={ImpactReports_ReportGenerate}/>}/>
 
   </Routes>
 );

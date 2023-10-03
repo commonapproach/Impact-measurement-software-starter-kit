@@ -15,8 +15,8 @@ export async function createCharacteristic(params) {
  * @param params
  * @returns {Promise<*>}
  */
-export async function updateCharacteristic(id, params) {
-  return putJson('/api/characteristic/' + id, params);
+export async function updateCharacteristic(uri, params) {
+  return putJson('/api/characteristic/' + uri, params);
 }
 
 /**

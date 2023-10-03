@@ -1,8 +1,8 @@
 import {deleteJson, getJson, postJson, putJson} from "./index";
 
 
-export async function fetchOrganization(orgUri,) {
-  return getJson('/api/organization/' + orgUri);
+export async function fetchStakeholderInterfaces() {
+  return getJson('/api/stakeholder/interface');
 }
 
 export async function fetchStakeholders() {

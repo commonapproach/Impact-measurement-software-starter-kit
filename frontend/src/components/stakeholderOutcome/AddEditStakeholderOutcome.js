@@ -30,9 +30,11 @@ export default function AddEditStakeholderOutcome() {
 
   const classes = useStyles();
   const navigate = useNavigate();
-  const {uri, orgUri
-    , operationMode} = useParams();
-  const mode = uri? operationMode : 'new';
+  const {
+    uri, orgUri
+    , operationMode
+  } = useParams();
+  const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -58,9 +60,9 @@ export default function AddEditStakeholderOutcome() {
   });
   const [dict, setDict] = useState({
     outcome: {},
-    code:{},
+    code: {},
     stakeholder: {}
-  })
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,30 +71,30 @@ export default function AddEditStakeholderOutcome() {
         fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
       ]
     ).then(([{stakeholderInterfaces}, {codesInterfaces}, {outcomeInterfaces}]) => {
-      const dict = {}
-      dict['outcome'] = outcomeInterfaces
-      dict['stakeholder'] = stakeholderInterfaces
-      dict['code'] = codesInterfaces
-      console.log(dict)
+      const dict = {};
+      dict['outcome'] = outcomeInterfaces;
+      dict['stakeholder'] = stakeholderInterfaces;
+      dict['code'] = codesInterfaces;
+      console.log(dict);
       setDict(dict);
-    }).catch(e=> {
+    }).catch(e => {
       if (e.json) {
         setErrors(e.json);
       }
-      console.log(e)
+      console.log(e);
       enqueueSnackbar(e.json?.message || 'Error occurs when fetching interfaces', {variant: "error"});
       setState({loadingButton: false, submitDialog: false,});
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
-    if((mode === 'edit' && uri) || (mode === 'view' && uri)){
+    if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
       fetchStakeholderOutcome(encodeURIComponent(uri)).then(({success, stakeholderOutcome}) => {
-        if(success){
-          console.log(stakeholderOutcome)
+        if (success) {
+          console.log(stakeholderOutcome);
           stakeholderOutcome.uri = stakeholderOutcome._uri;
           setForm(stakeholderOutcome);
-          setLoading(false)
+          setLoading(false);
         }
       }).catch(e => {
         if (e.json)
@@ -100,26 +102,26 @@ export default function AddEditStakeholderOutcome() {
         setLoading(false);
         enqueueSnackbar(e.json?.message || "Error occurs when fetching stakeholder outcome", {variant: 'error'});
       });
-    } else if(mode === 'edit' && (!uri || !orgUri) ) {
+    } else if (mode === 'edit' && (!uri || !orgUri)) {
       navigate(-1);
       enqueueSnackbar("No URI or orgUri provided", {variant: 'error'});
-    } else if (mode === 'new' && !orgUri){
+    } else if (mode === 'new' && !orgUri) {
       setLoading(false);
       // navigate(-1);
       // enqueueSnackbar("No orgId provided", {variant: 'error'});
-    }else if (mode === 'new' && orgUri) {
-      setForm(form => ({...form, organizations: [orgUri]}))
+    } else if (mode === 'new' && orgUri) {
+      setForm(form => ({...form, organizations: [orgUri]}));
       setLoading(false);
     } else {
       navigate(-1);
-      enqueueSnackbar('Wrong auth', {variant: 'error'})
+      enqueueSnackbar('Wrong auth', {variant: 'error'});
     }
 
   }, [mode, uri]);
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log(form)
+      console.log(form);
       setState(state => ({...state, submitDialog: true}));
     }
   };
@@ -137,7 +139,7 @@ export default function AddEditStakeholderOutcome() {
         if (e.json) {
           setErrors(e.json);
         }
-        console.log(e)
+        console.log(e);
         enqueueSnackbar(e.json?.message || 'Error occurs when creating stakeholder Outcome', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
@@ -169,9 +171,9 @@ export default function AddEditStakeholderOutcome() {
     //   error.themes = 'The field cannot be empty';
     // if (!form.description)
     //   error.description = 'The field cannot be empty'
-    if(!form.organization)
-      error.organization = 'The field cannot be empty'
-    if(form.uri && !isValidURL(form.uri))
+    if (!form.organization)
+      error.organization = 'The field cannot be empty';
+    if (form.uri && !isValidURL(form.uri))
       error.uri = 'Not a valid URI';
     setErrors(error);
     return Object.keys(error).length === 0;
@@ -182,7 +184,7 @@ export default function AddEditStakeholderOutcome() {
 
   return (
     <Container maxWidth="md">
-      {mode === 'view'?
+      {mode === 'view' ?
         (
           <Paper sx={{p: 2}} variant={'outlined'}>
 
@@ -191,15 +193,19 @@ export default function AddEditStakeholderOutcome() {
             <Typography variant={'h6'}> {`URI:`} </Typography>
             <Typography variant={'body1'}> {`${form.uri}`} </Typography>
             <Typography variant={'h6'}> {`Stakeholder:`} </Typography>
-            <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(form.stakeholder)}/view`} colorWithHover color={'#2f5ac7'}>{dict.stakeholder[form.stakeholder]}</Link> </Typography>
+            <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(form.stakeholder)}/view`}
+                                                 colorWithHover
+                                                 color={'#2f5ac7'}>{dict.stakeholder[form.stakeholder]}</Link>
+            </Typography>
             <Typography variant={'h6'}> {`isUnderserved:`} </Typography>
             <Typography variant={'body1'}> {`${form.isUnderserved}`} </Typography>
             <Typography variant={'h6'}> {`Importance:`} </Typography>
             <Typography variant={'body1'}> {`${form.importance}`} </Typography>
             <Typography variant={'h6'}> {`Outcome:`} </Typography>
-            <Typography variant={'body1'}> <Link to={`/outcome/${encodeURIComponent(form.outcome)}/view`} colorWithHover color={'#2f5ac7'}>{dict.outcome[form.outcome]}</Link> </Typography>
+            <Typography variant={'body1'}> <Link to={`/outcome/${encodeURIComponent(form.outcome)}/view`} colorWithHover
+                                                 color={'#2f5ac7'}>{dict.outcome[form.outcome]}</Link> </Typography>
 
-            {form.codes?.length? <Typography variant={'h6'}> {`Codes:`} </Typography>: null}
+            {form.codes?.length ? <Typography variant={'h6'}> {`Codes:`} </Typography> : null}
             {form.codes?.map(codeURI => {
               return (
                 <Typography variant={'body1'}>
@@ -220,7 +226,7 @@ export default function AddEditStakeholderOutcome() {
             <Typography variant={'h6'}> {`Description:`} </Typography>
             <Typography variant={'body1'}> {`${form.description}`} </Typography>
 
-            <Button variant="contained" color="primary" className={classes.button} onClick={()=>{
+            <Button variant="contained" color="primary" className={classes.button} onClick={() => {
               navigate(`/outcome/${encodeURIComponent(uri)}/edit`);
             }
             }>
@@ -243,8 +249,8 @@ export default function AddEditStakeholderOutcome() {
             importErrors={errors}
           />
 
-          {mode==='view'?
-            <div/>:
+          {mode === 'view' ?
+            <div/> :
             <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
               Submit
             </Button>}

@@ -103,7 +103,7 @@ const fetchIndicator = async (req, res) => {
     throw new Server400Error('Id is not given');
   const indicator = await GDBIndicatorModel.findOne({_uri: uri}, {populates: ['unitOfMeasure', 'baseline']});
   indicator.unitOfMeasure = indicator.unitOfMeasure?.label;
-  indicator.baseline = indicator.baseline.numericalValue
+  indicator.baseline = indicator.baseline?.numericalValue
   if (!indicator)
     throw new Server400Error('No such indicator');
   indicator.forOrganization = await GDBOrganizationModel.findOne({_uri: indicator.forOrganization})
@@ -115,7 +115,7 @@ const fetchIndicator = async (req, res) => {
   // indicator.forOrganizations.map(organization => {
   //   indicator.organizations[organization._id] = organization.legalName;
   // })
-  delete indicator.forOrganizations;
+  delete indicator.forOrganization;
   return res.status(200).json({success: true, indicator});
 
 };

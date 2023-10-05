@@ -214,13 +214,16 @@ export default function ThemeReports() {
           }}
         />
         {!!selectedTheme?
-          <Paper elevation={0}>
+          <Paper>
           <Typography variant={'body1'} sx={{pl: 4}}>{`Theme Name: `} <Link to={`/theme/${encodeURIComponent(theme._uri)}/view`} color={'#2f5ac7'} colorWithHover>{theme.name || 'Not Given'}</Link> </Typography>
           <Typography variant={'body1'} sx={{pl:4}}> {`Description: ${theme.description || 'Not Given'}`} </Typography>
           </Paper>
           : null}
 
-        {outcomes.length? <Typography sx={{pl:4}} variant={'h5'} > {'Outcomes:'} </Typography>:null}
+        <Paper>
+          {outcomes.length? <Typography sx={{pl:4}} variant={'h5'} > {'Outcomes:'} </Typography>:null}
+        </Paper>
+
 
         {outcomes.length ? outcomes.map((outcome, index) => {
           return (

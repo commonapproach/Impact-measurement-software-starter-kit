@@ -179,16 +179,16 @@ export default function AddEditIndicator() {
           <Typography variant={'h6'}> {`Unit of Measure:`} </Typography>
           <Typography variant={'body1'}> {`${form.unitOfMeasure || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Baseline:`} </Typography>
-          <Typography variant={'body1'}> {`${form.baseline}`} </Typography>
+          <Typography variant={'body1'}> {`${form.baseline || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`codes:`} </Typography>
           {form.codes?.length?
             form.codes.map(code => <Typography variant={'body1'}> {<Link to={`/code/${encodeURIComponent(code)}/view`} colorWithHover
                                                                          color={'#2f5ac7'}>{codesInterfaces[code]}</Link>} </Typography>)
 
-            : 'Not Given'}
+            : <Typography variant={'body1'}> {`Not Given`} </Typography>}
 
           <Typography variant={'h6'}> {`Description:`} </Typography>
-          <Typography variant={'body1'}> {`${form.description}`} </Typography>
+          <Typography variant={'body1'}> {`${form.description || 'Not Given'}`} </Typography>
 
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
             navigate(`/indicator/${encodeURIComponent(uri)}/edit`);

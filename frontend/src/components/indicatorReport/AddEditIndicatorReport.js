@@ -177,7 +177,7 @@ export default function AddEditIndicatorReport() {
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
           <Typography variant={'h6'}> {`value:`} </Typography>
-          <Typography variant={'body1'}> {`${form.numericalValue || 'Not Given'} (${form.unitOfMeasure || 'Not Given'})`} </Typography>
+          <Typography variant={'body1'}> {`${form.numericalValue || 'Value Not Given'} (${form.unitOfMeasure || 'Unit of Measure Not Given'})`} </Typography>
           <Typography variant={'h6'}> {`Indicator:`} </Typography>
           <Typography variant={'body1'}> <Link to={`/indicator/${encodeURIComponent(form.indicator)}/view`} colorWithHover color={'#2f5ac7'}>{form.indicatorName}</Link> </Typography>
           <Typography variant={'h6'}> {`Organization:`} </Typography>

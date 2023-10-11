@@ -12,6 +12,7 @@ import {loginDoubleAuthFields} from "../../constants/login_double_auth_fields";
 import { UserContext } from "../../context";
 import GeneralField from "../shared/fields/GeneralField";
 import {useSnackbar} from "notistack";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,8 +28,10 @@ const useStyles = makeStyles(() => ({
 
 export default function DoubleAuth() {
   const classes = useStyles();
-  const navigate = useNavigate();
   const {id} = useParams();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
+
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
 

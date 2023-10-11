@@ -11,7 +11,7 @@ import IndicatorReportField from "../shared/IndicatorReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -27,10 +27,11 @@ const useStyles = makeStyles(() => ({
 export default function AddEditIndicatorReport() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
   const {uri, orgUri, operationMode} = useParams();
   const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const userContext = useContext(UserContext);
 
   const [state, setState] = useState({

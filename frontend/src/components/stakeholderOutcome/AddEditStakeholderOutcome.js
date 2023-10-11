@@ -13,6 +13,7 @@ import {isValidURL} from "../../helpers/validation_helpers";
 import {fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
 import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,9 +28,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditStakeholderOutcome() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const {
     uri, orgUri
     , operationMode

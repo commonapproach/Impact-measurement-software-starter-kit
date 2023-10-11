@@ -12,6 +12,7 @@ import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
 import {fetchStakeholders} from "../../api/stakeholderAPI";
 import {fetchStakeholderOutcomesThroughStakeholder} from "../../api/stakeholderOutcomeAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -34,8 +35,8 @@ const useStyles = makeStyles(() => ({
 export default function StakeholderOutcomeReports() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const [stakeholders, setStakeholders] = useState({});
   const [selectedStakeholder, setSelectedStakeholder] = useState('');
   const [stakeholderOutcomes, setStakeholderOutcomes] = useState([]);

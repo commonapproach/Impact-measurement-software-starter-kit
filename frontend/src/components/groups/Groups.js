@@ -7,11 +7,13 @@ import {useSnackbar} from 'notistack';
 import {deleteGroup, fetchGroups} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 export default function Groups() {
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const [state, setState] = useState({
     loading: true,
     data: [],

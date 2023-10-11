@@ -1,10 +1,15 @@
 const hostname = window && window.location && window.location.hostname;
 
 let serverHost;
+console.log(`hostname: ${hostname}`)
 if (hostname === 'www.common-approach.ca') {
   serverHost = 'https://api.common-approach.ca'
+} else if (hostname === 'csse-uoft.github.io') {
+  console.log('in')
+  serverHost = 'https://api.common-approach.ca' // have to be changed
 } else {
   serverHost = 'https://localhost:5000';
+  console.log('Not in')
 }
 
 

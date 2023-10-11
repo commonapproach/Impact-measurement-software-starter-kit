@@ -11,6 +11,7 @@ import {isFieldEmpty} from "../../helpers";
 import {REQUIRED_HELPER_TEXT} from "../../constants";
 import LoadingButton from "../shared/LoadingButton";
 import PasswordHint from "../shared/PasswordHint";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 
 const useStyles = makeStyles(() => ({
@@ -25,7 +26,8 @@ const useStyles = makeStyles(() => ({
 
 export default function ForgotPasswordResetPassword(){
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {token} = useParams();
 
   const [state, setState] = useState({

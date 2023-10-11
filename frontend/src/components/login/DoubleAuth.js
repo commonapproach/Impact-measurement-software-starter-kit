@@ -12,6 +12,7 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {loginDoubleAuthFields} from "../../constants/login_double_auth_fields";
 import {UserContext} from "../../context";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,7 +28,8 @@ const useStyles = makeStyles(() => ({
 
 export default function DoubleAuth() {
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const userContext = useContext(UserContext);
 
   const [state, setState] = useState({
@@ -91,7 +93,7 @@ export default function DoubleAuth() {
           });
 
           setState(state => ({...state, loadingButton: false}));
-          navigate('/dashboard');
+          navigate(`/dashboard`);
 
         } else {
           setState(state => ({...state, group: state.group + 1, loadingButton: false}));
@@ -147,7 +149,7 @@ export default function DoubleAuth() {
                        onClick={handleSubmit}/>
         <AlertDialog dialogContentText={state.errors.message || "Error occur"}
                      dialogTitle={'Error'}
-                     buttons={[<Button onClick={() => navigate('/')} key={'ok'}>{'ok'}</Button>]}
+                     buttons={[<Button onClick={() => navigate(`/`)} key={'ok'}>{'ok'}</Button>]}
                      open={state.errorDialog}/>
         {/*<AlertDialog dialogContentText={'A link has been sent to your email address. Please follow it to reset your password'}*/}
         {/*             dialogTitle={'Success'}*/}
@@ -159,7 +161,7 @@ export default function DoubleAuth() {
     return (
       <AlertDialog dialogContentText={'You have missed all 3 chances'}
                    dialogTitle={'Sorry'}
-                   buttons={[<Button onClick={() => navigate('/')} key={'ok'}>{'ok'}</Button>]}
+                   buttons={[<Button onClick={() => navigate(`/`)} key={'ok'}>{'ok'}</Button>]}
                    open={state.group > 3}/>
     );
   }

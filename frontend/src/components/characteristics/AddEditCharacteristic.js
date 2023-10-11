@@ -20,7 +20,7 @@ import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 import {createCode, fetchCode, fetchCodes, updateCode} from "../../api/codeAPI";
 import {fetchStakeholders} from "../../api/stakeholderAPI";
 import {createCharacteristic, fetchCharacteristic, updateCharacteristic} from "../../api/characteristicApi";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -40,9 +40,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditCharacteristic() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {uri, viewMode} = useParams();
   const mode = uri ? viewMode : 'new';

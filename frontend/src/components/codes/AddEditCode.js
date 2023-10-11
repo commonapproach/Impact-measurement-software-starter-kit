@@ -18,7 +18,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
 import {createCode, fetchCode, updateCode} from "../../api/codeAPI";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -40,8 +40,9 @@ const useStyles = makeStyles(() => ({
 export default function AddEditCode() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
   const userContext = useContext(UserContext);
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {uri, viewMode} = useParams();
   const mode = uri ? viewMode : 'new';
   const {enqueueSnackbar} = useSnackbar();

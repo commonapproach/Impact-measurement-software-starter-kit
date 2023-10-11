@@ -13,6 +13,7 @@ import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
 import {fetchCharacteristics} from "../../api/characteristicApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -35,9 +36,9 @@ const useStyles = makeStyles(() => ({
 export default function Characteristic_ReportGenerate() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
 
   const [characteristics, setCharacteristics] = useState([]);
   const [loading, setLoading] = useState(true);

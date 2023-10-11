@@ -2,15 +2,18 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
-import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {useNavigate} from "react-router-dom";
 
 export default function Organizations() {
-  const navigate = useNavigate();
+
   const {enqueueSnackbar} = useSnackbar();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
 
 
   const userContext = useContext(UserContext);

@@ -13,6 +13,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
 import {fetchImpactReports} from "../../api/impactReportAPI";
 import {fetchStakeholderOutcome, fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -35,9 +36,9 @@ const useStyles = makeStyles(() => ({
 export default function ImpactReports_ReportGenerate() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
 
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');

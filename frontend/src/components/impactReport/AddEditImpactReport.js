@@ -15,7 +15,7 @@ import {fetchImpactReport} from "../../api/impactReportAPI";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
 import {fetchStakeholders} from "../../api/stakeholderAPI";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -29,9 +29,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditImpactReport() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const {uri, orgUri, operationMode} = useParams();
   const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();

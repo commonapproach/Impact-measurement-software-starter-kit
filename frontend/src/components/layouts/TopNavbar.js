@@ -1,5 +1,4 @@
 import React, {useState, useContext, useCallback} from 'react';
-import {useNavigate} from 'react-router-dom';
 import {AppBar, Toolbar, Typography, Menu, MenuItem, ListItemIcon} from '@mui/material';
 import {IconButton} from "@mui/material";
 import {logout} from '../../api/auth';
@@ -10,14 +9,14 @@ import ReportIcon from '@mui/icons-material/Report';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
-import GroupsIcon from '@mui/icons-material/Groups';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import LoginIcon from '@mui/icons-material/Login';
 import OutputIcon from '@mui/icons-material/Output'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import {Domain, Download, Edit, FileUpload, People} from "@mui/icons-material";
+import {useNavigate} from 'react-router-dom';
+import {navigateHelper} from "../../helpers/navigatorHelper";
+
 
 const ITEM_HEIGHT = 48;
 
@@ -27,7 +26,9 @@ const ITEM_HEIGHT = 48;
  * @constructor
  */
 function TopNavBar() {
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
+
   const userContext = useContext(UserContext);
   const uri = userContext.uri;
   const isLoggedin = !!userContext.email;
@@ -62,7 +63,7 @@ function TopNavBar() {
     userContext.updateUser(defaultUserContext);
     setAnchorElLeft(null);
     setAnchorElRight(null);
-    navigate('/login/superPassword');
+    navigate(`/login/superPassword`);
   }
 
   return (

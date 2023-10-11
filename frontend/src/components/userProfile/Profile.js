@@ -8,7 +8,7 @@ import {Link, Loading} from "../shared";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
 import {getInstancesInClass} from "../../api/dynamicClassInstance";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 function NavButton({to, text}) {
   return (
@@ -42,7 +42,8 @@ const useStyles = makeStyles(() => ({
 export default function Profile() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {id} = useParams();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();

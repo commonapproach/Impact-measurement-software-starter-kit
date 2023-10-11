@@ -11,7 +11,7 @@ import {createIndicator, fetchIndicator, updateIndicator} from "../../api/indica
 import IndicatorField from "../shared/indicatorField";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -25,9 +25,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditIndicator() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const {uri, orgUri, operationMode} = useParams();
   const mode = uri ? operationMode : 'new';
   const {enqueueSnackbar} = useSnackbar();

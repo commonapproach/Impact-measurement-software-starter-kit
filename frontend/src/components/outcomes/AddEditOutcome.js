@@ -10,7 +10,7 @@ import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
 import {createOutcome, fetchOutcome, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -24,9 +24,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function AddEditOutcome() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const {uri, orgUri
     , operationMode} = useParams();
   const mode = uri? operationMode : 'new';

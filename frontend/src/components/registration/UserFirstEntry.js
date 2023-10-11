@@ -12,6 +12,7 @@ import {AlertDialog} from "../shared/Dialogs";
 import LoadingButton from "../shared/LoadingButton";
 import PasswordHint from "../shared/PasswordHint";
 import { useSnackbar } from 'notistack';
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -24,8 +25,9 @@ const useStyles = makeStyles(() => ({
 }));
 
 export default function UserFirstEntry() {
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const {token} = useParams();
   const {enqueueSnackbar} = useSnackbar();
 
@@ -52,7 +54,7 @@ export default function UserFirstEntry() {
       setState(state => ({...state, email: res.email, uri: res.userUri, loading: false}))
     }).catch(e => {
       setState(state => ({...state, loading: false, errors: e.json}))
-      navigate('/login')
+      navigate(`/login`)
       enqueueSnackbar(e.json?.message || 'Error occurred', {variant: 'error'})
       }
     )
@@ -126,7 +128,7 @@ export default function UserFirstEntry() {
         securityQuestions: securityQuestions})
       if(success){
         setState(state => ({...state, loadingButton: false, submitDialog: false}));
-        navigate('/login/superPassword');
+        navigate(`/login/superPassword`);
         enqueueSnackbar(message || 'Success', {variant: 'success'});
       }
     } catch (e) {

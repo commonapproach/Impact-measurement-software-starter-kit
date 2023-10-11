@@ -1,5 +1,5 @@
 import React, { useEffect, useState,useContext } from 'react';
-import { useNavigate, useParams,} from "react-router-dom";
+import {useNavigate, useParams,} from "react-router-dom";
 import { Button, Container, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import {
@@ -18,6 +18,7 @@ import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchUserTypes} from "../../api/userTypesApi";
 import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -32,7 +33,6 @@ const useStyles = makeStyles(() => ({
 
 export default function EditUserForm() {
   const classes = useStyles();
-  const navigate = useNavigate();
   const {uri} = useParams();
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
@@ -41,6 +41,8 @@ export default function EditUserForm() {
   const [dialogSubmit, setDialogSubmit] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const [dialogQuitEdit, setDialogQuitEdit] = useState(false);
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
 
@@ -56,7 +58,7 @@ export default function EditUserForm() {
     }).catch(e => {
       setErrors(e.json);
       setLoading(false);
-      navigate('/dashboard');
+      navigate(`/dashboard`);
       enqueueSnackbar(errors.message || 'Error occurs', {variant: 'error'})
     });
   }, [uri]);

@@ -15,6 +15,7 @@ import {createGroup, fetchGroup, updateGroup} from "../../api/groupApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -31,7 +32,8 @@ const useStyles = makeStyles(() => ({
 export default function AddEditGroup() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {uri, viewMode} = useParams();
   const mode = uri ? viewMode : 'new';
   const {enqueueSnackbar} = useSnackbar();

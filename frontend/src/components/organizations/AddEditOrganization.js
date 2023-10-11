@@ -21,6 +21,7 @@ import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
 import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -43,7 +44,8 @@ const useStyles = makeStyles(() => ({
 export default function AddEditOrganization() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const userContext = useContext(UserContext);
   const {uri, viewMode} = useParams();
   const mode = uri ? viewMode : 'new';

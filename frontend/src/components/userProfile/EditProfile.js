@@ -16,6 +16,7 @@ import AddressField from "../shared/AddressFieldField";
 import Dropdown from "../shared/fields/MultiSelectField";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 
 const useStyles = makeStyles(() => ({
@@ -35,9 +36,9 @@ const useStyles = makeStyles(() => ({
  * @constructor
  */
 export default function EditProfile() {
-  const classes = useStyles();
-  const navigate = useNavigate();
   const uri = encodeURIComponent(useParams().uri);
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
   const [messageList, setMessageList] = useState([])
   const [form, setForm] = useState({
@@ -91,7 +92,7 @@ export default function EditProfile() {
     }).catch(e => {
       console.log(e)
       reportErrorToBackend(e);
-      navigate('/dashboard');
+      navigate(`/dashboard`);
       enqueueSnackbar(e.json?.message || 'Error occurs', {variant: 'error'});
     });
   }, [uri]);
@@ -130,12 +131,12 @@ export default function EditProfile() {
   // cancel change button handler
   const handleDialogCancel = () => {
     setDialogQuitEdit(false);
-    navigate('/users/' + uri + '/edit');
+    navigate(`/users/` + uri + '/edit');
   };
 
   const handleMessageListCancel = () => {
     setMessageList([])
-    navigate('/users');
+    navigate(`/users`);
   }
 
 

@@ -6,7 +6,8 @@ import {confirmEmailFields, updatePasswordFields} from "../constants/updatePassw
 import {Link} from "./shared";
 import {isFieldEmpty} from "../helpers";
 import {REQUIRED_HELPER_TEXT} from "../constants";
-import { useNavigate } from "react-router-dom";
+import {navigate, navigateHelper} from "../helpers/navigatorHelper";
+import {useNavigate} from "react-router-dom";
 
 
 const useStyles = makeStyles(() => ({
@@ -22,6 +23,8 @@ const useStyles = makeStyles(() => ({
 
 export default function EmailConfirm() {
     const classes = useStyles();
+    const navigator = useNavigate();
+    const navigate = navigateHelper(navigator)
     const [state, setState] = useState({
         form: {
             ...defaultUserFields
@@ -30,7 +33,6 @@ export default function EmailConfirm() {
         //loading: true,
     });
 
-    let history = useNavigate();
 
     const validate = () => {
 

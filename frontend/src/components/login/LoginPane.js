@@ -7,6 +7,7 @@ import {Link} from '../shared';
 
 import {login} from '../../api/auth';
 import {UserContext} from "../../context";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -30,8 +31,10 @@ const useStyles = makeStyles(() => ({
 }));
 
 function LoginPane() {
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
+
   const classes = useStyles();
-  const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const [form, setForm] = useState({email: '', password: '', alert: ''});
 
@@ -44,9 +47,7 @@ function LoginPane() {
     try {
       const {success} = await login(form.email, form.password);
       if (success) {
-        console.log('User email and password are correct');
-        console.log('successfully logged in:');
-        navigate('/login/doubleAuth');
+        navigate(`/login/doubleAuth`);
       }
     } catch (e) {
       console.error(e);
@@ -90,7 +91,7 @@ function LoginPane() {
           <span style={{color: 'red'}}>{form.alert}</span>
         </Typography>
         <br/>
-        <Button variant="outlined" color="primary" className={classes.button} onClick={submit}> Log in</Button>
+        <Button variant="outlined" color="primary" className={classes.button} onClick={submit}>Log in</Button>
         <Divider/>
 
         <Link to={'/forgot-password'}>

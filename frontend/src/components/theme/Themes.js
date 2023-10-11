@@ -7,11 +7,11 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {deleteTheme, fetchThemes} from "../../api/themeApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 export default function Themes() {
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,

@@ -11,7 +11,7 @@ import PasswordHint from "../shared/PasswordHint";
 import GeneralField from "../shared/fields/GeneralField";
 import {UserContext} from "../../context";
 import {useSnackbar} from "notistack";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -31,6 +31,8 @@ const useStyles = makeStyles(() => ({
 export default function UserResetPassword() {
   const classes = useStyles();
   const {id} = useParams();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const [errors, setErrors] = useState({});
   const [dialogSubmit, setDialogSubmit] = useState(false);
   const [form, setForm] = useState({
@@ -39,7 +41,6 @@ export default function UserResetPassword() {
     repeatNewPassword: ''
   });
   const [loadingButton, setLoadingButton] = useState(false);
-  const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
 

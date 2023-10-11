@@ -12,7 +12,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {fetchGroups} from "../../api/groupApi";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
 import { jsPDF } from "jspdf"
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -32,9 +32,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function GroupMembers() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
 
   const [groups, setGroups] = useState({});

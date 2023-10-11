@@ -7,12 +7,12 @@ import { useSnackbar } from 'notistack';
 import {UserContext} from "../../context";
 import {fetchIndicatorReports} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 export default function IndicatorReports() {
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
   const {uri} = useParams();
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
     loading: true,

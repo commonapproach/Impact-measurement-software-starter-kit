@@ -11,6 +11,7 @@ import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,10 +28,11 @@ const useStyles = makeStyles(() => ({
 export default function AddEditTheme() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {uri, operationMode} = useParams();
   const mode = uri ? operationMode : 'new';
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
 
   const [state, setState] = useState({

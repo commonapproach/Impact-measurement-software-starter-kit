@@ -13,7 +13,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import {FileDownload, PictureAsPdf, Undo} from "@mui/icons-material";
 import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -35,8 +35,8 @@ const useStyles = makeStyles(() => ({
 export default function OutcomeReports() {
 
   const classes = useStyles();
-  const navigate = useNavigate();
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [outcomes, setOutcomes] = useState([]);

@@ -1,11 +1,12 @@
 import React, {useContext, useState} from 'react';
-import {useNavigate} from "react-router-dom";
 
 import {TextField, Container, Paper, Typography, Button, Divider} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 
 import {UserContext} from "../context";
 import {loginSuperPassword} from "../api/auth";
+import {useNavigate} from "react-router-dom";
+import {navigateHelper} from "../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -30,7 +31,8 @@ const useStyles = makeStyles(() => ({
 
 function SuperPassword() {
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const userContext = useContext(UserContext);
   const [superPassword, setSuperPassword] = useState('');
   const [alert, setAlert] = useState('')
@@ -43,8 +45,7 @@ function SuperPassword() {
     try {
       const {success} = await loginSuperPassword(superPassword);
       if (success) {
-        console.log('Super password are correct');
-        navigate('/login');
+        navigate(`/login`);
       }
     } catch (e) {
       console.error(e);

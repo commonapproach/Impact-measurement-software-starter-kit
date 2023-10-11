@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Chip, Container } from "@mui/material";
 import { Add as AddIcon, Check as YesIcon } from "@mui/icons-material";
 import { DeleteModal, DropdownMenu, Link, Loading, DataTable } from "../shared";
-import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {
   deleteOrganization,
@@ -10,11 +9,13 @@ import {
 } from "../../api/organizationApi";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {useNavigate} from "react-router-dom";
 
 export default function Organizations() {
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
 
   const userContext = useContext(UserContext);
   const [state, setState] = useState({
@@ -33,7 +34,7 @@ export default function Organizations() {
     }).catch(e => {
       reportErrorToBackend(e)
       setState(state => ({...state, loading: false}))
-      navigate('/dashboard');
+      navigate(`/dashboard`);
       enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
     });
   }, [trigger]);
@@ -69,7 +70,7 @@ export default function Organizations() {
     {
       label: 'Legal Name',
       body: ({legalName, _uri}) => {
-        return <Link colorWithHover to={`/organizationOfUsers/${encodeURIComponent(_uri)}`}>
+        return <Link colorWithHover to={`${process.env.PUBLIC_URL}/organizationOfUsers/${encodeURIComponent(_uri)}`}>
             {legalName}
           </Link>
       },
@@ -96,7 +97,7 @@ export default function Organizations() {
         customToolbar={
           <Chip
             disabled={!userContext.isSuperuser}
-            onClick={() => navigate('/organizations/new')}
+            onClick={() => navigate(`/organizations/new`)}
             color="primary"
             icon={<AddIcon/>}
             label="Add new Organization"

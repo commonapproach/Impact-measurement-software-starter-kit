@@ -13,7 +13,7 @@ import {reportErrorToBackend} from "../../api/errorReportApi";
 import FileUploader from "../shared/fields/fileUploader";
 import {uploadFile} from "../../api/fileUploadingApi";
 import { saveAs } from 'file-saver';
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -33,9 +33,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function FileUploadingPage() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
 

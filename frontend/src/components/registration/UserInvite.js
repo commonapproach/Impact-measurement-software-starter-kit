@@ -14,6 +14,7 @@ import {useSnackbar} from 'notistack';
 import GeneralField from "../shared/fields/GeneralField";
 import {fetchOrganizations} from "../../api/organizationApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 
 const useStyles = makeStyles(() => ({
@@ -28,7 +29,8 @@ const useStyles = makeStyles(() => ({
 
 export default function UserInvite() {
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {enqueueSnackbar} = useSnackbar();
   const [state, setState] = useState({
     form: {
@@ -98,7 +100,7 @@ export default function UserInvite() {
       setState(state => ({...state, loadingButton: true}));
       const {success, message} = await createUser({form: state.form});
       setState(state => ({...state, loadingButton: false, dialog: false}));
-      navigate('/users');
+      navigate(`/users`);
       enqueueSnackbar(message, {variant: 'success'});
 
     } catch (e) {

@@ -38,9 +38,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function Link({className = '', colorWithHover, color, ...props}) {
+export function Link({className = '', colorWithHover, color,to, ...props}) {
   const classes = useStyles();
-  return <DomLink {...props} className={colorWithHover ? classes.linkWithHover : classes.link + ' ' + className} color={color || 'inherit'}/>
+  return <DomLink {...props} to={process.env.PUBLIC_URL + to} className={colorWithHover ? classes.linkWithHover : classes.link + ' ' + className} color={color || 'inherit'}/>
 }
 
 /**

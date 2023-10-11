@@ -7,6 +7,7 @@ import { fetchUser, updateUser, createUser } from "../../api/userApi";
 import { Loading } from "../shared"
 import { isFieldEmpty } from "../../helpers";
 import { REQUIRED_HELPER_TEXT } from "../../constants";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -20,8 +21,9 @@ const useStyles = makeStyles(() => ({
 
 export default function UserForm() {
   const classes = useStyles();
-  const navigate = useNavigate();
   let {uri} = useParams();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const mode = uri == null ? 'new' : 'edit';
   const [state, setState] = useState({
     form: {

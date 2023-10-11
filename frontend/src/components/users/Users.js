@@ -8,11 +8,13 @@ import {formatPhoneNumber} from "../../helpers/phone_number_helpers";
 import {useSnackbar} from 'notistack';
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 export default function Users() {
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
   const userContext = useContext(UserContext);
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const {organizationURI} = useParams();
   const [state, setState] = useState({
     loading: true,
@@ -30,7 +32,7 @@ export default function Users() {
       }).catch(e => {
         reportErrorToBackend(e)
         setState(state => ({...state, loading: false}));
-        navigate('/dashboard');
+        navigate(`/dashboard`);
         enqueueSnackbar(e.json?.message || "Error occur", {variant: 'error'});
       });
 

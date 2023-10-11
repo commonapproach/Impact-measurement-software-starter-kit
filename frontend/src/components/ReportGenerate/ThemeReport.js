@@ -11,6 +11,7 @@ import {fetchOutcomesThroughTheme} from "../../api/outcomeApi";
 import {fetchTheme, fetchThemes} from "../../api/themeApi";
 import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -31,9 +32,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function ThemeReports() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const {enqueueSnackbar} = useSnackbar();
 

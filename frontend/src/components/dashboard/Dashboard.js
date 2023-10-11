@@ -5,10 +5,14 @@ import {Container, Button, Typography} from "@mui/material";
 import {Edit, Create, People, ViewHeadline as Log, CheckCircleOutline as Criteria, FileUpload, Download} from "@mui/icons-material";
 import {UserContext} from "../../context";
 import {NavButton} from "./NavButton";
+import {useNavigate} from "react-router-dom";
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 
 function Dashboard() {
   const userContext = useContext(UserContext);
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   console.log(userContext)
 
   // if (userContext.userTypes.includes('superuser'))
@@ -43,7 +47,7 @@ function Dashboard() {
         null}
 
       {userContext.isSuperuser?
-        <NavButton to={`/codes`} icon={<People/>} key={'stakeholders'}
+        <NavButton to={`/codes`} icon={<People/>} key={'codes'}
                    text="Manage Codes"/>:
         null}
 
@@ -51,22 +55,22 @@ function Dashboard() {
         <NavButton to={userContext.isSuperuser?`/users`:`/organizationUsers`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:null}
 
-      <NavButton to={'/organization-indicators'} icon={<Edit/>} key={'organization-indicators'}
+      <NavButton to={`/organization-indicators`} icon={<Edit/>} key={'organization-indicators'}
                  text="Manage Indicators"/>
 
-      <NavButton to={'/organization-outcomes'} icon={<Edit/>} key={'organization-outcomes'}
+      <NavButton to={`/organization-outcomes`} icon={<Edit/>} key={'organization-outcomes'}
                  text="Manage Outcomes"/>
 
-      <NavButton to={'/organization-indicatorReports'} icon={<Edit/>} key={'indicatorReports'}
+      <NavButton to={`/organization-indicatorReports`} icon={<Edit/>} key={'indicatorReports'}
                  text="Manage Indicator Reports"/>
 
-      <NavButton to={'/themes'} icon={<Edit/>} key={'themes'}
+      <NavButton to={`/themes`} icon={<Edit/>} key={'themes'}
                  text="Manage Themes"/>
 
-      {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={'/fileUploading'} icon={<FileUpload/>} key={'fileUploading'}
+      {userContext.isSuperuser || userContext.editorOfs.length? <NavButton to={`/fileUploading`} icon={<FileUpload/>} key={'fileUploading'}
                   text="File Upload"/>:null}
 
-      <NavButton to={'/reportGenerate'} icon={<Download/>} key={'reportGenerate'}
+      <NavButton to={'/reportGenerate'} icon={<Download/>} key={`reportGenerate`}
                  text="Reports"/>
 
 
@@ -77,19 +81,6 @@ function Dashboard() {
       {/*           text="Manage Forms"/>*/}
 
 
-    </Container>);
-
-  return (
-    <Container>
-      <Typography
-        color={'black'}
-        variant="h2"
-        // marginLeft={'25%'}
-        textAlign="center"
-        marginTop={'20%'}
-      >
-        {'Welcome to Pathfinder!'}
-      </Typography>
     </Container>);
 
 

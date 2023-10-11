@@ -61,114 +61,115 @@ import AddEditImpactReport from "./components/impactReport/AddEditImpactReport";
 const routes = (
   <Routes>
     {/*basic*/}
-    <Route exact path="/" element={<Landing/>}/>
-    <Route path="/login/doubleAuth" element={<DoubleAuth/>}/>
-    <Route path="/login/superPassword" element={<SuperPassword/>}/>
-    <Route path="/login" element={<LoginPane/>}/>
-    <Route path="/dashboard" element={<PrivateRoute element={Dashboard}/>}/>
-    <Route path="/verify/:token" element={<UserFirstEntry/>}/>}/>
-    <Route path="/forgot-password" element={<ForgotPassword/>}/>
+    <Route exact path={`${process.env.PUBLIC_URL}/`} element={<Landing/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/login/doubleAuth`} element={<DoubleAuth/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/login/superPassword`} element={<SuperPassword/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/login`} element={<LoginPane/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/dashboard`} element={<PrivateRoute element={Dashboard}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/verify/:token`} element={<UserFirstEntry/>}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/forgot-password`} element={<ForgotPassword/>}/>
     {/*users*/}
-    <Route path="/users" element={<PrivateRoute element={Users}/>}/>
-    <Route path="/organizationOfUsers/:organizationURI" element={<PrivateRoute element={Users}/>}/>
-    <Route path="/organizationUsers" element={<PrivateRoute element={OrganizationUsers}/>}/>
-    <Route path="/users/invite" element={<PrivateRoute element={UserInvite}/>}/>
-    <Route path="/users/:uri/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
-    <Route path="/users/:uri" element={<PrivateRoute element={EditUserForm}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/users`} element={<PrivateRoute element={Users}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organizationOfUsers/:organizationURI`} element={<PrivateRoute element={Users}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organizationUsers`} element={<PrivateRoute element={OrganizationUsers}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/users/invite`} element={<PrivateRoute element={UserInvite}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/users/:uri/edit`} element={<PrivateRoute element={UpdateUserProfile}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/users/:uri`} element={<PrivateRoute element={EditUserForm}/>}/>
 
     {/*organization*/}
-    <Route path="/organizations" element={<PrivateRoute element={Organizations}/>}/>
-    <Route path="/organizations/new" element={<PrivateRoute element={AddEditOrganization}/>}/>
-    <Route path="/organizations/:uri/:viewMode" element={<PrivateRoute element={AddEditOrganization}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organizations`} element={<PrivateRoute element={Organizations}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organizations/new`} element={<PrivateRoute element={AddEditOrganization}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organizations/:uri/:viewMode`} element={<PrivateRoute element={AddEditOrganization}/>}/>
     {/*stakeholders*/}
-    <Route path="/stakeholders" element={<PrivateRoute element={Stakeholders}/>}/>
-    <Route path="/stakeholder/new" element={<PrivateRoute element={AddEditStakeholder}/>}/>
-    <Route path="/stakeholder/:uri/:viewMode" element={<PrivateRoute element={AddEditStakeholder}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/stakeholders`} element={<PrivateRoute element={Stakeholders}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/stakeholder/new`} element={<PrivateRoute element={AddEditStakeholder}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/stakeholder/:uri/:viewMode`} element={<PrivateRoute element={AddEditStakeholder}/>}/>
 
     {/*Codes*/}
-    <Route path="/codes" element={<PrivateRoute element={Codes}/>}/>
-    <Route path="/code/new" element={<PrivateRoute element={AddEditCode}/>}/>
-    <Route path="/code/:uri/:viewMode" element={<PrivateRoute element={AddEditCode}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/codes`} element={<PrivateRoute element={Codes}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/code/new`} element={<PrivateRoute element={AddEditCode}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/code/:uri/:viewMode`} element={<PrivateRoute element={AddEditCode}/>}/>
 
     {/*Characteristic*/}
     {/*<Route path="/characteristics" element={<PrivateRoute element={}/>}/>*/}
-    <Route path="/characteristic/new" element={<PrivateRoute element={AddEditCharacteristic}/>}/>
-    <Route path="/characteristic/:uri/:viewMode" element={<PrivateRoute element={AddEditCharacteristic}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/characteristic/new`} element={<PrivateRoute element={AddEditCharacteristic}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/characteristic/:uri/:viewMode`} element={<PrivateRoute element={AddEditCharacteristic}/>}/>
 
 
     {/*Groups*/}
-    <Route path="/groups" element={<PrivateRoute element={Groups}/>}/>
-    <Route path="/groups/new" element={<PrivateRoute element={AddEditGroup}/>}/>
-    <Route path="/groups/:uri/:viewMode" element={<PrivateRoute element={AddEditGroup}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/groups`} element={<PrivateRoute element={Groups}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/groups/new`} element={<PrivateRoute element={AddEditGroup}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/groups/:uri/:viewMode`} element={<PrivateRoute element={AddEditGroup}/>}/>
+
     {/*profile*/}
-    <Route path="/profile/:uri/edit" element={<PrivateRoute element={UpdateUserProfile}/>}/>
-    <Route path="/profile/:uri" element={<PrivateRoute element={UserProfile}/>}/>
-    <Route path="/profile/reset-password/:uri" element={<PrivateRoute element={ResetPassword}/>}/>
-    <Route path="/profile/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/profile/:uri/edit`} element={<PrivateRoute element={UpdateUserProfile}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/profile/:uri`} element={<PrivateRoute element={UserProfile}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/profile/reset-password/:uri`} element={<PrivateRoute element={ResetPassword}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/profile/reset-securityQuestions/:id`} element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
     {/*theme*/}
-    <Route path="/themes" element={<PrivateRoute element={Themes}/>}/>
-    <Route path="/themes/new" element={<PrivateRoute element={AddEditTheme}/>}/>
-    <Route path="/themes/:uri/:operationMode" element={<PrivateRoute element={AddEditTheme}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/themes`} element={<PrivateRoute element={Themes}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/themes/new`} element={<PrivateRoute element={AddEditTheme}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/themes/:uri/:operationMode`} element={<PrivateRoute element={AddEditTheme}/>}/>
     {/*indicators*/}
-    <Route path="/organization-indicators" element={<PrivateRoute element={Organization_indicators}/>}/>
-    <Route path="/indicators/:uri" element={<PrivateRoute element={Indicators}/>}/>
-    <Route path="/indicator/:orgUri/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
-    <Route path="/indicator/new" element={<PrivateRoute element={AddEditIndicator}/>}/>
-    <Route path="/indicator/:uri/:operationMode" element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organization-indicators`} element={<PrivateRoute element={Organization_indicators}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicators/:uri`} element={<PrivateRoute element={Indicators}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicator/:orgUri/new`} element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicator/new`} element={<PrivateRoute element={AddEditIndicator}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicator/:uri/:operationMode`} element={<PrivateRoute element={AddEditIndicator}/>}/>
     {/*outcomes*/}
-    <Route path="/organization-outcomes" element={<PrivateRoute element={Organization_outcomes}/>}/>
-    <Route path="/outcomes/:uri" element={<PrivateRoute element={Outcomes}/>}/>
-    <Route path="/outcome/:orgUri/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
-    <Route path="/outcome/new" element={<PrivateRoute element={AddEditOutcome}/>}/>
-    <Route path="/outcome/:uri/:operationMode" element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organization-outcomes`} element={<PrivateRoute element={Organization_outcomes}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/outcomes/:uri`} element={<PrivateRoute element={Outcomes}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/outcome/:orgUri/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/outcome/new`} element={<PrivateRoute element={AddEditOutcome}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/outcome/:uri/:operationMode`} element={<PrivateRoute element={AddEditOutcome}/>}/>
 
     {/*stakeholderOutcome*/}
-    <Route path="/stakeholderOutcome/new" element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
-    <Route path="/stakeholderOutcome/:uri/:operationMode"
+    <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/new`} element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/stakeholderOutcome/:uri/:operationMode`}
            element={<PrivateRoute element={AddEditStakeholderOutcome}/>}/>
 
 
-    <Route path="/impactReport/new" element={<PrivateRoute element={AddEditImpactReport}/>}/>
-    <Route path="/impactReport/:uri/:operationMode" element={<PrivateRoute element={AddEditImpactReport}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactReport/new`} element={<PrivateRoute element={AddEditImpactReport}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/impactReport/:uri/:operationMode`} element={<PrivateRoute element={AddEditImpactReport}/>}/>
     {/*file uploading page*/}
-    <Route path="/fileUploading" element={<PrivateRoute element={FileUploadingPage}/>}/>
-    <Route path="/fileUploading/:orgUri/:fileType" element={<PrivateRoute element={FileUploadingPage}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/fileUploading`} element={<PrivateRoute element={FileUploadingPage}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/fileUploading/:orgUri/:fileType`} element={<PrivateRoute element={FileUploadingPage}/>}/>
 
 
-    <Route path="/organization-indicatorReports" element={<PrivateRoute element={Organization_indicatorReports}/>}/>
-    <Route path="/indicatorReports/:uri" element={<PrivateRoute element={IndicatorReports}/>}/>
-    <Route path="/indicatorReport/new" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
-    <Route path="/indicatorReport/:orgUri/new" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
-    <Route path="/indicatorReport/:uri/:operationMode" element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/organization-indicatorReports`} element={<PrivateRoute element={Organization_indicatorReports}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicatorReports/:uri`} element={<PrivateRoute element={IndicatorReports}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicatorReport/new`} element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicatorReport/:orgUri/new`} element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/indicatorReport/:uri/:operationMode`} element={<PrivateRoute element={AddEditIndicatorReport}/>}/>
 
 
-    <Route path="/email-confirm" element={<EmailConfirm/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/email-confirm`} element={<EmailConfirm/>}/>
 
-    <Route path="/update-primary-email/:token" element={<changePrimaryEmail/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/update-primary-email/:token`} element={<changePrimaryEmail/>}/>
 
-    <Route path="/resetPassword/:token" element={<PrivateRoute element={ForgotPasswordResetPassword}/>}/>
-
-
-    <Route path="/users/reset-securityQuestions/:id" element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/resetPassword/:token`} element={<PrivateRoute element={ForgotPasswordResetPassword}/>}/>
 
 
-    <Route path="/users/new" element={<SuperUserRoute element={UserForm}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/users/reset-securityQuestions/:id`} element={<PrivateRoute element={UserResetSecurityQuestions}/>}/>
 
-    <Route path="/users/:id" element={<SuperUserRoute element={User}/>}/>
+
+    <Route path={`${process.env.PUBLIC_URL}/users/new`} element={<SuperUserRoute element={UserForm}/>}/>
+
+    <Route path={`${process.env.PUBLIC_URL}/users/:id`} element={<SuperUserRoute element={User}/>}/>
 
     {/*reportGenerate*/}
-    <Route path={"/reportGenerate"} element={<PrivateRoute element={ReportTypesPage}/>}/>
-    <Route path={"/reportGenerate/groupMembers"} element={<PrivateRoute element={GroupMembers}/>}/>
-    <Route path={"/reportGenerate/indicatorReports"}
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate`} element={<PrivateRoute element={ReportTypesPage}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/groupMembers`} element={<PrivateRoute element={GroupMembers}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/indicatorReports`}
            element={<PrivateRoute element={IndicatorReports_ReportGenerate}/>}/>
-    <Route path={"/reportGenerate/outcomeReports"} element={<PrivateRoute element={OutcomeReports}/>}/>
-    <Route path={"/reportGenerate/themeReports"} element={<PrivateRoute element={ThemeReports}/>}/>
-    <Route path={"/reportGenerate/characteristicReports"}
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/outcomeReports`} element={<PrivateRoute element={OutcomeReports}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/themeReports`} element={<PrivateRoute element={ThemeReports}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/characteristicReports`}
            element={<PrivateRoute element={Characteristic_ReportGenerate}/>}/>
-    <Route path={"/reportGenerate/codeReports"} element={<PrivateRoute element={Code_ReportGenerate}/>}/>
-    <Route path={"/reportGenerate/stakeholderOutcomeReports"}
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/codeReports`} element={<PrivateRoute element={Code_ReportGenerate}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/stakeholderOutcomeReports`}
            element={<PrivateRoute element={StakeholderOutcomeReports}/>}/>
-    <Route path={"/reportGenerate/impactReports-reports"}
+    <Route path={`${process.env.PUBLIC_URL}/reportGenerate/impactReports-reports`}
            element={<PrivateRoute element={ImpactReports_ReportGenerate}/>}/>
 
   </Routes>

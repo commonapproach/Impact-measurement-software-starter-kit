@@ -12,7 +12,7 @@ import {fetchIndicators} from "../../api/indicatorApi";
 import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
-
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -32,9 +32,9 @@ const useStyles = makeStyles(() => ({
 
 
 export default function IndicatorReports_ReportGenerate() {
-
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const classes = useStyles();
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
 
 

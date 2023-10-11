@@ -10,6 +10,7 @@ import {REQUIRED_HELPER_TEXT} from "../../constants";
 import {checkSecurityQuestion, fetchSecurityQuestionsByEmail, sendVerificationEmail} from "../../api/userApi";
 import {AlertDialog} from "../shared/Dialogs";
 import LoadingButton from "../shared/LoadingButton";
+import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -24,7 +25,8 @@ const useStyles = makeStyles(() => ({
 
 export default function ForgotPassword() {
   const classes = useStyles();
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const [state, setState] = useState({
     form: {
       ...defaultForgotPasswordFields
@@ -147,11 +149,11 @@ export default function ForgotPassword() {
                          onClick={handleSubmit}/>
           <AlertDialog dialogContentText={state.errors.message||"Error occur"}
                        dialogTitle={'Error'}
-                       buttons={[<Button onClick={() => navigate('/dashboard')} key={'ok'}>{'ok'}</Button>]}
+                       buttons={[<Button onClick={() => navigate(`/dashboard`)} key={'ok'}>{'ok'}</Button>]}
                        open={state.errorDialog}/>
           <AlertDialog dialogContentText={'A link has been sent to your email address. Please follow it to reset your password'}
                        dialogTitle={'Success'}
-                       buttons={[<Button onClick={() => navigate('/')} key={'ok'}>{'ok'}</Button>]}
+                       buttons={[<Button onClick={() => navigate(`/`)} key={'ok'}>{'ok'}</Button>]}
                        open={state.successDialog}/>
         </Container>)
 
@@ -163,7 +165,7 @@ export default function ForgotPassword() {
     return (
       <AlertDialog dialogContentText={'You have missed all 3 chances'}
                    dialogTitle={'Sorry'}
-                   buttons={[<Button onClick={() => navigate('/')} key={'ok'}>{'ok'}</Button>]}
+                   buttons={[<Button onClick={() => navigate(`/`)} key={'ok'}>{'ok'}</Button>]}
                    open={state.group > 4}/>
     )
   }

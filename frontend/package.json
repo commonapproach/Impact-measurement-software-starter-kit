@@ -24,6 +24,7 @@
     "react-star-rating-component": "^1.4.1",
     "redux": "^4.0.5"
   },
+  "homepage": "https://csse-uoft.github.io/CommonApproachSandboxTesting",
   "devDependencies": {
     "gh-pages": "^5.0.0",
     "react-scripts": "5.0.1",

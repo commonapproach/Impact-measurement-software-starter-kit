@@ -4,10 +4,9 @@ import {Button, Container, Typography} from "@mui/material";
 import {Edit, FileUpload, People, Undo} from "@mui/icons-material";
 import {NavButton} from "../dashboard/NavButton";
 import {useNavigate} from "react-router-dom";
-
+import {navigate} from "../../helpers/navigatorHelper";
 
 function ReportTypes() {
-  const navigate = useNavigate();
 
   return (
     <Container maxWidth="sm" sx={{

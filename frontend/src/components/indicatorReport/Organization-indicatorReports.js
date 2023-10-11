@@ -6,9 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from 'notistack';
 import {deleteOrganization, fetchOrganizations} from "../../api/organizationApi";
 import {UserContext} from "../../context";
-
+import {navigate} from "../../helpers/navigatorHelper";
 export default function Organization_indicatorReports() {
-  const navigate = useNavigate();
   const {enqueueSnackbar} = useSnackbar();
 
   const userContext = useContext(UserContext);

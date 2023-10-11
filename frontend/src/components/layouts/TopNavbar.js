@@ -166,7 +166,7 @@ function TopNavBar() {
         ) : null}
 
         <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-         Common Approach Sandbox
+          {process.env.PUBLIC_URL === '/CommonApproachSandboxTesting'? 'Testing Mode' : 'Common Approach Sandbox'}
         </Typography>
 
         {/*The profile button containing dashboard, profile, logout/login*/}

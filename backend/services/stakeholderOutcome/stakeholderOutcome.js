@@ -19,9 +19,11 @@ const fetchStakeholderOutcomesThroughOrganizationHandler = async (req, res, next
 const fetchStakeholderOutcomesThroughOrganization = async (req, res) => {
   const {organizationUri} = req.params;
   if (!organizationUri)
-    throw new Server400Error('Stakeholder URI is missing')
+    throw new Server400Error('Organization URI is missing')
 
   const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}, {populates: ['stakeholderOutcomes.outcome', 'stakeholderOutcomes.codes', 'stakeholderOutcomes.impactReports']});
+  if (!impactNorms)
+    return res.status(200).json({success: true, stakeholderOutcomes: []})
   const stakeholderOutcomes = impactNorms.stakeholderOutcomes
   return res.status(200).json({success: true, stakeholderOutcomes})
 }

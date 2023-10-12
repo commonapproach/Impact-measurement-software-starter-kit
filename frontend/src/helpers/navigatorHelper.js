@@ -6,4 +6,3 @@ export function navigateHelper(navigator) {
   }
   return navigate
 }
-export function navigate(){}

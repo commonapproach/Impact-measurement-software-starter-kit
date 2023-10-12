@@ -1,15 +1,18 @@
 const isDocker = process.env.DOCKER;
 const isProduction = process.env.NODE_ENV === 'production';
+const isTesting = process.env.test
 
 if (isProduction)
   console.log('In production mode.')
+if (isTesting)
+  console.log('In Testing Stage.')
 
 const config = {
   graphdb: {
     addr: isProduction ? 'http://localhost:7200' : `http://${isDocker ? 'host.docker.internal' : 'localhost'}:7200`,
   },
   mongodb: {
-    addr: isProduction ? 'mongodb://localhost:27017/pathfinder' : `mongodb://localhost:27017/${process.env.test ? "pathfinderTest" : "pathfinder"}`
+    addr: isProduction ? (isTesting? 'mongodb://localhost:27017/pathfinder-testing' : 'mongodb://localhost:27017/pathfinder') : `mongodb://localhost:27017/${process.env.test ? "pathfinderTest" : "pathfinder"}`
   },
 
   allowedOrigins: [
@@ -18,11 +21,10 @@ const config = {
     'http://localhost:3002',
     'https://csse-uoft.github.io',
     'https://www.common-approach.ca',
-    // 'https://www.snmi.ca'
     ],
 
   frontend: {
-    addr: isProduction ? 'https://www.common-approach.ca' : 'http://localhost:3000'
+    addr: isProduction ? (isTesting? 'https://csse-uoft.github.io' : 'https://www.common-approach.ca') : 'http://localhost:3000'
   },
 
   // pbkdf2 configuration, ~70ms with this config

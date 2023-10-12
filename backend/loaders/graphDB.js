@@ -86,6 +86,7 @@ async function cleanup() {
 async function load() {
   const idGenerator = new MongoDBIdGenerator(mongodb.addr);
   const DBName = process.env.test ? "PathfinderTest" : "Pathfinder"
+  console.log('name: ' + DBName)
 
   const result = await initGraphDB({
     idGenerator,

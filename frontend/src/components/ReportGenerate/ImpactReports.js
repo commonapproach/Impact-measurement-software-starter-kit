@@ -190,7 +190,7 @@ export default function ImpactReports_ReportGenerate() {
               <Typography variant={'body1'}
                           sx={{pl: 4}}> {`Impact Scale: ${impactReport.impactScale?.value?.numericalValue || 'Not Given'}`} </Typography>
               <Typography variant={'body1'} sx={{pl: 4}}> {'Stakeholder Outcome: '}<Link
-                to={`/stakeholderOutcome/${encodeURIComponent(impactReport.forStakeholderOutcome)}/view`} colorWithHover
+                to={`/stakeholderOutcome/${encodeURIComponent(impactReport.forStakeholderOutcome._uri)}/view`} colorWithHover
                 color={'#2f5ac7'}>{impactReport.forStakeholderOutcome?.name || 'Name Not Given'}</Link> </Typography>
 
             </Paper>

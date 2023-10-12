@@ -47,7 +47,7 @@ const fetchImpactReports = async (req, res) => {
   const {orgUri} = req.params;
   if (!orgUri)
     throw new Server400Error('Organization URI is missing');
-  const impactReports = await GDBImpactReportModel.find({forOrganization: orgUri}, {populates: ['impactScale.value', 'impactDepth.value']});
+  const impactReports = await GDBImpactReportModel.find({forOrganization: orgUri}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
   return res.status(200).json({success: true, impactReports});
 };
 
@@ -55,7 +55,7 @@ const fetchImpactReport = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is missing');
-  const impactReport = await GDBImpactReportModel.findOne({_uri: uri}, {populates: ['impactScale.value', 'impactDepth.value']});
+  const impactReport = await GDBImpactReportModel.findOne({_uri: uri}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
   if (!impactReport)
     throw new Server400Error('No such impact Report');
   return res.status(200).json({success: true, impactReport});

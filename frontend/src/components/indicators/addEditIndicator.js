@@ -180,7 +180,7 @@ export default function AddEditIndicator() {
           <Typography variant={'body1'}> {`${form.unitOfMeasure || 'Not Given'}`} </Typography>
           <Typography variant={'h6'}> {`Baseline:`} </Typography>
           <Typography variant={'body1'}> {`${form.baseline || 'Not Given'}`} </Typography>
-          <Typography variant={'h6'}> {`codes:`} </Typography>
+          <Typography variant={'h6'}> {`Codes:`} </Typography>
           {form.codes?.length?
             form.codes.map(code => <Typography variant={'body1'}> {<Link to={`/code/${encodeURIComponent(code)}/view`} colorWithHover
                                                                          color={'#2f5ac7'}>{codesInterfaces[code]}</Link>} </Typography>)

@@ -161,7 +161,7 @@ export default function AddEditOutcome() {
              {form.themes?.length? form.themes.map(themeURI => {
               return (
                 <Typography variant={'body1'}>
-                <Link to={`/theme/${encodeURIComponent(themeURI)}/view`} colorWithHover
+                <Link to={`/themes/${encodeURIComponent(themeURI)}/view`} colorWithHover
                             color={'#2f5ac7'}>{form.themeNames[themeURI]}</Link>
                 </Typography>
                 );

@@ -146,6 +146,7 @@ export default function OutcomeReports() {
   if (loading)
     return <Loading/>;
 
+  console.log(outcomes[0])
   return (
     <Container maxWidth="md">
       <Paper sx={{p: 2}} variant={'outlined'} sx={{position: 'relative'}}>
@@ -181,6 +182,19 @@ export default function OutcomeReports() {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'body1'}> {'Outcome: '}<Link to={`/outcome/${encodeURIComponent(outcome._uri)}/view`} color={'#2f5ac7'} colorWithHover>{outcome?.name || 'Name Not Given'}</Link> </Typography>
+              {
+                outcome.themes?
+                  outcome.themes.map(theme => {
+                    return (
+                          <Paper elevation={0} sx={{pl: 4}}>
+                            <Typography variant={'body1'}> {`Theme: `}<Link
+                              to={`/themes/${encodeURIComponent(theme._uri)}/view`}
+                              color={'#2f5ac7'} colorWithHover>{theme.name || 'Name Not Given'}</Link> </Typography>
+                          </Paper>
+                    )
+                  })
+                  :null
+              }
               {outcome.indicators?
                 <Paper elevation={0}>
                 {/*<Typography variant={'body1'}> {`Indicators:`}  </Typography>*/}

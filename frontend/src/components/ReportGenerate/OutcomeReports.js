@@ -42,6 +42,7 @@ export default function OutcomeReports() {
   const [outcomes, setOutcomes] = useState([]);
   const [loading, setLoading] = useState(true);
   const {enqueueSnackbar} = useSnackbar();
+  const userContext = useContext(UserContext);
 
   const generateTXTFile = () => {
     let str = ''
@@ -113,6 +114,8 @@ export default function OutcomeReports() {
     fetchOrganizations().then(({organizations, success}) => {
       if (success) {
         const organizationsOps = {};
+        if (userContext.isSuperuser)
+          organizationsOps['all'] = 'All Outcomes'
         organizations.map(organization => {
           organizationsOps[organization._uri] = organization.legalName;
         });

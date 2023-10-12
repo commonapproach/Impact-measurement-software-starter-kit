@@ -13,6 +13,7 @@ import {jsPDF} from "jspdf";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {useSnackbar} from "notistack";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {UserContext} from "../../context";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -36,7 +37,7 @@ export default function IndicatorReports_ReportGenerate() {
   const navigate = navigateHelper(navigator)
   const classes = useStyles();
   const {enqueueSnackbar} = useSnackbar();
-
+  const userContext = useContext(UserContext);
 
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
@@ -104,6 +105,8 @@ export default function IndicatorReports_ReportGenerate() {
       fetchOrganizations().then(({organizations, success}) => {
         if (success) {
           const organizationsOps = {};
+          if (userContext.isSuperuser)
+            organizationsOps['all'] = 'All Indicators'
           organizations.map(organization => {
             organizationsOps[organization._uri] = organization.legalName;
           });

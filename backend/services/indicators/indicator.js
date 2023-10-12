@@ -13,12 +13,12 @@ const fetchIndicators = async (req, res) => {
 
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   const {organizationUri} = req.params;
-  if (!organizationUri) {
+  if (!organizationUri || organizationUri === 'all') {
     // the organizationId is not given, return all indicators which is reachable by the user
 
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
-      const indicators = await GDBIndicatorModel.find({});
+      const indicators = await GDBIndicatorModel.find({}, {populates: ['unitOfMeasure','baseline', 'indicatorReports.value']});
       indicators.map(indicator => indicator.editable = true);
       return res.status(200).json({success: true, indicators});
     }
@@ -42,7 +42,7 @@ const fetchIndicators = async (req, res) => {
     });
     // replace indicatorURIs to actual indicator objects
     const indicators = await Promise.all(indicatorURIs.map(indicatorURI => {
-      return GDBIndicatorModel.findOne({_uri: indicatorURI}, {populates: ['unitOfMeasure']});
+      return GDBIndicatorModel.findOne({_uri: indicatorURI}, {populates: ['unitOfMeasure', 'baseline']});
     }));
     // for all indicators, if its id in editableIndicatorIDs, then it is editable
     indicators.map(indicator => {

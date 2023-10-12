@@ -14,12 +14,13 @@ const {transSave} = require("../helpers");
 const fetchOutcomes = async (req, res) => {
 
   const {organizationUri} = req.params;
-  if (!organizationUri) {
+  if (!organizationUri || organizationUri === 'all') {
     // the organizationId is not given, return all outcomes which is reachable by the user
     const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
     if (userAccount.isSuperuser) {
       // simple return all indicators to him
-      const outcomes = await GDBOutcomeModel.find({});
+      const outcomes = await GDBOutcomeModel.find({},
+        {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value', 'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd', 'themes']});
       outcomes.map(outcome => outcome.editable = true);
       return res.status(200).json({success: true, outcomes, editable: true});
     }

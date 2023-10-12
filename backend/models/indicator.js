@@ -9,7 +9,7 @@ const GDBIndicatorModel = createGraphDBModel({
   forOutcomes: {type: [GDBOutcomeModel], internalKey: 'cids:forOutcome'},
   indicatorReports: {type: [GDBIndicatorReportModel], internalKey: 'cids:hasIndicatorReport'},
   forOrganization: {type: () => require('./organization').GDBOrganizationModel, internalKey: 'cids:definedBy'},
-  unitOfMeasure: {type: () => require('./measure').GDBUnitOfMeasure, internalKey: 'iso21972:unit_of_measure'},
+  unitOfMeasure: {type: GDBMeasureModel, internalKey: 'iso21972:unit_of_measure'},
   codes: {type: [() => require('./code').GDBCodeModel], internalKey: 'cids:hasCode'},
   baseline: {type: GDBMeasureModel, internalKey: 'cids:hasBaseline'}
 }, {

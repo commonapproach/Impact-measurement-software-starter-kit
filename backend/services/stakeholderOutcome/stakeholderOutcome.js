@@ -1,7 +1,30 @@
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
 const {hasAccess} = require("../../helpers/hasAccess");
+const {GDBImpactNormsModel} = require("../../models/impactStuffs");
+const {GDBStakeholderModel} = require("../../models/stakeholder");
 
+
+const fetchStakeholderOutcomesThroughOrganizationHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchStakeholderOutcomes'))
+      return await fetchStakeholderOutcomesThroughOrganization(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchStakeholderOutcomesThroughOrganization = async (req, res) => {
+  const {organizationUri} = req.params;
+  if (!organizationUri)
+    throw new Server400Error('Stakeholder URI is missing')
+
+  const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}, {populates: ['stakeholderOutcomes.outcome', 'stakeholderOutcomes.codes', 'stakeholderOutcomes.impactReports']});
+  const stakeholderOutcomes = impactNorms.stakeholderOutcomes
+  return res.status(200).json({success: true, stakeholderOutcomes})
+}
 
 
 const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next) => {
@@ -68,5 +91,5 @@ const fetchStakeholderOutcomesThroughStakeholder = async (req, res) => {
 
 
 module.exports = {
-  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomesHandler, fetchStakeholderOutcomeInterfacesHandler
+  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomesHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler
 }

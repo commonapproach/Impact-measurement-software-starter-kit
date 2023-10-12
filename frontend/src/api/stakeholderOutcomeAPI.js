@@ -8,6 +8,10 @@ export async function fetchStakeholderOutcomesThroughStakeholder(stakeholderUri)
   return getJson(`/api/stakeholderOutcome/stakeholder/${stakeholderUri}`)
 }
 
+export async function fetchStakeholderOutcomesThroughOrganization(organizationUri) {
+  return getJson(`/api/stakeholderOutcome/organization/${organizationUri}`)
+}
+
 export async function fetchStakeholderOutcome(uri) {
   return getJson('/api/stakeholderOutcome/' + uri);
 }

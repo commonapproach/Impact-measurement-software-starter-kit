@@ -1,12 +1,13 @@
 const express = require('express');
 
 const {fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomesHandler,
-  fetchStakeholderOutcomeInterfacesHandler
+  fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler
 } = require("../services/stakeholderOutcome/stakeholderOutcome");
 
 const router = express.Router();
 
 // router.post('/', createStakeholderHandler);
+router.get('/organization/:organizationUri', fetchStakeholderOutcomesThroughOrganizationHandler);
 router.get('/stakeholder/:stakeholderUri', fetchStakeholderOutcomesThroughStakeholderHandler);
 router.get('/interfaces', fetchStakeholderOutcomeInterfacesHandler)
 router.get('/:uri', fetchStakeholderOutcomesHandler);

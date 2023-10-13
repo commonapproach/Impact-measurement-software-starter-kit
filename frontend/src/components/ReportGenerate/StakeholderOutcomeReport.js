@@ -183,7 +183,7 @@ export default function StakeholderOutcomeReports() {
                 }} startIcon={<Undo/>}>
           Back
         </Button>
-        {stakeholderOutcomes.length ?
+        {stakeholderOutcomes?.length ?
           <Button variant="contained" color="primary" className={classes.button}
                   sx={{position: 'absolute', right: 100, marginTop: 0}}
                   onClick={generateTXTFile} startIcon={<FileDownload/>}>
@@ -205,7 +205,7 @@ export default function StakeholderOutcomeReports() {
           }}
         />
 
-        {stakeholderOutcomes.length ? stakeholderOutcomes.map((stakeholderOutcome, index) => {
+        {stakeholderOutcomes?.length ? stakeholderOutcomes.map((stakeholderOutcome, index) => {
           return (
             <Paper sx={{p: 2}} variant={'outlined'}>
               <Typography variant={'body1'}> {`Stakeholder Outcome Name: `}<Link

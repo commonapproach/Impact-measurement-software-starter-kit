@@ -76,7 +76,8 @@ async function hasAccess(req, operationType) {
 
     // stakeholderOutcomes
     case 'fetchStakeholderOutcomes':
-      return true;
+      if (userAccount.isSuperuser)
+        return true;
       break
 
 

@@ -12,6 +12,7 @@ import {fetchOutcomes} from "../../api/outcomeApi";
 import {jsPDF} from "jspdf";
 import {fetchStakeholders} from "../../api/stakeholderAPI";
 import {
+  fetchStakeholderOutcomes,
   fetchStakeholderOutcomesThroughOrganization,
   fetchStakeholderOutcomesThroughStakeholder
 } from "../../api/stakeholderOutcomeAPI";
@@ -46,6 +47,7 @@ export default function StakeholderOutcomeReports() {
   const [stakeholderOutcomes, setStakeholderOutcomes] = useState([]);
   const [loading, setLoading] = useState(true);
   const {enqueueSnackbar} = useSnackbar();
+  const userContext = useContext(UserContext);
 
   const generateTXTFile = () => {
     let str = '';
@@ -117,6 +119,8 @@ export default function StakeholderOutcomeReports() {
     fetchOrganizations().then(({organizations, success}) => {
       if (success) {
         const organizationsOps = {};
+        if (userContext.isSuperuser)
+          organizationsOps['all'] = 'All Stakeholder Outcomes'
         organizations.map(organization => {
           organizationsOps[organization._uri] = organization.legalName;
         });
@@ -132,7 +136,20 @@ export default function StakeholderOutcomeReports() {
   }, []);
 
   useEffect(() => {
-    if (selectedOrganization) {
+    if (selectedOrganization === 'all') {
+      fetchStakeholderOutcomes().then(({
+                                         success,
+                                         stakeholderOutcomes
+                                       }) => {
+        if (success) {
+          setStakeholderOutcomes(stakeholderOutcomes);
+        }
+      }).catch(e => {
+        reportErrorToBackend(e);
+        setLoading(false);
+        enqueueSnackbar(e.json?.message || "Error occurs when fetching outcomes", {variant: 'error'});
+      });
+    } else if (selectedOrganization) {
       fetchStakeholderOutcomesThroughOrganization(encodeURIComponent(selectedOrganization)).then(({
                                                                                                     success,
                                                                                                     stakeholderOutcomes

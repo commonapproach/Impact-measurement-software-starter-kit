@@ -40,10 +40,10 @@ const fetchStakeholderOutcomesThroughStakeholderHandler = async (req, res, next)
   }
 };
 
-const fetchStakeholderOutcomesHandler = async (req, res, next) => {
+const fetchStakeholderOutcomeHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetchStakeholderOutcomes'))
-      return await fetchStakeholderOutcomes(req, res);
+      return await fetchStakeholderOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {
@@ -73,7 +73,7 @@ const fetchStakeholderOutcomeInterfaces = async (req, res) => {
   return res.status(200).json({success: true, stakeholderOutcomeInterface});
 }
 
-const fetchStakeholderOutcomes = async (req, res) => {
+const fetchStakeholderOutcome = async (req, res) => {
   const {uri} = req.params;
   if (!uri)
     throw new Server400Error('URI is missing')
@@ -93,5 +93,5 @@ const fetchStakeholderOutcomesThroughStakeholder = async (req, res) => {
 
 
 module.exports = {
-  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomesHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler
+  fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomeHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler
 }

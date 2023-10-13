@@ -1,7 +1,7 @@
 import {getJson, postJson, putJson} from "./index";
 
-export async function fetchStakeholderOutcomes(organizationUri) {
-  return getJson('/api/stakeholderOutcomes/' + organizationUri + '/');
+export async function fetchStakeholderOutcomes() {
+  return getJson('/api/stakeholderOutcomes/');
 }
 
 export async function fetchStakeholderOutcomesThroughStakeholder(stakeholderUri) {

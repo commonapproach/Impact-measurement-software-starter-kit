@@ -22,6 +22,7 @@ module.exports = {
   characteristicRoute: require('./characteristic'),
   characteristicsRoute: require('./characteristics'),
   stakeholderOutcomeRoute: require('./stakeholderOutcome'),
+  stakeholderOutcomesRoute: require('./stakeholderOutcomes'),
   impactReportRoute: require('./impactReport'),
   impactReportsRoute: require('./impactReports')
 }

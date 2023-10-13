@@ -58,23 +58,24 @@ export default function StakeholderOutcomeReports() {
         });
       str += line + '\n';
     };
+    stakeholderOutcomes?.map(stakeholderOutcome => {
+      addLine(`Stakeholder Outcome Name: ${stakeholderOutcome.name || 'Not Given'}`, 2);
+      addLine(`Description: ${stakeholderOutcome.description}`, 2);
+      addLine(`Outcome: ${stakeholderOutcome.outcome?.name || 'Name Not Given'}`, 2);
+      addLine(`Importance: ${stakeholderOutcome.importance || 'Not Given'}`, 2);
+      addLine(`isUnderserved: ${stakeholderOutcome.isUnderserved || 'Not Given'}`, 2);
 
-    outcomes.map(outcome => {
-      addLine('Outcome: ' + outcome.name || '', 2);
-      outcome.indicators.map(indicator => {
-        addLine(`Indicator Name: ${indicator.name || ''}`, 6);
-        addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 10);
-        indicator.indicatorReports.map(indicatorReport => {
-          addLine(`Indicator Report: ${indicatorReport.name || ''}`, 10);
-          addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 14);
-          addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 14);
-        });
+      stakeholderOutcome.codes?.map(code => {
+        addLine(`Code: ${code.name || 'Name Not Given'}`, 6);
       });
-
+      stakeholderOutcome.impactReports?.map(impactReport => {
+        addLine(`Impact Report: ${impactReport.name || 'Name Not Given'}`, 6);
+      });
+      addLine('')
     });
 
     const file = new Blob([str], {type: 'text/plain'});
-    saveAs(file, 'outcomeReport.txt');
+    saveAs(file, 'stakeholderOutcomeReport.txt');
   };
 
 
@@ -212,14 +213,10 @@ export default function StakeholderOutcomeReports() {
                 colorWithHover>{stakeholderOutcome.name || ''}</Link> </Typography>
               <Typography variant={'body1'}> {`Description: ${stakeholderOutcome.description}`} </Typography>
               <Typography variant={'body1'}> {`Outcome: `}<Link
-                to={`/outcome/${encodeURIComponent(stakeholderOutcome.outcome._uri)}/view`} color={'#2f5ac7'}
-                colorWithHover>{stakeholderOutcome.outcome.name || ''}</Link></Typography>
-              <Typography variant={'body1'}> {`Importance: ${stakeholderOutcome.importance}`}</Typography>
-              <Typography variant={'body1'}> {`isUnderserved: ${stakeholderOutcome.isUnderserved}`}</Typography>
-              {/*<Typography variant={'body1'}> {`For Stakeholder:`}</Typography>*/}
-              {/*<Typography variant={'body1'}><Link to={`/stakeholder/${encodeURIComponent(stakeholderOutcome.stakeholder._uri)}/view`}*/}
-              {/*                                    color={'#2f5ac7'}*/}
-              {/*                                    colorWithHover>{stakeholderOutcome.stakeholder.name || 'Name Not Given'}</Link></Typography>*/}
+                to={`/outcome/${encodeURIComponent(stakeholderOutcome.outcome?._uri)}/view`} color={'#2f5ac7'}
+                colorWithHover>{stakeholderOutcome.outcome?.name || 'Name Not Given'}</Link></Typography>
+              <Typography variant={'body1'}> {`Importance: ${stakeholderOutcome.importance || 'Not Given'}`}</Typography>
+              <Typography variant={'body1'}> {`isUnderserved: ${stakeholderOutcome.isUnderserved || 'Not Given'}`}</Typography>
 
               <Typography variant={'body1'}> {stakeholderOutcome.codes?.length ? `Codes: ` : ''} </Typography>
               {stakeholderOutcome.codes?.length ?
@@ -234,7 +231,7 @@ export default function StakeholderOutcomeReports() {
               {stakeholderOutcome.impactReports?.length ?
                 stakeholderOutcome.impactReports.map(impactReport =>
                   <Typography variant={'body1'}><Link to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`}
-                                                      color={'#2f5ac7'} colorWithHover>{impactReport.name || ''}</Link></Typography>
+                                                      color={'#2f5ac7'} colorWithHover>{impactReport.name || 'Name Not Given'}</Link></Typography>
                 )
                 : null}
 

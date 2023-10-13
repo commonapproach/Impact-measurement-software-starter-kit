@@ -86,12 +86,12 @@ export default function IndicatorReports_ReportGenerate() {
     // pdf.save('indicator report.pdf');
 
     indicators.map(indicator => {
-      addLine(`Indicator: ${indicator.name || ''}`, 2);
-      addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 6);
-      indicator.indicatorReports.map(indicatorReport => {
-        addLine(`Indicator Report: ${indicatorReport.name || ''}`, 6);
-        addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 10);
-        addLine(indicatorReport.hasTime? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 10);
+      addLine(`Indicator: ${indicator.name || 'Name not Given'}`, 2);
+      addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`, 6);
+      indicator.indicatorReports?.map(indicatorReport => {
+        addLine(`Indicator Report: ${indicatorReport.name || 'Name Not Given'}`, 6);
+        addLine(`Value: ${indicatorReport.value?.numericalValue || 'Not Given'}`, 10);
+        addLine(indicatorReport.hasTime? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning?.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd?.date)).toLocaleString()}` : '', 10);
       })
     })
 

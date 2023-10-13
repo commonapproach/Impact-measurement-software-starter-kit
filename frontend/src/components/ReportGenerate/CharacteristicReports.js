@@ -84,18 +84,15 @@ export default function Characteristic_ReportGenerate() {
     // })
     // pdf.save('indicator report.pdf');
 
-    // indicators.map(indicator => {
-    //   addLine(`Indicator: ${indicator.name || ''}`, 2);
-    //   addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 6);
-    //   indicator.indicatorReports.map(indicatorReport => {
-    //     addLine(`Indicator Report: ${indicatorReport.name || ''}`, 6);
-    //     addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 10);
-    //     addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 10);
-    //   });
-    // });
-    //
-    // const file = new Blob([str], {type: 'text/plain'});
-    // saveAs(file, 'indicatorReport.txt');
+    characteristics?.map(characteristic => {
+      addLine(`Characteristic: ${characteristic.name || 'Name Not Given'}`, 2);
+      addLine(`Value: ${characteristic.value || 'Not Given'}`, 2);
+      addLine('')
+    });
+
+
+    const file = new Blob([str], {type: 'text/plain'});
+    saveAs(file, 'characteristicReport.txt');
   };
 
 

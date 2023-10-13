@@ -55,17 +55,20 @@ export default function OutcomeReports() {
     }
 
     outcomes.map(outcome => {
-      addLine('Outcome: ' + outcome.name || '', 2);
-      outcome.indicators.map(indicator => {
-        addLine(`Indicator Name: ${indicator.name || ''}`, 6);
-        addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 10);
-        indicator.indicatorReports.map(indicatorReport => {
-          addLine(`Indicator Report: ${indicatorReport.name || ''}`, 10);
-          addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 14);
-          addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 14);
+      addLine('Outcome: ' + outcome.name || 'Name Not Given', 2);
+      outcome.themes?.map(theme => {
+        addLine(`Theme: ${theme.name || 'Name Not Given'}`, 6)
+      })
+      outcome.indicators?.map(indicator => {
+        addLine(`Indicator Name: ${indicator.name || 'Not Given'}`, 6);
+        addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || 'Not Given'}`, 10);
+        indicator.indicatorReports?.map(indicatorReport => {
+          addLine(`Indicator Report: ${indicatorReport.name || 'Name Not Given'}`, 10);
+          addLine(`Value: ${indicatorReport.value?.numericalValue || 'Not Given'}`, 14);
+          addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning?.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd?.date)).toLocaleString()}` : '', 14);
         })
       })
-
+      addLine('')
     })
 
     const file = new Blob([str], { type: 'text/plain' });

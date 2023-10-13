@@ -53,49 +53,19 @@ export default function Code_ReportGenerate() {
         });
       str += line + '\n';
     };
-    // const pdf = new jsPDF({
-    //   orientation: 'p',
-    //   unit: 'mm',
-    //   format: 'a5',
-    //   putOnlyUsedFonts:true
-    // });
 
+    codes?.map(code => {
+      addLine(`Code: ${code.name || 'Name Not Given'}`, 2);
+      addLine(`Value: ${code.codeValue || 'Not Given'}`, 2);
+      addLine(`Identifier: ${code.identifier || 'Not Given'}`, 2);
+      addLine(`Specification: ${code.specification || 'Not Given'}`, 2);
+      addLine(`Description: ${code.description || 'Not Given'}`, 2);
+      addLine('')
 
-    // let x = 20
-    // let y = 20
-    // pdf.setFontSize(20);
-    // pdf.text("Indicator Reports", x, y);
-    // y += 6;
-    // pdf.setFontSize(10);
-    // pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
-    // y += 10;
-    // indicators?.map(indicator => {
-    //   x = 23;
-    //   y += 6
-    //   pdf.text(`Indicator Name: ${indicator.name}`, x, y)
-    //   y += 6;
-    //   pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
-    //   y += 6;
-    //   indicator.indicatorReports?.map(indicatorReport => {
-    //     x = 26
-    //     pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
-    //     y += 6
-    //   })
-    // })
-    // pdf.save('indicator report.pdf');
+    });
 
-    // indicators.map(indicator => {
-    //   addLine(`Indicator: ${indicator.name || ''}`, 2);
-    //   addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 6);
-    //   indicator.indicatorReports.map(indicatorReport => {
-    //     addLine(`Indicator Report: ${indicatorReport.name || ''}`, 6);
-    //     addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 10);
-    //     addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 10);
-    //   });
-    // });
-    //
-    // const file = new Blob([str], {type: 'text/plain'});
-    // saveAs(file, 'indicatorReport.txt');
+    const file = new Blob([str], {type: 'text/plain'});
+    saveAs(file, 'codeReport.txt');
   };
 
 

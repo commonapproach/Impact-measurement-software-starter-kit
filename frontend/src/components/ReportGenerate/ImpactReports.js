@@ -59,49 +59,19 @@ export default function ImpactReports_ReportGenerate() {
         });
       str += line + '\n';
     };
-    // const pdf = new jsPDF({
-    //   orientation: 'p',
-    //   unit: 'mm',
-    //   format: 'a5',
-    //   putOnlyUsedFonts:true
-    // });
 
 
-    // let x = 20
-    // let y = 20
-    // pdf.setFontSize(20);
-    // pdf.text("Indicator Reports", x, y);
-    // y += 6;
-    // pdf.setFontSize(10);
-    // pdf.text(`Generated at ${(new Date).toLocaleString()}`, x, y);
-    // y += 10;
-    // indicators?.map(indicator => {
-    //   x = 23;
-    //   y += 6
-    //   pdf.text(`Indicator Name: ${indicator.name}`, x, y)
-    //   y += 6;
-    //   pdf.text(`Unit of Measure: ${indicator.unitOfMeasure.label}`, x, y);
-    //   y += 6;
-    //   indicator.indicatorReports?.map(indicatorReport => {
-    //     x = 26
-    //     pdf.text(`Indicator Report Name: ${indicatorReport.name}`, x, y)
-    //     y += 6
-    //   })
-    // })
-    // pdf.save('indicator report.pdf');
-
-    indicators.map(indicator => {
-      addLine(`Indicator: ${indicator.name || ''}`, 2);
-      addLine(`Unit of Measure: ${indicator.unitOfMeasure?.label || ''}`, 6);
-      indicator.indicatorReports.map(indicatorReport => {
-        addLine(`Indicator Report: ${indicatorReport.name || ''}`, 6);
-        addLine(`Value: ${indicatorReport.value?.numericalValue || ''}`, 10);
-        addLine(indicatorReport.hasTime ? `Time Interval: ${(new Date(indicatorReport.hasTime.hasBeginning.date)).toLocaleString()} to ${(new Date(indicatorReport.hasTime.hasEnd.date)).toLocaleString()}` : '', 10);
-      });
+    impactReports.map(impactReport => {
+      addLine(`Impact Report: ${impactReport.name || 'Name Not Given'}`, 2);
+      addLine(`Comment: ${impactReport.comment || 'Not Given'}`, 2);
+      addLine(`Impact Depth: ${impactReport.impactDepth?.value?.numericalValue || 'Not Given'}`, 2);
+      addLine(`Impact Scale: ${impactReport.impactScale?.value?.numericalValue || 'Not Given'}`, 2);
+      addLine(`Stakeholder Outcome: ${impactReport.forStakeholderOutcome?.name || 'Name Not Given'}`, 2);
+      addLine('')
     });
 
     const file = new Blob([str], {type: 'text/plain'});
-    saveAs(file, 'indicatorReport.txt');
+    saveAs(file, 'impactReport.txt');
   };
 
 
@@ -182,10 +152,10 @@ export default function ImpactReports_ReportGenerate() {
           return (
 
             <Paper sx={{p: 2}} variant={'outlined'}>
-              <Typography variant={'h6'}> {`Impact Report: ${impactReport.name || ''}`}  </Typography>
+              <Typography variant={'h6'}> {`Impact Report: ${impactReport.name || 'Name Not Given'}`}  </Typography>
               <Typography variant={'body1'} sx={{pl: 4}}> {'Name: '}<Link
                 to={`/impactReport/${encodeURIComponent(impactReport._uri)}/view`} colorWithHover
-                color={'#2f5ac7'}>{impactReport.name || ''}</Link> </Typography>
+                color={'#2f5ac7'}>{impactReport.name || 'Name Not Given'}</Link> </Typography>
               <Typography variant={'body1'}
                           sx={{pl: 4}}> {`Comment: ${impactReport.comment || 'Not Given'}`} </Typography>
               <Typography variant={'body1'}

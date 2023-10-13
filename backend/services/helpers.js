@@ -31,7 +31,7 @@ const getObjectValue = (object, graphdbModel, property) => {
 };
 
 const getFullTypeURI = (graphdbModel) => {
-  return getFullURI(graphdbModel.schemaOptions.rdfTypes[1]);
+  return getFullURI(graphdbModel.schemaOptions.rdfTypes[1] || graphdbModel.schemaOptions.rdfTypes[0]);
 };
 
 const getFullPropertyURI = (graphdbModel, propertyName) => {

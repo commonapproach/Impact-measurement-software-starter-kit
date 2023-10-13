@@ -125,9 +125,10 @@ const fetchOutcomesThroughTheme = async (req, res) => {
     throw new Server400Error('Theme URI is not given')
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   const reachableOrganizations = (await allReachableOrganizations(userAccount)).map(organization => organization._uri);
-  const outcomes = await GDBOutcomeModel.find({theme: themeUri, forOrganization: {$in: reachableOrganizations}},
+  let outcomes = await GDBOutcomeModel.find({forOrganization: {$in: reachableOrganizations}},
     {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value',
         'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd']});
+  outcomes = outcomes.filter(outcome => outcome.themes?.includes(themeUri))
   return res.status(200).json({success: true, outcomes})
 };
 

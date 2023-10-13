@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { IconButton, Menu, MenuItem, ListItemIcon, Typography } from "@mui/material";
 import { MoreVert as MoreVertIcon, Edit, Delete, OpenInBrowser } from '@mui/icons-material';
+import {navigateHelper} from "../../helpers/navigatorHelper";
 
 const ITEM_HEIGHT = 48;
 
 export default function DropdownMenu({urlPrefix, objectUri, handleDelete, hideViewOption, hideDeleteOption, hideEditOption, indicatorsOption}) {
-  const navigate = useNavigate();
+  const navigator = useNavigate();
+  const navigate = navigateHelper(navigator)
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = event => {

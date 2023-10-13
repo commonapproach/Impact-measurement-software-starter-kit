@@ -14,6 +14,7 @@ import {useSnackbar} from "notistack";
 import {fetchImpactReports} from "../../api/impactReportAPI";
 import {fetchStakeholderOutcome, fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
 import {navigateHelper} from "../../helpers/navigatorHelper";
+import {UserContext} from "../../context";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -39,7 +40,7 @@ export default function ImpactReports_ReportGenerate() {
   const {enqueueSnackbar} = useSnackbar();
   const navigator = useNavigate();
   const navigate = navigateHelper(navigator)
-
+  const userContext = useContext(UserContext);
   const [organizations, setOrganizations] = useState({});
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [interfaces, setInterfaces] = useState({
@@ -108,6 +109,8 @@ export default function ImpactReports_ReportGenerate() {
     Promise.all([fetchOrganizations(), fetchStakeholderOutcomeInterface()]).then(
       ([{organizations}, {stakeholderOutcomeInterface}]) => {
         const organizationsOps = {};
+        if (userContext.isSuperuser)
+          organizationsOps['all'] = 'All Impact Reports'
         organizations.map(organization => {
           organizationsOps[organization._uri] = organization.legalName;
         });

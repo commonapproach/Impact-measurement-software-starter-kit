@@ -47,7 +47,12 @@ const fetchImpactReports = async (req, res) => {
   const {orgUri} = req.params;
   if (!orgUri)
     throw new Server400Error('Organization URI is missing');
-  const impactReports = await GDBImpactReportModel.find({forOrganization: orgUri}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
+  let impactReports
+  if (orgUri === 'all') {
+    impactReports = await GDBImpactReportModel.find({}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
+  } else {
+    impactReports = await GDBImpactReportModel.find({forOrganization: orgUri}, {populates: ['impactScale.value', 'impactDepth.value', 'forStakeholderOutcome']});
+  }
   return res.status(200).json({success: true, impactReports});
 };
 

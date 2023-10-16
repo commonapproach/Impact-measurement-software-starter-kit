@@ -3,6 +3,7 @@ const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
+const {Transaction} = require('graphdb-utils')
 const {getObjectValue, assignValue, assignMeasure} = require("../helpers");
 
 async function codeBuilder(environment, trans, object, organization, error, {codeDict}, {
@@ -18,10 +19,10 @@ async function codeBuilder(environment, trans, object, organization, error, {cod
   let ret;
   const mainObject = environment === 'fileUploading' ? codeDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await Transaction.beginTransaction();
+    await mainObject.save();
     uri = mainObject._uri;
   }
-
 
   const config = baseLevelConfig['code'];
   let hasError = false;
@@ -75,7 +76,9 @@ async function codeBuilder(environment, trans, object, organization, error, {cod
     error = ret.error;
 
     if (environment === 'interface') {
-      await transSave(trans, mainObject);
+      await mainObject.save();
+      await Transaction.commit();
+      return true
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);

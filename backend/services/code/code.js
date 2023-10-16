@@ -2,6 +2,8 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBCodeModel} = require("../../models/code");
 const {GDBMeasureModel} = require("../../models/measure");
+const {codeBuilder} = require("./codeBuilder");
+const {Transaction} = require("graphdb-utils");
 
 const fetchCodeHandler = async (req, res, next) => {
   try {
@@ -27,10 +29,16 @@ const fetchCode = async (req, res) => {
 
 const createCodeHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'createCode'))
-      return await createCode(req, res);
+    if (await hasAccess(req, 'createCode')){
+      const {form} = req.body;
+      if(await codeBuilder('interface', null, null,
+        null, null, {}, {}, form)) {
+        return res.status(200).json({success: true})
+      }
+    }
     return res.status(400).json({message: 'Wrong Auth'});
   } catch (e) {
+    Transaction.rollback();
     next(e);
   }
 };

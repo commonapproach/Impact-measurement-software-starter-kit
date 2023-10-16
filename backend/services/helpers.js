@@ -1,5 +1,6 @@
 const {Server400Error} = require("../utils");
 const {GDBMeasureModel} = require("../models/measure");
+const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 const {UpdateQueryPayload,} = require('graphdb').query;
 const {QueryContentType} = require('graphdb').http;
@@ -60,6 +61,7 @@ function assignValue(environment, config, object, mainModel, mainObject, propert
         error += 1;
         hasError = true;
       } else if (environment === 'interface') {
+        Transaction.rollback();
         throw new Server400Error(`${propertyName} is mandatory`);
       }
     } else if (config[internalKey].ignoreInstance) {
@@ -107,12 +109,15 @@ function assignValues(environment, config, object, mainModel, mainObject, proper
 }
 
 function assignMeasure(environment, config, object, mainModel, mainObject, propertyName, internalKey, addMessage, uri, hasError, error, form) {
-  let measureURI = getValue(object, mainModel, propertyName);
-  let measureObject = getObjectValue(object, mainModel, propertyName);
+  let measureURI = environment === 'interface'? null : getValue(object, mainModel, propertyName);
+  let measureObject = environment === 'interface'? null : getObjectValue(object, mainModel, propertyName);
 
   let numericalValue;
-  if (measureObject)
+  if (measureObject) {
     numericalValue = getValue(measureObject, GDBMeasureModel, 'numericalValue');
+  } else if (environment === 'interface' && form && propertyName) {
+    numericalValue = form[propertyName]
+  }
 
   if (!measureURI && !numericalValue && config[internalKey] && !form[propertyName]) {
     if (config[internalKey].rejectFile) {

@@ -1464,10 +1464,10 @@ google-libphonenumber@>=3.2.22:
 
 "graphdb-utils@https://github.com/csse-uoft/graphdb-utils.git":
   version "1.0.0"
-  resolved "https://github.com/csse-uoft/graphdb-utils.git#fa05c97e92451308f372b7b18e1b012025e79d57"
+  resolved "https://github.com/csse-uoft/graphdb-utils.git#ad0685fa7e30726deb349ea818695abf3c655ed7"
   dependencies:
     form-data "^4.0.0"
-    graphdb "^3.0.0"
+    graphdb "^3.0.1"
     mongoose "^6.9.0"
     node-fetch "^3.3.0"
     redis "^4.6.4"
@@ -1488,6 +1488,24 @@ graphdb@^3.0.0:
     rdfxml-streaming-parser "^1.4.0"
     sparqljson-parse "^1.6.0"
     sparqlxml-parse "^1.4.0"
+    uuid "^3.4.0"
+
+graphdb@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/graphdb/-/graphdb-3.0.1.tgz#783b5c3f2dc578aab700f93fc0ab89dc75d2e73e"
+  integrity sha512-pG1f5XGD7oxpP8Nexeszo86SdOhdGhiTF+gKxJ7Ctix1nl/6o19IK6EO4ivUvutFJ2JlilOFJrRsxLqw2wYtgw==
+  dependencies:
+    axios "^0.21.4"
+    base64url "^3.0.1"
+    eslint-config-google "^0.13.0"
+    jsonld-streaming-parser "^2.2.0"
+    n3 "^1.16.2"
+    pino "^5.17.0"
+    qs "6.9.7"
+    rdfxml-streaming-parser "^1.4.0"
+    sparqljson-parse "^1.6.0"
+    sparqlxml-parse "^1.4.0"
+    typescript "^5.1.6"
     uuid "^3.4.0"
 
 has-symbols@^1.0.3:
@@ -2022,6 +2040,11 @@ qs@6.10.3:
   dependencies:
     side-channel "^1.0.4"
 
+qs@6.9.7:
+  version "6.9.7"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.7.tgz#4610846871485e1e048f44ae3b94033f0e675afe"
+  integrity sha512-IhMFgUmuNpyRfxA90umL7ByLlgRXu6tIfKPpF5TmcfRLlLCckfP/g3IQmju6jjpu+Hh8rA+2p6A27ZSPOOHdKw==
+
 qs@^6.9.4:
   version "6.11.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.0.tgz#fd0d963446f7a65e1367e01abd85429453f0c37a"
@@ -2373,6 +2396,11 @@ typescript@^4.9.5:
   version "4.9.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
   integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
+
+typescript@^5.1.6:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.2.tgz#5ebb5e5a5b75f085f22bc3f8460fba308310fa78"
+  integrity sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==
 
 typpy@2.3.11:
   version "2.3.11"

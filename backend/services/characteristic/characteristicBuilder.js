@@ -2,6 +2,7 @@ const {baseLevelConfig} = require("../fileUploading/configs");
 const {Server400Error} = require("../../utils");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {assignValue, assignValues} = require("../helpers");
+const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function characteristicBuilder(environment, trans, object, error, {characteristicDict}, {
@@ -17,7 +18,8 @@ async function characteristicBuilder(environment, trans, object, error, {charact
   let ret;
   const mainObject = environment === 'fileUploading' ? characteristicDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await Transaction.beginTransaction();
+    await mainObject.save();
     uri = mainObject._uri;
   }
 
@@ -43,7 +45,9 @@ async function characteristicBuilder(environment, trans, object, error, {charact
     error = ret.error;
 
     if (environment === 'interface') {
-      await transSave(trans, mainObject);
+      await mainObject.save();
+      await Transaction.commit();
+      return true
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);

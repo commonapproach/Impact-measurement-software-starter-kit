@@ -6,21 +6,17 @@ import {Button, Chip, Container, Paper, Typography} from "@mui/material";
 import GeneralField from "../shared/fields/GeneralField";
 import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
-import {
-  fetchOrganizations,
-} from "../../api/organizationApi";
+
 import {useSnackbar} from "notistack";
-import {fetchUsers} from "../../api/userApi";
 import Dropdown from "../shared/fields/MultiSelectField";
 import SelectField from "../shared/fields/SelectField";
 import {UserContext} from "../../context";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {Add as AddIcon, Remove as RemoveIcon} from "@mui/icons-material";
-import {createCode, fetchCode, fetchCodes, updateCode} from "../../api/codeAPI";
 import {fetchStakeholders} from "../../api/stakeholderAPI";
 import {createCharacteristic, fetchCharacteristic, updateCharacteristic} from "../../api/characteristicApi";
-import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import {navigateHelper} from "../../helpers/navigatorHelper";
+import {fetchCodes} from "../../api/codeAPI";
 const useStyles = makeStyles(() => ({
   root: {
     width: '80%'
@@ -111,7 +107,7 @@ export default function AddEditCharacteristic() {
           }
         );
       } else if ((mode === 'edit' || mode === 'view') && !uri) {
-        navigate('/codes');
+        navigate('/characteristics');
         enqueueSnackbar("No URI provided", {variant: 'error'});
       } else {
         setLoading(false);
@@ -141,7 +137,7 @@ export default function AddEditCharacteristic() {
       createCharacteristic({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/codes');
+          navigate('/characteristics');
           enqueueSnackbar(ret.message || 'Success', {variant: "success"});
         }
 
@@ -150,14 +146,14 @@ export default function AddEditCharacteristic() {
           setErrors(e.json);
         }
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when creating code', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when creating characteristic', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     } else if (mode === 'edit') {
       updateCharacteristic(encodeURIComponent(uri), {form},).then((res) => {
         if (res.success) {
           setState({loadingButton: false, submitDialog: false,});
-          navigate('/codes');
+          navigate('/characteristics');
           enqueueSnackbar(res.message || 'Success', {variant: "success"});
         }
       }).catch(e => {
@@ -166,7 +162,7 @@ export default function AddEditCharacteristic() {
         }
         console.log(e);
         reportErrorToBackend(e);
-        enqueueSnackbar(e.json?.message || 'Error occurs when updating code', {variant: "error"});
+        enqueueSnackbar(e.json?.message || 'Error occurs when updating characteristic', {variant: "error"});
         setState({loadingButton: false, submitDialog: false,});
       });
     }
@@ -204,10 +200,15 @@ export default function AddEditCharacteristic() {
           <Typography variant={'body1'}> {`${form.name}`} </Typography>
           <Typography variant={'h6'}> {`URI:`} </Typography>
           <Typography variant={'body1'}> {`${form.uri}`} </Typography>
+          <Typography variant={'h6'}> {`Stakeholders:`} </Typography>
+          {form.stakeholders.map(stakeholder =>
+            <Typography variant={'body1'}> <Link to={`/stakeholder/${encodeURIComponent(stakeholder)}/view`}
+                                                 colorWithHover color={'#2f5ac7'}>{options.stakeholders[stakeholder] || stakeholder}</Link> </Typography>
+          )}
           <Typography variant={'h6'}> {`Codes:`} </Typography>
           {form.codes.map(code =>
             <Typography variant={'body1'}> <Link to={`/code/${encodeURIComponent(code)}/view`}
-                                                 colorWithHover color={'#2f5ac7'}>{options[code] || code}</Link> </Typography>
+                                                 colorWithHover color={'#2f5ac7'}>{options.codes[code] || code}</Link> </Typography>
           )}
 
           {form.specification ? <Typography variant={'h6'}> {`specification:`} </Typography> : null}
@@ -309,7 +310,7 @@ export default function AddEditCharacteristic() {
       <Paper sx={{p: 2}} variant={'outlined'}>
         {mode === 'view' ?
           <Button variant="contained" color="primary" className={classes.button} onClick={() => {
-            navigate(`/code/${encodeURIComponent(uri)}/edit`);
+            navigate(`/characteristic/${encodeURIComponent(uri)}/edit`);
           }
           }>
             Edit

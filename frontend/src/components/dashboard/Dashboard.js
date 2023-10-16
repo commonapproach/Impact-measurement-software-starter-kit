@@ -51,6 +51,11 @@ function Dashboard() {
                    text="Manage Codes"/>:
         null}
 
+      {userContext.isSuperuser?
+        <NavButton to={`/characteristics`} icon={<People/>} key={'characteristic'}
+                   text="Manage Characteristic"/>:
+        null}
+
       {userContext.isSuperuser || userContext.administratorOfs.length?
         <NavButton to={userContext.isSuperuser?`/users`:`/organizationUsers`} icon={<People/>} key={'users'}
                   text="Manage Users"/>:null}

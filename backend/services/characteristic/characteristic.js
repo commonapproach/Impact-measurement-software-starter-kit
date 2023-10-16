@@ -2,18 +2,20 @@ const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBCharacteristicModel} = require("../../models/characteristic");
 const {GDBCodeModel} = require("../../models/code");
+const {characteristicBuilder} = require("./characteristicBuilder");
+const {Transaction} = require("graphdb-utils");
 
 const createCharacteristicHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'createCharacteristic')) {
       const {form} = req.body;
-      if (await createCharacteristic({form}))
+      if (await characteristicBuilder('interface', null, null, null, {}, {}, form))
         return res.status(200).json({success: true});
     } else {
       return res.status(400).json({message: 'Wrong Auth'});
     }
-
   } catch (e) {
+    Transaction.rollback();
     next(e);
   }
 };

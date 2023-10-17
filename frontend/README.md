@@ -23,5 +23,4 @@ npx serve -s ./build
 
 ### Allow Self-Signed Localhost certificate
 Chrome: Enable chrome://flags/#allow-insecure-localhost and reboot chrome.
-
 Firefox: Go to Preferences --> Privacy & Security --> View Certificates --> Servers --> Add Exception --> Add localhost:5001

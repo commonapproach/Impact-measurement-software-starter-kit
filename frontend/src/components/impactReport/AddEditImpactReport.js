@@ -228,17 +228,17 @@ export default function AddEditImpactReport() {
         </Paper>
       ) : (<Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Impact Report </Typography>
-        <IndicatorReportField
-          disabled={mode === 'view'}
-          disabledOrganization={!!orgUri}
-          defaultValue={form}
-          required
-          onChange={(state) => {
-            setForm(form => ({...form, ...state}));
-          }}
-          uriDiasbled={mode !== 'new'}
-          importErrors={errors}
-        />
+        {/*<IndicatorReportField*/}
+        {/*  disabled={mode === 'view'}*/}
+        {/*  disabledOrganization={!!orgUri}*/}
+        {/*  defaultValue={form}*/}
+        {/*  required*/}
+        {/*  onChange={(state) => {*/}
+        {/*    setForm(form => ({...form, ...state}));*/}
+        {/*  }}*/}
+        {/*  uriDiasbled={mode !== 'new'}*/}
+        {/*  importErrors={errors}*/}
+        {/*/>*/}
 
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit

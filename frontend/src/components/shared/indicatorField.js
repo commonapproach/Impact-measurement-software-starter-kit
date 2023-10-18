@@ -189,6 +189,29 @@ export default function IndicatorField({defaultValue, required, onChange, label,
               <TextField
                 sx={{mt: 2}}
                 fullWidth
+                label="Baseline"
+                type="text"
+                defaultValue={state.baseline}
+                onChange={handleChange('baseline')}
+                disabled={disabled}
+                required={required}
+                error={!!errors.baseline}
+                helperText={errors.baseline}
+                onBlur={() => {
+                  if (!state.baseline) {
+                    setErrors(errors => ({...errors, baseline: 'This field cannot be empty'}));
+                  }else {
+                    setErrors(errors => ({...errors, baseline: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
                 label="Description"
                 type="text"
                 defaultValue={state.description}

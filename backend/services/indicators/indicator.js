@@ -7,6 +7,8 @@ const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBOwnershipModel} = require("../../models/ownership");
 const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {GDBUnitOfMeasure} = require("../../models/measure");
+const {indicatorBuilder} = require("./indicatorBuilder");
+const {Transaction} = require("graphdb-utils");
 
 
 const fetchIndicators = async (req, res) => {
@@ -122,11 +124,16 @@ const fetchIndicator = async (req, res) => {
 
 const createIndicatorHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'createIndicator'))
-      return await createIndicator(req, res);
+    if (await hasAccess(req, 'createIndicator')){
+      const {form} = req.body;
+      if (await indicatorBuilder('interface', null, null, null, null, null, {}, {}, form)){
+        return res.status(200).json({success: true})
+      }
+    }
     return res.status(400).json({success: false, message: 'Wrong auth'});
 
   } catch (e) {
+    Transaction.rollback();
     next(e);
   }
 };

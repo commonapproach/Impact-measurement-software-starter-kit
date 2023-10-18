@@ -6,6 +6,7 @@ const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
 const {GDBMeasureModel} = require("../../models/measure");
 const {getObjectValue, assignMeasure, assignValue, assignValues} = require("../helpers");
+const {Transaction} = require("graphdb-utils");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function indicatorBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -25,7 +26,8 @@ async function indicatorBuilder(environment, trans, object, organization, impact
   let ret;
   const mainObject = environment === 'fileUploading' ? indicatorDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await Transaction.beginTransaction();
+    await mainObject.save();
     uri = mainObject._uri;
   }
 
@@ -42,11 +44,16 @@ async function indicatorBuilder(environment, trans, object, organization, impact
     mainObject.forOrganization = organization._uri;
     if (!impactNorms.indicators)
       impactNorms.indicators = [];
-    impactNorms.indicators.push(uri);
+    impactNorms.indicators = [...impactNorms.indicators, uri]
 
     if (!organization.hasIndicators)
       organization.hasIndicators = [];
-    organization.hasIndicators.push(uri);
+    organization.hasIndicators = [...organization.hasIndicators, uri];
+
+    if (environment === 'interface') {
+      await organization.save();
+      await impactNorms.save();
+    }
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -63,6 +70,12 @@ async function indicatorBuilder(environment, trans, object, organization, impact
     ret = assignValues(environment, config, object, mainModel, mainObject, 'codes', 'cids:hasCode', addMessage, form, uri, hasError, error, getListOfValue);
     hasError = ret.hasError;
     error = ret.error;
+
+    if (environment === 'interface'){
+      await mainObject.save();
+      await Transaction.commit();
+      return true
+    }
 
 
     // add outcomes

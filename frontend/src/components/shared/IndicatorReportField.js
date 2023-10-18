@@ -132,6 +132,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
   }, [importErrors]);
 
   const handleChange = name => (e, value) => {
+    console.log(name)
     if(name !== 'indicator'){
       setState(state => {
         state[name] = value ?? e.target.value;
@@ -140,7 +141,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
     } else {
       setState(state => {
         state.indicator = value;
-        state.unitOfMeasure = indicators[value]?.unitOfMeasure.label;
+        state.unitOfMeasure = indicators[value]?.unitOfMeasure?.label;
         return state
       });
     }
@@ -271,7 +272,7 @@ export default function IndicatorReportField({defaultValue, required, onChange, 
             </Grid>
             <Grid item xs={4}>
               <LoadingAutoComplete
-                label="Indicator"
+                label={"Indicator"}
                 disabled={disabled || !state.organization}
                 options={state.organization? options[state.organization]: []}
                 state={state.organization? state.indicator: null}

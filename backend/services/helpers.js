@@ -12,6 +12,8 @@ const {QueryContentType} = require('graphdb').http;
  * @returns {*}
  */
 const getValue = (object, graphdbModel, property) => {
+  if (!object)
+    return undefined
   if (object[getFullURI(graphdbModel.schema[property].internalKey)]) {
     return object[getFullURI(graphdbModel.schema[property].internalKey)][0]['@value'];
   } else {

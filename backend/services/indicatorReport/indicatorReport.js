@@ -7,15 +7,23 @@ const {GDBDateTimeIntervalModel} = require("../../models/time");
 const {GDBMeasureModel} = require("../../models/measure");
 const {GDBUserAccountModel} = require("../../models/userAccount");
 const {GDBOwnershipModel} = require("../../models/ownership");
+const {indicatorReportBuilder} = require("./indicatorReportBuilder");
+const {Transaction} = require("graphdb-utils");
 
 const RESOURCE = 'IndicatorReport';
 
 const createIndicatorReportHandler = async (req, res, next) => {
   try {
-    if (await hasAccess(req, 'create' + RESOURCE))
-      return await createIndicatorReport(req, res);
+    if (await hasAccess(req, 'create' + RESOURCE)){
+      const {form} = req.body;
+      form.value = form.numericalValue
+      form.forIndicator = form.indicator
+      if (await indicatorReportBuilder('interface', null, null, null, null, null, {}, {}, form))
+        return res.status(200).json({success: true})
+        }
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
+    Transaction.rollback();
     next(e);
   }
 };

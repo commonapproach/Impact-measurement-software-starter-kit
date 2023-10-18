@@ -7,6 +7,7 @@ import {UserContext} from "../../context";
 import Dropdown from "./fields/MultiSelectField";
 import {fetchIndicators} from "../../api/indicatorApi";
 import {isValidURL} from "../../helpers/validation_helpers";
+import {fetchCodesInterfaces} from "../../api/codeAPI";
 
 
 const filterOptions = createFilterOptions({
@@ -64,7 +65,7 @@ export default function OutcomeField({
 
   const [state, setState] = useState(defaultValue || {});
 
-  const [options, setOptions] = useState({themes: {}, indicators: {}});
+  const [options, setOptions] = useState({themes: {}, indicators: {}, codes: {}});
 
   const [loading, setLoading] = useState(true);
 
@@ -95,6 +96,11 @@ export default function OutcomeField({
           setOptions(op => ({...op, organization: options}));
         }
       }),
+      fetchCodesInterfaces().then(({success, codesInterfaces}) => {
+        if (success) {
+          setOptions(op => ({...op, codes: codesInterfaces}));
+        }
+      })
     ]).then(() => setLoading(false));
 
   }, []);
@@ -151,6 +157,28 @@ export default function OutcomeField({
                     setErrors(errors => ({...errors, name: 'This field cannot be empty'}));
                   } else {
                     setErrors(errors => ({...errors, name: null}));
+                  }
+                }
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                sx={{mt: 2}}
+                fullWidth
+                label="URI"
+                type="text"
+                defaultValue={state.uri}
+                onChange={handleChange('uri')}
+                disabled={disabled || disableURI}
+                required={required}
+                error={!!errors.uri}
+                helperText={errors.uri}
+                onBlur={() => {
+                  if (state.uri && !isValidURL(state.uri)) {
+                    setErrors(errors => ({...errors, uri: 'Please input a valid URI'}));
+                  } else {
+                    setErrors(errors => ({...errors, uri: null}));
                   }
                 }
                 }
@@ -228,6 +256,32 @@ export default function OutcomeField({
 
             <Grid item xs={12}>
               <Dropdown
+                label="Codes"
+                options={options.codes}
+                value={state.codes}
+                onChange={(e) => {
+                  setState(state => ({...state, codes: e.target.value}));
+                  const st = state;
+                  st.codes = e.target.value;
+                  onChange(st);
+                }
+                }
+                minWidth={775}
+                // error={!!errors.themes}
+                // helperText={errors.themes}
+                disabled={disabled}
+                // onBlur={() => {
+                //   if (!state.themes.length) {
+                //     setErrors(errors => ({...errors, themes: 'This field cannot be empty'}));
+                //   } else {
+                //     setErrors(errors => ({...errors, themes: null}));
+                //   }
+                // }
+                // }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Dropdown
                 label="Indicators"
                 key={'indicators'}
                 options={options.indicators}
@@ -253,28 +307,7 @@ export default function OutcomeField({
                 }
                 }
               />
-              <Grid item xs={12}>
-                <TextField
-                  sx={{mt: 2}}
-                  fullWidth
-                  label="URI"
-                  type="text"
-                  defaultValue={state.uri}
-                  onChange={handleChange('uri')}
-                  disabled={disabled || disableURI}
-                  required={required}
-                  error={!!errors.uri}
-                  helperText={errors.uri}
-                  onBlur={() => {
-                    if (state.uri && !isValidURL(state.uri)) {
-                      setErrors(errors => ({...errors, uri: 'Please input a valid URI'}));
-                    } else {
-                      setErrors(errors => ({...errors, uri: null}));
-                    }
-                  }
-                  }
-                />
-              </Grid>
+
 
 
             </Grid>

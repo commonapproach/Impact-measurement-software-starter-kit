@@ -5,6 +5,7 @@ const {Server400Error} = require("../../utils");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {assignValue, assignValues} = require("../helpers");
+const {Transaction} = require("graphdb-utils");
 
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
@@ -22,7 +23,8 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
   const mainObject = environment === 'fileUploading' ? outcomeDict[uri] : mainModel({
   }, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await Transaction.beginTransaction();
+    await mainObject.save();
     uri = mainObject._uri;
   }
 
@@ -33,10 +35,15 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
   mainObject.forOrganization = organization._uri;
   if (!impactNorms.outcomes)
     impactNorms.outcomes = [];
-  impactNorms.outcomes.push(uri);
+  impactNorms.outcomes = [...impactNorms.outcomes, uri]
   if (!organization.hasOutcomes)
     organization.hasOutcomes = [];
-  organization.hasOutcomes.push(uri);
+  organization.hasOutcomes = [...organization.hasOutcomes, uri]
+
+  if (environment === 'interface') {
+    await organization.save();
+    await impactNorms.save();
+  }
 
   const config = baseLevelConfig['outcome'];
   let hasError = false;
@@ -88,7 +95,7 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
       if (!mainObject.indicators)
         mainObject.indicators = [];
       for (const indicatorURI of environment === 'fileUploading'? getListOfValue(object, mainModel, 'indicators') : form.indicators) {
-        mainObject.indicators.push(indicatorURI);
+        mainObject.indicators = [...mainObject.indicators, indicatorURI]
         // add outcome to indicator
         if (environment !== 'fileUploading' || !objectDict[indicatorURI]) {
           //in this case, the indicator is not in the file, get the indicator from database and add the outcome to it
@@ -122,17 +129,17 @@ async function outcomeBuilder(environment, trans, object, organization, impactNo
           } else {
             if (!indicator.forOutcomes)
               indicator.forOutcomes = [];
-            indicator.forOutcomes.push(uri);
-            await transSave(trans, indicator);
+            indicator.forOutcomes = [...indicator.forOutcomes, uri]
+            await indicator.save();
           }
 
         } // if the indicator is in the file, don't have to worry about adding the outcome to the indicator
       }
     }
     if (environment === 'interface') {
-      await transSave(trans, organization);
-      await transSave(trans, mainObject);
-      await transSave(trans, impactNorms);
+      await mainObject.save();
+      await Transaction.commit();
+      return true
     }
     if (hasError) {
       // addTrace(`Fail to upload ${uri} of type ${getPrefixedURI(object['@type'][0])}`);

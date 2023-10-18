@@ -47,7 +47,8 @@ export default function AddEditOutcome() {
     organization: null,
     indicators:[],
     uri: '',
-    themes: []
+    themes: [],
+    codes: []
   });
   const [loading, setLoading] = useState(true);
 

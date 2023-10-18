@@ -9,6 +9,7 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {outcomeBuilder} = require("./outcomeBuilder");
 const {getRepository} = require("../../loaders/graphDB");
 const {transSave} = require("../helpers");
+const {Transaction} = require("graphdb-utils");
 
 
 const fetchOutcomes = async (req, res) => {
@@ -42,8 +43,10 @@ const fetchOutcomes = async (req, res) => {
   } else {
     // the organizationId is given, return all outcomes belongs to the organization
     const organization = await GDBOrganizationModel.findOne({_uri: organizationUri},
-      {populates: ['hasOutcomes.indicators.unitOfMeasure', 'hasOutcomes.indicators.indicatorReports.value',
-          'hasOutcomes.indicators.indicatorReports.hasTime.hasBeginning', 'hasOutcomes.indicators.indicatorReports.hasTime.hasEnd', 'hasOutcomes.themes']});
+      {
+        populates: ['hasOutcomes.indicators.unitOfMeasure', 'hasOutcomes.indicators.indicatorReports.value',
+          'hasOutcomes.indicators.indicatorReports.hasTime.hasBeginning', 'hasOutcomes.indicators.indicatorReports.hasTime.hasEnd', 'hasOutcomes.themes']
+      });
     if (!organization)
       throw new Server400Error('No such organization');
     let editable;
@@ -112,24 +115,26 @@ const fetchOutcomeInterfaceHandler = async (req, res, next) => {
 
 async function fetchOutcomeInterface(req, res) {
   const outcomes = await GDBOutcomeModel.find({});
-  const outcomeInterfaces = {}
+  const outcomeInterfaces = {};
   outcomes.map(outcome => {
-    outcomeInterfaces[outcome._uri] = outcome.name
-  })
+    outcomeInterfaces[outcome._uri] = outcome.name;
+  });
   return res.status(200).json({success: true, outcomeInterfaces});
 }
 
 const fetchOutcomesThroughTheme = async (req, res) => {
   const {themeUri} = req.params;
   if (!themeUri)
-    throw new Server400Error('Theme URI is not given')
+    throw new Server400Error('Theme URI is not given');
   const userAccount = await GDBUserAccountModel.findOne({_uri: req.session._uri});
   const reachableOrganizations = (await allReachableOrganizations(userAccount)).map(organization => organization._uri);
   let outcomes = await GDBOutcomeModel.find({forOrganization: {$in: reachableOrganizations}},
-    {populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value',
-        'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd']});
-  outcomes = outcomes.filter(outcome => outcome.themes?.includes(themeUri))
-  return res.status(200).json({success: true, outcomes})
+    {
+      populates: ['indicators.unitOfMeasure', 'indicators.indicatorReports.value',
+        'indicators.indicatorReports.hasTime.hasBeginning', 'indicators.indicatorReports.hasTime.hasEnd']
+    });
+  outcomes = outcomes.filter(outcome => outcome.themes?.includes(themeUri));
+  return res.status(200).json({success: true, outcomes});
 };
 
 const fetchOutcome = async (req, res) => {
@@ -139,7 +144,7 @@ const fetchOutcome = async (req, res) => {
   const outcome = await GDBOutcomeModel.findOne({_uri: uri}, {populates: ['themes', 'indicators']});
   if (!outcome)
     throw new Server400Error('No such outcome');
-  outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization})
+  outcome.forOrganization = await GDBOrganizationModel.findOne({_uri: outcome.forOrganization});
   outcome.organization = outcome.forOrganization?._uri;
   outcome.organizationName = outcome.forOrganization?.legalName;
   if (!outcome.themes)
@@ -147,13 +152,13 @@ const fetchOutcome = async (req, res) => {
   outcome.themeNames = {};
   outcome.themes?.map(theme => {
     outcome.themeNames[theme._uri] = theme.name;
-  })
+  });
   outcome.themes = outcome.themes?.map(theme => theme._uri);
 
   outcome.indicatorNames = {};
   outcome.indicators?.map(indicator => {
     outcome.indicatorNames[indicator._uri] = indicator.name;
-  })
+  });
   outcome.indicators = outcome.indicators?.map(indicator => indicator._uri);
   // outcome.forOrganizations = await Promise.all(outcome.forOrganizations.map(orgURI => {
   //   return GDBOrganizationModel.findOne({_id: orgURI.split('_')[1]});
@@ -173,20 +178,15 @@ const fetchOutcome = async (req, res) => {
 };
 
 const createOutcomeHandler = async (req, res, next) => {
-  const repo = await getRepository();
-  const trans = await repo.beginTransaction();
-  trans.repositoryClientConfig.useGdbTokenAuthentication(repo.repositoryClientConfig.username, repo.repositoryClientConfig.pass);
   try {
-    if (await hasAccess(req, 'createOutcome')){
+    if (await hasAccess(req, 'createOutcome')) {
       const {form} = req.body;
-      await outcomeBuilder('interface', trans, null, null, null,null, {}, {transSave}, form);
-      await trans.commit();
+      await outcomeBuilder('interface', null, null, null, null, null, {}, {}, form);
       return res.status(200).json({success: true});
     }
-      // return await createOutcome(req, res);
     return res.status(400).json({success: false, message: 'Wrong auth'});
   } catch (e) {
-    await trans.rollback();
+    await Transaction.rollback();
     next(e);
   }
 };
@@ -216,7 +216,7 @@ const updateOutcome = async (req, res) => {
     throw new Server400Error('No such outcome');
   outcome.name = form.name;
   outcome.description = form.description;
-  outcome.themes = form.themes || []
+  outcome.themes = form.themes || [];
   const organizationDict = {};
   const indicatorDict = {};
 

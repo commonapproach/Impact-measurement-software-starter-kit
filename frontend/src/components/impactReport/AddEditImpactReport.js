@@ -11,9 +11,9 @@ import ImpactReportField from "../shared/ImpactReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchImpactReport} from "../../api/impactReportAPI";
+import {createImpactReport, fetchImpactReport} from "../../api/impactReportAPI";
 import {fetchOrganizations} from "../../api/organizationApi";
-import {fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
+import {createStakeholderOutcome, fetchStakeholderOutcomeInterface} from "../../api/stakeholderOutcomeAPI";
 import {fetchStakeholders} from "../../api/stakeholderAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
 const useStyles = makeStyles(() => ({
@@ -57,7 +57,11 @@ export default function AddEditImpactReport() {
     impactDepth: '',
     forStakeholderOutcome: '',
     organization: null,
-    uri: ''
+    startTime: '',
+    endTime: '',
+    uri: '',
+    impactScaleIndicator: '',
+    impactDepthIndicator: ''
   });
   const [loading, setLoading] = useState(true);
 
@@ -125,7 +129,7 @@ export default function AddEditImpactReport() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createIndicatorReport({form}).then((ret) => {
+      createImpactReport({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -161,33 +165,33 @@ export default function AddEditImpactReport() {
 
   const validate = () => {
     const error = {};
-    if (!form.name)
-      error.name = 'The field cannot be empty';
-    if (!form.comment)
-      error.comment = 'The field cannot be empty';
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
-    if (!form.indicator)
-      error.indicator = 'The field cannot be empty';
-    if (!form.startTime)
-      error.startTime = 'The field cannot be empty';
-    if (!form.endTime)
-      error.endTime = 'The field cannot be empty';
-    if (form.uri && !isValidURL(form.uri))
-      error.uri = 'The field cannot be empty';
+    // if (!form.name)
+    //   error.name = 'The field cannot be empty';
+    // if (!form.comment)
+    //   error.comment = 'The field cannot be empty';
+    // if (!form.organization)
+    //   error.organization = 'The field cannot be empty';
+    // if (!form.indicator)
+    //   error.indicator = 'The field cannot be empty';
+    // if (!form.startTime)
+    //   error.startTime = 'The field cannot be empty';
+    // if (!form.endTime)
+    //   error.endTime = 'The field cannot be empty';
+    // if (form.uri && !isValidURL(form.uri))
+    //   error.uri = 'The field cannot be empty';
     if (!!form.startTime && !!form.endTime && form.startTime > form.endTime) {
       error.startTime = 'The date must be earlier than the end date';
       error.endTime = 'The date must be later than the start date';
     }
 
-    if (!form.numericalValue)
-      error.numericalValue = 'The field cannot be empty';
-    if (form.numericalValue && isNaN(form.numericalValue))
-      error.numericalValue = 'The field must be a number';
+    // if (!form.numericalValue)
+    //   error.numericalValue = 'The field cannot be empty';
+    // if (form.numericalValue && isNaN(form.numericalValue))
+    //   error.numericalValue = 'The field must be a number';
     // if (!form.unitOfMeasure)
     //   error.unitOfMeasure = 'The field cannot be empty';
-    if (!form.dateCreated)
-      error.dateCreated = 'The field cannot be empty';
+    // if (!form.dateCreated)
+    //   error.dateCreated = 'The field cannot be empty';
     setErrors(error);
     return Object.keys(error).length === 0;
   };
@@ -246,7 +250,7 @@ export default function AddEditImpactReport() {
 
         <AlertDialog dialogContentText={"You won't be able to edit the information after clicking CONFIRM."}
                      dialogTitle={mode === 'new' ? 'Are you sure you want to create this new Indicator Report?' :
-                       'Are you sure you want to update this Indicator Report?'}
+                       'Are you sure you want to update this Impact Report?'}
                      buttons={[<Button onClick={() => setState(state => ({...state, submitDialog: false}))}
                                        key={'cancel'}>{'cancel'}</Button>,
                        <LoadingButton noDefaultStyle variant="text" color="primary" loading={state.loadingButton}

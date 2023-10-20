@@ -12,8 +12,8 @@ export async function fetchImpactReport(uri) {
   return getJson('/api/impactReport/' + uri);
 }
 
-export async function createIndicator(params) {
-  return postJson(`/api/indicator/`, params);
+export async function createImpactReport(params) {
+  return postJson(`/api/impactReport/`, params);
 }
 
 export async function updateIndicator(params, uri) {

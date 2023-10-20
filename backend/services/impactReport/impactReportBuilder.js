@@ -3,9 +3,12 @@ const {GDBImpactReportModel} = require("../../models/impactReport");
 const {baseLevelConfig} = require("../fileUploading/configs");
 const {GDBOrganizationModel} = require("../../models/organization");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
-const {assignValue} = require("../helpers");
+const {assignValue, getFullObjectURI} = require("../helpers");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
+const {GDBDateTimeIntervalModel, GDBInstant} = require("../../models/time");
+const {Transaction} = require("graphdb-utils");
+const {GDBImpactScaleModel, GDBImpactDepthModel} = require("../../models/howMuchImpact");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function impactReportBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -13,13 +16,13 @@ async function impactReportBuilder(environment, trans, object, organization, imp
   impactReportDict,
   objectDict
 }, {
-                                           addMessage,
-                                           addTrace,
-                                           transSave,
-                                           getFullPropertyURI,
-                                           getValue,
-                                           getListOfValue
-                                         }, form) {
+                                     addMessage,
+                                     addTrace,
+                                     transSave,
+                                     getFullPropertyURI,
+                                     getValue,
+                                     getListOfValue
+                                   }, form) {
   let uri = object ? object['@id'] : undefined;
   let hasError = false;
   let ret;
@@ -27,7 +30,7 @@ async function impactReportBuilder(environment, trans, object, organization, imp
   const mainModel = GDBImpactReportModel;
   const mainObject = environment === 'fileUploading' ? impactReportDict[uri] : mainModel({}, {uri: form.uri});
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await mainObject.save();
     uri = mainObject._uri;
   }
   const config = baseLevelConfig.indicatorReport;
@@ -35,13 +38,13 @@ async function impactReportBuilder(environment, trans, object, organization, imp
   if (mainObject) {
     if (environment !== 'fileUploading') {
       organization = await GDBOrganizationModel.findOne({_uri: form.organization});
-      impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization})
+      impactNorms = await GDBImpactNormsModel.findOne({organization: form.organization}) || GDBImpactNormsModel({organization: form.organization});
     }
     mainObject.forOrganization = organization._uri;
     if (!impactNorms.impactReports) {
       impactNorms.impactReports = [];
     }
-    impactNorms.impactReports.push(uri);
+    impactNorms.impactReports = [...impactNorms.impactReports, uri];
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -51,6 +54,26 @@ async function impactReportBuilder(environment, trans, object, organization, imp
     hasError = ret.hasError;
     error = ret.error;
 
+    if (environment === 'interface') {
+      const impactScale = GDBImpactScaleModel({
+        value: {
+          numericalValue: form.impactScale
+        },
+        indicator: form.impactScaleIndicator
+      });
+      const impactDepth = GDBImpactDepthModel({
+        value: {
+          numericalValue: form.impactDepth
+        },
+        indicator: form.impactDepthIndicator
+      });
+      await impactScale.save();
+      await impactDepth.save();
+      form.impactScale = impactScale._uri;
+      form.impactDepth = impactDepth._uri;
+    }
+
+
     ret = assignValue(environment, config, object, mainModel, mainObject, 'impactScale', 'cids:hasImpactScale', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
@@ -58,6 +81,7 @@ async function impactReportBuilder(environment, trans, object, organization, imp
     ret = assignValue(environment, config, object, mainModel, mainObject, 'impactDepth', 'cids:hasImpactDepth', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
+
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'forStakeholderOutcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -80,26 +104,69 @@ async function impactReportBuilder(environment, trans, object, organization, imp
             throw new Server400Error('No such StakeholderOutcome');
           }
         } // todo: check weather the stakeholderOutcome and the impact report is for the same organization
-        // else if (!indicator.forOrganization !== organization._uri) {
-        //   if (environment === 'fileUploading') {
-        //     addTrace('        Error:');
-        //     addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
-        //     addMessage(8, 'subjectDoesNotBelong',
-        //       {uri, type: 'Indicator', subjectURI: indicatorURI}, {rejectFile: true});
-        //     error += 1;
-        //     hasError = true;
-        //   } else if (environment === 'interface') {
-        //     throw new Server400Error('The indicator is not under the organization');
-        //   }
+          // else if (!indicator.forOrganization !== organization._uri) {
+          //   if (environment === 'fileUploading') {
+          //     addTrace('        Error:');
+          //     addTrace(`            Indicator ${indicatorURI} doesn't belong to this organization`);
+          //     addMessage(8, 'subjectDoesNotBelong',
+          //       {uri, type: 'Indicator', subjectURI: indicatorURI}, {rejectFile: true});
+          //     error += 1;
+          //     hasError = true;
+          //   } else if (environment === 'interface') {
+          //     throw new Server400Error('The indicator is not under the organization');
+          //   }
         // }
         else {
           if (!stakeholderOutcome.impactReports) {
             stakeholderOutcome.impactReports = [];
           }
-          stakeholderOutcome.impactReports.push(uri);
-          await transSave(trans, stakeholderOutcome);
+          stakeholderOutcome.impactReports = [...stakeholderOutcome.impactReports, uri];
+          if (environment === 'interface') {
+            await stakeholderOutcome.save();
+          } else {
+            await transSave(trans, stakeholderOutcome);
+          }
         }
       }
+    }
+
+    if (environment === 'fileUploading') {
+      mainObject.hasTime = getValue(object, mainModel, 'hasTime') ||
+        GDBDateTimeIntervalModel({
+          hasBeginning: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+              GDBDateTimeIntervalModel, 'hasBeginning') ||
+            GDBInstant({
+              date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0], GDBInstant, 'date'))
+            }, {
+              uri: getFullObjectURI(
+                object[getFullPropertyURI(mainModel, 'hasTime')][0]
+                  [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasBeginning')][0]
+              )
+            }),
+
+          hasEnd: getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0],
+              GDBDateTimeIntervalModel, 'hasEnd') ||
+            GDBInstant({
+              date: new Date(getValue(object[getFullPropertyURI(mainModel, 'hasTime')][0]
+                [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0], GDBInstant, 'date'))
+            }, {
+              uri: getFullObjectURI(
+                object[getFullPropertyURI(mainModel, 'hasTime')][0]
+                  [getFullPropertyURI(GDBDateTimeIntervalModel, 'hasEnd')][0]
+              )
+            })
+        }, {uri: getFullObjectURI(object[getFullPropertyURI(mainModel, 'hasTime')])});
+    }
+
+    if (environment === 'interface') {
+      if (form.startTime && form.endTime)
+        mainObject.hasTime = GDBDateTimeIntervalModel({
+          hasBeginning: {date: new Date(form.startTime)},
+          hasEnd: {date: new Date(form.endTime)}
+        });
+      await mainObject.save();
+      return true;
     }
 
     if (!ignore && !hasError && environment === 'fileUploading') {
@@ -113,4 +180,4 @@ async function impactReportBuilder(environment, trans, object, organization, imp
   return error;
 }
 
-module.exports = {impactReportBuilder}
+module.exports = {impactReportBuilder};

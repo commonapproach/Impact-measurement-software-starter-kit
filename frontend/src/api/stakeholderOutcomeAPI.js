@@ -16,8 +16,8 @@ export async function fetchStakeholderOutcome(uri) {
   return getJson('/api/stakeholderOutcome/' + uri);
 }
 
-export async function fetchStakeholderOutcomeInterface() {
-  return getJson('/api/stakeholderOutcome/interfaces');
+export async function fetchStakeholderOutcomeInterface(organizationUri) {
+  return getJson('/api/stakeholderOutcome/interfaces/' + organizationUri);
 }
 
 export async function createStakeholderOutcome(params) {

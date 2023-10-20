@@ -5,6 +5,7 @@ const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {GDBStakeholderModel} = require("../../models/stakeholder");
 const {Transaction} = require("graphdb-utils");
 const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
+const {GDBOrganizationModel} = require("../../models/organization");
 
 const DATATYPE = 'StakeholderOutcome'
 
@@ -82,14 +83,24 @@ const fetchStakeholderOutcomeInterfacesHandler = async (req, res, next) => {
 };
 
 const fetchStakeholderOutcomeInterfaces = async (req, res) => {
-  const stakeholderOutcomes = await GDBStakeholderOutcomeModel.find({})
-  const stakeholderOutcomeInterface = {}
+  const {organizationUri} = req.params;
+  let stakeholderOutcomes = [];
+  if (!organizationUri || organizationUri === 'undefined') {
+    stakeholderOutcomes = await GDBStakeholderOutcomeModel.find({})
+  } else {
+    const impactNorms = await GDBImpactNormsModel.findOne({organization: organizationUri}, {populates: ['stakeholderOutcomes']});
+    if (impactNorms) {
+      stakeholderOutcomes = impactNorms.stakeholderOutcomes || []
+    }
+  }
+
+  const stakeholderOutcomeInterfaces = {}
   stakeholderOutcomes.map(
     stakeholderOutcome => {
-      stakeholderOutcomeInterface[stakeholderOutcome._uri] = stakeholderOutcome.name
+      stakeholderOutcomeInterfaces[stakeholderOutcome._uri] = stakeholderOutcome.name
     }
   )
-  return res.status(200).json({success: true, stakeholderOutcomeInterface});
+  return res.status(200).json({success: true, stakeholderOutcomeInterfaces});
 }
 
 const fetchStakeholderOutcome = async (req, res) => {

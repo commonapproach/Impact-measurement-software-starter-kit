@@ -10,7 +10,7 @@ const router = express.Router();
 router.post('/', createStakeholderOutcomeHandler);
 router.get('/organization/:organizationUri', fetchStakeholderOutcomesThroughOrganizationHandler);
 router.get('/stakeholder/:stakeholderUri', fetchStakeholderOutcomesThroughStakeholderHandler);
-router.get('/interfaces', fetchStakeholderOutcomeInterfacesHandler)
+router.get('/interfaces/:organizationUri', fetchStakeholderOutcomeInterfacesHandler)
 router.get('/:uri', fetchStakeholderOutcomeHandler);
 // router.put('/:uri', updateStakeholderHandler);
 

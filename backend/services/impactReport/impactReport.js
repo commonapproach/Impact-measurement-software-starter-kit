@@ -1,9 +1,28 @@
 const {hasAccess} = require("../../helpers/hasAccess");
 const {Server400Error} = require("../../utils");
 const {GDBImpactReportModel} = require("../../models/impactReport");
+const {Transaction} = require("graphdb-utils");
+const {impactReportBuilder} = require("./impactReportBuilder");
 
 
 const RESOURCE = 'ImpactReport';
+
+const createImpactReportHandler = async (req, res, next) => {
+  try {
+    const {form} = req.body;
+    await Transaction.beginTransaction();
+    if (await hasAccess(req, 'create' + RESOURCE)) {
+      if (await impactReportBuilder('interface', null, null, null, null, null, {}, {}, form)){
+        await Transaction.commit();
+        return res.status(200).json({success: true})
+      }
+    }
+  } catch (e) {
+    await Transaction.rollback();
+    next(e);
+  }
+}
+
 const fetchImpactReportHandler = async (req, res, next) => {
   try {
     if (await hasAccess(req, 'fetch' + RESOURCE))
@@ -66,4 +85,4 @@ const fetchImpactReport = async (req, res) => {
   return res.status(200).json({success: true, impactReport});
 };
 
-module.exports = {fetchImpactReportHandler, fetchImpactReportsHandler, fetchImpactReportInterfaceHandler};
+module.exports = {fetchImpactReportHandler, fetchImpactReportsHandler, fetchImpactReportInterfaceHandler, createImpactReportHandler};

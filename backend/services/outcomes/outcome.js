@@ -114,12 +114,22 @@ const fetchOutcomeInterfaceHandler = async (req, res, next) => {
 };
 
 async function fetchOutcomeInterface(req, res) {
-  const outcomes = await GDBOutcomeModel.find({});
+  const {organizationUri} = req.params;
+  let outcomes
+  if (organizationUri === 'undefined' || !organizationUri) {
+    // return all outcome Interfaces
+    outcomes = await GDBOutcomeModel.find({});
+  } else {
+    // return outcomes based on their organization
+    outcomes = await GDBOutcomeModel.find({forOrganization: organizationUri})
+  }
+
   const outcomeInterfaces = {};
   outcomes.map(outcome => {
     outcomeInterfaces[outcome._uri] = outcome.name;
   });
   return res.status(200).json({success: true, outcomeInterfaces});
+
 }
 
 const fetchOutcomesThroughTheme = async (req, res) => {

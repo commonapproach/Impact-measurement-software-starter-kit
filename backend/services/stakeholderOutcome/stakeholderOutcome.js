@@ -3,6 +3,25 @@ const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
 const {hasAccess} = require("../../helpers/hasAccess");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {GDBStakeholderModel} = require("../../models/stakeholder");
+const {Transaction} = require("graphdb-utils");
+const {stakeholderOutcomeBuilder} = require("./stakeholderOutcomeBuilder");
+
+const DATATYPE = 'StakeholderOutcome'
+
+const createStakeholderOutcomeHandler = async (req, res, next) => {
+  try {
+    await Transaction.beginTransaction();
+    const {form} = req.body;
+    if (await hasAccess(req, 'create' + DATATYPE)) {
+      if (await stakeholderOutcomeBuilder('interface', null, null, null, null, null, {}, {}, form)) {
+        return res.status(200).json({success: true});
+      }
+    }
+  } catch (e) {
+    Transaction.rollback();
+    next(e)
+  }
+}
 
 
 const fetchStakeholderOutcomesThroughOrganizationHandler = async (req, res, next) => {
@@ -92,6 +111,6 @@ const fetchStakeholderOutcomesThroughStakeholder = async (req, res) => {
 }
 
 
-module.exports = {
+module.exports = {createStakeholderOutcomeHandler,
   fetchStakeholderOutcomesThroughStakeholderHandler, fetchStakeholderOutcomeHandler, fetchStakeholderOutcomeInterfacesHandler, fetchStakeholderOutcomesThroughOrganizationHandler
 }

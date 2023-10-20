@@ -10,10 +10,11 @@ import {UserContext} from "../../context";
 import OutcomeField from "../shared/OutcomeField";
 import {createOutcome, fetchOutcomeInterfaces, updateOutcome} from "../../api/outcomeApi";
 import {isValidURL} from "../../helpers/validation_helpers";
-import {fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
+import {createStakeholderOutcome, fetchStakeholderOutcome} from "../../api/stakeholderOutcomeAPI";
 import {fetchStakeholderInterfaces} from "../../api/stakeholderAPI";
 import {fetchCodesInterfaces} from "../../api/codeAPI";
 import {navigate, navigateHelper} from "../../helpers/navigatorHelper";
+import StakeholderOutcomeField from "../shared/StakeholderOutcomeField";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -57,7 +58,8 @@ export default function AddEditStakeholderOutcome() {
     importance: '',
     inUnderserved: '',
     indicators: [],
-    impactReports: []
+    impactReports: [],
+    organization: ''
   });
   const [dict, setDict] = useState({
     outcome: {},
@@ -67,26 +69,29 @@ export default function AddEditStakeholderOutcome() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all(
-      [
-        fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
-      ]
-    ).then(([{stakeholderInterfaces}, {codesInterfaces}, {outcomeInterfaces}]) => {
-      const dict = {};
-      dict['outcome'] = outcomeInterfaces;
-      dict['stakeholder'] = stakeholderInterfaces;
-      dict['code'] = codesInterfaces;
-      console.log(dict);
-      setDict(dict);
-    }).catch(e => {
-      if (e.json) {
-        setErrors(e.json);
-      }
-      console.log(e);
-      enqueueSnackbar(e.json?.message || 'Error occurs when fetching interfaces', {variant: "error"});
-      setState({loadingButton: false, submitDialog: false,});
-    });
-  }, []);
+    if (mode === 'view') {
+      Promise.all(
+        [
+          fetchStakeholderInterfaces(), fetchCodesInterfaces(), fetchOutcomeInterfaces()
+        ]
+      ).then(([{stakeholderInterfaces}, {codesInterfaces}, {outcomeInterfaces}]) => {
+        const dict = {};
+        dict['outcome'] = outcomeInterfaces;
+        dict['stakeholder'] = stakeholderInterfaces;
+        dict['code'] = codesInterfaces;
+        console.log(dict);
+        setDict(dict);
+      }).catch(e => {
+        if (e.json) {
+          setErrors(e.json);
+        }
+        console.log(e);
+        enqueueSnackbar(e.json?.message || 'Error occurs when fetching interfaces', {variant: "error"});
+        setState({loadingButton: false, submitDialog: false,});
+      });
+    }
+    }
+   , []);
 
   useEffect(() => {
     if ((mode === 'edit' && uri) || (mode === 'view' && uri)) {
@@ -130,7 +135,7 @@ export default function AddEditStakeholderOutcome() {
   const handleConfirm = () => {
     setState(state => ({...state, loadingButton: true}));
     if (mode === 'new') {
-      createOutcome({form}).then((ret) => {
+      createStakeholderOutcome({form}).then((ret) => {
         if (ret.success) {
           setState({loadingButton: false, submitDialog: false,});
           navigate(-1);
@@ -166,14 +171,14 @@ export default function AddEditStakeholderOutcome() {
     const error = {};
     if (!form.name)
       error.name = 'The field cannot be empty';
-    if (!form.indicators.length)
-      error.indicators = 'The field cannot be empty';
+    // if (!form.indicators.length)
+    //   error.indicators = 'The field cannot be empty';
     // if (!form.themes.length)
     //   error.themes = 'The field cannot be empty';
     // if (!form.description)
     //   error.description = 'The field cannot be empty'
-    if (!form.organization)
-      error.organization = 'The field cannot be empty';
+    // if (!form.organization)
+    //   error.organization = 'The field cannot be empty';
     if (form.uri && !isValidURL(form.uri))
       error.uri = 'Not a valid URI';
     setErrors(error);
@@ -215,15 +220,6 @@ export default function AddEditStakeholderOutcome() {
                 </Typography>
               );
             })}
-            {/*<Typography variant={'h6'}> {`Indicators:`} </Typography>*/}
-            {/*{form.indicators.map(indicatorURI => {*/}
-            {/*  return (*/}
-            {/*    <Typography variant={'body1'}>*/}
-            {/*      <Link to={`/indicator/${encodeURIComponent(indicatorURI)}/view`} colorWithHover*/}
-            {/*            color={'#2f5ac7'}>{form.indicatorNames[indicatorURI]}</Link>*/}
-            {/*    </Typography>*/}
-            {/*  );*/}
-            {/*})}*/}
             <Typography variant={'h6'}> {`Description:`} </Typography>
             <Typography variant={'body1'}> {`${form.description}`} </Typography>
 
@@ -237,9 +233,8 @@ export default function AddEditStakeholderOutcome() {
           </Paper>
         )
         : (<Paper sx={{p: 2}} variant={'outlined'}>
-          <Typography variant={'h4'}> Outcome </Typography>
-          <OutcomeField
-            disabled={mode === 'view'}
+          <Typography variant={'h4'}> Stakeholder Outcome </Typography>
+          <StakeholderOutcomeField
             disabledOrganization={!!orgUri}
             disableURI={mode !== 'new'}
             defaultValue={form}

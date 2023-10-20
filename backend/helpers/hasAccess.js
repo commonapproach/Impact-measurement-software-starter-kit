@@ -75,6 +75,11 @@ async function hasAccess(req, operationType) {
       break
 
     // stakeholderOutcomes
+    case 'createStakeholderOutcome':
+      if (userAccount.isSuperuser)
+        return true;
+      break
+
     case 'fetchStakeholderOutcomes':
       if (userAccount.isSuperuser)
         return true;
@@ -216,6 +221,9 @@ async function hasAccess(req, operationType) {
       return true;
 
     // indicators
+    case 'fetchIndicatorInterfaces':
+      return true;
+
     case 'fetchIndicators':
       return true; // todo: to be removed later
       if (userAccount.isSuperuser)

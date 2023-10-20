@@ -12,8 +12,8 @@ export async function fetchOutcome(uri) {
   return getJson('/api/outcome/' + uri);
 }
 
-export async function fetchOutcomeInterfaces() {
-  return getJson('/api/outcome/interface');
+export async function fetchOutcomeInterfaces(organizationUri) {
+  return getJson('/api/outcome/interface/' + organizationUri);
 }
 
 export async function createOutcome(params) {

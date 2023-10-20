@@ -8,6 +8,10 @@ export async function fetchIndicator(uri) {
   return getJson('/api/indicator/' + uri);
 }
 
+export async function fetchIndicatorInterfaces(organizationUri) {
+  return getJson('/api/indicator/interface/' + organizationUri);
+}
+
 export async function createIndicator(params) {
   return postJson(`/api/indicator/`, params);
 }

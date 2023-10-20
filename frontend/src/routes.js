@@ -66,7 +66,7 @@ const routes = (
     <Route path={`${process.env.PUBLIC_URL}/login/superPassword`} element={<SuperPassword/>}/>
     <Route path={`${process.env.PUBLIC_URL}/login`} element={<LoginPane/>}/>
     <Route path={`${process.env.PUBLIC_URL}/dashboard`} element={<PrivateRoute element={Dashboard}/>}/>
-    <Route path={`${process.env.PUBLIC_URL}/verify/:token`} element={<UserFirstEntry/>}/>}/>
+    <Route path={`${process.env.PUBLIC_URL}/verify/:token`} element={<UserFirstEntry/>}/>
     <Route path={`${process.env.PUBLIC_URL}/forgot-password`} element={<ForgotPassword/>}/>
     {/*users*/}
     <Route path={`${process.env.PUBLIC_URL}/users`} element={<PrivateRoute element={Users}/>}/>

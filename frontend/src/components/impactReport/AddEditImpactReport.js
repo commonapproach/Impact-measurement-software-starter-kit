@@ -7,7 +7,7 @@ import LoadingButton from "../shared/LoadingButton";
 import {AlertDialog} from "../shared/Dialogs";
 import {useSnackbar} from "notistack";
 import {UserContext} from "../../context";
-import IndicatorReportField from "../shared/IndicatorReportField";
+import ImpactReportField from "../shared/ImpactReportField";
 import {createIndicatorReport, fetchIndicatorReport, updateIndicatorReport} from "../../api/indicatorReportApi";
 import {reportErrorToBackend} from "../../api/errorReportApi";
 import {isValidURL} from "../../helpers/validation_helpers";
@@ -224,22 +224,22 @@ export default function AddEditImpactReport() {
           }>
             Edit
           </Button>
-
+        
         </Paper>
       ) : (<Paper sx={{p: 2}} variant={'outlined'}>
         <Typography variant={'h4'}> Impact Report </Typography>
-        {/*<IndicatorReportField*/}
-        {/*  disabled={mode === 'view'}*/}
-        {/*  disabledOrganization={!!orgUri}*/}
-        {/*  defaultValue={form}*/}
-        {/*  required*/}
-        {/*  onChange={(state) => {*/}
-        {/*    setForm(form => ({...form, ...state}));*/}
-        {/*  }}*/}
-        {/*  uriDiasbled={mode !== 'new'}*/}
-        {/*  importErrors={errors}*/}
-        {/*/>*/}
-
+          <ImpactReportField
+          disabled={mode === 'view'}
+          disabledOrganization={!!orgUri}
+          defaultValue={form}
+          required
+          onChange={(state) => {
+            setForm(form => ({...form, ...state}));
+          }}
+          uriDiasbled={mode !== 'new'}
+          importErrors={errors}
+        />
+          
         <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
           Submit
         </Button>

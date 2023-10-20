@@ -4,6 +4,8 @@ const {GDBOutcomeModel} = require("../../models/outcome");
 const {GDBImpactNormsModel} = require("../../models/impactStuffs");
 const {Server400Error} = require("../../utils");
 const {GDBStakeholderOutcomeModel} = require("../../models/stakeholderOutcome");
+const {Transaction} = require("graphdb-utils");
+const {GDBOrganizationModel} = require("../../models/organization");
 const {getFullURI, getPrefixedURI} = require('graphdb-utils').SPARQL;
 
 async function stakeholderOutcomeBuilder(environment, trans, object, organization, impactNorms, error, {
@@ -25,22 +27,27 @@ async function stakeholderOutcomeBuilder(environment, trans, object, organizatio
   let ignore;
   const mainModel = GDBStakeholderOutcomeModel;
   const mainObject = environment === 'fileUploading' ? stakeholderOutcomeDict[uri] : mainModel({}, {uri: form.uri});
+
   if (environment !== 'fileUploading') {
-    await transSave(trans, mainObject);
+    await mainObject.save();
     uri = mainObject._uri;
   }
   const config = baseLevelConfig['stakeholderOutcome'];
 
 
   if (mainObject) {
-
     if (environment !== 'fileUploading') {
-      impactNorms = await GDBImpactNormsModel.findOne({organization}) || GDBImpactNormsModel({organization});
+      organization = await GDBOrganizationModel.findOne({_uri: form.organization});
+      impactNorms = await GDBImpactNormsModel.findOne({organization: organization._uri}) || GDBImpactNormsModel({organization});
     }
 
     if (!impactNorms.stakeholderOutcomes)
       impactNorms.stakeholderOutcomes = [];
-    impactNorms.stakeholderOutcomes.push(uri);
+    impactNorms.stakeholderOutcomes = [...impactNorms.stakeholderOutcomes, uri];
+
+    if (environment === 'interface') {
+      await impactNorms.save();
+    }
 
     ret = assignValue(environment, config, object, mainModel, mainObject, 'name', 'cids:hasName', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
@@ -78,6 +85,7 @@ async function stakeholderOutcomeBuilder(environment, trans, object, organizatio
     ret = assignValue(environment, config, object, mainModel, mainObject, 'outcome', 'cids:forOutcome', addMessage, form, uri, hasError, error);
     hasError = ret.hasError;
     error = ret.error;
+
     if (mainObject.outcome && (environment === 'interface' || !outcomeDict[mainObject.outcome])){
       const outcomeURI = mainObject.outcome;
       const outcome = await GDBOutcomeModel.findOne({_uri: outcomeURI});
@@ -104,12 +112,22 @@ async function stakeholderOutcomeBuilder(environment, trans, object, organizatio
           throw new Server400Error('The indicator is not under the organization');
         }
       } else {
-        if (!outcome.StakeholderOutcomes) {
-          outcome.StakeholderOutcomes = [];
+        if (!outcome.stakeholderOutcomes) {
+          outcome.stakeholderOutcomes = [];
         }
-        outcome.StakeholderOutcomes.push(uri);
-        await transSave(trans, outcome);
+        outcome.stakeholderOutcomes = [...outcome.stakeholderOutcomes, uri]
+        if(environment === 'interface'){
+          await outcome.save();
+        } else {
+          await transSave(trans, outcome);
+        }
       }
+    }
+
+    if (environment === 'interface') {
+      await mainObject.save();
+      await Transaction.commit();
+      return true;
     }
 
     if (!ignore && !hasError && environment === 'fileUploading') {

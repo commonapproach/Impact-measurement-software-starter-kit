@@ -9,6 +9,7 @@ const {allReachableOrganizations, addObjectToList} = require("../../helpers");
 const {GDBUnitOfMeasure} = require("../../models/measure");
 const {indicatorBuilder} = require("./indicatorBuilder");
 const {Transaction} = require("graphdb-utils");
+const {GDBOutcomeModel} = require("../../models/outcome");
 
 
 const fetchIndicators = async (req, res) => {
@@ -98,6 +99,36 @@ const fetchIndicatorHandler = async (req, res, next) => {
     next(e);
   }
 };
+
+const fetchIndicatorInterfacesHandler = async (req, res, next) => {
+  try {
+    if (await hasAccess(req, 'fetchIndicatorInterfaces'))
+      return await fetchIndicatorInterfaces(req, res);
+    return res.status(400).json({success: false, message: 'Wrong auth'});
+
+  } catch (e) {
+    next(e);
+  }
+};
+
+const fetchIndicatorInterfaces = async (req, res) => {
+  const {organizationUri} = req.params;
+  let indicators
+  if (organizationUri === 'undefined' || !organizationUri) {
+    // return all indicator Interfaces
+    indicators = await GDBIndicatorModel.find({});
+  } else {
+    // return outcomes based on their organization
+    indicators = await GDBIndicatorModel.find({forOrganization: organizationUri})
+  }
+
+  const indicatorInterfaces = {};
+  indicators.map(indicator => {
+    indicatorInterfaces[indicator._uri] = indicator.name;
+  });
+  return res.status(200).json({success: true, indicatorInterfaces});
+
+}
 
 const fetchIndicator = async (req, res) => {
   const {uri} = req.params;
@@ -288,4 +319,4 @@ const createIndicator = async (req, res) => {
 };
 
 
-module.exports = {updateIndicatorHandler, createIndicatorHandler, fetchIndicatorsHandler, fetchIndicatorHandler};
+module.exports = {updateIndicatorHandler, createIndicatorHandler, fetchIndicatorsHandler, fetchIndicatorHandler, fetchIndicatorInterfacesHandler};

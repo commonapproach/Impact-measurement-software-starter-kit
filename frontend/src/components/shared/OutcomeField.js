@@ -184,27 +184,6 @@ export default function OutcomeField({
                 }
               />
             </Grid>
-            {/*<Grid item xs={6}>*/}
-            {/*  <LoadingAutoComplete*/}
-            {/*    label="Theme"*/}
-            {/*    options={options}*/}
-            {/*    property={'theme'}*/}
-            {/*    state={state}*/}
-            {/*    onChange={handleChange}*/}
-            {/*    error={!!errors.theme}*/}
-            {/*    helperText={errors.theme}*/}
-            {/*    required={required}*/}
-            {/*    disabled={disabled}*/}
-            {/*    onBlur={() => {*/}
-            {/*      if (!state.theme) {*/}
-            {/*        setErrors(errors => ({...errors, theme: 'This field cannot be empty'}));*/}
-            {/*      } else {*/}
-            {/*        setErrors(errors => ({...errors, theme: null}));*/}
-            {/*      }*/}
-            {/*    }*/}
-            {/*    }*/}
-            {/*  />*/}
-            {/*</Grid>*/}
 
             <Grid item xs={6}>
               <Dropdown
@@ -267,17 +246,7 @@ export default function OutcomeField({
                 }
                 }
                 minWidth={775}
-                // error={!!errors.themes}
-                // helperText={errors.themes}
                 disabled={disabled}
-                // onBlur={() => {
-                //   if (!state.themes.length) {
-                //     setErrors(errors => ({...errors, themes: 'This field cannot be empty'}));
-                //   } else {
-                //     setErrors(errors => ({...errors, themes: null}));
-                //   }
-                // }
-                // }
               />
             </Grid>
             <Grid item xs={12}>
